@@ -1,0 +1,54 @@
+name: "Comfort to MQTT"
+description: "Cytech Comfort II Ultra to MQTT bridge"
+version: "0.1.7"
+slug: "comfort2mqtt"
+init: false
+startup: application
+apparmor: true
+panel_icon: "mdi:alarm-panel-outline"
+codenotary: notary@home-assistant.io
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+options:
+  mqtt_broker_address: core-mosquitto
+  mqtt_user: null
+  mqtt_password: null
+  mqtt_broker_port: 1883
+  comfort_address: null
+  comfort_port: 1002
+  comfort_login_id: null
+  log_verbosity: INFO
+  alarm_inputs: 8
+  alarm_outputs: 0
+  alarm_rio_inputs: 0
+  alarm_rio_outputs: 0
+  alarm_responses: 0
+  alarm_flags: 0
+  alarm_counters: 0
+  comfort_time: false
+schema:
+  mqtt_broker_address: str
+  mqtt_user: str
+  mqtt_password: password
+  comfort_address: str
+  comfort_port: int
+  comfort_login_id: password
+  mqtt_broker_port: int(1024,65535)
+  log_verbosity: list(DEBUG|INFO|WARNING|ERROR|CRITICAL)?
+  alarm_inputs: int(8,128)?
+  alarm_outputs: int(0,128)?
+  alarm_rio_inputs: int(0,120)?
+  alarm_rio_outputs: int(0,120)?
+  alarm_responses: int(0,1024)?
+  alarm_flags: int(0,254)?
+  alarm_counters: int(0,255)?
+  #broker_ca: str?
+  #broker_client_cert: str?
+  #broker_client_key: str?
+  comfort_time: bool
+
+  

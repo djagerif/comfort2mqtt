@@ -1,0 +1,95 @@
+---
+configuration:
+  mqtt_broker_address:
+    name: MQTT Broker Address
+    description: >-
+      The MQTT Broker Hostname or IP address in IPV4 format or use the default Homeassistant 'Mosquitto' broker.
+  mqtt_user:
+    name: MQTT Broker Username
+    description: >-
+      The MQTT Broker Username used for authentication.
+  mqtt_password:
+    name: MQTT Broker Password
+    description: >-
+      The MQTT Broker Password.
+  mqtt_broker_port:
+    name: MQTT Broker Port
+    description: >-
+      MQTT Broker TCP port. Range from 1024 - 65535 (Default 1883).
+  comfort_port:
+    name: Comfort II Port
+    description: >-
+      Cytech Comfort II UCM/Ethernet TCP Port. Range from 1 - 65535 (Default is 1002).
+  comfort_address:
+    name: Comfort II IP address
+    description: >-
+      Cytech Comfort II IP Address in IPV4 format.
+  comfort_login_id:
+    name: Comfort II User Login ID
+    description: >-
+      Cytech Comfort II User Login ID with at least Read-Only access. Login ID has minimum 4 characters and 6 as maximum.
+  log_verbosity:
+    name: Global Log Verbosity
+    description: >-
+      Global Log Verbosity level (Default INFO).
+  alarm_inputs:
+    name: Comfort II Zone Inputs
+    description: >-
+      Cytech Comfort II physical Zone Inputs installed on your system. Range from 8 - 128 (Default is 8).
+  alarm_outputs:
+    name: Comfort II Zone Outputs.
+    description: >-
+      Cytech Comfort II physical Zone Outputs installed on your system. Range from 0 - 128 (Default is 0).
+  alarm_rio_inputs:
+    name: Comfort II SCS/RIO Inputs
+    description: >-
+      Cytech Comfort II SCS/RIO Inputs installed on your system. Range from 0 - 120 (Default is 0).
+      Note: This is the amount of SCS/RIO Inputs EG. one SCS/RIO can have up to 8 Inputs. 
+  alarm_rio_outputs:
+    name: Comfort II SCS/RIO Outputs.
+    description: >-
+      Cytech Comfort II SCS/RIO Outputs installed on your system. Range from 0 - 120 (Default is 0).
+      Note: This is the amount of additional SCS/RIO Outputs EG. one SCS/RIO can have up to 8 Outputs.
+  alarm_responses:
+    name: Comfort II Responses
+    description: >-
+      The number of Cytech Comfort II Responses. Range from 0 - 1024 (Default is 0).
+  alarm_flags:
+    name: Comfort II Flags
+    description: >-
+      Cytech Comfort II Flags on your system. Range from 0 - 254 (Default is 0).
+  alarm_counters:
+    name: Comfort II Counters
+    description: >-
+      Cytech Comfort II Counters on your system. Range from 0 - 255 (Default is 0).
+  comfort_time:
+    name: Set Comfort II Date and Time
+    description: >-
+      Set Cytech Comfort II Time and Date on successful logon, and once a day at midnight after that (Default is False).
+  #require_certificate:
+  #  name: Require Certificate
+  #  description: >-
+  #    If enabled encryption will be enabled using the cert- and keyfile options.
+  #certfile:
+  #  name: Certificate File
+  #  description: >-
+  #    A file containing a certificate, including its chain. Place this file in
+  #    the Home Assistant `ssl` folder.
+  #cafile:
+  #  name: CA File
+  #  description: >-
+  #    A file containing a root certificate. Place this file in the Home
+  #    Assistant `ssl` folder.
+  #keyfile:
+  #  name: Private Key File
+  #  description: >-
+  #    A file containing the private key. Place this file in the Home Assistant
+  #    `ssl` folder.
+  #customize:
+  #  name: Customize
+  #  description: >-
+  #    See the Documentation tab for more information about these options.
+  #debug:
+  #  name: Debug
+  #  description: >-
+  #    If enabled will turn on debug logging for mosquitto and the auth plugin.
