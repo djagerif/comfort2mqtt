@@ -14,7 +14,7 @@
 # limitations under the License.
 
 #import os
-#import re
+import re
 #from re import DEBUG
 #import select
 import socket
