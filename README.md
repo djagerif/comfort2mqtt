@@ -101,7 +101,7 @@ The following Cytech Ethernet modules (UCM) are supported:
   UCM/Eth03 with LAN cable implementation.
 
   You must have a reachable IP address on your network from Home Assistant to the Comfort II
-  ethernet module (UCM). The default port is TCP/1002 which is Port #2 of an existing UCM/Eth03. 
+  ethernet module (UCM). The default port is TCP/1002 which is Port #2 of an UCM/Eth03. 
   Other UCM's may require a different port number.
 
 [rtd]: https://cbus.readthedocs.io/en/latest/
