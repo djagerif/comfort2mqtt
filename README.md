@@ -9,9 +9,7 @@
 [armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
 
-For more information on MQTT and Mosquitto, please see [![Documentation Status]][mosquitto]
-
-For More information on MQTT and Mosquitto, please see [![Documentation Status](https://readthedocs.org/projects/cbus/badge/?version=latest)][mosquitto]
+For more information on MQTT and Mosquitto, please see [![Documentation Status](https://readthedocs.org/projects/cbus/badge/?version=latest)][mosquitto] To Update !!!
 
 This Addon is used to bridge an IP connected Cytech Comfort II Ultra Alarm system to MQTT for use with Home Assistant.
 
