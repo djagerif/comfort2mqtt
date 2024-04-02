@@ -108,9 +108,9 @@ The following Cytech Ethernet modules (UCM) are supported:
 
 To manually install this Add-on, follow the steps below.
 
-* In Home Assistant, go to Settings -> Add-ons
-* Click ADD-ON STORE in the bottom-right corner
-* Click the three dots '...' in the top-right corner and select Repositories
+* In Home Assistant, go to 'Settings' -> 'Add-ons'
+* Click 'ADD-ON STORE' in the bottom-right corner
+* Click the three dots '...' in the top-right corner and select 'Repositories'
 * Add the https://github.com/djagerif/comfort2mqtt URL and click Close.
 
   You should now see the following Add-on.
