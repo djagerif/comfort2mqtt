@@ -111,7 +111,7 @@ To manually install this Add-on, follow the steps below.
 * In Home Assistant, go to Settings -> Add-ons
 * Click ADD-ON STORE in the bottom-right corner
 * Click the three dots '...' in the top-right corner and select Repositories
-* Add the [install]https://github.com/djagerif/comfort2mqtt URL and click Close.
+* Add the https://github.com/djagerif/comfort2mqtt URL and click Close.
 
 [rtd]: https://cbus.readthedocs.io/en/latest/
 [coveralls]: https://coveralls.io/github/micolous/cbus
@@ -125,4 +125,4 @@ To manually install this Add-on, follow the steps below.
 [clipsal-docs]: https://updates.clipsal.com/ClipsalSoftwareDownload/DL/downloads/OpenCBus/OpenCBusProtocolDownloads.html
 [libcbm-src]: https://sourceforge.net/projects/cbusmodule/files/source/
 [py2]: https://www.python.org/doc/sunset-python-2/
-[install]: https://github.com/djagerif/comfort2mqtt
+
