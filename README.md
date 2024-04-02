@@ -104,6 +104,15 @@ The following Cytech Ethernet modules (UCM) are supported:
   ethernet module (UCM). The default port is TCP/1002 which is Port #2 of a UCM/Eth03. 
   Other UCM's may require a different port number.
 
+## Installation instructions
+
+To manually install this Add-on, follow the steps below.
+
+* In Home Assistant, go to Settings -> Add-ons
+* Click ADD-ON STORE in the bottom-right corner
+* Click the three dots '...' in the top-right corner and select Repositories
+* Add the [install]https://github.com/djagerif/comfort2mqtt URL and click Close.
+
 [rtd]: https://cbus.readthedocs.io/en/latest/
 [coveralls]: https://coveralls.io/github/micolous/cbus
 [travis]: https://travis-ci.org/micolous/cbus
@@ -116,3 +125,4 @@ The following Cytech Ethernet modules (UCM) are supported:
 [clipsal-docs]: https://updates.clipsal.com/ClipsalSoftwareDownload/DL/downloads/OpenCBus/OpenCBusProtocolDownloads.html
 [libcbm-src]: https://sourceforge.net/projects/cbusmodule/files/source/
 [py2]: https://www.python.org/doc/sunset-python-2/
+[install]: https://github.com/djagerif/comfort2mqtt
