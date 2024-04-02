@@ -2,8 +2,6 @@
 
 ![Supports aarch64 Architecture][aarch64-shield] ![Supports amd64 Architecture][amd64-shield] ![Supports armhf Architecture][armhf-shield] ![Supports armv7 Architecture][armv7-shield] ![Supports i386 Architecture][i386-shield]
 
-For more information on MQTT and Mosquitto, please see [mosquitto]
-
 [mosquitto]: https://mosquitto.org
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
@@ -11,7 +9,9 @@ For more information on MQTT and Mosquitto, please see [mosquitto]
 [armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
 
-[![Documentation Status](https://readthedocs.org/projects/cbus/badge/?version=latest)][rtd] - Still to do !!
+For more information on MQTT and Mosquitto, please see [![Documentation Status]][mosquitto]
+
+For more information on MQTT and Mosquitto, please see [![Documentation Status](https://readthedocs.org/projects/cbus/badge/?version=latest)][mosquitto]
 
 This Addon is used to bridge an IP connected Cytech Comfort II Ultra Alarm system to MQTT for use with Home Assistant.
 
