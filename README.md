@@ -113,6 +113,11 @@ To manually install this Add-on, follow the steps below.
 * Click the three dots '...' in the top-right corner and select Repositories
 * Add the https://github.com/djagerif/comfort2mqtt URL and click Close.
 
+  You should now see the following Add-on.
+
+  ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/fd7b947d-3787-4a13-a0f1-78e45e1ba9a0)
+
+
 [rtd]: https://cbus.readthedocs.io/en/latest/
 [coveralls]: https://coveralls.io/github/micolous/cbus
 [travis]: https://travis-ci.org/micolous/cbus
