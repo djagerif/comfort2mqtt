@@ -11,7 +11,7 @@
 
 For more information on MQTT and Mosquitto, please see [![Documentation Status]][mosquitto]
 
-For more information on MQTT and Mosquitto, please see [![Documentation Status](https://readthedocs.org/projects/cbus/badge/?version=latest)][mosquitto]
+For More information on MQTT and Mosquitto, please see [![Documentation Status](https://readthedocs.org/projects/cbus/badge/?version=latest)][mosquitto]
 
 This Addon is used to bridge an IP connected Cytech Comfort II Ultra Alarm system to MQTT for use with Home Assistant.
 
