@@ -50,5 +50,5 @@ schema:
   #broker_client_cert: str?
   #broker_client_key: str?
   comfort_time: bool
-image: "ghcr.io/djagerif/{arch}-addon-comfort2mqtt"
+#image: "ghcr.io/djagerif/{arch}-addon-comfort2mqtt"
   
