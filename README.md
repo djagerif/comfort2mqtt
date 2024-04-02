@@ -13,16 +13,15 @@ For more information, please see [mosquitto] - To do !!
 
 [![Documentation Status](https://readthedocs.org/projects/cbus/badge/?version=latest)][rtd] - To do !!
 
-This Addon is used to bridge an IP connected Cytech Comfort II Alarm system to MQTT for use with Homeassistant.
+This Addon is used to bridge an IP connected Cytech Comfort II Alarm system to MQTT for use with Home Assistant.
 
-Copyright 2023 Ingo de Jager. Licensed under the GNU LGPL3+. For more
+Copyright 2024 Ingo de Jager. Licensed under the GNU LGPL3+. For more
 details see `COPYING` and `COPYING.LESSER`.
 
 > **Note:** This software is neither certified nor endorsed by Cytech
 > Technology Pte Ltd.
 
-More information about the source project is available on
-[nowhere][koochyrat], and in the `docs` directory of the source
+More information about the original source project is available [here][koochyrat], and in the `docs` directory of the source
 repository.
 
 ## About this project
@@ -80,11 +79,11 @@ mqtt:
       payload_not_available: "0"
 ```
 Please take note of the 'Study Light' example above. Comfort supports 16-bit values but 
-most integrations set counter values to 0xFF(255) as an 'On' state.
+many integrations set counter values to 0xFF(255) as an 'On' state.
 
-Even though this is a pure-Python implementation, it's currently only  tested on
-amd64 platform. It has been developed on Linux on `amd64` and so other platform
-remains untested.
+Even though this is a Python implementation, it's currently only tested on
+an amd64 platform. It has been developed on Linux on `amd64`, other platforms
+remain untested and it's not clear if it will work.
 
 ## Hardware interface support
 
@@ -99,12 +98,12 @@ This should work with the following Cytech Ethernet modules (UCM):
 * [UCM/Eth03] - Recommended (LAN)
 
   This software _requires_ a fully functional UCM/Ethernet or UCM/Wifi configuration.
-  The UCM/Wifi is not recommended due to possible connectivity issues that can arise from 
-  switching between AP's and other possible sources of noise. It ir recommended to use the 
+  The UCM/Wifi is not recommended due to possible connectivity issues that could arise from 
+  switching between AP's and other possible sources of noise. It is recommended to use the 
   UCM/Eth03 with LAN cable implementation.
 
   You must have a reachable IP address on your network from Home Assistant to Comfort II
-  UCM/Eth03. The default port is TCP/1002, which is Port #2 of an existing UCM/Eth03. 
+  UCM/Eth03. The default port is TCP/1002 which is Port #2 of an existing UCM/Eth03. 
   Other UCM's may require a different port number.
 
 [rtd]: https://cbus.readthedocs.io/en/latest/
