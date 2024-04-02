@@ -85,11 +85,11 @@ remain untested and it's not clear if it will work.
 
 ## Hardware interface support
 
-This should work with the following Cytech Ethernet modules (UCM):
+The following Cytech Ethernet modules (UCM) are supported:
 
-* [UCM/Eth01] - Obsolete
+* [UCM/Eth01] - Obsolete/Untested
 
-* [UCM/Eth02] - Obsolete
+* [UCM/Eth02] - Obsolete/Untested
 
 * [UCM/Wifi01] - Not Recommended (WiFi)
 
@@ -100,8 +100,8 @@ This should work with the following Cytech Ethernet modules (UCM):
   switching between AP's and other possible sources of noise. It is recommended to use the 
   UCM/Eth03 with LAN cable implementation.
 
-  You must have a reachable IP address on your network from Home Assistant to Comfort II
-  UCM/Eth03. The default port is TCP/1002 which is Port #2 of an existing UCM/Eth03. 
+  You must have a reachable IP address on your network from Home Assistant to the Comfort II
+  ethernet module (UCM). The default port is TCP/1002 which is Port #2 of an existing UCM/Eth03. 
   Other UCM's may require a different port number.
 
 [rtd]: https://cbus.readthedocs.io/en/latest/
