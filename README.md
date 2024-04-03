@@ -10,7 +10,7 @@ Cytech Comfort II Ultra Alarm System to MQTT bridge for Home Assistant.
 [armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
 
-For more information on MQTT and Mosquitto, please see [![Documentation Status](https://readthedocs.org/projects/cbus/badge/?version=latest)][mosquitto] To Update !!!
+For more information on MQTT and Mosquitto, please see [![Documentation Status](https://readthedocs.org/projects/cbus/badge/?version=latest)][mosquitto] Still To Update !!!
 
 This Addon is used to bridge an IP connected Cytech Comfort II Ultra Alarm system to MQTT for use with Home Assistant.
 
@@ -47,6 +47,17 @@ Manual Sensor creation is required in your configuration.yaml file. Samples are 
 
 ```
 mqtt: 
+  alarm_control_panel:
+    - name: Comfort Alarm
+      unique_id: "comfort2_alarm"
+      state_topic: "comfort2/alarm"
+      command_topic: "comfort2/alarm/set"
+      availability_topic: "comfort2/alarm/online"
+      payload_available: "1"
+      payload_not_available: "0"
+      code: "1234"  #code can be different from Comfort's. This code is for the Add-on while the Comfort code is to login to Comfort itself.
+      #Note: If the Comfort User Code does not allow Disarm then the Add-on will not be able to Disarm.
+      
   sensor:
     - name: Alarm Mode
       unique_id: 'comfort2_alarm_mode'
