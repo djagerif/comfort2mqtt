@@ -677,7 +677,7 @@ class Comfort2(mqtt.Client):
     
 
     def HexToSigned16Decimal(self,value):        # Returns Signed Decimal value from HEX string EG. FFFF = -1
-        logger.debug("690-HexToSigned16Decimal[value]: %s",value)
+        #logger.debug("690-HexToSigned16Decimal[value]: %s",value)
         return -(int(value,16) & 0x8000) | (int(value,16) & 0x7fff)
 
     def byte_swap_16_bit(self, hex_string):
