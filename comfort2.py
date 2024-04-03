@@ -637,6 +637,7 @@ class Comfort2(mqtt.Client):
         if msg.topic == ALARMCOMMANDTOPIC:      ## Revised Names used !!!! ## Also Check MQTT SET not working
             #logger.debug(msg.topic+" "+msgstr)
             if self.connected:
+                #logger.debug("msgstr: %s",msgstr)
                 if msgstr == "ARM_HOME":
                     self.comfortsock.sendall(("\x03m!03"+self.comfort_pincode+"\r").encode()) #arm to 03 day mode
                 elif msgstr == "ARM_NIGHT":
