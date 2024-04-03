@@ -488,32 +488,17 @@ class Comfortf_ReportAllFlags(object):
                     flags[flag_name] = int(segment[8 - j],2)
                     self.flags.append(ComfortFLFlagActivationReport("", int(start_flag + j - 1),int(segment[8 - j],2) & 1))
             
-            #for flag_name, flag_value in flags.items():
-            #    logger.debug (f"{flag_name}: {flag_value}")
-
-
-
-        
-        #logger.debug("len(data): %s", b)
-        #logger.debug("data: %s", data)
-#        for i in range(2,b+2):      
-#            flagbits = int(data[2*i:2*i+2],16)
-#            #print ("flagbits: %d" % (flagbits))
-#            for j in range(0,8):
-#                if (8*(i-2)+1+j) >= 255:    # Guard against incorrect configuration of too many flags.
-#                    break   
-#                self.flags.append(ComfortFLFlagActivationReport("", 8*(i-2)+1+j,(flagbits>>j) & 1))
-#                logger.debug("Flags: %s %s", 8*(i-2)+1+j,(flagbits>>j) )
 
 #mode = { 00=Off, 01=Away, 02=Night, 03=Day, 04=Vacation }
 class ComfortM_SecurityModeReport(object):
     def __init__(self, data={}):
         self.mode = int(data[2:4],16)
-        if self.mode == 0: self.modename = "Security Off"
-        elif self.mode == 1: self.modename = "Away Mode"
-        elif self.mode == 2: self.modename = "Night Mode"
-        elif self.mode == 3: self.modename = "Day Mode"
-        elif self.mode == 4: self.modename = "Vacation Mode"
+        #if self.mode == 0: self.modename = "Security Off"
+        if self.mode == 0: self.modename = "disarmed"
+        elif self.mode == 1: self.modename = "armed_away"
+        elif self.mode == 2: self.modename = "armed_night"
+        elif self.mode == 3: self.modename = "armed_home"
+        elif self.mode == 4: self.modename = "armed_vacation"
 
 #zone = 00 means system can be armed, no open zones
 class ComfortERArmReadyNotReady(object):
@@ -638,7 +623,9 @@ class Comfort2(mqtt.Client):
             #logger.debug(msg.topic+" "+msgstr)
             if self.connected:
                 #logger.debug("msgstr: %s",msgstr)
-                if msgstr == "ARM_HOME":
+                if msgstr == "ARM_VACATION":
+                    self.comfortsock.sendall(("\x03m!04"+self.comfort_pincode+"\r").encode()) #arm to 04 vacation mode
+                elif msgstr == "ARM_HOME":
                     self.comfortsock.sendall(("\x03m!03"+self.comfort_pincode+"\r").encode()) #arm to 03 day mode
                 elif msgstr == "ARM_NIGHT":
                     self.comfortsock.sendall(("\x03m!02"+self.comfort_pincode+"\r").encode()) #arm to 02 night mode
@@ -927,12 +914,12 @@ class Comfort2(mqtt.Client):
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, amMsg.message,qos=0,retain=True)
                                 if amMsg.triggered:
-                                    self.publish(ALARMSTATETOPIC, "Triggered",qos=0,retain=True)
+                                    self.publish(ALARMSTATETOPIC, "triggered",qos=0,retain=True)    # Updated to lowercase
                             elif line[1:3] == "EX":
                                 exMsg = ComfortEXEntryExitDelayStarted(line[1:])
                                 self.entryexitdelay = exMsg.delay
                                 self.entryexit_timer()
-                                self.publish(ALARMSTATETOPIC, "Pending",qos=0,retain=True)
+                                self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=True)      # Updated to lowercase
                             elif line[1:3] == "RP":
                                 self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=0,retain=True)
                             elif line[1:3] == "DB":
