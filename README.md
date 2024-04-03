@@ -56,7 +56,7 @@ mqtt:
       payload_available: "1"
       payload_not_available: "0"
       code: "1234"  #code can be different from Comfort's. This code is for the Add-on while the Comfort code is to login to Comfort itself.
-      #Note: If the Comfort User Code does not allow Disarm then the Add-on will not be able to Disarm.
+      **#Note: If the Comfort User Code does not allow Disarm then the Add-on will not be able to Disarm.**
       
   sensor:
     - name: Alarm Mode
