@@ -481,11 +481,11 @@ class ComfortM_SecurityModeReport(object):
     def __init__(self, data={}):
         self.mode = int(data[2:4],16)
         #if self.mode == 0: self.modename = "Security Off"
-        if self.mode == 0: self.modename = "disarmed"
-        elif self.mode == 1: self.modename = "armed_away"
-        elif self.mode == 2: self.modename = "armed_night"
-        elif self.mode == 3: self.modename = "armed_home"
-        elif self.mode == 4: self.modename = "armed_vacation"
+        if self.mode == 0: self.modename = "disarmed"; logger.info("Security Off")
+        elif self.mode == 1: self.modename = "armed_away"; logger.info("Armed Away Mode")
+        elif self.mode == 2: self.modename = "armed_night"; logger.info("Armed Night Mode")
+        elif self.mode == 3: self.modename = "armed_home"; logger.info("Armed Day Mode")
+        elif self.mode == 4: self.modename = "armed_vacation"; logger.info("Armed Vacation Mode")
 
 #a?AASS[XXYYBBzzRRTTGG]
 #AA is the current Alarm Type 01 to 1FH
