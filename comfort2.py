@@ -28,6 +28,7 @@ from argparse import ArgumentParser
 
 DOMAIN = "comfort2"
 ALARMSTATETOPIC = DOMAIN+"/alarm"
+ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
 ALARMCOMMANDTOPIC = DOMAIN+"/alarm/set"
 ALARMAVAILABLETOPIC = DOMAIN+"/alarm/online"
 ALARMLWTTOPIC = DOMAIN+"/alarm/LWT"
@@ -487,33 +488,17 @@ class ComfortM_SecurityModeReport(object):
         elif self.mode == 3: self.modename = "armed_home"; logger.info("Armed Day Mode")
         elif self.mode == 4: self.modename = "armed_vacation"; logger.info("Armed Vacation Mode")
 
-#a?AASS[XXYYBBzzRRTTGG]
-#AA is the current Alarm Type 01 to 1FH
-#SS is alarm state 0-3
-#XX is Trouble bits
-#Bit 0 = AC Failure
-#Bit 1 = Low Battery
-#Bit 2 = Zone Trouble
-#Bit 3 = RS485 Comms Fail
-#Bit 4 = Tamper
-#Bit 5 = Phone Trouble
-#Bit 6 = GSM trouble
-#Bit 7 = Unused
-#YY is for Spare Trouble Bits, 0 if unused
-#BB = Low Battery ID = 0 for Comfort or none
-#zz = Zone Trouble number, =0 if none
-#RR = RS485 Trouble ID, = 0 if none
-#TT = Tamper ID = 0 if none
-#GG = GSM ID =0 if no trouble
-#class ComfortA_SecurityInformationReport(object):       # To Do !!!
-#    def __init__(self, data={}):
-#        self.mode = int(data[2:4],16)
-#        if self.mode == 0: self.modename = "disarmed"
-#        elif self.mode == 1: self.modename = "armed_away"
-#        elif self.mode == 2: self.modename = "armed_night"
-#        elif self.mode == 3: self.modename = "armed_home"
-#        elif self.mode == 4: self.modename = "armed_vacation"
-
+#The current alarm state can be found by sending the S? query
+#PC: S?
+#UCM: S?nn
+#nn 00 = Idle, 1 = Trouble, 2 = Alert, 3 = Alarm
+class ComfortS_SecurityModeReport(object):
+    def __init__(self, data={}):
+        self.mode = int(data[2:4],16)
+        if self.mode == 0: self.modename = "Idle"
+        elif self.mode == 1: self.modename = "Trouble"
+        elif self.mode == 2: self.modename = "Alert"
+        elif self.mode == 3: self.modename = "Alarm"
 
 #zone = 00 means system can be armed, no open zones
 class ComfortERArmReadyNotReady(object):
@@ -525,11 +510,12 @@ class ComfortAMSystemAlarmReport(object):
         self.alarm = int(data[2:4],16)
         self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
         self.parameter = int(data[4:6],16)
+        #logger.debug('AM - data: %s', str(data))
         low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
         if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
         elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
         elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
-        elif self.alarm == 3: self.message = "Power Failure "+str(self.parameter)
+        elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
         elif self.alarm == 4: self.message = "Phone Trouble"
         elif self.alarm == 5: self.message = "Duress"
         elif self.alarm == 6: self.message = "Arm Failure"
@@ -547,8 +533,83 @@ class ComfortAMSystemAlarmReport(object):
         elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
         elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
         elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
-        elif self.alarm == 25: self.message = "Comms Failure RS485 "+str(self.parameter)
+        elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
         elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
+
+#a? - Current Alarm Information Request/Reply
+#PC a?
+#UCM a?AASS[XXYYBBzzRRTTGG]
+#AA is the current Alarm Type 01 to 1FH
+#SS is alarm state 0-3
+#XX is Trouble bits
+#Bit 0 = AC Failure
+#Bit 1 = Low Battery
+#Bit 2 = Zone Trouble
+#Bit 3 = RS485 Comms Fail
+#Bit 4 = Tamper
+#Bit 5 = Phone Trouble
+#Bit 6 = GSM trouble
+#Bit 7 = Unused
+#YY is for Spare Trouble Bits, 0 if unused
+#BB = Low Battery ID = 0 for Comfort or none
+#zz = Zone Trouble number, =0 if none
+#RR = RS485 Trouble ID, = 0 if none
+#TT = Tamper ID = 0 if none
+#GG = GSM ID =0 if no trouble
+class Comfort_A_SecurityInformationReport(object):
+    #a?000000000000000000
+    def __init__(self, data={}):
+        self.AA = int(data[2:4],16)
+        self.SS = int(data[4:6],16)
+        self.XX = int(data[6:8],16)
+        self.YY = int(data[8:10],16)
+        self.BB = int(data[10:12],16)
+        self.zz = int(data[12:14],16)
+        self.RR = int(data[14:16],16)
+        self.TT = int(data[16:18],16)
+        self.GG = int(data[18:20],16)
+        #self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
+        logger.debug('a? - data: %s', str(data))
+        low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
+        #if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
+        #elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
+        #elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+        #elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+        #elif self.alarm == 4: self.message = "Phone Trouble"
+        #elif self.alarm == 5: self.message = "Duress"
+        #elif self.alarm == 6: self.message = "Arm Failure"
+        #elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
+        #elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
+        #elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
+        #elif self.alarm == 12: self.message = "Entry Warning, Zone "+str(self.parameter); self.triggered = False
+        #elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
+        #elif self.alarm == 14: self.message = "Siren Tamper"
+        #elif self.alarm == 15: self.message = "Bypass, Zone "+str(self.parameter); self.triggered = False
+        #elif self.alarm == 17: self.message = "Dial Test, User "+str(self.parameter); self.triggered = False
+        #elif self.alarm == 19: self.message = "Entry Alert, Zone "+str(self.parameter); self.triggered = False
+        #elif self.alarm == 20: self.message = "Fire"
+        #elif self.alarm == 21: self.message = "Panic"
+        #elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
+        #elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
+        #elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
+        #elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
+        #elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
+
+class ComfortARSystemAlarmReport(object):
+    def __init__(self, data={}):
+        self.alarm = int(data[2:4],16)
+        self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
+        self.parameter = int(data[4:6],16)
+        low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
+        #logger.debug('AR - data: %s', str(data))
+        if self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"+" Restore"
+        elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+        elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+        elif self.alarm == 4: self.message = "Phone Trouble"+" Restore"
+        elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)+" Restore"
+        elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
+        elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)+" Restore"
+        elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
 
 class ComfortEXEntryExitDelayStarted(object):
     def __init__(self, data={}):
@@ -578,6 +639,7 @@ class Comfort2(mqtt.Client):
 
             # You need to subscribe to your own topics to enable publish messages activating Comfort entities.
             self.subscribe(ALARMCOMMANDTOPIC)
+            self.subscribe(ALARMSTATUSTOPIC)
             #logger.debug('ALARMNUMBEROFOUTPUTS: %s', str(ALARMNUMBEROFOUTPUTS))
             for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
@@ -755,7 +817,7 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                     continue
                 else:
-                    print (e)
+                    logger.error ("readlines() error %s", e)
     #sys.exit(1)
             except socket.error as e:
                 # Something else happened, handle error, exit, etc.
@@ -794,8 +856,10 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all RIO Outputs
             #get all flag states
             self.comfortsock.sendall("\x03f?00\r".encode())
-            #get Alarm Information
-            self.comfortsock.sendall("\x03a?\r".encode())       # a? replies not yet processed.
+            #get Alarm Status Information
+            self.comfortsock.sendall("\x03S?\r".encode())       # S? Status Request
+            #get Alarm Additional Information
+            self.comfortsock.sendall("\x03a?\r".encode())       # S? Status Request
 
             #get all sensor values. 0 - 31
             self.comfortsock.sendall("\x03r?010010\r".encode())
@@ -916,14 +980,14 @@ class Comfort2(mqtt.Client):
                                 #logging.debug("Alarm Mode %s", mMsg.modename)
                                 self.publish(ALARMSTATETOPIC, mMsg.modename,qos=0,retain=True)
                                 self.entryexitdelay = 0    #zero out the countdown timer
-                            #elif line[1:3] == "S?":
-                            #    mMsg = ComfortS_SecurityModeReport(line[1:])
-                            #    #logging.debug("Alarm Mode %s", mMsg.modename)
-                            #    self.publish(ALARMSTATETOPIC, mMsg.modename,qos=0,retain=True)
-                            #elif line[1:3] == "a?":
-                            #    mMsg = ComfortA_SecurityInformationReport(line[1:])
-                            #    logging.debug("Alarm Information %s", mMsg.modename)
-                            #    self.publish(ALARMSTATETOPIC, mMsg.modename,qos=0,retain=True)
+                            elif line[1:3] == "S?":
+                                SMsg = ComfortS_SecurityModeReport(line[1:])
+                                #logging.debug("Alarm Mode %s", SMsg.modename)
+                                self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=0,retain=True)
+                            elif line[1:3] == "a?":
+                                aMsg = Comfort_A_SecurityInformationReport(line[1:])
+                                #logging.debug("Alarm Mode %s", aMsg.modename)
+                                #self.publish(ALARMSTATUSTOPIC, aMsg.modename,qos=0,retain=True)
                             elif line[1:3] == "ER":
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
                                 if not erMsg.zone == 0:
@@ -934,15 +998,28 @@ class Comfort2(mqtt.Client):
                                 self.publish(ALARMMESSAGETOPIC, amMsg.message,qos=0,retain=True)
                                 if amMsg.triggered:
                                     self.publish(ALARMSTATETOPIC, "triggered",qos=0,retain=True)    # Updated to lowercase
+                            elif line[1:3] == "AR":
+                                arMsg = ComfortARSystemAlarmReport(line[1:])
+                                self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=0,retain=True)
                             elif line[1:3] == "EX":
                                 exMsg = ComfortEXEntryExitDelayStarted(line[1:])
                                 self.entryexitdelay = exMsg.delay
                                 self.entryexit_timer()
                                 self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=True)      # Updated to lowercase
                             elif line[1:3] == "RP":
-                                self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=0,retain=True)
+                                if line[3:5] == "01":
+                                    self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=0,retain=True)
+                                elif line[3:5] == "00":
+                                    self.publish(ALARMMESSAGETOPIC, "",qos=0,retain=True)   # Stopped Ringing
+                                elif line[3:5] == "FF":
+                                    self.publish(ALARMMESSAGETOPIC, "Phone Answer",qos=0,retain=True)
                             elif line[1:3] == "DB":
-                                self.publish(ALARMDOORBELLTOPIC, 1 if line[1:] != "DBFF" else 0,qos=0,retain=True)
+                                if line[3:5] == "FF":
+                                    self.publish(ALARMMESSAGETOPIC, "",qos=0,retain=True)
+                                    self.publish(ALARMDOORBELLTOPIC, 0,qos=0,retain=True)
+                                else:
+                                    self.publish(ALARMDOORBELLTOPIC, 1, qos=0,retain=True)
+                                    self.publish(ALARMMESSAGETOPIC, "Door Bell",qos=0,retain=True)
                             elif line[1:3] == "OP":
                                 ipMsg = ComfortOPOutputActivationReport(line[1:])
                                 #print("output %d state %d" % (ipMsg.output, ipMsg.state))
