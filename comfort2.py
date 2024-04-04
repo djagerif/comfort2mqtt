@@ -798,7 +798,6 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall("\x03a?\r".encode())       # a? replies not yet processed.
 
             #get all sensor values. 0 - 31
-            #get all sensor states
             self.comfortsock.sendall("\x03r?010010\r".encode())
             self.comfortsock.sendall("\x03r?011010\r".encode())
 
