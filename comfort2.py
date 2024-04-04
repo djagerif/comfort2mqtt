@@ -525,7 +525,7 @@ class ComfortAMSystemAlarmReport(object):
         self.alarm = int(data[2:4],16)
         self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
         self.parameter = int(data[4:6],16)
-        low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5']
+        low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
         if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
         elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
         elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
