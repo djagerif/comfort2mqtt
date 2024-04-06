@@ -15,6 +15,8 @@
 
 #import os
 import re
+import sys
+import signal
 #from re import DEBUG
 #import select
 import socket
@@ -37,6 +39,7 @@ ALARMTIMERTOPIC = DOMAIN+"/alarm/timer"
 ALARMDOORBELLTOPIC = DOMAIN+"/doorbell"
 
 FIRST_LOGIN = 1
+RUN = True
 
 mqtt_strings = ['Connection successful',
 				'Connection refused - incorrect protocol version',
@@ -556,6 +559,7 @@ class ComfortAMSystemAlarmReport(object):
 #RR = RS485 Trouble ID, = 0 if none
 #TT = Tamper ID = 0 if none
 #GG = GSM ID =0 if no trouble
+
 class Comfort_A_SecurityInformationReport(object):
     #a?000000000000000000
     def __init__(self, data={}):
@@ -570,30 +574,17 @@ class Comfort_A_SecurityInformationReport(object):
         self.GG = int(data[18:20],16)
         #self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
         logger.debug('a? - data: %s', str(data))
-        low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
-        #if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
-        #elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
-        #elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
-        #elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
-        #elif self.alarm == 4: self.message = "Phone Trouble"
-        #elif self.alarm == 5: self.message = "Duress"
-        #elif self.alarm == 6: self.message = "Arm Failure"
-        #elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
-        #elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
-        #elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
-        #elif self.alarm == 12: self.message = "Entry Warning, Zone "+str(self.parameter); self.triggered = False
-        #elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
-        #elif self.alarm == 14: self.message = "Siren Tamper"
-        #elif self.alarm == 15: self.message = "Bypass, Zone "+str(self.parameter); self.triggered = False
-        #elif self.alarm == 17: self.message = "Dial Test, User "+str(self.parameter); self.triggered = False
-        #elif self.alarm == 19: self.message = "Entry Alert, Zone "+str(self.parameter); self.triggered = False
-        #elif self.alarm == 20: self.message = "Fire"
-        #elif self.alarm == 21: self.message = "Panic"
-        #elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
-        #elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
-        #elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
-        #elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
-        #elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
+        alarm_type = ['','Intruder','Duress','LineCut','ArmFail','ZoneTrouble','ZoneAlert','LowBattery', \
+			          'PowerFail', 'Panic', 'EntryAlert','Tamper','Fire','Gas','FamilyCare','Perimeter', \
+			          'BypassZone','Disarm','CMSTest','SystemArmed','AlarmAbort','EntryWarning','SirenTrouble','AlarmType23', \
+			          'RS485Comms','Doorbell','HomeSafe','DialTest','AlarmType28','NewMessage','Temperature','SigninTamper']
+        alarm_state = ['Idle','Trouble','Alert','Alarm']
+        low_battery = ['Main','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
+        self.type = alarm_type[self.AA]
+        self.state = alarm_state[self.SS]
+        if self.BB == 0: self.battery = low_battery[0]
+        elif self.BB > 0:self.battery = low_battery[(self.BB - 32)]
+        #logger.debug('Battery ID: %s', self.id)
 
 class ComfortARSystemAlarmReport(object):
     def __init__(self, data={}):
@@ -629,6 +620,11 @@ class Comfort2(mqtt.Client):
         self.connected = False
         self.username_pw_set(mqtt_username, mqtt_password)
 
+    def handler(signum, frame):
+        logger.debug('Ctrl+Z pressed, but ignored')
+
+    signal.signal(signal.SIGTSTP, handler)
+
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc, properties):
         #print("Broker Connected with result code "+str(rc))
@@ -645,7 +641,7 @@ class Comfort2(mqtt.Client):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
                 #logger.debug('ALARMOUTPUTCOMMANDTOPIC %s', str(ALARMOUTPUTCOMMANDTOPIC % i))
           
-            for i in ALARMVIRTUALINPUTRANGE: #for virtual inputs #inputs+1 to 96
+            for i in ALARMVIRTUALINPUTRANGE: #for virtual inputs #inputs+1 to 128
                 #logger.debug('ALARMINPUTCOMMANDTOPIC %s', str(ALARMINPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMINPUTCOMMANDTOPIC % i)
             
@@ -670,9 +666,8 @@ class Comfort2(mqtt.Client):
             for i in range(0, ALARMNUMBEROFCOUNTERS + 1):
                 self.subscribe(ALARMCOUNTERCOMMANDTOPIC % i)  
 
-
-            #for i in range(1, ALARMNUMBEROFRESPONSES + 1):
-            #    self.subscribe(ALARMRESPONSECOMMANDTOPIC % i)
+            for i in range(1, ALARMNUMBEROFRESPONSES + 1):      # Responses as specified from HA options.
+                self.subscribe(ALARMRESPONSECOMMANDTOPIC % i)
                 
 
           
@@ -896,6 +891,8 @@ class Comfort2(mqtt.Client):
     def run(self):
 
         global FIRST_LOGIN         # Used to track if Addon started up or not.
+        global RUN
+
 #        FIRST_LOGIN = 0
 
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
@@ -904,7 +901,7 @@ class Comfort2(mqtt.Client):
         self.will_set(ALARMLWTTOPIC, payload="Offline", qos=0, retain=True)
         logging.debug("Self.Connected: %s", str(self.connected))
         try:
-            while True:
+            while RUN:
                 try:
                     self.comfortsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     #print("Connecting to "+self.comfort_ip+" "+str(self.comfort_port))
@@ -986,8 +983,10 @@ class Comfort2(mqtt.Client):
                                 self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=0,retain=True)
                             elif line[1:3] == "a?":
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
-                                #logging.debug("Alarm Mode %s", aMsg.modename)
-                                #self.publish(ALARMSTATUSTOPIC, aMsg.modename,qos=0,retain=True)
+                                logging.debug("Alarm Type: %s, Alarm State: %s ", aMsg.type, aMsg.state)
+                                if aMsg.type == 'LowBattery':
+                                    logging.debug("Low Battery %s", aMsg.battery)
+                                #self.publish(ALARMSTATUSTOPIC, aMsg.type,qos=0,retain=True)
                             elif line[1:3] == "ER":
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
                                 if not erMsg.zone == 0:
@@ -1065,23 +1064,17 @@ class Comfort2(mqtt.Client):
                 self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
                 self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 time.sleep(RETRY.seconds)
+        except KeyboardInterrupt:
+            logger.info('Shutting down.')
+            RUN = False
+            #infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
+            #infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
+            #infot.wait_for_publish()
+            #sys.exit(130)
         finally:
             infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
             infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
             infot.wait_for_publish()
-
-#print("MQTTBROKERIP: %s " % MQTTBROKERIP)
-#print("MQTTBROKERPORT: %s " % MQTTBROKERPORT)
-#print("MQTTUSERNAME: %s " % MQTTUSERNAME)
-#print("MQTTPASSWORD: %s " % MQTTPASSWORD)
-#print("COMFORTIP: %s " % COMFORTIP)
-#print("COMFORTPORT: %s " % COMFORTPORT)
-#print("PINCODE: %s " % PINCODE)
-#print("COMFORT_INPUTS: %s " % COMFORT_INPUTS)
-#print("COMFORT_OUTPUTS: %s " % COMFORT_OUTPUTS)
-#print("COMFORT_RESPONSES: %s " % COMFORT_RESPONSES)
-#print("COMFORT_FLAGS: %s " % COMFORT_FLAGS)
-#print("COMFORT_COUNTERS: %s " % COMFORT_COUNTERS)
 
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, DOMAIN)
 #logging.debug("1:%s",str(mqttc))
