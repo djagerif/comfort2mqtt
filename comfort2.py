@@ -31,6 +31,8 @@ from argparse import ArgumentParser
 DOMAIN = "comfort2"
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
+ALARMBYPASSTOPIC = DOMAIN+"/bypass"         # binary number representing bypassed zones. b?00000000000000000000000000
+
 ALARMCOMMANDTOPIC = DOMAIN+"/alarm/set"
 ALARMAVAILABLETOPIC = DOMAIN+"/alarm/online"
 ALARMLWTTOPIC = DOMAIN+"/alarm/LWT"
@@ -38,8 +40,10 @@ ALARMMESSAGETOPIC = DOMAIN+"/alarm/message"
 ALARMTIMERTOPIC = DOMAIN+"/alarm/timer"
 ALARMDOORBELLTOPIC = DOMAIN+"/doorbell"
 
-FIRST_LOGIN = 1
+FIRST_LOGIN = True
 RUN = True
+ArmFromExternal = True      # Used to track Own vs External Arm requests. False means Local Arm via MQTT/HA.
+SAVEDTIME = datetime.now()  # Used for sending keepalives to Comfort.
 
 mqtt_strings = ['Connection successful',
 				'Connection refused - incorrect protocol version',
@@ -287,7 +291,7 @@ TIMEOUT = timedelta(seconds=30) #Comfort will disconnect if idle for 120 secs, s
 RETRY = timedelta(seconds=10)
 
 class ComfortLUUserLoggedIn(object):
-    def __init__(self, datastr="", user=0):
+    def __init__(self, datastr="", user=1):     #changed to see what happens !!!
         if datastr:
             self.user = int(datastr[2:4], 16)
         else:
@@ -368,6 +372,14 @@ class ComfortFLFlagActivationReport(object):
         else:
             self.flag = int(flag)
             self.state = int(state)
+
+class ComfortBBypassActivationReport(object):
+    def __init__(self, datastr=""):
+        logger.debug("DataString: %s", datastr)
+        #logger.debug("Flag: %s", flag)
+        #logger.debug("Flag State: %s", state)
+        self.value = datastr[4:]
+
 
 class ComfortZ_ReportAllZones(object):
     def __init__(self, data={}):
@@ -453,6 +465,33 @@ class Comfort_Y_ReportAllOutputs(object):
             outputbits = int(data[2*i:2*i+2],16)
             for j in range(0,8):
                 self.outputs.append(ComfortOPOutputActivationReport("", 128+8*(i-1)+1+j,(outputbits>>j) & 1))
+
+class ComfortB_ReportAllBypassZones(object):
+    def __init__(self, data={}):
+        self.value = []
+        source_length = (len(data) * 4 - 16)
+        # Convert the string to a hexadecimal value
+        source_hex = int(data[4:], 16)
+        # Convert the hex number to binary string
+        binary_number = bin(source_hex)[2:].zfill(source_length)  # Convert to binary and zero-fill to 24 bits
+        # Determine the length of the binary number
+        num_bits = len(binary_number)
+        # Extract 8-bit segments from the binary number
+        #eight_bit_segments = [binary_number[i:i+8] for i in range(0, num_bits, 8)]
+        #for i, segment in enumerate(eight_bit_segments, start=0):
+        #    start_zone = 1 + (8 * i)
+        #    zones = {}
+        #    for j in range(1, 9):   # Flag 1 to 8 (Saved as 0 - 7)
+        #        if (start_zone + j - 1) < 255:
+        #            zone_number = str(start_zone + j - 1)
+        #            zones[zone_number] = int(segment[8 - j],2)
+        #            logger.debug("zones[zone_number]:%s", zones[zone_number])
+        #self.zones.append(ComfortFLFlagActivationReport("", int(start_zone + j - 1),int(segment[8 - j],2) & 1))
+        self.value.append(ComfortBBypassActivationReport("01234567890"))
+
+class ComfortBY_ReportAllBypassZones(object):       # Still to be done.
+    def __init__(self, data={}):
+        source_length = (len(data) * 4 - 16)
 
 class Comfortf_ReportAllFlags(object):
     def __init__(self, data={}):
@@ -573,7 +612,7 @@ class Comfort_A_SecurityInformationReport(object):
         self.TT = int(data[16:18],16)
         self.GG = int(data[18:20],16)
         #self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
-        logger.debug('a? - data: %s', str(data))
+        logger.debug('a? - data: %s  - still under development', str(data))
         alarm_type = ['','Intruder','Duress','LineCut','ArmFail','ZoneTrouble','ZoneAlert','LowBattery', \
 			          'PowerFail', 'Panic', 'EntryAlert','Tamper','Fire','Gas','FamilyCare','Perimeter', \
 			          'BypassZone','Disarm','CMSTest','SystemArmed','AlarmAbort','EntryWarning','SirenTrouble','AlarmType23', \
@@ -610,6 +649,7 @@ class ComfortEXEntryExitDelayStarted(object):
 class Comfort2(mqtt.Client):
 
     global FIRST_LOGIN
+    global ArmFromExternal
 
     def init(self, mqtt_ip, mqtt_port, mqtt_username, mqtt_password, comfort_ip, comfort_port, comfort_pincode):
         self.mqtt_ip = mqtt_ip
@@ -636,6 +676,8 @@ class Comfort2(mqtt.Client):
             # You need to subscribe to your own topics to enable publish messages activating Comfort entities.
             self.subscribe(ALARMCOMMANDTOPIC)
             self.subscribe(ALARMSTATUSTOPIC)
+            self.subscribe(ALARMBYPASSTOPIC)
+
             #logger.debug('ALARMNUMBEROFOUTPUTS: %s', str(ALARMNUMBEROFOUTPUTS))
             for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
@@ -673,7 +715,7 @@ class Comfort2(mqtt.Client):
           
            
             
-            if FIRST_LOGIN == 0:
+            if FIRST_LOGIN == True:
                 self.readcurrentstate()
             
         else:
@@ -688,22 +730,30 @@ class Comfort2(mqtt.Client):
 
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg = 0):
+
+        global ArmFromExternal
+
         #logger.debug("on_message")
         msgstr = msg.payload.decode()
         #logger.debug(msg.topic+" "+msgstr)
-        if msg.topic == ALARMCOMMANDTOPIC:      ## Revised Names used !!!! ## Also Check MQTT SET not working
+        if msg.topic == ALARMCOMMANDTOPIC:      
             #logger.debug(msg.topic+" "+msgstr)
             if self.connected:
                 #logger.debug("msgstr: %s",msgstr)
                 if msgstr == "ARM_VACATION":
+                    ArmFromExternal = True
                     self.comfortsock.sendall(("\x03m!04"+self.comfort_pincode+"\r").encode()) #arm to 04 vacation mode
                 elif msgstr == "ARM_HOME":
+                    ArmFromExternal = True
                     self.comfortsock.sendall(("\x03m!03"+self.comfort_pincode+"\r").encode()) #arm to 03 day mode
                 elif msgstr == "ARM_NIGHT":
+                    ArmFromExternal = True
                     self.comfortsock.sendall(("\x03m!02"+self.comfort_pincode+"\r").encode()) #arm to 02 night mode
                 elif msgstr == "ARM_AWAY":
+                    ArmFromExternal = True
                     self.comfortsock.sendall(("\x03m!01"+self.comfort_pincode+"\r").encode()) #arm to 01 away mode
                 elif msgstr == "DISARM":
+                    ArmFromExternal = False
                     self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #arm to 00 disarm mode
         elif msg.topic.startswith(DOMAIN+"/output") and msg.topic.endswith("/set"):
             #logger.debug("msgstr: %s",msgstr )
@@ -796,6 +846,11 @@ class Comfort2(mqtt.Client):
     def readlines(self, recv_buffer=BUFFER_SIZE, delim='\r'):
 
         global FIRST_LOGIN
+        #global SAVEDTIME
+        #global TIMEOUT
+
+        #logger.debug("SAVEDTIME %s", SAVEDTIME)
+        #logger.debug("TIMEOUT %s", TIMEOUT)
 
         buffer = ''
         data = True
@@ -807,24 +862,24 @@ class Comfort2(mqtt.Client):
                 # this next if/else is a bit redundant, but illustrates how the
                 # timeout exception is setup
                 if err == 'timed out':
-                    #sleep(1)
                     #print ('recv timed out, retry later')
                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                     continue
                 else:
                     logger.error ("readlines() error %s", e)
-    #sys.exit(1)
             except socket.error as e:
                 # Something else happened, handle error, exit, etc.
                 logger.debug("Something else happened %s", e)
-                FIRST_LOGIN = 1
+                FIRST_LOGIN = True
                 raise
-                #sys.exit(1)
             else:
                 if len(data) == 0:
-                    #logger.info('Orderly disconnect on Comfort end')
-                    FIRST_LOGIN = 1
-                #sys.exit(0)
+                    #logger.debug('data:%s', str(data))
+                    #logger.debug('data:%s', str(data))
+                    logger.debug('Comfort initiated disconnect (LU00).')
+                    self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
+                    # perhaps send 'LI' to logout gracefully - To be Tested !!!
+                    FIRST_LOGIN = True
                 else:
                     # got a message do something :)
                     buffer += data
@@ -854,7 +909,9 @@ class Comfort2(mqtt.Client):
             #get Alarm Status Information
             self.comfortsock.sendall("\x03S?\r".encode())       # S? Status Request
             #get Alarm Additional Information
-            self.comfortsock.sendall("\x03a?\r".encode())       # S? Status Request
+            self.comfortsock.sendall("\x03a?\r".encode())       # a? Status Request
+            #get Bypassed Zones
+            self.comfortsock.sendall("\x03b?00\r".encode())       # b?00 Bypassed Zones
 
             #get all sensor values. 0 - 31
             self.comfortsock.sendall("\x03r?010010\r".encode())
@@ -862,12 +919,9 @@ class Comfort2(mqtt.Client):
 
           #get all counter values
             for i in range(0, int((ALARMNUMBEROFCOUNTERS+1) / 16)):          # Counters 0 to 254 Using 256/16 = 16 iterations
-                #query = f"{i:#0{3}X}"[2:]+"0"
-                #self.comfortsock.sendall("\x03r?00%02X10\r".encode() % (i))
                 #logger.debug("self.comfortsock.sendall(r?00%X010.encode()" % (i))
                 self.comfortsock.sendall("\x03r?00%X010\r".encode() % (i))
                 time.sleep(0.05)
-
             
             self.publish(ALARMAVAILABLETOPIC, 1,qos=0,retain=True)
             self.publish(ALARMLWTTOPIC, 'Online',qos=0,retain=True)
@@ -892,8 +946,11 @@ class Comfort2(mqtt.Client):
 
         global FIRST_LOGIN         # Used to track if Addon started up or not.
         global RUN
+        global ArmFromExternal
+        global SAVEDTIME
+        global TIMEOUT
 
-#        FIRST_LOGIN = 0
+#        FIRST_LOGIN = False
 
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         self.loop_start()
@@ -909,16 +966,17 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.connect((self.comfort_ip, self.comfort_port))
                     self.comfortsock.settimeout(TIMEOUT.seconds)
                     self.login()
-
+                    #if line[0:1] == "\x03":
                     for line in self.readlines():
+                        #if line[0:1] != "\x03":    # Trying to catch lines with incorrect STX character. Issues with Bus Monitor using \r as data instead of EOL.
+                        #    continue
                         if line[1:] != "cc00":
-                            logger.debug(line[1:])  	# Print all responses only in DEBUG mode. Print all received Comfort commands.
+                            logger.debug(line[1:])  	# Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
                         if self.check_string(line[:3]):  #"\x03":   #check for valid prefix.
                             if line[1:3] == "LU":
                                 luMsg = ComfortLUUserLoggedIn(line[1:])
                                 if luMsg.user != 0:
                                     logger.info('Comfort Login Ok - User %s', (luMsg.user if luMsg.user != 254 else 'Engineer'))
-                                    #self.connected = True
 
                                     logger.debug("Starting 3s delay...")
                                     delay = timedelta(seconds=3)
@@ -932,9 +990,17 @@ class Comfort2(mqtt.Client):
                                     #client.publish(ALARMSTATETOPIC, "disarmed")
                                     self.publish(ALARMCOMMANDTOPIC, "comm test",qos=0,retain=True)
                                     self.setdatetime()      # Set Date/Time if Flag is set
-                                    if FIRST_LOGIN == 1:
+                                    if FIRST_LOGIN == True:
                                         self.readcurrentstate()
-                                        FIRST_LOGIN = 0
+                                        FIRST_LOGIN = False
+                                else:
+                                    logger.debug("Disconnect (LU00) Received from Comfort")
+                                    logger.debug("FIRST_LOGIN:%s", str(FIRST_LOGIN))
+                                    #self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
+                                    #self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
+                                    #RUN = False
+                                    FIRST_LOGIN = True
+                                    break
                             elif line[1:5] == "PS00":     # Set Date/Time once a day on receipt of PS command. Usually midnight or any time the system is armed.
                                 #logger.debug('In the PS00 section')
                                 self.setdatetime()          # Set Date/Time if Flag is set at 00:00 every day.
@@ -973,6 +1039,8 @@ class Comfort2(mqtt.Client):
                                     #logger.debug("RIO input %d state %d" % (ipMsgZ.input, ipMsgZ.state))
                                     self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
                             elif line[1:3] == "M?" or line[1:3] == "MD":
+                                if line[3:5] == "00":
+                                    ArmFromExternal = False     #Rest ArmFromExternal value on Disarm or Security Off.
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
                                 #logging.debug("Alarm Mode %s", mMsg.modename)
                                 self.publish(ALARMSTATETOPIC, mMsg.modename,qos=0,retain=True)
@@ -991,7 +1059,15 @@ class Comfort2(mqtt.Client):
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
                                 if not erMsg.zone == 0:
                                     #print("zone not ready: "+str(erMsg.zone))
-                                    self.comfortsock.sendall("\x03KD1A\r".encode()) #force arm
+                                    # Sending KD1A when receiving ER message confuses Comfort. When arming local to Night Mode it immediately goes into Arm Mode
+                                    # Not all Zones are announced and it 'presses' the '#' key on your behalf. Tryingto find a fix...
+                                    #self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
+                                    logging.debug("Force Arm prevented. ER received from external keypad")  # Add ArmFromExternal as Global Boolen.
+                                    if ArmFromExternal:
+                                        logging.debug("ArmFromExternal = True. Don't send KD01")
+                                    else:
+                                        logging.debug("ArmFromExternal = False, Can send KD01")
+                                        self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
                             elif line[1:3] == "AM":
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, amMsg.message,qos=0,retain=True)
@@ -1048,6 +1124,9 @@ class Comfort2(mqtt.Client):
                                 for fMsgf in fMsg.flags:
                                     #print("flag %d state %d" % (fMsgf.flag, fMsgf.state))
                                     self.publish(ALARMFLAGTOPIC % fMsgf.flag, fMsgf.state,qos=0,retain=True)
+                            elif (line[1:3] == "b?") and (len(line) == 69):
+                                bMsg = ComfortB_ReportAllBypassZones(line[1:])
+                                self.publish(ALARMBYPASSTOPIC % bMsg,qos=0,retain=True)
                             elif line[1:3] == "FL":
                                 flMsg = ComfortFLFlagActivationReport(line[1:])
                                 #print("flag %d state %d" % (flMsg.flag, flMsg.state))
@@ -1056,6 +1135,11 @@ class Comfort2(mqtt.Client):
                                 #on rare occassions comfort ucm might get reset (RS11), our session is no longer valid, need to relogin
                                 logger.warning('Reset detected')
                                 self.login()
+                            else:
+                                if datetime.now() > (SAVEDTIME + TIMEOUT):
+                                    #logger.debug("Sending Keepalives")
+                                    self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                                    SAVEDTIME = datetime.now()
                 except socket.error as v:
                     ##errorcode = v[0]
                     logger.error('Comfort Socket Error %s', str(v))
@@ -1066,6 +1150,7 @@ class Comfort2(mqtt.Client):
                 time.sleep(RETRY.seconds)
         except KeyboardInterrupt:
             logger.info('Shutting down.')
+            self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
             RUN = False
             #infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
             #infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
