@@ -104,12 +104,15 @@ group.add_argument(
 
 group.add_argument(
     '--broker-transport',
-    required=True,
+    required=False,
+    dest='--broker-transport', default='TCP', choices=(
+         'TCP', 'WebSocket'),
     help='TCP or WebSockets Transport protocol for MQTT broker. [default: TCP]')
 
 group.add_argument(
     '--broker-encryption',
-    required=True,
+    required=False,
+    type=boolean_string, default='false',
     help='Use TLS encryption. [default: False]')
 
 group = parser.add_argument_group('Comfort System options')
@@ -191,6 +194,8 @@ MQTT_USER=option.broker_username
 MQTT_PASSWORD=option.broker_password
 MQTT_SERVER=option.broker_address
 MQTT_PORT=option.broker_port
+MQTT_TRANSPORT=option.broker_transport
+MQTT_ENCRYPTION=option.broker_encryption
 COMFORT_ADDRESS=option.comfort_address
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id
@@ -264,6 +269,8 @@ logger.debug('MQTT_USER = %s', MQTT_USER)
 logger.debug('MQTT_PASSWORD = ******')
 logger.debug('MQTT_SERVER = %s', MQTT_SERVER)
 logger.debug('MQTT_PORT = %s', MQTT_PORT)
+logger.debug('MQTT_TRANSPORT = %s', MQTT_TRANSPORT)
+logger.debug('MQTT_ENCRYPTION = %s', MQTT_ENCRYPTION)
 logger.debug('COMFORT_ADDRESS = %s', COMFORT_ADDRESS)
 logger.debug('COMFORT_PORT = %s', COMFORT_PORT)
 logger.debug('COMFORT_LOGIN_ID = ******')
@@ -1017,6 +1024,10 @@ class Comfort2(mqtt.Client):
         global BROKERCONNECTED
 
 #        FIRST_LOGIN = False
+
+        print (MQTT_TRANSPORT)
+        print (MQTT_ENCRYPTION)
+
 
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         self.loop_start()
