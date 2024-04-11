@@ -1,9 +1,9 @@
-# Home Assistant Community Add-on: Comfort2MQTT (Sample Text)
+# Home Assistant Add-on: Comfort to MQTT (Sample Text)
 
-[AppDaemon][appdaemon] is a loosely coupled, multithreaded, sandboxed Python
-execution environment for writing automation apps for Home Assistant home
-automation software. It also provides a configurable dashboard (HADashboard)
-suitable for wall mounted tablets.
+[Comfort to MQTT] is a MQTT bridge between Cytech Comfort II Ultra Alarm Panels
+and Home Assistant Mosquito Broker. It provides the ability to configure
+sensors to monitor most of the variables available on the Comfort II Ultra
+alarm system.
 
 ## Installation
 
@@ -15,35 +15,14 @@ comparison to installing any other Home Assistant add-on.
 
    [![Open this add-on in your Home Assistant instance.][addon-badge]][addon]
 
-1. Click the "Install" button to install the add-on.
-1. Start the "AppDaemon" add-on
-1. Check the logs of the "AppDaemon" add-on to see if everything went well.
+2. Click the "Install" button to install the add-on.
 
-:information_source: Please note, the add-on is pre-configured to connect with
-Home Assistant. There is no need to create access tokens or to set your
-Home Assistant URL in the AppDaemon configuration.
-
-This automatic handling of the URL and token conflicts with the
-[AppDaemon official documentation][appdaemon]. The official documentation
-will state `ha_url` and `token` options are required. For the add-on, however,
-this isn't needed.
+:information_source: Please note, the add-on requires configuration to connect with
+Home Assistant and the Comfort II Ultra alarm system.
 
 ## Configuration
 
 **Note**: _Remember to restart the add-on when the configuration is changed._
-
-Example add-on configuration:
-
-```yaml
-log_level: info
-system_packages:
-  - ffmpeg
-python_packages:
-  - PyMySQL
-  - Pillow
-```
-
-**Note**: _This is just an example, don't copy and past it! Create your own!_
 
 ### Option: `log_level`
 
