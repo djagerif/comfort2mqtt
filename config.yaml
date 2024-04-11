@@ -29,16 +29,17 @@ options:
   alarm_rio_inputs: 0
   alarm_rio_outputs: 0
   alarm_responses: 0
-  alarm_flags: 0
-  alarm_counters: 0
+#  alarm_flags: 0
+#  alarm_counters: 0
   comfort_time: false
 schema:
   mqtt_broker_address: str
   mqtt_user: str
   mqtt_password: password
   mqtt_broker_port: int(1024,65535)
-  mqtt_protocol: list(TCP|WebSockets)  comfort_address: str
+  mqtt_protocol: list(TCP|WebSockets)
   mqtt_encryption: bool
+  comfort_address: str
   comfort_port: int
   comfort_login_id: password
   log_verbosity: list(DEBUG|INFO|WARNING|ERROR|CRITICAL)?
@@ -47,8 +48,8 @@ schema:
   alarm_rio_inputs: int(0,120)?
   alarm_rio_outputs: int(0,120)?
   alarm_responses: int(0,1024)?
-  alarm_flags: int(0,254)?
-  alarm_counters: int(0,255)?
+#  alarm_flags: int(0,254)?
+#  alarm_counters: int(0,255)?
   #broker_ca: str?
   #broker_client_cert: str?
   #broker_client_key: str?
