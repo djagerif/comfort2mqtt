@@ -1,6 +1,6 @@
 # Home Assistant Add-on: Comfort2MQTT (Sample Text)
 
-[comfort2mqtt][Comfort to MQTT] is a MQTT bridge between Cytech Comfort II Ultra Alarm Panels
+[Comfort to MQTT][comfort2mqtt] is a MQTT bridge between Cytech Comfort II Ultra Alarm Panels
 and Home Assistant Mosquito Broker. It provides the ability to configure
 sensors to monitor most of the variables available on the Comfort II Ultra
 alarm system.
