@@ -102,6 +102,16 @@ group.add_argument(
     required=True,
     help='Password to use for MQTT broker authentication.')
 
+group.add_argument(
+    '--broker-transport',
+    required=True,
+    help='TCP or WebSockets Transport protocol for MQTT broker. [default: TCP]')
+
+group.add_argument(
+    '--broker-encryption',
+    required=True,
+    help='Use TLS encryption. [default: False]')
+
 group = parser.add_argument_group('Comfort System options')
 group.add_argument(
     '--comfort-address',
