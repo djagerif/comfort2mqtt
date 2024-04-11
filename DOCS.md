@@ -157,7 +157,7 @@ SOFTWARE.
 [addon]: https://my.home-assistant.io/redirect/supervisor_addon/?addon=a0d7b954_appdaemon&repository_url=https%3A%2F%2Fgithub.com%2Fhassio-addons%2Frepository
 [alpine-packages]: https://pkgs.alpinelinux.org/packages
 [appdaemon]: https://appdaemon.readthedocs.io
-[comfort2mqtt]: https://github.com/djagerfi/comfort2mqtt
+[comfort2mqtt]: https://github.com/djagerif/comfort2mqtt
 [contributors]: https://github.com/hassio-addons/addon-appdaemon/graphs/contributors
 [discord-ha]: https://discord.gg/c5DvZ4e
 [discord]: https://discord.me/hassioaddons
