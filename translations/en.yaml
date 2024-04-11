@@ -20,6 +20,10 @@ configuration:
     name: MQTT Transport Protocol
     description: >-
       Use TCP or WebSockets as transport (Default TCP).
+  mqtt_encryption:
+    name: MQTT Transport Encryption
+    description: >-
+      Use TLS Encryption (Default False).
   comfort_port:
     name: Comfort II Port
     description: >-
