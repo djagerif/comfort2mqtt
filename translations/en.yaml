@@ -3,7 +3,7 @@ configuration:
   mqtt_broker_address:
     name: MQTT Broker Address
     description: >-
-      The MQTT Broker Hostname or IP address in IPV4 format or use the default Homeassistant 'Mosquitto' broker.
+      The MQTT Broker Hostname, IP address in IPV4 format or use the default local Home Assistant 'core-mosquitto' broker.
   mqtt_user:
     name: MQTT Broker Username
     description: >-
@@ -28,6 +28,7 @@ configuration:
     name: Comfort II User Login ID
     description: >-
       Cytech Comfort II User Login ID with at least Read-Only access. Login ID has minimum 4 characters and 6 as maximum.
+      For full functionality you need Read/Write access as well as Disarm capabilities.
   log_verbosity:
     name: Global Log Verbosity
     description: >-
@@ -53,15 +54,15 @@ configuration:
   alarm_responses:
     name: Comfort II Responses
     description: >-
-      The number of Cytech Comfort II Responses. Range from 0 - 1024 (Default is 0).
-  alarm_flags:
-    name: Comfort II Flags
-    description: >-
-      Cytech Comfort II Flags on your system. Range from 0 - 254 (Default is 0).
-  alarm_counters:
-    name: Comfort II Counters
-    description: >-
-      Cytech Comfort II Counters on your system. Range from 0 - 255 (Default is 0).
+      The number of Cytech Comfort II Responses that can be activated. Range from 0 - 1024 (Default is 0).
+  #alarm_flags:
+  #  name: Comfort II Flags
+  #  description: >-
+  #    Cytech Comfort II Flags on your system. Range from 0 - 254 (Default is 0).
+  #alarm_counters:
+  #  name: Comfort II Counters
+  #  description: >-
+  #    Cytech Comfort II Counters on your system. Range from 0 - 255 (Default is 0).
   comfort_time:
     name: Set Comfort II Date and Time
     description: >-

@@ -18,6 +18,7 @@ options:
   mqtt_user: null
   mqtt_password: null
   mqtt_broker_port: 1883
+  mqtt_protocol: TCP
   comfort_address: null
   comfort_port: 1002
   comfort_login_id: null
@@ -38,6 +39,7 @@ schema:
   comfort_port: int
   comfort_login_id: password
   mqtt_broker_port: int(1024,65535)
+  mqtt_protocol: list(TCP|WebSockets)?
   log_verbosity: list(DEBUG|INFO|WARNING|ERROR|CRITICAL)?
   alarm_inputs: int(8,128)?
   alarm_outputs: int(0,128)?
