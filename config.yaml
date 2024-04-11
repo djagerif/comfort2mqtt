@@ -19,6 +19,7 @@ options:
   mqtt_password: null
   mqtt_broker_port: 1883
   mqtt_protocol: TCP
+  mqtt_encryption: false
   comfort_address: null
   comfort_port: 1002
   comfort_login_id: null
@@ -35,11 +36,11 @@ schema:
   mqtt_broker_address: str
   mqtt_user: str
   mqtt_password: password
-  comfort_address: str
+  mqtt_broker_port: int(1024,65535)
+  mqtt_protocol: list(TCP|WebSockets)  comfort_address: str
+  mqtt_encryption: bool
   comfort_port: int
   comfort_login_id: password
-  mqtt_broker_port: int(1024,65535)
-  mqtt_protocol: list(TCP|WebSockets)?
   log_verbosity: list(DEBUG|INFO|WARNING|ERROR|CRITICAL)?
   alarm_inputs: int(8,128)?
   alarm_outputs: int(0,128)?

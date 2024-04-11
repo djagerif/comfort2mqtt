@@ -16,6 +16,10 @@ configuration:
     name: MQTT Broker Port
     description: >-
       MQTT Broker TCP port. Range from 1024 - 65535 (Default 1883).
+  mqtt_protocol:
+    name: MQTT Transport Protocol
+    description: >-
+      Use TCP or WebSockets as transport (Default TCP).
   comfort_port:
     name: Comfort II Port
     description: >-
