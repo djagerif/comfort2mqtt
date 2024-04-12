@@ -14,8 +14,6 @@ arch:
   - armhf
   - armv7
   - i386
-discovery:
-  - mqtt
 options:
   mqtt_broker_address: core-mosquitto
   mqtt_user: null

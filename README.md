@@ -10,13 +10,13 @@ Cytech Comfort II Ultra Alarm System to MQTT bridge for Home Assistant.
 [armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
 
-For more information about Cytech Comfort II Ultra alarm systems, please see [cytech]
+For more information about Cytech Comfort II Ultra alarm systems, please see [cytech] website.
 
 [koochyrat]: https://github.com/koochyrat/comfort2
 [cytech]: http://www.cytech.biz/index.html
 
 ## About
-This Addon is used to bridge an IP connected Cytech Comfort II Ultra Alarm system to MQTT for use with Home Assistant.
+This Addon is used to bridge an IPv4 connected Cytech Comfort II Ultra Alarm system to MQTT for use with Home Assistant.
 
 Copyright 2024 Ingo de Jager. Licensed under the GNU LGPL3+. For more details see `COPYING` and `COPYING.LESSER`.
 

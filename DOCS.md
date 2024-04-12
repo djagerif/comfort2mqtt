@@ -1,12 +1,12 @@
 # Home Assistant Add-on: Comfort to MQTT
 
-[Comfort to MQTT][comfort2mqtt] is a MQTT bridge between an IP network connected Cytech Comfort II Ultra Alarm Panel and Home Assistant Mosquito Broker. It provides the ability to configure sensors to monitor most of the objects available on the Comfort II Ultra alarm system EG. Zone Inputs, Zone Outputs, Flags, Counters etc.
+[Comfort to MQTT][comfort2mqtt] is a MQTT bridge between an IPv4 network connected Cytech Comfort II Ultra Alarm Panel and Home Assistant Mosquito Broker. It provides the ability to configure various sensors to monitor most of the objects available on the Comfort II Ultra alarm system.
 
 This is a customised version of the original comfort2mqtt project by [koochyrat]
 
 [koochyrat]: https://github.com/koochyrat/comfort2
 
-This implementation does not do auto discovery. Objects need to be manually configured in Home Assistant.
+This implementation does not do auto configuration of objects. Objects need to be manually configured in Home Assistant configuration.yaml.
 
 ## Installation
 
@@ -27,8 +27,7 @@ This is a customised version of the original comfort2mqtt project by [koochyrat]
 
 [koochyrat]: https://github.com/koochyrat/comfort2
 
-This implementation does not do auto discovery. Objects need to be manually configured
-in Home Assistant.
+This implementation does not do auto configuration. Objects need to be manually configured in Home Assistant.
 
 The following objects are currently supported:
 
@@ -53,8 +52,8 @@ mqtt:
       availability_topic: "comfort2/alarm/online"
       payload_available: "1"
       payload_not_available: "0"
-      code: "1234"  #code can be different from Comfort's. This code is for the Add-on while the Comfort code is to login to Comfort itself.
-      #Note: If the Comfort User Code does not allow Disarm then the Add-on will not be able to Disarm.
+      code: "1234"  # Code can be different from Comfort's. This code is for the Add-on while the Comfort code is to login to Comfort itself.
+                    # Note: If the Comfort User Code does not allow Disarm then the Add-on will not be able to Disarm.
       
   sensor:
     - name: Alarm Mode
@@ -86,16 +85,13 @@ mqtt:
       payload_available: "1"
       payload_not_available: "0"
 ```
-Please take note of the 'Study Light' example above. Comfort supports 16-bit values but 
-many integrations set counter values to 0xFF(255) as an 'On' state.
+Please take note of the 'Study Light' example above. Comfort supports Signed 16-bit values but many integrations, like Clipsal C-BUS, uses Unsigned 8-bit values and sets Counter values to 0xFF(255) as an 'On' state. Adjust your `On` integer value accordingly.
 
-Even though this is a Python implementation, it's currently only tested on
-an amd64 platform. It has been developed on Linux on `amd64`, other platforms
-remain untested and it's not clear if it will work.
+Even though this is a Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Linux, other platforms remain untested and it's not clear if it will work or not.
 
 ## Hardware interface support
 
-The following Cytech Ethernet modules (UCM) are supported:
+The following Cytech Universal Communications Modules (UCM) Ethernet modules are supported:
 
 * [UCM/Eth01] - Obsolete/Untested
 
@@ -105,14 +101,11 @@ The following Cytech Ethernet modules (UCM) are supported:
 
 * [UCM/Eth03] - Recommended (LAN)
 
-  This software _requires_ a fully functional UCM/Ethernet or UCM/Wifi configuration.
-  The UCM/Wifi is not recommended due to possible connectivity issues that could arise from 
-  switching between AP's and other possible sources of noise. It is recommended to use the 
-  UCM/Eth03 with LAN cable implementation.
+  This software _requires_ a fully functional UCM/Ethernet or UCM/Wifi configuration. The UCM/Wifi is not recommended due to possible connectivity issues that could arise from switching between different AP's and other possible sources of RF noise. For best performance it is recommended to use the UCM/Eth03 which uses a physical LAN connection. Use a good quality CAT5e or better cable between the UCM/Eth03 and your network device.
 
-  You must have a reachable IP address on your network from Home Assistant to the Comfort II
-  ethernet module (UCM). The default port is TCP/1002 which is Port #2 of a UCM/Eth03. 
-  Other UCM's may require a different port number.
+  You must also have a reachable IP address on your network from Home Assistant to the Comfort II ethernet module (UCM). The default port is TCP/1002 which is Port #2 of a UCMEth03. If you have a segmented network with Firewalls then please ensure the required ports are open for communications.
+  
+  :information_source: Note that the UCM/WiFi uses port TCP/3000 as the default port. Any other port may be used as long as there is no overlap with existing services on the network.
 
 ## Installation instructions
 
@@ -278,7 +271,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 [addon-badge]: https://my.home-assistant.io/badges/supervisor_addon.svg
-[addon]: https://my.home-assistant.io/redirect/supervisor_addon/?addon=a0d7b954_appdaemon&repository_url=https%3A%2F%2Fgithub.com%2Fhassio-addons%2Frepository
+[addon]: https://my.home-assistant.io/redirect/supervisor_addon/?addon=comfort2mqtt&repository_url=https%3A%2F%2Fgithub.com%2Fdjagerif%2Fcomfort2mqtt
 [alpine-packages]: https://pkgs.alpinelinux.org/packages
 [appdaemon]: https://appdaemon.readthedocs.io
 [comfort2mqtt]: https://github.com/djagerif/comfort2mqtt
