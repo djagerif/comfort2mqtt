@@ -22,4 +22,4 @@ Copyright 2024 Ingo de Jager. Licensed under the GNU LGPL3+. For more details se
 
 > **Note:** This software is neither certified nor endorsed by Cytech Technology Pte Ltd.
 
-More information about the original source project is available [here][koochyrat], and in the `docs` directory of the source repository.
+More information about the original source project is available [here][koochyrat]

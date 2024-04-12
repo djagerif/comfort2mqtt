@@ -1,25 +1,24 @@
-# Home Assistant Add-on: Comfort2MQTT (Sample Text)
+# Home Assistant Add-on: Comfort to MQTT
 
-[Comfort to MQTT][comfort2mqtt] is a MQTT bridge between Cytech Comfort II Ultra Alarm Panels
-and Home Assistant Mosquito Broker. It provides the ability to configure
-sensors to monitor most of the variables available on the Comfort II Ultra
-alarm system.
+[Comfort to MQTT][comfort2mqtt] is a MQTT bridge between an IP network connected Cytech Comfort II Ultra Alarm Panel and Home Assistant Mosquito Broker. It provides the ability to configure sensors to monitor most of the objects available on the Comfort II Ultra alarm system EG. Zone Inputs, Zone Outputs, Flags, Counters etc.
+
+This is a customised version of the original comfort2mqtt project by [koochyrat]
+
+[koochyrat]: https://github.com/koochyrat/comfort2
+
+This implementation does not do auto discovery. Objects need to be manually configured in Home Assistant.
 
 ## Installation
 
-The installation of this add-on is pretty straightforward and not different in
-comparison to installing any other Home Assistant add-on.
+The installation of this add-on is pretty straightforward and not different in comparison to installing any other Home Assistant add-on.
 
-1. Click the Home Assistant My button below to open the add-on on your Home
-   Assistant instance.
+1. Click the Home Assistant `My button` below to open the add-on on your Home Assistant instance.
 
    [![Open this add-on in your Home Assistant instance.][addon-badge]][addon]
 
 2. Click the "Install" button to install the add-on.
 
-:information_source: Please note, the add-on requires configuration to connect with
-Home Assistant and the Comfort II Ultra alarm system.
-
+:information_source: Please note, the add-on requires configuration to connect with Home Assistant and the Comfort II Ultra alarm system.
 
 
 ## About this project
