@@ -103,11 +103,11 @@ group.add_argument(
     help='Password to use for MQTT broker authentication.')
 
 group.add_argument(
-    '--broker-transport',
+    '--broker-protocol',
     required=False,
-    dest='--broker-transport', default='TCP', choices=(
-         'TCP', 'WebSocket'),
-    help='TCP or WebSockets Transport protocol for MQTT broker. [default: TCP]')
+    dest='broker_protocol', default='TCP', choices=(
+         'TCP', 'WebSockets'),
+    help='TCP or WebSockets Transport Protocol for MQTT broker. [default: TCP]')
 
 group.add_argument(
     '--broker-encryption',
@@ -194,7 +194,7 @@ MQTT_USER=option.broker_username
 MQTT_PASSWORD=option.broker_password
 MQTT_SERVER=option.broker_address
 MQTT_PORT=option.broker_port
-MQTT_TRANSPORT=option.broker_transport
+MQTT_PROTOCOL=option.broker_protocol
 MQTT_ENCRYPTION=option.broker_encryption
 COMFORT_ADDRESS=option.comfort_address
 COMFORT_PORT=option.comfort_port
@@ -268,8 +268,8 @@ logger.debug('The following variable values were passed through via the Home Ass
 logger.debug('MQTT_USER = %s', MQTT_USER)
 logger.debug('MQTT_PASSWORD = ******')
 logger.debug('MQTT_SERVER = %s', MQTT_SERVER)
-logger.debug('MQTT_PORT = %s', MQTT_PORT)
-logger.debug('MQTT_TRANSPORT = %s', MQTT_TRANSPORT)
+#logger.debug('MQTT_PORT = %s', MQTT_PORT)
+logger.debug('MQTT_PROTOCOL = %s/%s', MQTT_PROTOCOL, MQTT_PORT)
 logger.debug('MQTT_ENCRYPTION = %s', MQTT_ENCRYPTION)
 logger.debug('COMFORT_ADDRESS = %s', COMFORT_ADDRESS)
 logger.debug('COMFORT_PORT = %s', COMFORT_PORT)
@@ -806,19 +806,19 @@ class Comfort2(mqtt.Client):
                 #logger.debug("msgstr: %s",msgstr)
                 if msgstr == "ARM_VACATION":
                     ArmFromExternal = True
-                    self.comfortsock.sendall(("\x03m!04"+self.comfort_pincode+"\r").encode()) #arm to 04 vacation mode
+                    self.comfortsock.sendall(("\x03M!04"+self.comfort_pincode+"\r").encode()) #Remote arm to 04 vacation mode
                 elif msgstr == "ARM_HOME":
                     ArmFromExternal = True
-                    self.comfortsock.sendall(("\x03m!03"+self.comfort_pincode+"\r").encode()) #arm to 03 day mode
+                    self.comfortsock.sendall(("\x03M!03"+self.comfort_pincode+"\r").encode()) #Remote arm to 03 day mode
                 elif msgstr == "ARM_NIGHT":
                     ArmFromExternal = True
-                    self.comfortsock.sendall(("\x03m!02"+self.comfort_pincode+"\r").encode()) #arm to 02 night mode
+                    self.comfortsock.sendall(("\x03M!02"+self.comfort_pincode+"\r").encode()) #Remote arm to 02 night mode
                 elif msgstr == "ARM_AWAY":
                     ArmFromExternal = True
-                    self.comfortsock.sendall(("\x03m!01"+self.comfort_pincode+"\r").encode()) #arm to 01 away mode
+                    self.comfortsock.sendall(("\x03M!01"+self.comfort_pincode+"\r").encode()) #Remote arm to 01 away mode
                 elif msgstr == "DISARM":
                     ArmFromExternal = False
-                    self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #arm to 00 disarm mode
+                    self.comfortsock.sendall(("\x03M!00"+self.comfort_pincode+"\r").encode()) #Remote arm to 00. disarm mode
         elif msg.topic.startswith(DOMAIN+"/output") and msg.topic.endswith("/set"):
             #logger.debug("msgstr: %s",msgstr )
             output = int(msg.topic.split("/")[1][6:])
@@ -928,7 +928,7 @@ class Comfort2(mqtt.Client):
                 # timeout exception is setup
                 if err == 'timed out':
                     #logger.debug("Timeout in readlines(), retry later")
-                    #self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                    self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                     continue
                 else:
                     logger.error ("readlines() error %s", e)
@@ -1024,10 +1024,6 @@ class Comfort2(mqtt.Client):
         global BROKERCONNECTED
 
 #        FIRST_LOGIN = False
-
-        print (MQTT_TRANSPORT)
-        print (MQTT_ENCRYPTION)
-
 
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         self.loop_start()
@@ -1138,16 +1134,18 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "ER":                 ### Still to be looked at !!!! ###
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
                                 if not erMsg.zone == 0:
-                                    #print("zone not ready: "+str(erMsg.zone))
+                                    logging.warning("Zone %s Not Ready", str(erMsg.zone))
+                                else:
+                                    logging.info("All Zones Ready for Arming")
                                     # Sending KD1A when receiving ER message confuses Comfort. When arming local to Night Mode it immediately goes into Arm Mode
                                     # Not all Zones are announced and it 'presses' the '#' key on your behalf. Tryingto find a fix...
                                     #self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
-                                    logging.debug("Force Arm prevented. ER received from external keypad")  # Add ArmFromExternal as Global Boolen.
-                                    if ArmFromExternal:
-                                        logging.debug("ArmFromExternal = True. Don't send KD01")
-                                    else:
-                                        logging.debug("ArmFromExternal = False, Can send KD01")
-                                        #self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
+#                                    logging.debug("Force Arm prevented. ER received from external keypad")  # Add ArmFromExternal as Global Boolen.
+#                                    if ArmFromExternal:
+#                                        logging.debug("ArmFromExternal = True. Don't send KD01")
+#                                    else:
+#                                        logging.debug("ArmFromExternal = False, Can send KD01")
+#                                        #self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
                             elif line[1:3] == "AM":
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, amMsg.message,qos=0,retain=True)
@@ -1242,11 +1240,13 @@ class Comfort2(mqtt.Client):
                                 logger.warning('Reset detected')
                                 self.login()
                             else:
+                                #print (SAVEDTIME)
                                 if datetime.now() > (SAVEDTIME + TIMEOUT):
                                     #logger.debug("Sending Keepalives")
                                     #logger.debug("30 second Keepalive in run(), sending 'cc00'")
                                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                                     SAVEDTIME = datetime.now()
+
                 except socket.error as v:
                     ##errorcode = v[0]
                     logger.error('Comfort Socket Error %s', str(v))
@@ -1271,9 +1271,6 @@ class Comfort2(mqtt.Client):
                 infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 infot.wait_for_publish()
 
-#mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, DOMAIN, transport="websockets")
-mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, DOMAIN, transport="tcp")
-#logging.debug("1:%s",str(mqttc))
+mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, DOMAIN, transport=MQTT_PROTOCOL)
 mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE)
-#logging.debug("2:%s",str(mqttc))
 mqttc.run()
