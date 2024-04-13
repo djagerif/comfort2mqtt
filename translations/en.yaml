@@ -72,9 +72,9 @@ configuration:
   #  description: >-
   #    Cytech Comfort II Counters on your system. Range from 0 - 255 (Default is 0).
   comfort_time:
-    name: Set Comfort II Date and Time
+    name: Set Comfort II Time and Date
     description: >-
-      Set Cytech Comfort II Time and Date on successful logon, and once a day at midnight after that (Default is False).
+      Set Cytech Comfort II Time and Date on successful logon and once a day at midnight (Default is False).
   #require_certificate:
   #  name: Require Certificate
   #  description: >-

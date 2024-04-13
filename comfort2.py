@@ -1071,7 +1071,7 @@ class Comfort2(mqtt.Client):
                                     self.connected = True  
                                     #client.publish(ALARMSTATETOPIC, "disarmed")
                                     self.publish(ALARMCOMMANDTOPIC, "comm test",qos=0,retain=True)
-                                    self.setdatetime()      # Set Date/Time if Flag is set
+                                    self.setdatetime()      # Set Date/Time if Option is enabled
                                     
                                     if FIRST_LOGIN == True:
                                         self.readcurrentstate()
@@ -1086,7 +1086,7 @@ class Comfort2(mqtt.Client):
                                     break
                             elif line[1:5] == "PS00":     # Set Date/Time once a day on receipt of PS command. Usually midnight or any time the system is armed.
                                 #logger.debug('In the PS00 section')
-                                self.setdatetime()          # Set Date/Time if Flag is set at 00:00 every day.
+                                self.setdatetime()          # Set Date/Time if Flag is set at 00:00 every day if option is enabled.
                             elif line[1:3] == "IP":
                                 ipMsg = ComfortIPInputActivationReport(line[1:])
                                 #print("input %d state %d" % (ipMsg.input, ipMsg.state))

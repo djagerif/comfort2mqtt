@@ -37,11 +37,11 @@ schema:
   mqtt_broker_address: str
   mqtt_user: str
   mqtt_password: password
-  mqtt_broker_port: int(1024,65535)
-  mqtt_protocol: list(TCP|WebSockets)
-  mqtt_encryption: bool
+  mqtt_broker_port: int(1024,65535)?
+  mqtt_protocol: list(TCP|WebSockets)?
+  mqtt_encryption: bool?
   comfort_address: str
-  comfort_port: int
+  comfort_port: int?
   comfort_login_id: password
   log_verbosity: list(DEBUG|INFO|WARNING|ERROR|CRITICAL)?
   alarm_inputs: int(8,128)?
