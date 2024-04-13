@@ -214,4 +214,4 @@ More details can be obtained from [gnu.org][license].
 [license]: https://www.gnu.org/licenses/gpl-3.0.en.html
 [comfort2mqtt]: https://github.com/djagerif/comfort2mqtt
 [koochyrat]: https://github.com/koochyrat/comfort2
-[comfortforums]: http://https://comfortforums.com/
+[comfortforums]: https://comfortforums.com/
