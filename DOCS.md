@@ -98,7 +98,7 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 **Note**: _Remember to restart the add-on when the configuration is changed._
 
-### Option: `MQTT Broker Address`
+### Option: `MQTT Broker Address` (Optional)
 
 The `MQTT Broker Address` is the Hostname or IP address of the MQTT Broker used by both Home Assistant and the Comfort to MQTT Add-on. By default the hostname is `core-mosquitto` but can be changed if required.
 
@@ -136,16 +136,16 @@ Cytech Comfort II User Login ID with the appropriate rights. Login ID has minimu
 
 [progman]: http://www.cytech.biz/download_files.php?item_id=1082
 
-### Option: `Global Log Verbosity`
+### Option: `Global Log Verbosity` (Optional)
 
 This option controls the level of log output by the addon and can be changed to be more or less verbose, which might be useful when you are dealing with an unknown issue. Possible values are:
 
-- `DEBUG`: Shows detailed debug information.
-- `ERROR`: Runtime errors that do not require immediate action.
+- `DEBUG`:   Shows detailed debug information.
+- `ERROR`:   Runtime errors that do not require immediate action.
 - `WARNING`: Exceptional occurrences that are not errors.
-- `INFO`: Normal (usually) interesting events.
+- `INFO`:    Normal (usually) interesting events.
 
-Please note that each level automatically includes log messages from a more severe level, e.g., `DEBUG` also shows `INFO` messages. By default, the `log_level` is set to `INFO`, which is the recommended setting unless you are troubleshooting.
+Please note that each level automatically includes log messages from a more severe level, e.g. `DEBUG` also shows `INFO` messages. By default, the `log_level` is set to `INFO`, which is the recommended setting unless you are troubleshooting.
 
 ### Option: `Comfort II Zone Inputs` - Under Development
 
@@ -163,11 +163,11 @@ Set number of SCS/RIO Inputs.
 
 Set number of SCS/RIO Outputs.
 
-### Option: `Comfort II Responses`
+### Option: `Comfort II Responses` (Optional)
 
 This sets the number of Responses that the Add-on subscribes to. Valid range values are from 0 - 1024. If you subscribe to the first 100 responses and trigger a response number EG. 200, then it will not be sent to Comfort for execution. Only subscribed responses are executed. The Default value is `0`.
 
-### Option: `Set Comfort II Time and Date`
+### Option: `Set Comfort II Time and Date` (Optional)
 
 Set the Comfort II Ultra Time and Date when the Add-on logs in and then 00:00 every day. The default value is `False`.
 
@@ -176,37 +176,40 @@ Set the Comfort II Ultra Time and Date when the Add-on logs in and then 00:00 ev
 
 Got questions?
 
-- The [Comfort Forums][discord-ha] for any questions or suggestions
+- The [Comfort Forums][comfortforums] for any questions or suggestions
 
 
 ## Authors & contributors
 
-The original project was done by [koocyrat][koochyrat]
+The original source for this project was done by [koocyrat][koochyrat]. This project is a modified, and slightly extended version, of the same source project.
 
 
-## License - To Do !!
+## License (Summary)
 
-MIT License
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
 
-Copyright (c) 2021 - 2024 Franck Nijhof
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+                            Preamble
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.  We, the Free Software Foundation, use the
+GNU General Public License for most of our software; it applies also to
+any other work released this way by its authors.  You can apply it to
+your programs, too.<snip> 
 
+More details can be obtained from [gnu.org][license].
+
+[license]: https://www.gnu.org/licenses/gpl-3.0.en.html
 [comfort2mqtt]: https://github.com/djagerif/comfort2mqtt
 [koochyrat]: https://github.com/koochyrat/comfort2
+[comfortforums]: http://https://comfortforums.com/
