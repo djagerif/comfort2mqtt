@@ -100,13 +100,38 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 **Note**: _Remember to restart the add-on when the configuration is changed._
 
-### Option: `MQTT Broker Address`
+#### Option: `MQTT Broker Address`
 
 The `MQTT Broker Address` is the Hostname or IP address of the MQTT Broker used by both Home Assistant and the Comfort to MQTT Add-on. By default the hostname is `core-mosquitto` but can be changed if required.
 
 ### Option: `MQTT Broker Username`
 
-The Username with Read/Write priveledges in MQTT that will be used for connection authentication. for more information on Users and rights, please refer to the Home Assistant Mosquitto Add-on or Mosquitto[mosquitto][homepage].
+The Username with Read/Write priveledges in MQTT that will be used for connection authentication. For more information on Users and Rights, please refer to the Home Assistant Mosquitto Add-on documentation or the Mosquitto [Homepage][mosquitto].
+
+### Option: `MQTT Broker Password`
+
+Password used for the above configured user for MQTT session establishment.
+
+### Option: `MQTT Broker Port` (Optional)
+
+The MQTT Broker listener port. This can be any configured port on your MQTT Broker. Please check your MQTT Broker Network configuration on what ports are configured. The default value is `1883`.
+
+### Option: `MQTT Transport Protocol` (Optional)
+
+The MQTT Transport Protocol between the Add-on and MQTT Broker can either be `TCP` or `WebSockets`. The default is `TCP`.
+
+### Option: `MQTT Transport Encryption` (Optional) - Not currently used
+
+The MQTT traffic can be encrypted with `TLS` or sent in clear-text. The Encryption option is currently not available. The default is `False`
+
+### Option: `Comfort II Port` (Optional)
+
+The Comfort II Ultra UCM/Eth03 TCP port used for connectivity. UCM/ETh03 can be changed so please check your Comfort II Ultra configuration and use the port that is configured for access. Note that only one client can connect to any given TCP port. The default is '1002'
+
+### Option: `Comfort II IP address`
+
+The Comfort II Ultra UCM/Eth03 IP address or FQDN Hostname used for connectivity.
+
 
 
 
