@@ -2,21 +2,28 @@
 
 [Comfort to MQTT][comfort2mqtt] is a MQTT bridge between an IP network connected Comfort II Ultra Alarm Panel from Cytech and Home Assistant MQTT Broker EG. Mosquito. It provides the ability to configure various sensors in Home Assistant to monitor most of the objects available in the Comfort II Ultra alarm system. If you are using a different MQTT broker then update the configuration accordingly.
 
-This is a customised version of the original comfort2mqtt project by [koochyrat]. Please visit his source and leave a like :like:
+This is a customised version of the original comfort2mqtt project by [koochyrat].
 
 [koochyrat]: https://github.com/koochyrat/comfort2
 
-This implementation does not do auto configuration of objects. Objects need to be manually configured in Home Assistant configuration.yaml.
+This implementation does not do auto configuration of objects in Home Asistant. Objects need to be manually configured in Home Assistant configuration.yaml. Samples of sensor configurations are shown below.
 
 ## Installation
 
-The installation of this add-on is pretty straightforward and not different in comparison to manually installing any other Home Assistant add-on.
+The installation of this add-on is pretty straightforward and not different in comparison to other manually installed Home Assistant add-ons.
 
-1. Click the Home Assistant `My button` below to open the add-on on your Home Assistant instance.
+1. In Home Assistant, go to `Settings` -> `Add-ons` and click the `ADD-ON STORE` button.
 
-   [![Open this add-on in your Home Assistant instance.][addon-badge]][addon]
+2. Once in the ADD-ON STORE page click the three dots `...` in the top-right corner and select `Repositories`
 
-2. Click the "Install" button to install the add-on.
+3. Add the `https://github.com/djagerif/comfort2mqtt` URL and click `ADD`.
+
+4. When the Add-on URL is loaded you can click `Close`.
+
+  After a few seconds you should now see the following Add-on. If not then navigate back to `Settings` and go `Add-ons` -> `Add-on Store`.
+
+  ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/fd7b947d-3787-4a13-a0f1-78e45e1ba9a0)
+
 
 :information_source: Please note, the add-on requires configuration to connect with Home Assistant and the Comfort II Ultra alarm system.
 
@@ -39,6 +46,7 @@ The following objects are currently supported:
 * RIO Outputs [129-248]
 * RIO Inputs [129-248]
 * Timer Reports [1-64]
+* Responses [1-1024]
 
 Manual Sensor creation is required in your configuration.yaml file. Samples are shown below.
 
@@ -85,9 +93,9 @@ mqtt:
       payload_available: "1"
       payload_not_available: "0"
 ```
-Please take note of the 'Study Light' example above. Comfort supports Signed 16-bit values but many integrations, like Clipsal C-BUS, uses Unsigned 8-bit values and sets Counter values to 0xFF(255) as an 'On' state. Adjust your `On` integer value accordingly.
+Please take note of the 'Study Light' example above. Comfort supports both 8-bit and Signed 16-bit values but many integrations, like Clipsal C-BUS, uses 8-bit values and sets Counter values to EG. 0xFF(255) for 'On' and 0x00(0) for 'Off' state. If you have a Comfort integration that is different to the example above then adjust your `On` integer value accordingly.
 
-Even though this is a Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Linux, other platforms remain untested and it's not clear if it will work or not.
+Even though this is a mostly Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Alpine Linux, other platforms remain untested and it's not clear if it will work or not.
 
 ## Hardware interface support
 
@@ -105,29 +113,9 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
   You must also have a reachable IP address on your network from Home Assistant to the Comfort II ethernet module (UCM). The default port is TCP/1002 which is Port #2 of a UCMEth03. If you have a segmented network with Firewalls then please ensure the required ports are open for communications.
   
-  :information_source: Note that the UCM/WiFi uses port TCP/3000 as the default port. Any other port may be used as long as there is no overlap with existing services on the network.
-
-## Installation instructions
-
-To manually install this Add-on, follow the steps below.
-
-* In Home Assistant, go to 'Settings' -> 'Add-ons'
-* Click 'ADD-ON STORE' in the bottom-right corner
-* Click the three dots '...' in the top-right corner and select 'Repositories'
-* Add the https://github.com/djagerif/comfort2mqtt URL and click Close.
-
-  You should now see the following Add-on.
-
-  ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/fd7b947d-3787-4a13-a0f1-78e45e1ba9a0)
+  :information_source: **Note:** The UCM/WiFi uses port TCP/3000 as the default port. Any port may be used as long as there are no overlaps with existing services on the network.
 
 
-[rtd]: https://cbus.readthedocs.io/en/latest/
-[coveralls]: https://coveralls.io/github/micolous/cbus
-[travis]: https://travis-ci.org/micolous/cbus
-[5500PC]: https://www.clipsal.com/Trade/Products/ProductDetail?catno=5500PC
-[5500PCU]: https://www.clipsal.com/Trade/Products/ProductDetail?catno=5500PCU
-[5500CN]: https://updates.clipsal.com/ClipsalOnline/Files/Brochures/W0000348.pdf
-[5500CN2]: https://www.clipsal.com/Trade/Products/ProductDetail?catno=5500CN2
 [ha-auto]: https://www.home-assistant.io/docs/mqtt/discovery/
 [ha-mqtt]: https://www.home-assistant.io/integrations/light.mqtt/#json-schema
 [clipsal-docs]: https://updates.clipsal.com/ClipsalSoftwareDownload/DL/downloads/OpenCBus/OpenCBusProtocolDownloads.html
@@ -135,9 +123,7 @@ To manually install this Add-on, follow the steps below.
 [py2]: https://www.python.org/doc/sunset-python-2/
 
 
-
-
-## Configuration
+## Add-on Configuration
 
 **Note**: _Remember to restart the add-on when the configuration is changed._
 
