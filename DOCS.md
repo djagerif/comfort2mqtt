@@ -1,32 +1,12 @@
 # Home Assistant Add-on: Comfort to MQTT
 
-[Comfort to MQTT][comfort2mqtt] is a MQTT bridge between an IP network connected Comfort II Ultra Alarm Panel from Cytech and Home Assistant MQTT Broker EG. Mosquito. It provides the ability to configure various sensors in Home Assistant to monitor most of the objects available in the Comfort II Ultra alarm system. If you are using a different MQTT broker then update the configuration accordingly.
+[Comfort to MQTT][comfort2mqtt] is a MQTT bridge between an IP connected Comfort II Ultra alarm system from Cytech and a Home Assistant MQTT Broker EG. Mosquito. It provides the ability to configure various sensors in Home Assistant to monitor most of the objects available in the Comfort II Ultra alarm system. If you are using a different MQTT broker then update the configuration accordingly.
 
 This is a customised version of the original comfort2mqtt project by [koochyrat].
 
 [koochyrat]: https://github.com/koochyrat/comfort2
 
 This implementation does not do auto configuration of objects in Home Asistant. Objects need to be manually configured in Home Assistant configuration.yaml. Samples of sensor configurations are shown below.
-
-## Installation
-
-The installation of this add-on is pretty straightforward and not different in comparison to other manually installed Home Assistant add-ons.
-
-1. In Home Assistant, go to `Settings` -> `Add-ons` and click the `ADD-ON STORE` button.
-
-2. Once in the ADD-ON STORE page click the three dots `...` in the top-right corner and select `Repositories`
-
-3. Add the `https://github.com/djagerif/comfort2mqtt` URL and click `ADD`.
-
-4. When the Add-on URL is loaded you can click `Close`.
-
-  After a few seconds you should now see the following Add-on. If not then navigate back to `Settings` and go `Add-ons` -> `Add-on Store`.
-
-  ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/fd7b947d-3787-4a13-a0f1-78e45e1ba9a0)
-
-
-:information_source: Please note, the add-on requires configuration to connect with Home Assistant and the Comfort II Ultra alarm system.
-
 
 ## About this project
 
@@ -47,6 +27,27 @@ The following objects are currently supported:
 * RIO Inputs [129-248]
 * Timer Reports [1-64]
 * Responses [1-1024]
+
+## Installation
+
+The installation of this add-on is pretty straightforward and no different in comparison to other manually installed Home Assistant add-ons.
+
+1. In Home Assistant, go to `Settings` -> `Add-ons` and click the `ADD-ON STORE` button.
+
+2. Once in the ADD-ON STORE page click the three dots `...` in the top-right corner and select `Repositories`
+
+3. Add the `https://github.com/djagerif/comfort2mqtt` URL and click `ADD`.
+
+4. When the Add-on URL is loaded you can click `Close`.
+
+  After a few seconds you should now see the following Add-on. If not, navigate back to `Settings` and go to `Add-ons` -> `Add-on Store` once again.
+
+  ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/fd7b947d-3787-4a13-a0f1-78e45e1ba9a0)
+
+
+:information_source: **Please note:** The add-on requires configuration to connect with Home Assistant and the Comfort II Ultra alarm system.
+
+
 
 Manual Sensor creation is required in your configuration.yaml file. Samples are shown below.
 

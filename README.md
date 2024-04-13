@@ -16,10 +16,26 @@ For more information about Cytech Comfort II Ultra alarm systems, please see [cy
 [cytech]: http://www.cytech.biz/index.html
 
 ## About
-This Addon is used to bridge an IPv4 connected Cytech Comfort II Ultra Alarm system to MQTT for use with Home Assistant.
-
-Copyright 2024 Ingo de Jager. Licensed under the GNU LGPL3+. For more details see `COPYING` and `COPYING.LESSER`.
+This Addon is used to bridge an IP connected Cytech Comfort II Ultra Alarm system to MQTT for use in Home Assistant.
 
 > **Note:** This software is neither certified nor endorsed by Cytech Technology Pte Ltd.
 
-More information about the original source project is available [here][koochyrat]
+This is a customised version of the original comfort2mqtt project by [koochyrat]. More information about the original source project is available [here][koochyrat].
+
+[koochyrat]: https://github.com/koochyrat/comfort2
+
+This implementation does not do auto configuration. Objects need to be manually configured in Home Assistant.
+
+The following objects are currently supported:
+
+* Zone Inputs [1-128]
+* Zone Outputs [1-128]
+* Counters [0-254]
+* Flags [1-254]
+* Sensors [0-31]
+* RIO Outputs [129-248]
+* RIO Inputs [129-248]
+* Timer Reports [1-64]
+* Responses [1-1024]
+
+Copyright 2024 Ingo de Jager. Licensed under the GNU LGPL3+. For more details see `COPYING` and `COPYING.LESSER`.
