@@ -15,7 +15,7 @@
 
 #import os
 import re
-import sys
+#import sys
 import signal
 #from re import DEBUG
 #import select
@@ -25,10 +25,15 @@ import datetime
 import threading
 import logging
 from datetime import datetime, timedelta
+from random import randint
 import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
 DOMAIN = "comfort2"
+
+rand_hex_str = hex(randint(268435456, 4294967295))
+mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])
+
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
 ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"         # List of Bypassed Zones.
@@ -635,10 +640,7 @@ class ComfortAMSystemAlarmReport(object):
         elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
 
 #a? - Current Alarm Information Request/Reply
-#PC a?
 #UCM a?AASS[XXYYBBzzRRTTGG]
-#AA is the current Alarm Type 01 to 1FH
-#SS is alarm state 0-3
 #XX is Trouble bits
 #Bit 0 = AC Failure
 #Bit 1 = Low Battery
@@ -648,25 +650,19 @@ class ComfortAMSystemAlarmReport(object):
 #Bit 5 = Phone Trouble
 #Bit 6 = GSM trouble
 #Bit 7 = Unused
-#YY is for Spare Trouble Bits, 0 if unused
-#BB = Low Battery ID = 0 for Comfort or none
-#zz = Zone Trouble number, =0 if none
-#RR = RS485 Trouble ID, = 0 if none
-#TT = Tamper ID = 0 if none
-#GG = GSM ID =0 if no trouble
 
 class Comfort_A_SecurityInformationReport(object):
     #a?000000000000000000
     def __init__(self, data={}):
-        self.AA = int(data[2:4],16)
-        self.SS = int(data[4:6],16)
-        self.XX = int(data[6:8],16)
-        self.YY = int(data[8:10],16)
-        self.BB = int(data[10:12],16)
-        self.zz = int(data[12:14],16)
-        self.RR = int(data[14:16],16)
-        self.TT = int(data[16:18],16)
-        self.GG = int(data[18:20],16)
+        self.AA = int(data[2:4],16)     #AA is the current Alarm Type 01 to 1FH
+        self.SS = int(data[4:6],16)     #SS is alarm state 0-3
+        self.XX = int(data[6:8],16)     #XX is Trouble bits
+        self.YY = int(data[8:10],16)    #YY is for Spare Trouble Bits, 0 if unused
+        self.BB = int(data[10:12],16)   #BB = Low Battery ID = 0 for Comfort or none
+        self.zz = int(data[12:14],16)   #zz = Zone Trouble number, =0 if none
+        self.RR = int(data[14:16],16)   #RR = RS485 Trouble ID, = 0 if none
+        self.TT = int(data[16:18],16)   #TT = Tamper ID = 0 if none
+        self.GG = int(data[18:20],16)   #GG = GSM ID =0 if no trouble
         #self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
         logger.debug('a? - data: %s  - still under development', str(data[2:]))
         alarm_type = ['','Intruder','Duress','LineCut','ArmFail','ZoneTrouble','ZoneAlert','LowBattery', \
@@ -728,6 +724,7 @@ class Comfort2(mqtt.Client):
 
         global RUN
         global BROKERCONNECTED
+        global FIRST_LOGIN
         
         if rc == 'Success':
 
@@ -786,11 +783,16 @@ class Comfort2(mqtt.Client):
 
     def on_disconnect(self, client, userdata, flags, rc, properties):  #client, userdata, flags, reason_code, properties
 
+        global FIRST_LOGIN
+        global BROKERCONNECTED
+
         if rc == 0:
             logger.info('MQTT Broker %s', str(rc))
         else:
             #logger.error('MQTT Broker %s', str(rc))
             logger.error('MQTT Broker Connection Failed (%s). Check Network or MQTT Broker connection settings', str(rc))
+            BROKERCONNECTED = False
+            FIRST_LOGIN = True
 
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg = 0):
@@ -828,7 +830,12 @@ class Comfort2(mqtt.Client):
         elif msg.topic.startswith(DOMAIN+"/response") and msg.topic.endswith("/set"):
             response = int(msg.topic.split("/")[1][8:])
             if self.connected:
-                self.comfortsock.sendall(("\x03R!%02X\r" % response).encode())
+                if (response in range(1, ALARMNUMBEROFRESPONSES + 1)) and (response in range(256, 1025)):   # Check for  valid response numbers > 255 but less than Max.
+                    result = self.DecimalToSigned16(response)                                               # Returns hex value.
+                    self.comfortsock.sendall(("\x03R!%s\r" % result).encode())                              # Response with 16-bit converted hex number
+                elif (response in range(1, ALARMNUMBEROFRESPONSES + 1)) and (response in range(1, 256)):    # Check for 8-bit values
+                    self.comfortsock.sendall(("\x03R!%02X\r" % response).encode())                          # Response with 8-bit number
+                logger.debug("Activating Response %d",response )
         elif msg.topic.startswith(DOMAIN+"/input") and msg.topic.endswith("/set"):
             virtualinput = int(msg.topic.split("/")[1][5:])
             state = int(msgstr)
@@ -1271,6 +1278,6 @@ class Comfort2(mqtt.Client):
                 infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 infot.wait_for_publish()
 
-mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, DOMAIN, transport=MQTT_PROTOCOL)
+mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
 mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE)
 mqttc.run()

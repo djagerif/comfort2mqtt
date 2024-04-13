@@ -10,7 +10,7 @@ This implementation does not do auto configuration of objects. Objects need to b
 
 ## Installation
 
-The installation of this add-on is pretty straightforward and not different in comparison to installing any other Home Assistant add-on.
+The installation of this add-on is pretty straightforward and not different in comparison to manually installing any other Home Assistant add-on.
 
 1. Click the Home Assistant `My button` below to open the add-on on your Home Assistant instance.
 
