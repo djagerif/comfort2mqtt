@@ -20,6 +20,7 @@ Even though this is a mostly Python implementation, it's currently only tested o
 
 :information_source: **Please note:** This add-on requires configuration to connect with Home Assistant and Comfort II Ultra alarm system.
 
+
 ## Home Assistant Configuration
 
 Manual Sensor creation is required in your `configuration.yaml` file before this Add-on can start. Sample object configurations are shown below.
@@ -69,6 +70,7 @@ mqtt:
 ```
 Please take note of the `Study Light` example above. Comfort II Ultra supports both 8-bit and Signed 16-bit values but many integrations, like Clipsal C-BUS, uses 8-bit values and sets Counter values to EG. 0xFF(255) for 'On' and 0x00(0) for 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `On` integer value accordingly.
 
+
 ## Hardware interface support
 
 The following Cytech Universal Communications Modules (UCM) Ethernet modules are supported:
@@ -87,12 +89,8 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
   
   :information_source: **Note:** The UCM/WiFi uses port TCP/3000 as the default port. Any port may be used as long as there are no overlaps with existing services on the network.
 
-
 [ha-auto]: https://www.home-assistant.io/docs/mqtt/discovery/
 [ha-mqtt]: https://www.home-assistant.io/integrations/light.mqtt/#json-schema
-[clipsal-docs]: https://updates.clipsal.com/ClipsalSoftwareDownload/DL/downloads/OpenCBus/OpenCBusProtocolDownloads.html
-[libcbm-src]: https://sourceforge.net/projects/cbusmodule/files/source/
-[py2]: https://www.python.org/doc/sunset-python-2/
 [mosquitto]: https://mosquitto.org/
 
 
@@ -100,7 +98,7 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 **Note**: _Remember to restart the add-on when the configuration is changed._
 
-#### Option: `MQTT Broker Address`
+### Option: `MQTT Broker Address`
 
 The `MQTT Broker Address` is the Hostname or IP address of the MQTT Broker used by both Home Assistant and the Comfort to MQTT Add-on. By default the hostname is `core-mosquitto` but can be changed if required.
 
@@ -130,116 +128,63 @@ The Comfort II Ultra UCM/Eth03 TCP port used for connectivity. UCM/ETh03 can be 
 
 ### Option: `Comfort II IP address`
 
-The Comfort II Ultra UCM/Eth03 IP address or FQDN Hostname used for connectivity.
+The Comfort II Ultra UCM/Eth03 IP address or Hostname used for connectivity.
 
+### Option: `Comfort II User Login ID`
 
+Cytech Comfort II User Login ID with the appropriate rights. Login ID has minimum 4 characters and 6 maximum. For full functionality you need at least Local Arm/Disarm and Remote Arm/Disarm capabilities on Comfort. See the Comfigurator [Programming Guide][progman],  `Security Settings` and `Sign-in Codes` sections for more information on user creation and rights.
 
+[progman]: http://www.cytech.biz/download_files.php?item_id=1082
 
+### Option: `Global Log Verbosity`
 
-option controls the level of log output by the addon and can
-be changed to be more or less verbose, which might be useful when you are
-dealing with an unknown issue. Possible values are:
+This option controls the level of log output by the addon and can be changed to be more or less verbose, which might be useful when you are dealing with an unknown issue. Possible values are:
 
-- `trace`: Show every detail, like all called internal functions.
-- `debug`: Shows detailed debug information.
-- `info`: Normal (usually) interesting events.
-- `warning`: Exceptional occurrences that are not errors.
-- `error`: Runtime errors that do not require immediate action.
-- `fatal`: Something went terribly wrong. Add-on becomes unusable.
+- `DEBUG`: Shows detailed debug information.
+- `ERROR`: Runtime errors that do not require immediate action.
+- `WARNING`: Exceptional occurrences that are not errors.
+- `INFO`: Normal (usually) interesting events.
 
-Please note that each level automatically includes log messages from a
-more severe level, e.g., `debug` also shows `info` messages. By default,
-the `log_level` is set to `info`, which is the recommended setting unless
-you are troubleshooting.
+Please note that each level automatically includes log messages from a more severe level, e.g., `DEBUG` also shows `INFO` messages. By default, the `log_level` is set to `INFO`, which is the recommended setting unless you are troubleshooting.
 
-These log level also affects the log levels of the AppDaemon.
+### Option: `Comfort II Zone Inputs` - Under Development
 
-### Option: `system_packages`
+Set number of Input zones.
 
-Allows you to specify additional [Alpine packages][alpine-packages] to be
-installed to your AppDaemon setup (e.g., `g++`. `make`, `ffmpeg`).
+### Option: `Comfort II Zone Outputs` - Under Development
 
-**Note**: _Adding many packages will result in a longer start-up time
-for the add-on._
+Set number of Output zones.
 
-### Option: `python_packages`
+### Option: `Comfort II SCS/RIO Inputs` - Under Development
 
-Allows you to specify additional [Python packages][python-packages] to be
-installed to your AppDaemon setup (e.g., `PyMySQL`. `Requests`, `Pillow`).
+Set number of SCS/RIO Inputs.
 
-**Note**: _Adding many packages will result in a longer start-up time
-for the add-on._
+### Option: `Comfort II SCS/RIO Outputs` - Under Development
 
-#### Option: `init_commands`
+Set number of SCS/RIO Outputs.
 
-Customize your environment even more with the `init_commands` option.
-Add one or more shell commands to the list, and they will be executed every
-single time this add-on starts.
+### Option: `Comfort II Responses`
 
-## AppDaemon and HADashboard configuration
+This sets the number of Responses that the Add-on subscribes to. Valid range values are from 0 - 1024. If you subscribe to the first 100 responses and trigger a response number EG. 200, then it will not be sent to Comfort for execution. Only subscribed responses are executed. The Default value is `0`.
 
-This add-on does not configure the AppDaemon or HADashboard for you.
-It does, however, create some sample files to get you started on the first run.
+### Option: `Set Comfort II Time and Date`
 
-The configuration of the AppDaemon can be found in the add-on configuration
-folder of this add-on.
+Set the Comfort II Ultra Time and Date when the Add-on logs in and then 00:00 every day. The default value is `False`.
 
-For more information about configuring AppDaemon, please refer to the
-extensive documentation they offer:
-
-<http://appdaemon.readthedocs.io/en/latest/>
-
-## Home Assistant access tokens and ha_url settings
-
-By default, this add-on ships without a `token` and without the `ha_url`
-in the `appdaemon.yaml` config file. **This is not an error!**
-
-The add-on takes care of these settings for you and you do not need to provide
-or set these in the AppDaemon configuration.
-
-This automatic handling of the URL and token conflicts with the AppDaemon
-official documentation. The official documentation will state `ha_url` and
-`token` options are required. For the add-on, these aren't needed.
-
-However, you are free to set them if you want to override, however, in
-general usage, that should not be needed and is not recommended for this add-on.
-
-## Changelog & Releases
-
-This repository keeps a change log using [GitHub's releases][releases]
-functionality.
-
-Releases are based on [Semantic Versioning][semver], and use the format
-of `MAJOR.MINOR.PATCH`. In a nutshell, the version will be incremented
-based on the following:
-
-- `MAJOR`: Incompatible or major changes.
-- `MINOR`: Backwards-compatible new features and enhancements.
-- `PATCH`: Backwards-compatible bugfixes and package updates.
 
 ## Support
 
 Got questions?
 
-You have several options to get them answered:
+- The [Comfort Forums][discord-ha] for any questions or suggestions
 
-- The [Home Assistant Community Add-ons Discord chat server][discord] for add-on
-  support and feature requests.
-- The [Home Assistant Discord chat server][discord-ha] for general Home
-  Assistant discussions and questions.
-- The Home Assistant [Community Forum][forum].
-- Join the [Reddit subreddit][reddit] in [/r/homeassistant][reddit]
-
-You could also [open an issue here][issue] GitHub.
 
 ## Authors & contributors
 
-The original setup of this repository is by [Franck Nijhof][frenck].
+The original project was done by [koocyrat][koochyrat]
 
-For a full list of all authors and contributors,
-check [the contributor's page][contributors].
 
-## License
+## License - To Do !!
 
 MIT License
 
@@ -263,18 +208,5 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[addon-badge]: https://my.home-assistant.io/badges/supervisor_addon.svg
-[addon]: https://my.home-assistant.io/redirect/supervisor_addon/?addon=comfort2mqtt&repository_url=https%3A%2F%2Fgithub.com%2Fdjagerif%2Fcomfort2mqtt
-[alpine-packages]: https://pkgs.alpinelinux.org/packages
-[appdaemon]: https://appdaemon.readthedocs.io
 [comfort2mqtt]: https://github.com/djagerif/comfort2mqtt
-[contributors]: https://github.com/hassio-addons/addon-appdaemon/graphs/contributors
-[discord-ha]: https://discord.gg/c5DvZ4e
-[discord]: https://discord.me/hassioaddons
-[forum]: https://community.home-assistant.io/t/home-assistant-community-add-on-appdaemon-4/163259?u=frenck
-[frenck]: https://github.com/frenck
-[issue]: https://github.com/hassio-addons/addon-appdaemon/issues
-[python-packages]: https://pypi.org/
-[reddit]: https://reddit.com/r/homeassistant
-[releases]: https://github.com/hassio-addons/addon-appdaemon/releases
-[semver]: http://semver.org/spec/v2.0.0.htm
+[koochyrat]: https://github.com/koochyrat/comfort2
