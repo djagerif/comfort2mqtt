@@ -186,7 +186,7 @@ The original source for this project was done by [koocyrat][koochyrat]. This pro
 
 ## License (Summary)
 
-                    GNU GENERAL PUBLIC LICENSE
+```                    GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
@@ -205,7 +205,7 @@ share and change all versions of a program--to make sure it remains free
 software for all its users.  We, the Free Software Foundation, use the
 GNU General Public License for most of our software; it applies also to
 any other work released this way by its authors.  You can apply it to
-your programs, too.<snip> 
+your programs, too.<snip>```
 
 More details can be obtained from [gnu.org][license].
 
