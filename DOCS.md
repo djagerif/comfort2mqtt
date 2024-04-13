@@ -1,33 +1,5 @@
 # Home Assistant Add-on: Comfort to MQTT
 
-[Comfort to MQTT][comfort2mqtt] is a MQTT bridge between an IP connected Comfort II Ultra alarm system from Cytech and a Home Assistant MQTT Broker EG. Mosquito. It provides the ability to configure various sensors in Home Assistant to monitor most of the objects available in the Comfort II Ultra alarm system. If you are using a different MQTT broker then update the configuration accordingly.
-
-This is a customised version of the original comfort2mqtt project by [koochyrat].
-
-[koochyrat]: https://github.com/koochyrat/comfort2
-
-This implementation does not do auto configuration of objects in Home Asistant. Objects need to be manually configured in Home Assistant configuration.yaml. Samples of sensor configurations are shown below.
-
-## About this project
-
-This is a customised version of the original comfort2mqtt project by [koochyrat]
-
-[koochyrat]: https://github.com/koochyrat/comfort2
-
-This implementation does not do auto configuration. Objects need to be manually configured in Home Assistant.
-
-The following objects are currently supported:
-
-* Zone Inputs [1-128]
-* Zone Outputs [1-128]
-* Counters [0-254]
-* Flags [1-254]
-* Sensors [0-31]
-* RIO Outputs [129-248]
-* RIO Inputs [129-248]
-* Timer Reports [1-64]
-* Responses [1-1024]
-
 ## Installation
 
 The installation of this add-on is pretty straightforward and no different in comparison to other manually installed Home Assistant add-ons.
@@ -44,10 +16,11 @@ The installation of this add-on is pretty straightforward and no different in co
 
   ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/fd7b947d-3787-4a13-a0f1-78e45e1ba9a0)
 
+Even though this is a mostly Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Alpine Linux, other platforms remain untested and it's not clear if it will work or not.
 
-:information_source: **Please note:** The add-on requires configuration to connect with Home Assistant and the Comfort II Ultra alarm system.
+:information_source: **Please note:** This add-on requires configuration to connect with Home Assistant and Comfort II Ultra alarm system.
 
-
+## Home Assistant Configuration
 
 Manual Sensor creation is required in your configuration.yaml file. Samples are shown below.
 
@@ -95,8 +68,6 @@ mqtt:
       payload_not_available: "0"
 ```
 Please take note of the 'Study Light' example above. Comfort supports both 8-bit and Signed 16-bit values but many integrations, like Clipsal C-BUS, uses 8-bit values and sets Counter values to EG. 0xFF(255) for 'On' and 0x00(0) for 'Off' state. If you have a Comfort integration that is different to the example above then adjust your `On` integer value accordingly.
-
-Even though this is a mostly Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Alpine Linux, other platforms remain untested and it's not clear if it will work or not.
 
 ## Hardware interface support
 
