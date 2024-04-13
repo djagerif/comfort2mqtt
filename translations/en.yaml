@@ -3,7 +3,7 @@ configuration:
   mqtt_broker_address:
     name: MQTT Broker Address
     description: >-
-      The MQTT Broker Hostname, IP address in IPV4 format or use the default local Home Assistant 'core-mosquitto' broker.
+      The MQTT Broker Hostname or IP address in IPV4 format or use the default local Home Assistant 'core-mosquitto' broker.
   mqtt_user:
     name: MQTT Broker Username
     description: >-

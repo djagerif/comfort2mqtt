@@ -6,13 +6,13 @@ The installation of this add-on is pretty straightforward and no different in co
 
 1. In Home Assistant, go to `Settings` -> `Add-ons` and click the `ADD-ON STORE` button.
 
-2. Once in the ADD-ON STORE page click the three dots `...` in the top-right corner and select `Repositories`
+2. Once in the ADD-ON STORE, click the three dots `...` in the top-right corner and select `Repositories`
 
-3. Add the `https://github.com/djagerif/comfort2mqtt` URL and click `ADD`.
+3. Paste the ```https://github.com/djagerif/comfort2mqtt``` URL on the line provided and click `ADD`.
 
-4. When the Add-on URL is loaded you can click `Close`.
+4. When the Add-on URL is successfully loaded you can click `Close`.
 
-  After a few seconds you should now see the following Add-on. If not, navigate back to `Settings` and go to `Add-ons` -> `Add-on Store` once again.
+  After a few seconds you should now see the following Add-on. If not, navigate back to `Settings`, go to `Add-ons` -> `Add-on Store` once again.
 
   ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/fd7b947d-3787-4a13-a0f1-78e45e1ba9a0)
 
@@ -22,7 +22,7 @@ Even though this is a mostly Python implementation, it's currently only tested o
 
 ## Home Assistant Configuration
 
-Manual Sensor creation is required in your configuration.yaml file. Samples are shown below.
+Manual Sensor creation is required in your `configuration.yaml` file before this Add-on can start. Sample object configurations are shown below.
 
 ```
 mqtt: 
@@ -67,7 +67,7 @@ mqtt:
       payload_available: "1"
       payload_not_available: "0"
 ```
-Please take note of the 'Study Light' example above. Comfort supports both 8-bit and Signed 16-bit values but many integrations, like Clipsal C-BUS, uses 8-bit values and sets Counter values to EG. 0xFF(255) for 'On' and 0x00(0) for 'Off' state. If you have a Comfort integration that is different to the example above then adjust your `On` integer value accordingly.
+Please take note of the `Study Light` example above. Comfort II Ultra supports both 8-bit and Signed 16-bit values but many integrations, like Clipsal C-BUS, uses 8-bit values and sets Counter values to EG. 0xFF(255) for 'On' and 0x00(0) for 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `On` integer value accordingly.
 
 ## Hardware interface support
 
@@ -93,15 +93,25 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 [clipsal-docs]: https://updates.clipsal.com/ClipsalSoftwareDownload/DL/downloads/OpenCBus/OpenCBusProtocolDownloads.html
 [libcbm-src]: https://sourceforge.net/projects/cbusmodule/files/source/
 [py2]: https://www.python.org/doc/sunset-python-2/
+[mosquitto]: https://mosquitto.org/
 
 
 ## Add-on Configuration
 
 **Note**: _Remember to restart the add-on when the configuration is changed._
 
-### Option: `log_level`
+### Option: `MQTT Broker Address`
 
-The `log_level` option controls the level of log output by the addon and can
+The `MQTT Broker Address` is the Hostname or IP address of the MQTT Broker used by both Home Assistant and the Comfort to MQTT Add-on. By default the hostname is `core-mosquitto` but can be changed if required.
+
+### Option: `MQTT Broker Username`
+
+The Username with Read/Write priveledges in MQTT that will be used for connection authentication. for more information on Users and rights, please refer to the Home Assistant Mosquitto Add-on or Mosquitto[mosquitto][homepage].
+
+
+
+
+option controls the level of log output by the addon and can
 be changed to be more or less verbose, which might be useful when you are
 dealing with an unknown issue. Possible values are:
 
