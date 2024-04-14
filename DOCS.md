@@ -114,7 +114,7 @@ Password used for the MQTT Broker Username. Used for authenticated MQTT session 
 
 ### Option: `MQTT Broker Port` (Optional)
 
-The MQTT Broker listener port. This can be any configured port on your MQTT Broker. Please check your MQTT Broker Network configuration on what ports are configured. The default value is `1883`.
+The MQTT Broker exposed listener port. This can be any configured port on your MQTT Broker. Please check your MQTT Broker Network configuration on what exposed ports are configured. The default value is `1883`. Take note that Mosquitto Broker port configurations are Docker `exposed` ports. These ports will not reflect in any Mosquitto Broker logs as it uses e.g. 1883 internally for TCP and 1884 for WebSockets.
 
 ### Option: `MQTT Transport Protocol` (Optional)
 
