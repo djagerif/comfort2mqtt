@@ -71,7 +71,9 @@ mqtt:
 Please take note of the `Study Light` example above. Comfort II Ultra supports both 8-bit and Signed 16-bit values but many integrations, like Clipsal C-BUS, uses 8-bit values and sets Counter values to EG. 0xFF(255) for 'On' and 0x00(0) for 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `On` integer value accordingly.
 
 
-## Hardware interface support
+## Hardware and Interface support
+
+This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. Firmware as tested, is `7.201`.
 
 The following Cytech Universal Communications Modules (UCM) Ethernet modules are supported:
 
