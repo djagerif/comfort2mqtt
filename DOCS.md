@@ -102,7 +102,7 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 ### Option: `MQTT Broker Address` (Optional)
 
-The `MQTT Broker Address` is the Hostname or IP address of the MQTT Broker used by both Home Assistant and the Comfort to MQTT Add-on. By default the hostname is `core-mosquitto` but can be changed if required.
+The `MQTT Broker Address` is the Hostname, or IP address, of the MQTT Broker used by both Home Assistant and the Comfort to MQTT Add-on. By default the hostname is `core-mosquitto`. If another MQTT Broker is used then this needs to reflect the IP address or Hostname of that instance.
 
 ### Option: `MQTT Broker Username`
 
@@ -110,7 +110,7 @@ The Username with Read/Write priveledges in MQTT that will be used for connectio
 
 ### Option: `MQTT Broker Password`
 
-Password used for the above configured user for MQTT session establishment.
+Password used for the MQTT Broker Username. Used for authenticated MQTT session establishment.
 
 ### Option: `MQTT Broker Port` (Optional)
 
