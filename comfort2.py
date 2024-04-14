@@ -693,6 +693,24 @@ class ComfortARSystemAlarmReport(object):
         elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)+" Restore"
         elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
 
+class ComfortV_SystemTypeReport(object):
+    def __init__(self, data={}):
+        #logger.debug('V? - data: %s', str(data))
+        #self.data = int(data[2:4],16)
+        self.filesystem = int(data[8:10],16)
+        self.version = int(data[4:6],16)
+        self.revision = int(data[6:8],16)
+        #low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
+        #logger.debug('AR - data: %s', str(data))
+        #if self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"+" Restore"
+        #elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+        #elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+        #elif self.alarm == 4: self.message = "Phone Trouble"+" Restore"
+        #elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)+" Restore"
+        #elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
+        #elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)+" Restore"
+        #elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
+
 class ComfortEXEntryExitDelayStarted(object):
     def __init__(self, data={}):
         self.type = int(data[2:4],16)
@@ -966,6 +984,8 @@ class Comfort2(mqtt.Client):
 
     def readcurrentstate(self):
         if self.connected == True:
+            #get Comfort type
+            self.comfortsock.sendall("\x03V?\r".encode())
             #get Security Mode
             self.comfortsock.sendall("\x03M?\r".encode())
             #get all zone input states
@@ -1132,6 +1152,14 @@ class Comfort2(mqtt.Client):
                                 SMsg = ComfortS_SecurityModeReport(line[1:])
                                 #logging.debug("Alarm Mode %s", SMsg.modename)
                                 self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=0,retain=True)
+                            elif line[1:3] == "V?":
+                                VMsg = ComfortV_SystemTypeReport(line[1:])
+                                if VMsg.filesystem != 34:
+                                    logging.warning("Unsupported Comfort Alarm System detected (File System %d).", VMsg.filesystem)
+                                else:
+                                    logging.debug("Supported Comfort II Ultra Alarm System detected (File System %d).", VMsg.filesystem)
+                                    logging.debug("Comfort II Ultra Alarm System Firmware %d.%03d ", VMsg.version, VMsg.revision)
+                                #self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=0,retain=True)
                             elif line[1:3] == "a?":
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
                                 logging.debug("Alarm Type: %s, Alarm State: %s ", aMsg.type, aMsg.state)
@@ -1262,9 +1290,10 @@ class Comfort2(mqtt.Client):
                 self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
                 self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 time.sleep(RETRY.seconds)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as e:
             logger.info('Shutting down.')
-            #logging.debug("#1231-Self.Connected: %s", str(self.connected))
+            logging.debug("#1267-Self.Connected: %s", str(self.connected))
+            logging.debug("#KeyboardInterrupt: %s", str(e))
             if self.connected == True:
                 self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
             RUN = False
