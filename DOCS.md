@@ -73,7 +73,7 @@ Please take note of the `Study Light` example above. Comfort II Ultra supports b
 
 ## Hardware and Interface support
 
-This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. Firmware as tested, is `7.201`.
+This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. Firmware as tested, is `7.201`. If any other Comfort system, or firmware lower than `7.201`, is used then results may be unpredictable.
 
 The following Cytech Universal Communications Modules (UCM) Ethernet modules are supported:
 
