@@ -269,7 +269,7 @@ logger.info('Completed importing addon configuration options')
 #print ("")
 
 # The following variables values were passed through via the Home Assistant add on configuration options
-logger.debug('The following variable values were passed through via the Home Assistant add on configuration options')
+logger.debug('The following variable values were passed through via the Home Assistant')
 logger.debug('MQTT_USER = %s', MQTT_USER)
 logger.debug('MQTT_PASSWORD = ******')
 logger.debug('MQTT_SERVER = %s', MQTT_SERVER)
