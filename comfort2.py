@@ -1045,6 +1045,8 @@ class Comfort2(mqtt.Client):
     def exit_gracefully(self, signum, frame):
         #self.kill_now = True
         global RUN
+        if self.connected == True:
+            self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
         logger.debug("SIGTERM")
         if BROKERCONNECTED == True:      # MQTT Connected ??
             infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
@@ -1055,6 +1057,8 @@ class Comfort2(mqtt.Client):
     def exit_gracefully2(self, signum, frame):
         #self.kill_now = True
         global RUN
+        if self.connected == True:
+            self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
         logger.debug("SIGHUP")
         if BROKERCONNECTED == True:      # MQTT Connected ??
             infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
