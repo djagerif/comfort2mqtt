@@ -1042,6 +1042,26 @@ class Comfort2(mqtt.Client):
         else:
             return False
 
+    def exit_gracefully(self, signum, frame):
+        #self.kill_now = True
+        global RUN
+        logger.debug("SIGTERM")
+        if BROKERCONNECTED == True:      # MQTT Connected ??
+            infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
+            infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
+            infot.wait_for_publish()
+        RUN = False
+
+    def exit_gracefully2(self, signum, frame):
+        #self.kill_now = True
+        global RUN
+        logger.debug("SIGHUP")
+        if BROKERCONNECTED == True:      # MQTT Connected ??
+            infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
+            infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
+            infot.wait_for_publish()
+        RUN = False
+
     def run(self):
 
         global FIRST_LOGIN         # Used to track if Addon started up or not.
@@ -1050,6 +1070,9 @@ class Comfort2(mqtt.Client):
         global SAVEDTIME
         global TIMEOUT
         global BROKERCONNECTED
+
+        signal.signal(signal.SIGTERM, self.exit_gracefully)
+        #signal.signal(signal.SIGHUP, self.exit_gracefully2)
 
 #        FIRST_LOGIN = False
 
