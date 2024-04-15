@@ -870,7 +870,6 @@ class Comfort2(mqtt.Client):
                 #logger.debug("Flag Set: %s, State: %s",flag,state )
         elif msg.topic.startswith(DOMAIN+"/counter") and msg.topic.endswith("/set"): # counter set
             counter = int(msg.topic.split("/")[1][7:])
-            logger.debug("#792:%s", msgstr)
             state = int(msgstr)
             if self.connected:
                 self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
@@ -1150,7 +1149,7 @@ class Comfort2(mqtt.Client):
                                     ArmFromExternal = False     #Rest ArmFromExternal value on Disarm or Security Off.
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
                                 #logging.debug("Alarm Mode %s", mMsg.modename)
-                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=0,retain=True)
+                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=0,retain=False)      # Was True
                                 self.entryexitdelay = 0    #zero out the countdown timer
                             elif line[1:3] == "S?":
                                 SMsg = ComfortS_SecurityModeReport(line[1:])
@@ -1188,7 +1187,7 @@ class Comfort2(mqtt.Client):
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, amMsg.message,qos=0,retain=True)
                                 if amMsg.triggered:
-                                    self.publish(ALARMSTATETOPIC, "triggered",qos=0,retain=True)    # Updated to lowercase
+                                    self.publish(ALARMSTATETOPIC, "triggered",qos=0,retain=False)    # Updated to lowercase
                             elif line[1:3] == "AR":
                                 arMsg = ComfortARSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=0,retain=True)
@@ -1196,7 +1195,7 @@ class Comfort2(mqtt.Client):
                                 exMsg = ComfortEXEntryExitDelayStarted(line[1:])
                                 self.entryexitdelay = exMsg.delay
                                 self.entryexit_timer()
-                                self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=True)      # Updated to lowercase
+                                self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)      # Updated to lowercase
                             elif line[1:3] == "RP":
                                 if line[3:5] == "01":
                                     self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=0,retain=True)
