@@ -1139,7 +1139,7 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "Z?":
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
-                                    print("input %d state %d" % (ipMsgZ.input, ipMsgZ.state))
+                                    #print("input %d state %d" % (ipMsgZ.input, ipMsgZ.state))
                                     self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
                             elif line[1:3] == "z?":
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
