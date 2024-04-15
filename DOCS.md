@@ -29,7 +29,7 @@ Manual Sensor creation is required in your `configuration.yaml` file before this
 mqtt: 
   alarm_control_panel:
     - name: Comfort Alarm
-      unique_id: "comfort2_alarm"
+      unique_id: "comfort2_alarm_a46ee0"        # Use last six digits of UCM/Eth03 MAC address
       state_topic: "comfort2/alarm"
       command_topic: "comfort2/alarm/set"
       availability_topic: "comfort2/alarm/online"
