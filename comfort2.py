@@ -1025,7 +1025,7 @@ class Comfort2(mqtt.Client):
             
             self.publish(ALARMAVAILABLETOPIC, 1,qos=0,retain=True)
             self.publish(ALARMLWTTOPIC, 'Online',qos=0,retain=True)
-            self.publish(ALARMMESSAGETOPIC, "",qos=0,retain=True)
+            self.publish(ALARMMESSAGETOPIC, "",qos=0,retain=True)       # Emptry string removes topic.
 
     def setdatetime(self):
         if self.connected == True:  #set current date and time if COMFORT_TIME Flag is set to True
@@ -1228,12 +1228,12 @@ class Comfort2(mqtt.Client):
                                 cMsg = Comfort_R_ReportAllSensors(line[1:])
                                 for cMsgr in cMsg.counters:
                                     #logger.debug("counter %s state %s" % (cMsgr.counter, cMsgr.state))
-                                    self.publish(ALARMCOUNTERINPUTRANGE % cMsgr.counter, cMsgr.state,qos=0,retain=True)
+                                    self.publish(ALARMCOUNTERINPUTRANGE % cMsgr.counter, cMsgr.state,qos=0,retain=True)     
                             elif line[1:5] == "r?01":
                                 sMsg = Comfort_R_ReportAllSensors(line[1:])
                                 for sMsgr in sMsg.sensors:
                                     #print("sensor %d state %d" % (sMsgr.sensor, sMsgr.value))
-                                    self.publish(ALARMSENSORTOPIC % sMsgr.sensor, sMsgr.value,qos=0,retain=True)
+                                    self.publish(ALARMSENSORTOPIC % sMsgr.sensor, sMsgr.value,qos=0,retain=False)           # Was True, test False
                             elif (line[1:3] == "f?") and (len(line) == 69):
                                 fMsg = Comfortf_ReportAllFlags(line[1:])
                                 for fMsgf in fMsg.flags:
