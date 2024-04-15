@@ -85,12 +85,12 @@ if [ "${COMFORT_TIME}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --comfort-time ${COMFORT_TIME}"
 fi
 
-echo " "
+#echo " "
 
 if [ "${MQTT_LOG_LEVEL}" != "null" ]; then
       COMFORT_ARGS="$COMFORT_ARGS --verbosity $MQTT_LOG_LEVEL"
 fi
 
-echo "Running comfort2mqtt with flags: ${COMFORT_ARGS}"
+#echo "Running comfort2mqtt with flags: ${COMFORT_ARGS}"
 python3 comfort2.py $COMFORT_ARGS
 
