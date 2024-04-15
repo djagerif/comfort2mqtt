@@ -1092,7 +1092,7 @@ class Comfort2(mqtt.Client):
 
                                     self.connected = True  
                                     #client.publish(ALARMSTATETOPIC, "disarmed")
-                                    if BROKERCONNECTED -- True:
+                                    if BROKERCONNECTED == True:
                                         infot = self.publish(ALARMCOMMANDTOPIC, "comm test",qos=0,retain=True)
                                         infot.wait_for_publish()
                                     self.setdatetime()      # Set Date/Time if Option is enabled
