@@ -53,6 +53,7 @@ ArmFromExternal = True      # Used to track Own vs External Arm requests. False 
 SAVEDTIME = datetime.now()  # Used for sending keepalives to Comfort.
 BYPASSEDZONES = []          # Global list of Bypassed Zones
 BROKERCONNECTED = False
+ZONEMAPFILE = False         # Zone Number to Name CSV file present.
 
 mqtt_strings = ['Connection successful',
 				'Connection refused - incorrect protocol version',
@@ -1076,17 +1077,19 @@ class Comfort2(mqtt.Client):
         global SAVEDTIME
         global TIMEOUT
         global BROKERCONNECTED
+        global ZONEMAPFILE
 
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         #signal.signal(signal.SIGHUP, self.exit_gracefully2)
-
+        data = []
         zonemap = Path("config/zones.csv")
         if zonemap.is_file():
             logger.info ("Zone Name Mapping File detected.")    
             with open(zonemap, 'r') as file:
                 csv_reader = csv.DictReader(file, delimiter=',')
                 data = [row for row in csv_reader]
-            logger.debug(data)
+            #logger.debug(data)
+            ZONEMAPFILE = True      # File available and data read into dictionary 'data'
 
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         self.loop_start()
@@ -1206,7 +1209,11 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "ER":                 ### Still to be looked at !!!! ###
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
                                 if not erMsg.zone == 0:
-                                    logging.warning("Zone %s Not Ready", str(erMsg.zone))
+                                    #Check if file is loaded, add enrichment here.
+                                    if ZONEMAPFILE:
+                                        logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), data[erMsg.zone]) 
+                                    else:   
+                                        logging.warning("Zone %s Not Ready", str(erMsg.zone))
                                 else:
                                     logging.info("All Zones Ready for Arming")
                                     # Sending KD1A when receiving ER message confuses Comfort. When arming local to Night Mode it immediately goes into Arm Mode
