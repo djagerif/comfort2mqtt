@@ -1086,8 +1086,7 @@ class Comfort2(mqtt.Client):
             with open(zonemap, 'r') as file:
                 csv_reader = csv.DictReader(file, delimiter=',')
                 data = [row for row in csv_reader]
-            print(data)
-
+            logger.debug(data)
 
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         self.loop_start()
