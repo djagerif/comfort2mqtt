@@ -887,6 +887,24 @@ class Comfort2(mqtt.Client):
     def DecimalToSigned16(self,value):      # Returns Comfort corrected HEX string value from signed 16-bit decimal value.
         return ('{:04X}'.format((int((value & 0xff) * 0x100 + (value & 0xff00) / 0x100))) )
     
+    def CheckZoneNameFormat(self,value):      # Checks CSV file Zone Name to only contain valid characters. Return False if it fails else True
+        #pattern = r'^[a-zA-Z0-9_ -]+$'
+        pattern = r'^(?![ ]{1,}).{1}[a-zA-Z0-9_ -]+$'
+        return bool(re.match(pattern, value))
+    
+    def CheckZoneNumberFormat(self,value):      # Checks CSV file Zone Number to only contain valid characters. Return False if it fails else True
+        pattern = r'^[0-9]+$'
+        if bool(re.match(pattern, value)):
+            if value.isnumeric() & (int(value) <= 128):
+                return True
+            else:
+                return False
+        else:
+            return False
+
+        #bool(re.match(pattern, value))
+    
+    
     #def HexToSigned16Decimal(self,value):        # Returns Signed Decimal value from HEX string EG. FFFF = -1
     #    #print("Value:", value)
     #    return -(int(value,16) & 0x8000) | (int(value,16) & 0x7fff)
@@ -1096,8 +1114,21 @@ class Comfort2(mqtt.Client):
                 # Iterate over each row in the CSV file
                 for row in reader:
                     # Truncate the 'zone' numeric value to 3 characters (0-999) and 'name' to 30 characters. 
-                    zone = row['zone'][:3]
-                    name = row['name'][:30]
+                    #zone = row['zone'][:3]
+
+                    if self.CheckZoneNumberFormat(row['zone'][:3]):
+                        zone = row['zone'][:3]      # Check Zone Number sanity else blank.
+                    else: 
+                        zone = ""
+                        logger.debug("Invalid Zone Number detected in 'zones.csv' file.")
+
+                    if self.CheckZoneNameFormat(row['name'][:30]): 
+                        name = row['name'][:30]      # Check Zone sanity else blank.
+                    else: 
+                        name = ""
+                        logger.debug("Invalid Zone Name detected in 'zones.csv' file.")
+
+
                     # Add the truncated value to the dictionary
                     self.zone_to_name[zone] = name
 
