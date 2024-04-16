@@ -888,6 +888,8 @@ class Comfort2(mqtt.Client):
         return ('{:04X}'.format((int((value & 0xff) * 0x100 + (value & 0xff00) / 0x100))) )
     
     def CheckZoneNameFormat(self,value):      # Checks CSV file Zone Name to only contain valid characters. Return False if it fails else True
+        
+        #print ("ZoneNameFormat:" + str(value))
         #pattern = r'^[a-zA-Z0-9_ -]+$'
         pattern = r'^(?![ ]{1,}).{1}[a-zA-Z0-9_ -]+$'
         return bool(re.match(pattern, value))
@@ -901,9 +903,6 @@ class Comfort2(mqtt.Client):
                 return False
         else:
             return False
-
-        #bool(re.match(pattern, value))
-    
     
     #def HexToSigned16Decimal(self,value):        # Returns Signed Decimal value from HEX string EG. FFFF = -1
     #    #print("Value:", value)
@@ -1118,15 +1117,21 @@ class Comfort2(mqtt.Client):
 
                     if self.CheckZoneNumberFormat(row['zone'][:3]):
                         zone = row['zone'][:3]      # Check Zone Number sanity else blank.
+                        ZONEMAPFILE = True      # File available and data read into dictionary 'data'
                     else: 
                         zone = ""
-                        logger.error("Invalid Zone Number detected in 'zones.csv' file.")
+                        logger.error("Invalid Zone Number detected in 'zones.csv' file, file ignored.")
+                        ZONEMAPFILE = False
+                        break
 
                     if self.CheckZoneNameFormat(row['name'][:30]): 
                         name = row['name'][:30]      # Check Zone sanity else blank.
+                        ZONEMAPFILE = True      # File available and data read into dictionary 'data'
                     else: 
                         name = ""
-                        logger.error("Invalid Zone Name detected in 'zones.csv' file.")
+                        logger.error("Invalid Zone Name detected in 'zones.csv' file, file ignored.")
+                        ZONEMAPFILE = False      # File available and data read into dictionary 'data'
+                        break
 
 
                     # Add the truncated value to the dictionary
@@ -1137,8 +1142,6 @@ class Comfort2(mqtt.Client):
             #print("Name zone_to_name:", zone_to_name)
             #else:
             #    print("Zone", zone, "not found in the dictionary.")
-
-            ZONEMAPFILE = True      # File available and data read into dictionary 'data'
 
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         self.loop_start()
@@ -1260,10 +1263,11 @@ class Comfort2(mqtt.Client):
                                 if not erMsg.zone == 0:
                                     #Check if file is loaded, add enrichment here.
 
-                                    print (self.CheckZoneNumberFormat(str(erMsg.zone)))
-                                    print (self.CheckZoneNameFormat(str(erMsg.zone)))
-                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(erMsg.zone)) & self.CheckZoneNameFormat(str(erMsg.zone)):
-                                        logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name[str(erMsg.zone)])
+                                    #print ("1:"+str(self.CheckZoneNumberFormat(str(erMsg.zone))))
+                                    #print ("3:"+str(ZONEMAPFILE))
+
+                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(erMsg.zone)):
+                                        logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name.get(str(erMsg.zone),'N/A'))
                                     else: logging.warning("Zone %s Not Ready", str(erMsg.zone))
 
                                     #if ZONEMAPFILE:
