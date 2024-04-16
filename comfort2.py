@@ -1260,7 +1260,8 @@ class Comfort2(mqtt.Client):
                                 if not erMsg.zone == 0:
                                     #Check if file is loaded, add enrichment here.
 
-                                    if ZONEMAPFILE: logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name[str(erMsg.zone)])
+                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(erMsg.zone)) & self.CheckZoneNameFormat(str(erMsg.zone)):
+                                        logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name[str(erMsg.zone)])
                                     else: logging.warning("Zone %s Not Ready", str(erMsg.zone))
 
                                     #if ZONEMAPFILE:
@@ -1362,11 +1363,13 @@ class Comfort2(mqtt.Client):
                                 #print ("#1194"+str(byMsg.value))
                                 if byMsg.state == 1:
                                     #logger.debug("Zone %d Bypassed", byMsg.zone)
-                                    if ZONEMAPFILE: logging.debug("Zone %s Bypassed (%s)", str(byMsg.zone), self.zone_to_name[str(byMsg.zone)])
+                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)) & self.CheckZoneNameFormat(str(byMsg.zone)):
+                                        logging.debug("Zone %s Bypassed (%s)", str(byMsg.zone), self.zone_to_name[str(byMsg.zone)])
                                     else: logger.debug("Zone %d Bypassed", byMsg.zone)
                                 else:
                                     #logger.debug("Zone %d Unbypassed", byMsg.zone)
-                                    if ZONEMAPFILE: logging.debug("Zone %s Unbypassed (%s)", str(byMsg.zone), self.zone_to_name[str(byMsg.zone)])
+                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)) & self.CheckZoneNameFormat(str(byMsg.zone)):
+                                        logging.debug("Zone %s Unbypassed (%s)", str(byMsg.zone), self.zone_to_name[str(byMsg.zone)])
                                     else: logger.debug("Zone %d Unbypassed", byMsg.zone)
 
                                 self.publish(ALARMINPUTBYPASSTOPIC % byMsg.zone, byMsg.state, qos=0, retain=True)
