@@ -1222,7 +1222,7 @@ class Comfort2(mqtt.Client):
                                 exMsg = ComfortEXEntryExitDelayStarted(line[1:])
                                 self.entryexitdelay = exMsg.delay
                                 self.entryexit_timer()
-                                self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)      # Updated to lowercase
+                                self.publish(ALARMSTATETOPIC, "arming",qos=0,retain=False)      # Updated to lowercase
                             elif line[1:3] == "RP":
                                 if line[3:5] == "01":
                                     self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=0,retain=True)
