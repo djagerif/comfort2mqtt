@@ -14,6 +14,8 @@
 # limitations under the License.
 
 #import os
+import csv
+from pathlib import Path
 import re
 #import sys
 import signal
@@ -1078,7 +1080,14 @@ class Comfort2(mqtt.Client):
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         #signal.signal(signal.SIGHUP, self.exit_gracefully2)
 
-#        FIRST_LOGIN = False
+        zonemap = Path("config/zones.csv")
+        if zonemap.is_file():
+            logger.info ("Zone Name Mapping File detected.")    
+            with open(zonemap, 'r') as file:
+                csv_reader = csv.DictReader(file, delimiter=',')
+                data = [row for row in csv_reader]
+            print(data)
+
 
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         self.loop_start()
