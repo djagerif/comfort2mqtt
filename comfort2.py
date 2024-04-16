@@ -1081,14 +1081,32 @@ class Comfort2(mqtt.Client):
 
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         #signal.signal(signal.SIGHUP, self.exit_gracefully2)
-        data = []
         zonemap = Path("config/zones.csv")
         if zonemap.is_file():
-            logger.info ("Zone Name Mapping File detected.")    
-            with open(zonemap, 'r') as file:
-                csv_reader = csv.DictReader(file, delimiter=',')
-                data = [row for row in csv_reader]
-            #logger.debug(data)
+            logger.info ("Zone Mapping File detected.") 
+               
+            # Initialize an empty dictionary
+            self.zone_to_name = {}
+
+            # Open the CSV file
+            with open(zonemap, newline='') as csvfile:
+                # Create a CSV reader object
+                reader = csv.DictReader(csvfile)
+    
+                # Iterate over each row in the CSV file
+                for row in reader:
+                    # Truncate the 'zone' numeric value to 3 characters (0-999) and 'name' to 30 characters. 
+                    zone = row['zone'][:3]
+                    name = row['name'][:30]
+                    # Add the truncated value to the dictionary
+                    self.zone_to_name[zone] = name
+
+            #zone = '100'
+            #if zone in zone_to_name:
+            #print("Name zone_to_name:", zone_to_name)
+            #else:
+            #    print("Zone", zone, "not found in the dictionary.")
+
             ZONEMAPFILE = True      # File available and data read into dictionary 'data'
 
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
@@ -1210,10 +1228,14 @@ class Comfort2(mqtt.Client):
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
                                 if not erMsg.zone == 0:
                                     #Check if file is loaded, add enrichment here.
-                                    if ZONEMAPFILE:
-                                        logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), data[erMsg.zone]) 
-                                    else:   
-                                        logging.warning("Zone %s Not Ready", str(erMsg.zone))
+
+                                    if ZONEMAPFILE: logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name[str(erMsg.zone)])
+                                    else: logging.warning("Zone %s Not Ready", str(erMsg.zone))
+
+                                    #if ZONEMAPFILE:
+                                    #    logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name[str(erMsg.zone)]) 
+                                    #else:   
+                                    #    logging.warning("Zone %s Not Ready", str(erMsg.zone))
                                 else:
                                     logging.info("All Zones Ready for Arming")
                                     # Sending KD1A when receiving ER message confuses Comfort. When arming local to Night Mode it immediately goes into Arm Mode
@@ -1308,9 +1330,14 @@ class Comfort2(mqtt.Client):
                                 #print ("#1193"+str(byMsg.state))
                                 #print ("#1194"+str(byMsg.value))
                                 if byMsg.state == 1:
-                                    logger.debug("Zone %d Bypassed", byMsg.zone)
+                                    #logger.debug("Zone %d Bypassed", byMsg.zone)
+                                    if ZONEMAPFILE: logging.debug("Zone %s Bypassed (%s)", str(byMsg.zone), self.zone_to_name[str(byMsg.zone)])
+                                    else: logger.debug("Zone %d Bypassed", byMsg.zone)
                                 else:
-                                    logger.debug("Zone %d Unbypassed", byMsg.zone)
+                                    #logger.debug("Zone %d Unbypassed", byMsg.zone)
+                                    if ZONEMAPFILE: logging.debug("Zone %s Unbypassed (%s)", str(byMsg.zone), self.zone_to_name[str(byMsg.zone)])
+                                    else: logger.debug("Zone %d Unbypassed", byMsg.zone)
+
                                 self.publish(ALARMINPUTBYPASSTOPIC % byMsg.zone, byMsg.state, qos=0, retain=True)
                                 self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=0,retain=True)
 
