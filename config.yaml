@@ -14,6 +14,8 @@ arch:
   - armhf
   - armv7
   - i386
+map:
+  - addon_config:ro
 options:
   mqtt_broker_address: core-mosquitto
   mqtt_user: null
