@@ -175,7 +175,7 @@ Set the Comfort II Ultra Time and Date when the Add-on logs in and then 00:00 ev
 
 ## Custom Zone Name File
 
-a CSV file can be uploaded to the Addon/Config directory with the format as shown below. Upload a file called `zones.csv` to the Add-on/config directory and the Zone Names from the file will be used to enrich the logging information. The format of the file is as follows:
+a CSV file can be uploaded to the `addon_config` directory with the format as shown below. Upload a file called `zones.csv` to the `addon_config` directory and the Zone Names from the file will be used to enrich the logging information. The format of the file is as follows:
 
 ```
 1,FrontDoor
@@ -195,9 +195,9 @@ a CSV file can be uploaded to the Addon/Config directory with the format as show
 127,Zone127
 128,Zone128
 ```
-Zone Name lengths up to 30 characters are supported and restricted to the following characters `[a-zA-Z0-9 _-]`. Names can be enclosed in quotes but is optional.
+Zone Name lengths up to 30 characters are supported and restricted to the following characters `[a-zA-Z0-9 _-]`. Names can be enclosed in quotes but is optional. Zone numbers must be numerical and are limited from 0 to 128.
 
-If you upload a file with missing Zone Name information then a `null` value will be returned for that particular Zone and it will revert back to Zone Number only reporting.
+If you upload a file with missing, or incorrect, Zone Name or Number information then a `null` value will be returned for that particular Zone and it will revert back to Zone Number only reporting.
 
 ## Support
 

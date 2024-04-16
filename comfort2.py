@@ -1120,13 +1120,13 @@ class Comfort2(mqtt.Client):
                         zone = row['zone'][:3]      # Check Zone Number sanity else blank.
                     else: 
                         zone = ""
-                        logger.debug("Invalid Zone Number detected in 'zones.csv' file.")
+                        logger.error("Invalid Zone Number detected in 'zones.csv' file.")
 
                     if self.CheckZoneNameFormat(row['name'][:30]): 
                         name = row['name'][:30]      # Check Zone sanity else blank.
                     else: 
                         name = ""
-                        logger.debug("Invalid Zone Name detected in 'zones.csv' file.")
+                        logger.error("Invalid Zone Name detected in 'zones.csv' file.")
 
 
                     # Add the truncated value to the dictionary
@@ -1260,6 +1260,8 @@ class Comfort2(mqtt.Client):
                                 if not erMsg.zone == 0:
                                     #Check if file is loaded, add enrichment here.
 
+                                    print (self.CheckZoneNumberFormat(str(erMsg.zone)))
+                                    print (self.CheckZoneNameFormat(str(erMsg.zone)))
                                     if ZONEMAPFILE & self.CheckZoneNumberFormat(str(erMsg.zone)) & self.CheckZoneNameFormat(str(erMsg.zone)):
                                         logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name[str(erMsg.zone)])
                                     else: logging.warning("Zone %s Not Ready", str(erMsg.zone))
