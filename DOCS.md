@@ -86,9 +86,9 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 * [UCM/Eth03] - Recommended (LAN)
 
-  This software _requires_ a fully functional UCM/Ethernet or UCM/Wifi configuration. The UCM/Wifi is not recommended due to possible connectivity issues that could arise from switching between different AP's and other possible sources of RF noise. For best performance it is recommended to use the UCM/Eth03 which uses a physical LAN connection. Use a good quality CAT5e or better cable between the UCM/Eth03 and your network device.
+This software _requires_ a fully functional UCM/Ethernet or UCM/Wifi configuration. The UCM/Wifi is not recommended due to possible connectivity issues that could arise from switching between different AP's and other possible sources of RF noise. For best performance it is recommended to use the UCM/Eth03 which uses a physical LAN connection. Use a good quality CAT5e or better cable between the UCM/Eth03 and your network device.
 
-  You must also have a reachable IP address on your network from Home Assistant to the Comfort II ethernet module (UCM). The default port is TCP/1002 which is Port #2 of a UCMEth03. If you have a segmented network with Firewalls then please ensure the required ports are open for communications.
+You must also have a reachable IP address on your network from Home Assistant to the Comfort II ethernet module (UCM). The default port is TCP/1002 which is Port #2 of a UCMEth03. If you have a segmented network with Firewalls then please ensure the required ports are open for communications.
   
   :information_source: **Note:** The UCM/WiFi uses port TCP/3000 as the default port. Any port may be used as long as there are no overlaps with existing services on the network.
 
@@ -145,7 +145,7 @@ This option controls the level of log output by the addon and can be changed to 
 - `DEBUG`:   Shows detailed debug information.
 - `ERROR`:   Runtime errors that do not require immediate action.
 - `WARNING`: Exceptional occurrences that are not errors.
-- `INFO`:    Normal (usually) interesting events.
+- `INFO`:    Normal, usually, interesting events (`DEFAULT`).
 
 Please note that each level automatically includes log messages from a more severe level, e.g. `DEBUG` also shows `INFO` messages. By default, the `log_level` is set to `INFO`, which is the recommended setting unless you are troubleshooting.
 
@@ -172,6 +172,7 @@ This sets the number of Responses that the Add-on subscribes to. Valid range val
 ### Option: `Set Comfort II Time and Date` (Optional)
 
 Set the Comfort II Ultra Time and Date when the Add-on logs in and then 00:00 every day. The default value is `False`.
+
 
 ## Custom Zone Name File
 
@@ -200,6 +201,7 @@ Zone Name lengths are permitted up to 30 characters but restricted to the follow
 If you upload a file with incorrect Zone Name, or Number, information then the file will be disregarded and an error message logged in the addon log file. If you upload a valid `zones.csv` file, but have not specified all the zones, then only the zones with data will be used and the missing ones will display the following message in the log file on receipt of a `ER08` Zone Open message on arming. The same is true for the Bypass Message when force-armed with an open zone.
 
 2024-04-16 22:41:13 WARNING  Zone 8 Not Ready (**N/A**)
+
 
 ## Support
 
