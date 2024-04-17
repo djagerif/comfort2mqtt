@@ -19,7 +19,7 @@ The installation of this add-on is pretty straightforward and no different in co
 
 Even though this is a mostly Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Alpine Linux, other platforms remain untested and it's not clear if it will work or not.
 
-:information_source: **Please note:** This add-on requires configuration to connect with Home Assistant and Comfort II Ultra alarm system.
+**Please note:** This add-on requires configuration to connect with Home Assistant and Comfort II Ultra alarm system.
 
 
 ## Home Assistant Configuration
