@@ -1363,20 +1363,26 @@ class Comfort2(mqtt.Client):
                                 #print("flag %d state %d" % (flMsg.flag, flMsg.state))
                                 self.publish(ALARMFLAGTOPIC % flMsg.flag, flMsg.state,qos=0,retain=True)
                             elif line[1:3] == "BY":
-                                byMsg = ComfortBYBypassActivationReport(line[1:])   # To Do!! Update global bypass string. Maybe even remove it.
+                                byMsg = ComfortBYBypassActivationReport(line[1:])   
                                 #print ("#1192"+str(byMsg.zone))
                                 #print ("#1193"+str(byMsg.state))
                                 #print ("#1194"+str(byMsg.value))
                                 if byMsg.state == 1:
                                     #logger.debug("Zone %d Bypassed", byMsg.zone)
-                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)) & self.CheckZoneNameFormat(str(byMsg.zone)):
-                                        logging.debug("Zone %s Bypassed (%s)", str(byMsg.zone), self.zone_to_name[str(byMsg.zone)])
-                                    else: logger.debug("Zone %d Bypassed", byMsg.zone)
+                                    #if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)) & self.CheckZoneNameFormat(str(byMsg.zone)):
+                                    #    logging.debug("Zone %s Bypassed (%s)", str(byMsg.zone), self.zone_to_name[str(byMsg.zone)])
+                                    #else: logger.debug("Zone %d Bypassed", byMsg.zone)
+                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
+                                        logging.warning("Zone %s Bypassed (%s)", str(byMsg.zone), self.zone_to_name.get(str(byMsg.zone),'N/A'))
+                                    else: logging.warning("Zone %s Bypassed", str(byMsg.zone))
                                 else:
                                     #logger.debug("Zone %d Unbypassed", byMsg.zone)
-                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)) & self.CheckZoneNameFormat(str(byMsg.zone)):
-                                        logging.debug("Zone %s Unbypassed (%s)", str(byMsg.zone), self.zone_to_name[str(byMsg.zone)])
-                                    else: logger.debug("Zone %d Unbypassed", byMsg.zone)
+                                    #if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)) & self.CheckZoneNameFormat(str(byMsg.zone)):
+                                    #    logging.debug("Zone %s Unbypassed (%s)", str(byMsg.zone), self.zone_to_name[str(byMsg.zone)])
+                                    #else: logger.debug("Zone %d Unbypassed", byMsg.zone)
+                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
+                                        logging.info("Zone %s Unbypassed (%s)", str(byMsg.zone), self.zone_to_name.get(str(byMsg.zone),'N/A'))
+                                    else: logging.info("Zone %s Unbypassed", str(byMsg.zone))
 
                                 self.publish(ALARMINPUTBYPASSTOPIC % byMsg.zone, byMsg.state, qos=0, retain=True)
                                 self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=0,retain=True)
