@@ -1248,10 +1248,10 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "V?":
                                 VMsg = ComfortV_SystemTypeReport(line[1:])
                                 if VMsg.filesystem != 34:
-                                    logging.warning("Unsupported Comfort Alarm System detected (File System %d).", VMsg.filesystem)
+                                    logging.warning("Unsupported Comfort System detected (File System %d).", VMsg.filesystem)
                                 else:
-                                    logging.debug("Supported Comfort II Ultra Alarm System detected (File System %d).", VMsg.filesystem)
-                                    logging.debug("Comfort II Ultra Alarm System Firmware %d.%03d ", VMsg.version, VMsg.revision)
+                                    logging.info("Comfort II Ultra detected (Firmware %d.%03d).", VMsg.version, VMsg.revision)
+                                    #logging.info("Comfort II Ultra System Firmware %d.%03d ", VMsg.version, VMsg.revision)
                             elif line[1:3] == "a?":
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
                                 logging.debug("Alarm Type: %s, Alarm State: %s ", aMsg.type, aMsg.state)
