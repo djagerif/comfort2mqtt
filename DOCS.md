@@ -14,7 +14,7 @@ The installation of this add-on is pretty straightforward and no different in co
 
   After a few seconds you should now see the following Add-on. If not, navigate back to `Settings`, go to `Add-ons` -> `Add-on Store` once again.
 
-  ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/fd7b947d-3787-4a13-a0f1-78e45e1ba9a0)
+  ![Comfort to MQTT](image.png)
 
 Even though this is a mostly Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Alpine Linux, other platforms remain untested and it's not clear if it will work or not.
 
