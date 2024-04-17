@@ -657,8 +657,8 @@ class ComfortAMSystemAlarmReport(object):
 class Comfort_A_SecurityInformationReport(object):
     #a?000000000000000000
     def __init__(self, data={}):
-        self.AA = int(data[2:4],16)     #AA is the current Alarm Type 01 to 1FH
-        self.SS = int(data[4:6],16)     #SS is alarm state 0-3
+        self.AA = int(data[2:4],16)     #AA is the current Alarm Type 01 to 1FH (Defaults can be changed in Comfigurator)
+        self.SS = int(data[4:6],16)     #SS is alarm state 0-3 (Idle, Trouble, Alert, Alarm)
         self.XX = int(data[6:8],16)     #XX is Trouble bits
         self.YY = int(data[8:10],16)    #YY is for Spare Trouble Bits, 0 if unused
         self.BB = int(data[10:12],16)   #BB = Low Battery ID = 0 for Comfort or none
@@ -703,16 +703,6 @@ class ComfortV_SystemTypeReport(object):
         self.filesystem = int(data[8:10],16)
         self.version = int(data[4:6],16)
         self.revision = int(data[6:8],16)
-        #low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
-        #logger.debug('AR - data: %s', str(data))
-        #if self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"+" Restore"
-        #elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
-        #elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
-        #elif self.alarm == 4: self.message = "Phone Trouble"+" Restore"
-        #elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)+" Restore"
-        #elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
-        #elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)+" Restore"
-        #elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
 
 class ComfortEXEntryExitDelayStarted(object):
     def __init__(self, data={}):
@@ -734,9 +724,16 @@ class Comfort2(mqtt.Client):
         self.username_pw_set(mqtt_username, mqtt_password)
 
     def handler(signum, frame):
-        logger.debug('Ctrl+Z pressed, but ignored')
+        logger.debug('SIGTSTP intercepted')
+
+    def sigquit_handler(signum, frame):
+        logger.debug('SIGQUIT intercepted')
+
+    #def handler(signum, frame):
+    #    logger.debug('SIGTSTP/SIGQUIT intercepted and ignored')
 
     signal.signal(signal.SIGTSTP, handler)
+    signal.signal(signal.SIGQUIT, sigquit_handler)
 
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc, properties):
@@ -1097,7 +1094,7 @@ class Comfort2(mqtt.Client):
         global ZONEMAPFILE
 
         signal.signal(signal.SIGTERM, self.exit_gracefully)
-        #signal.signal(signal.SIGHUP, self.exit_gracefully2)
+
         zonemap = Path("config/zones.csv")
         if zonemap.is_file():
             logger.info ("Zone Mapping File detected.") 
@@ -1408,9 +1405,8 @@ class Comfort2(mqtt.Client):
                 self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 time.sleep(RETRY.seconds)
         except KeyboardInterrupt as e:
+            logging.debug("SIGINT Intercepted")
             logger.info('Shutting down.')
-            logging.debug("#1337-Self.Connected: %s", str(self.connected))
-            logging.debug("#KeyboardInterrupt: %s", str(e))
             if self.connected == True:
                 self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
             RUN = False
