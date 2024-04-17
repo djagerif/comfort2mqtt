@@ -90,7 +90,7 @@ This software _requires_ a fully functional UCM/Ethernet or UCM/Wifi configurati
 
 You must also have a reachable IP address on your network from Home Assistant to the Comfort II ethernet module (UCM). The default port is TCP/1002 which is Port #2 of a UCMEth03. If you have a segmented network with Firewalls then please ensure the required ports are open for communications.
   
-  :information_source: **Note:** The UCM/WiFi uses port TCP/3000 as the default port. Any port may be used as long as there are no overlaps with existing services on the network.
+**Note:** The UCM/WiFi uses port TCP/3000 as the default port. Any port may be used as long as there are no overlaps with existing services on the network.
 
 [ha-auto]: https://www.home-assistant.io/docs/mqtt/discovery/
 [ha-mqtt]: https://www.home-assistant.io/integrations/light.mqtt/#json-schema
