@@ -729,16 +729,18 @@ class Comfort2(mqtt.Client):
         self.connected = False
         self.username_pw_set(mqtt_username, mqtt_password)
 
-    def handler(signum, frame):
-        logger.debug('SIGTSTP intercepted')
+    def handler(signum, frame):                 # Ctrl-Z Keyboard Interrupt
+        logger.debug('SIGTSTP (Ctrl-Z) intercepted')
 
     def sigquit_handler(signum, frame):
-        logger.debug('SIGQUIT intercepted')
+        global RUN                              # Ctrl-\ Keyboard Interrupt
+        logger.debug('SIGQUIT (Ctrl-\) intercepted')
+        RUN = False
 
     #def handler(signum, frame):
     #    logger.debug('SIGTSTP/SIGQUIT intercepted and ignored')
 
-    #signal.signal(signal.SIGTSTP, handler)
+    signal.signal(signal.SIGTSTP, handler)
     signal.signal(signal.SIGQUIT, sigquit_handler)
 
     # The callback for when the client receives a CONNACK response from the server.
@@ -1292,7 +1294,11 @@ class Comfort2(mqtt.Client):
 
                                     if ZONEMAPFILE & self.CheckZoneNumberFormat(str(erMsg.zone)):
                                         logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name.get(str(erMsg.zone),'N/A'))
-                                    else: logging.warning("Zone %s Not Ready", str(erMsg.zone))
+                                    else: 
+                                        logging.warning("Zone %s Not Ready", str(erMsg.zone))
+
+                                    message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
+                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=0, retain=True)       # Emptry string removes topic.
 
                                     #if ZONEMAPFILE:
                                     #    logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name[str(erMsg.zone)]) 
