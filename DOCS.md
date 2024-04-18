@@ -88,7 +88,7 @@ mqtt:
 ```
 Please take note of the `Light` examples above. Comfort II Ultra supports both Unsigned 8-bit and Signed 16-bit values however, many integrations like Clipsal C-BUS, uses Unsigned 8-bit values and sets Counter values to E.G. 0xFF(255) for the 'On' state and 0x00(0) for the 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `On` integer value accordingly.
 
-The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable CFL-type light.
+The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable CFL-type light mapped to Comfort Counters. You could map your Non-Dimmable Lights to Comfort Flags in which case they do not have a seperate `state` topic, you can read the state from the main `comfort2/flagX` topic.
 
 
 ## Hardware and Interface support
