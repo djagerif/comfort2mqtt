@@ -24,14 +24,14 @@ profile comfort2mqtt flags=(attach_disconnected,mediate_deleted) {
   /data/** rw,
 
   # Config access
-  /config/** ro,
+  #/config/** ro,
 
   # suppress ptrace denials when using 'docker ps' or using 'ps' inside a container
-  ptrace (trace,read) peer=docker-default,
+  #ptrace (trace,read) peer=docker-default,
 
    # docker daemon confinement requires explict allow rule for signal
-  signal (receive) set=(kill,term) peer=/usr/bin/docker,
-  
+  #signal (receive) set=(kill,term) peer=/usr/bin/docker,
+
   # Bashio
   /usr/lib/bashio/** ix,
   /tmp/** rwk,
