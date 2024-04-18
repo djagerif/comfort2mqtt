@@ -1439,7 +1439,7 @@ class Comfort2(mqtt.Client):
                 self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 time.sleep(RETRY.seconds)
         except KeyboardInterrupt as e:
-            logging.debug("SIGINT Intercepted")
+            logging.debug("SIGINT (Ctrl-C) Intercepted")
             logger.info('Shutting down.')
             if self.connected == True:
                 self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
