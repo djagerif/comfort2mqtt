@@ -5,7 +5,7 @@ profile comfort2mqtt flags=(attach_disconnected,mediate_deleted) {
 
   # Capabilities
   file,
-  signal (send) set=(kill,term,int,hup,cont),
+  #signal (send) set=(kill,term,int,hup,cont),
 
   # S6-Overlay
   /init ix,
@@ -20,6 +20,12 @@ profile comfort2mqtt flags=(attach_disconnected,mediate_deleted) {
   /run/{,**} rwk,
   /dev/tty rw,
 
+  # Data access
+  /data/** rw,
+
+  # Config access
+  /config/** ro,
+  
   # Bashio
   /usr/lib/bashio/** ix,
   /tmp/** rwk,

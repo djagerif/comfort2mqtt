@@ -86,14 +86,14 @@ mqtt:
       optimistic: false
       on_command_type: "first"
 ```
-Please take note of the `Light` examples above. Comfort II Ultra supports both Unsigned 8-bit and Signed 16-bit values however, many integrations like Clipsal C-BUS, uses Unsigned 8-bit values and sets Counter values to E.G. 0xFF(255) for the 'On' state and 0x00(0) for the 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `On` integer value accordingly.
+Comfort II Ultra supports both Unsigned 8-bit and Signed 16-bit values however, many integrations like Clipsal C-BUS, uses Unsigned 8-bit values and sets Counter values to send 0xFF(255) for the 'On' and 0x00(0) for the 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `On` integer value accordingly.
 
-The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable CFL-type light mapped to Comfort Counters. You could map your Non-Dimmable Lights to Comfort Flags instead.
+The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable CFL-type light both mapped to their own Comfort Counters. You could map your Non-Dimmable Lights to Comfort Flags instead which would in the same manner as Counters except the states are only `0` or `1`.
 
 
 ## Hardware and Interface support
 
-This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. Firmware as tested, is `7.201`. If any other Comfort system, or firmware lower than `7.201`, is used then results may be unpredictable.
+This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. Firmware as tested, is `7.201`. If any other Comfort system, or firmware other than `7.201`, is used then results may be unexpected.
 
 The following Cytech Universal Communications Modules (UCM) Ethernet modules are supported:
 
@@ -101,9 +101,9 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 * [UCM/Eth02] - Obsolete/Untested
 
-* [UCM/Wifi01] - Not Recommended (WiFi)
+* [UCM/Wifi01] - Not Recommended (WiFi) - Firmware 7.176
 
-* [UCM/Eth03] - Recommended (LAN)
+* [UCM/Eth03] - Recommended (LAN) - Firmware 7.176
 
 This software _requires_ a fully functional UCM/Ethernet or UCM/Wifi configuration. The UCM/Wifi is not recommended due to possible connectivity issues that could arise from switching between different AP's and other possible sources of RF noise. For best performance it is recommended to use the UCM/Eth03 which uses a physical LAN connection. Use a good quality CAT5e or better cable between the UCM/Eth03 and your network device.
 

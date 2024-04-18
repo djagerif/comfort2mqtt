@@ -118,11 +118,11 @@ group.add_argument(
          'TCP', 'WebSockets'),
     help='TCP or WebSockets Transport Protocol for MQTT broker. [default: TCP]')
 
-group.add_argument(
-    '--broker-encryption',
-    required=False,
-    type=boolean_string, default='false',
-    help='Use TLS encryption. [default: False]')
+#group.add_argument(
+#    '--broker-encryption',
+#    required=False,
+#    type=boolean_string, default='false',
+#    help='Use TLS encryption. [default: False]')
 
 group = parser.add_argument_group('Comfort System options')
 group.add_argument(
@@ -734,7 +734,7 @@ class Comfort2(mqtt.Client):
         logger.debug('SIGTSTP (Ctrl-Z) intercepted')
 
     def sigquit_handler(signum, frame):         # Ctrl-\ Keyboard Interrupt
-        logger.debug("SIGQUIT (Ctrl-\\\) intercepted")
+        logger.debug("SIGQUIT intercepted")
         RUN = False
 
     #def handler(signum, frame):
