@@ -719,6 +719,7 @@ class Comfort2(mqtt.Client):
 
     global FIRST_LOGIN
     global ArmFromExternal
+    global RUN
 
     def init(self, mqtt_ip, mqtt_port, mqtt_username, mqtt_password, comfort_ip, comfort_port, comfort_pincode):
         self.mqtt_ip = mqtt_ip
@@ -732,8 +733,7 @@ class Comfort2(mqtt.Client):
     def handler(signum, frame):                 # Ctrl-Z Keyboard Interrupt
         logger.debug('SIGTSTP (Ctrl-Z) intercepted')
 
-    def sigquit_handler(signum, frame):
-        global RUN                              # Ctrl-\ Keyboard Interrupt
+    def sigquit_handler(signum, frame):         # Ctrl-\ Keyboard Interrupt
         logger.debug('SIGQUIT (Ctrl-\) intercepted')
         RUN = False
 
@@ -741,7 +741,7 @@ class Comfort2(mqtt.Client):
     #    logger.debug('SIGTSTP/SIGQUIT intercepted and ignored')
 
     signal.signal(signal.SIGTSTP, handler)
-    signal.signal(signal.SIGQUIT, sigquit_handler)
+    #signal.signal(signal.SIGQUIT, sigquit_handler)     # exit gracefully further down.
 
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc, properties):
@@ -1092,7 +1092,7 @@ class Comfort2(mqtt.Client):
         global RUN
         if self.connected == True:
             self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
-        logger.debug("SIGTERM")
+        #logger.debug(signum)
         if BROKERCONNECTED == True:      # MQTT Connected ??
             infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
             infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
@@ -1104,7 +1104,7 @@ class Comfort2(mqtt.Client):
         global RUN
         if self.connected == True:
             self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
-        logger.debug("SIGHUP")
+        #logger.debug("SIGHUP")
         if BROKERCONNECTED == True:      # MQTT Connected ??
             infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
             infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
@@ -1122,6 +1122,7 @@ class Comfort2(mqtt.Client):
         global ZONEMAPFILE
 
         signal.signal(signal.SIGTERM, self.exit_gracefully)
+        signal.signal(signal.SIGQUIT, self.exit_gracefully)
 
         zonemap = Path("config/zones.csv")
         if zonemap.is_file():
@@ -1214,8 +1215,8 @@ class Comfort2(mqtt.Client):
                                         self.readcurrentstate()
                                         FIRST_LOGIN = False
                                 else:
-                                    logger.debug("Disconnect (LU00) Received from Comfort")
-                                    logger.debug("FIRST_LOGIN:%s", str(FIRST_LOGIN))
+                                    logger.debug("Disconnect (LU00) Received from Comfort.")
+                                    #logger.debug("FIRST_LOGIN:%s", str(FIRST_LOGIN))
                                     #self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
                                     #self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                                     #RUN = False
