@@ -24,7 +24,7 @@ profile comfort2mqtt flags=(attach_disconnected,mediate_deleted) {
   /data/** rw,
 
   # Config access
-  /config/** ro,
+  /config/** rw,
 
   # suppress ptrace denials when using 'docker ps' or using 'ps' inside a container
   #ptrace (trace,read) peer=docker-default,
