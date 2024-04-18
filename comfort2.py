@@ -734,7 +734,7 @@ class Comfort2(mqtt.Client):
         logger.debug('SIGTSTP (Ctrl-Z) intercepted')
 
     def sigquit_handler(signum, frame):         # Ctrl-\ Keyboard Interrupt
-        logger.debug('SIGQUIT (Ctrl-\) intercepted')
+        logger.debug("SIGQUIT (Ctrl-\) intercepted")
         RUN = False
 
     #def handler(signum, frame):
