@@ -22,7 +22,6 @@ HOME.*
 img
 docs
 platform
-wiser-swf-de
 .idea
 venv
 debian_platform_install.sh

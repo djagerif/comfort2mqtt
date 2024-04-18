@@ -12,15 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+### Future Encryption option ###
+### Option: `MQTT Transport Encryption` (Optional) - Not currently used
+###
+### The MQTT traffic can be encrypted with `TLS` or sent in clear-text. The Encryption option is currently not available. The default is `False`
 
-#import os
 import csv
 from pathlib import Path
 import re
-#import sys
 import signal
-#from re import DEBUG
-#import select
 import socket
 import time
 import datetime
@@ -34,7 +35,7 @@ from argparse import ArgumentParser
 DOMAIN = "comfort2"
 
 rand_hex_str = hex(randint(268435456, 4294967295))
-mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])
+mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])   # Generate random client-id each time it starts.
 
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
@@ -262,8 +263,9 @@ ALARMSENSORTOPIC = DOMAIN+"/sensor%d"   #sensor0,sensor1,...sensor31
 ALARMSENSORCOMMANDTOPIC = DOMAIN+"/sensor%d/set" #sensor0,sensor1,...sensor31
 
 ALARMNUMBEROFCOUNTERS = 255 #COMFORT_COUNTERS        # set according to system. Default 255 (0-254), Max 255
-ALARMCOUNTERINPUTRANGE = DOMAIN+"/counter%d"  #each counter represents a value
+ALARMCOUNTERINPUTRANGE = DOMAIN+"/counter%d"  #each counter represents a value EG. light level
 ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set" # set the counter to a value for between 0 (off) to 255 (full on) or any 16-bit value.
+ALARMCOUNTERSTATETOPIC = DOMAIN+"/counter%d/state" # Holds the state of the object, either ON or OFF depending on the value. # State On=1 or Off=0
 
 ALARMTIMERREPORTTOPIC = DOMAIN+"/timer%d"       #each timer instance.
 ALARMNUMBEROFTIMERS = 64                        # default timer instances. 1 - 64.
@@ -338,17 +340,19 @@ class ComfortIPInputActivationReport(object):
 
 
 class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (counter) 1E = 30; state FF00 = 65280
-    def __init__(self, datastr="", counter=0, state=0):
+    def __init__(self, datastr="", counter=0, value=0, state=0):
         #logger.debug("ComfortCTCounterActivationReport[datastr]: %s, [counter]: %s, [state]: %s", datastr, counter, state)
         if datastr:
             self.counter = int(datastr[2:4], 16)    #Integer value 3
             #logger.debug("ComfortCTCounterActivationReport[counter(int)]: %s", self.counter)
             #self.state = self.ComfortSigned16(datastr[4:6]+datastr[6:8])                                # Use 16-bit format
-            self.state = self.ComfortSigned16(int("%s%s" % (datastr[6:8], datastr[4:6]),16))    # Use new 16-bit format
+            self.value = self.ComfortSigned16(int("%s%s" % (datastr[6:8], datastr[4:6]),16))    # Use new 16-bit format
+            self.state = self.state = 1 if (int(datastr[4:6],16) > 0) else 0                             # 8-bit value used for state
             #self.state = self.ComfortSigned16(hex(int("%s%s" % (datastr[6:8], datastr[4:6]),16)))       # Use new 16-bit format        state = FF7F
             #logger.debug("ComfortCTCounterActivationReport[state(int)]: %s", self.state)
         else:
             self.counter = counter
+            self.value = value
             self.state = state
             #self.state = self.byte_swap_16_bit(state)
 
@@ -468,7 +472,7 @@ class Comfort_RSensorActivationReport(object):
         return -(value & 0x8000) | (value & 0x7fff)
 
 class Comfort_R_ReportAllSensors(object):
-    def __init__(self, data={}, sensor=0, value=0, counter=0):
+    def __init__(self, data={}, sensor=0, value=0, counter=0, state=0):
         #logger.debug("ReportAllSensors(data): %s", data)
         self.sensors = []
         self.counters = []
@@ -486,7 +490,6 @@ class Comfort_R_ReportAllSensors(object):
                 #Change to Signed value here.
                 #self.value = int("%s%s" % (sensorbits[2:4], sensorbits[0:2]),16)
                 self.value = int((sensorbits[2:4] + sensorbits[0:2]),16)
-                
                 self.sensor =  self.RegisterStart+i
                 #logger.debug("Type:%d, Sensor:%s, Integer Value:%s" % (self.RegisterType, self.sensor, self.value))
                 self.sensors.append(Comfort_RSensorActivationReport("", self.RegisterStart+i, self.value))
@@ -494,8 +497,11 @@ class Comfort_R_ReportAllSensors(object):
                 counterbits = data[8+(4*i):8+(4*i)+4]   #0000
                 #logger.debug("counterbits: %s", counterbits)
                 self.value = int((counterbits[2:4] + counterbits[0:2]),16)
+                self.state = 1 if (int(counterbits[0:2],16) > 0) else 0
+                #logger.debug("value: %s", self.value)
+                #logger.debug("state: %s", self.state)
                 self.counter = self.RegisterStart+i
-                self.counters.append(ComfortCTCounterActivationReport("", self.RegisterStart+i, self.value))
+                self.counters.append(ComfortCTCounterActivationReport("", self.RegisterStart+i, self.value, self.state))
             #    #print("Type:%d, Register:%d, Inputbits:%d" % (self.RegisterType, self.RegisterStart+i, value))
     
     def ComfortSigned16(self,value):     # Returns signed 16-bit value from HEX value.
@@ -732,7 +738,7 @@ class Comfort2(mqtt.Client):
     #def handler(signum, frame):
     #    logger.debug('SIGTSTP/SIGQUIT intercepted and ignored')
 
-    signal.signal(signal.SIGTSTP, handler)
+    #signal.signal(signal.SIGTSTP, handler)
     signal.signal(signal.SIGQUIT, sigquit_handler)
 
     # The callback for when the client receives a CONNACK response from the server.
@@ -787,7 +793,8 @@ class Comfort2(mqtt.Client):
                 self.subscribe(ALARMSENSORCOMMANDTOPIC % i)
 
             for i in range(0, ALARMNUMBEROFCOUNTERS + 1):
-                self.subscribe(ALARMCOUNTERCOMMANDTOPIC % i)  
+                self.subscribe(ALARMCOUNTERCOMMANDTOPIC % i)    # Value or Level
+                self.subscribe(ALARMCOUNTERSTATETOPIC % i)      # State On=1 or Off=0
 
             for i in range(1, ALARMNUMBEROFRESPONSES + 1):      # Responses as specified from HA options.
                 self.subscribe(ALARMRESPONSECOMMANDTOPIC % i)
@@ -838,6 +845,9 @@ class Comfort2(mqtt.Client):
                 elif msgstr == "ARM_AWAY":
                     #ArmFromExternal = True
                     self.comfortsock.sendall(("\x03m!01"+self.comfort_pincode+"\r").encode()) #Local arm to 01 away mode. Requires # for open zones + Exit door
+                elif msgstr == "ARM_CUSTOM_BYPASS":
+                    #ArmFromExternal = True
+                    self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send '#' key code (KD1A)
                 elif msgstr == "DISARM":
                     #ArmFromExternal = False
                     self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #Local arm to 00. disarm mode.
@@ -870,9 +880,25 @@ class Comfort2(mqtt.Client):
                 #logger.debug("Flag Set: %s, State: %s",flag,state )
         elif msg.topic.startswith(DOMAIN+"/counter") and msg.topic.endswith("/set"): # counter set
             counter = int(msg.topic.split("/")[1][7:])
-            state = int(msgstr)
-            if self.connected:
-                self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
+            if not msgstr.isnumeric() and not msgstr == "ON" and not msgstr == "OFF":
+                print("Alphanumeric State detected ('"+str(msgstr)+"'), check MQTT payload configuration for Counter"+str(counter))
+            elif msgstr == "ON":
+                state = 255
+                if self.connected:
+                    self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
+            elif msgstr == "OFF":
+                state = 0
+                if self.connected:
+                    self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
+            else:
+                state = int(msgstr)
+                if self.connected:
+                    self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
+
+            #    state = int(msgstr)
+            #    if self.connected:
+            #        self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
+
         elif msg.topic.startswith(DOMAIN+"/sensor") and msg.topic.endswith("/set"): # sensor set
             #logger.debug("msg.topic: %s",msg.topic)
             sensor = int(msg.topic.split("/")[1][6:])
@@ -1203,7 +1229,8 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "CT":
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
                                 #print("counter %d state %d" % (ipMsgCT.counter, ipMsgCT.state))
-                                self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.state,qos=0,retain=True)
+                                self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=0,retain=True)     # Value Information
+                                self.publish(ALARMCOUNTERSTATETOPIC % ipMsgCT.counter, ipMsgCT.state,qos=0,retain=True)     # State Information
                             elif line[1:3] == "s?":
                                 ipMsgSQ = ComfortCTCounterActivationReport(line[1:])
                                 #logger.debug("sensor %s state %s" % (ipMsgSR.counter, ipMsgSR.state))
@@ -1327,7 +1354,8 @@ class Comfort2(mqtt.Client):
                                 cMsg = Comfort_R_ReportAllSensors(line[1:])
                                 for cMsgr in cMsg.counters:
                                     #logger.debug("counter %s state %s" % (cMsgr.counter, cMsgr.state))
-                                    self.publish(ALARMCOUNTERINPUTRANGE % cMsgr.counter, cMsgr.state,qos=0,retain=True)     
+                                    self.publish(ALARMCOUNTERINPUTRANGE % cMsgr.counter, cMsgr.value,qos=0,retain=True)     # Value Information
+                                    self.publish(ALARMCOUNTERSTATETOPIC % cMsgr.counter, cMsgr.state,qos=0,retain=True)     # State Information
                             elif line[1:5] == "r?01":
                                 sMsg = Comfort_R_ReportAllSensors(line[1:])
                                 for sMsgr in sMsg.sensors:

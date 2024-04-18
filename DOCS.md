@@ -30,7 +30,7 @@ Manual Sensor creation is required in your `configuration.yaml` file before this
 mqtt: 
   alarm_control_panel:
     - name: Comfort Alarm
-      unique_id: "comfort2_alarm_a46ee0"        # Use last six digits of UCM/Eth03 MAC address
+      unique_id: "comfort2_alarm_a46ee0"        # E.G. Use last six digits of UCM/Eth03 MAC address
       state_topic: "comfort2/alarm"
       command_topic: "comfort2/alarm/set"
       availability_topic: "comfort2/alarm/online"
@@ -58,18 +58,37 @@ mqtt:
       payload_not_available: "0" 
       device_class: motion
 
-  switch:
-    - name: Study Light
+  light:
+    - name: Kitchen Light (Dimmable)
+      unique_id: 'comfort2_counter117'
+      state_topic: "comfort2/counter117/state"
+      command_topic: "comfort2/counter117/set"
+      availability_topic: "comfort2/alarm/online"
+      payload_on: 1
+      payload_off: 0
+      payload_available: 1
+      payload_not_available: 0
+      brightness_scale: 255
+      brightness_state_topic: "comfort2/counter117"
+      brightness_command_topic: "comfort2/counter117/set"
+      optimistic: false
+      on_command_type: "brightness"
+
+    - name: Study Light (Non Dimmable On|Off)
       unique_id: 'comfort2_counter201'
       state_topic: "comfort2/counter201"
       command_topic: "comfort2/counter201/set"
       availability_topic: "comfort2/alarm/online"
-      payload_on: "255"
-      payload_off: "0"
-      payload_available: "1"
-      payload_not_available: "0"
+      payload_on: 255
+      payload_off: 0
+      payload_available: 1
+      payload_not_available: 0
+      optimistic: false
+      on_command_type: "first"
 ```
-Please take note of the `Study Light` example above. Comfort II Ultra supports both 8-bit and Signed 16-bit values but many integrations, like Clipsal C-BUS, uses 8-bit values and sets Counter values to EG. 0xFF(255) for 'On' and 0x00(0) for 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `On` integer value accordingly.
+Please take note of the `Light` examples above. Comfort II Ultra supports both Unsigned 8-bit and Signed 16-bit values however, many integrations like Clipsal C-BUS, uses Unsigned 8-bit values and sets Counter values to E.G. 0xFF(255) for the 'On' state and 0x00(0) for the 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `On` integer value accordingly.
+
+The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable CFL-type light.
 
 
 ## Hardware and Interface support
@@ -119,10 +138,6 @@ The MQTT Broker exposed listener port. This can be any configured port on your M
 ### Option: `MQTT Transport Protocol` (Optional)
 
 The MQTT Transport Protocol between the Add-on and MQTT Broker can either be `TCP` or `WebSockets`. The default is `TCP`.
-
-### Option: `MQTT Transport Encryption` (Optional) - Not currently used
-
-The MQTT traffic can be encrypted with `TLS` or sent in clear-text. The Encryption option is currently not available. The default is `False`
 
 ### Option: `Comfort II Port` (Optional)
 
