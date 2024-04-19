@@ -199,7 +199,7 @@ This sets the number of Responses that the Add-on subscribes to. Valid range val
 
 ### Option: `Set Comfort II Ultra Time and Date` (Optional)
 
-Set Comfort II Ultra Time and Date when the Add-on logs in and every day at 00:00. The default value is `False`.
+Set Comfort II Ultra Time and Date when the Add-on logs in and automatically every day at midnight. The default value is `False`.
 
 
 ## Custom Zone Name File
@@ -212,7 +212,8 @@ To upload a file to the `addon_config` directory you could use something like [S
 
 [samba]:https://github.com/home-assistant/addons/tree/master/samba
 
-```1,FrontDoor
+```
+1,FrontDoor
 2,GarageDoor
 3,GaragePIR
 4,UtilityDoor
@@ -227,7 +228,8 @@ To upload a file to the `addon_config` directory you could use something like [S
 .
 .
 127,Zone127
-128,Zone128```
+128,Zone128
+```
 
 Zone Name lengths are permitted up to 30 characters but restricted to the following characters `[a-zA-Z0-9 _-]`. Names can be enclosed in quotes but is optional. Zone numbers must be numerical and are limited from 1 to 128.
 
