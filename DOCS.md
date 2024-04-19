@@ -26,7 +26,9 @@ Even though this is a mostly Python implementation, it's currently only tested o
 
 Manual Sensor creation is required in your `configuration.yaml` file before this Add-on can start. 
 
-It must be noted that Comfort requires the `#` key during arming to acknowledge and bypass any open zones. Because the `Home Assistant Alarm Control Panel` does not have a`#` key, the `CUSTOM BYPASS` key is utilised for that purpose and send the appropriate `#` keycode (KD1A) to Comfort. Sample object configurations are shown below.
+It must be noted that Comfort requires the `#` key during arming to acknowledge and bypass any open zones. Because the `Home Assistant Alarm Control Panel` does not have a`#` key, the `CUSTOM BYPASS` key is utilised for that purpose and send the appropriate `#` keycode (KD1A) to Comfort.
+
+Sample object configurations are shown below.
 
 ```
 mqtt: 
@@ -99,7 +101,7 @@ Comfort II Ultra supports both Unsigned 8-bit and Signed 16-bit values. However,
 
 The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable light both mapped to their respective Comfort Counters. You could also map your Non-Dimmable Lights to Comfort Flags instead which would operate in the same manner as Counters except the `payload_on`value will be `1` rather than `255`.
 
-Because `Counters` can be used for many things, in this case the `Kitchen Light` example follows the [Brightness Without On Commands][ha-mqtt] chapter in the Home Assistant MQTT Light documentation.
+Because `Counters` can be used for many things other than Lights, the `Kitchen Light` in the example follows the [Brightness Without On Commands][ha-mqtt] chapter in the Home Assistant MQTT Light documentation, with a few additions.
 
 
 ## Hardware and Interface support
@@ -160,7 +162,7 @@ The Comfort II Ultra UCM/Eth03 IP address or Hostname used for connectivity.
 
 ### Option: `Comfort II Ultra User Login ID`
 
-Cytech Comfort II User Login ID with the appropriate rights. Login ID has minimum 4 characters and 6 maximum. For full functionality you need at least Local Arm/Disarm and Remote Arm/Disarm capabilities on Comfort. See the Comfigurator [Programming Guide][progman],  `Security Settings` and `Sign-in Codes` sections for more information on user creation and rights.
+Cytech Comfort II User Login ID with the appropriate rights. Login ID has minimum 4 characters and 6 maximum. For full functionality you need at least Local Arm/Disarm and Remote Arm/Disarm capabilities on Comfort. See the [Comfigurator Programming Guide][progman], `Security Settings` and `Sign-in Codes` sections for more information on user creation and rights.
 
 [progman]: http://www.cytech.biz/download_files.php?item_id=1082
 
@@ -202,7 +204,11 @@ Set Comfort II Ultra Time and Date when the Add-on logs in and every day at 00:0
 
 ## Custom Zone Name File
 
-a CSV file can be uploaded to the `addon_config` directory with the format as shown below. Upload a file called `zones.csv` to the `addon_config` directory and the Zone Names from the file will be used to enrich the logging information. The `zones.csv` file allows for up to 128 zones. 
+a CSV file can be uploaded to the `addon_config` directory with the format as shown below. The first column is the `Zone Number` and the second column the `Zone Name`.
+
+Upload a file called `zones.csv` to the `addon_config` directory and the Zone Names from the file will be used to enrich the logging information. The `zones.csv` file allows for up to 128 zones. To upload a file to the `addon_config` directory you could use something like [Samba share][samba] Add-on or similar allowing filesystem access to seleced directories on Home Assistant.
+
+[samba]:https://github.com/home-assistant/addons/tree/master/samba
 
 ```
 1,FrontDoor
