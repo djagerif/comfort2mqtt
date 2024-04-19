@@ -45,7 +45,7 @@ ALARMCOMMANDTOPIC = DOMAIN+"/alarm/set"
 ALARMAVAILABLETOPIC = DOMAIN+"/alarm/online"
 ALARMLWTTOPIC = DOMAIN+"/alarm/LWT"
 ALARMMESSAGETOPIC = DOMAIN+"/alarm/message"
-ALARMEXTMESSAGETOPIC = DOMAIN+"/alarm/ext_message"      # Extended Messages will be available here.
+#ALARMEXTMESSAGETOPIC = DOMAIN+"/alarm/ext_message"      # Extended Messages will be available here. Not implemented.
 ALARMTIMERTOPIC = DOMAIN+"/alarm/timer"
 ALARMDOORBELLTOPIC = DOMAIN+"/doorbell"
 
@@ -661,7 +661,7 @@ class ComfortAMSystemAlarmReport(object):
 #Bit 6 = GSM trouble
 #Bit 7 = Unused
 
-class Comfort_A_SecurityInformationReport(object):
+class Comfort_A_SecurityInformationReport(object):      # Not implemented.
     #a?000000000000000000
     def __init__(self, data={}):
         self.AA = int(data[2:4],16)     #AA is the current Alarm Type 01 to 1FH (Defaults can be changed in Comfigurator)
@@ -674,7 +674,7 @@ class Comfort_A_SecurityInformationReport(object):
         self.TT = int(data[16:18],16)   #TT = Tamper ID = 0 if none
         self.GG = int(data[18:20],16)   #GG = GSM ID =0 if no trouble
         #self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
-        logger.debug('a? - data: %s  - still under development', str(data[2:]))
+        #logger.debug('a? - data: %s  - still under development', str(data[2:]))
         alarm_type = ['','Intruder','Duress','LineCut','ArmFail','ZoneTrouble','ZoneAlert','LowBattery', \
 			          'PowerFail', 'Panic', 'EntryAlert','Tamper','Fire','Gas','FamilyCare','Perimeter', \
 			          'BypassZone','Disarm','CMSTest','SystemArmed','AlarmAbort','EntryWarning','SirenTrouble','AlarmType23', \
@@ -686,6 +686,8 @@ class Comfort_A_SecurityInformationReport(object):
         if self.BB == 0: self.battery = low_battery[0]
         elif self.BB > 0:self.battery = low_battery[(self.BB - 32)]
         #logger.debug('Battery ID: %s', self.id)
+        #logger.debug('Alarm Type: %s', self.type)       # What happens if you have low battery and zone trouble ????
+
 
 class ComfortARSystemAlarmReport(object):
     def __init__(self, data={}):
@@ -1073,7 +1075,7 @@ class Comfort2(mqtt.Client):
             self.publish(ALARMAVAILABLETOPIC, 1,qos=0,retain=True)
             self.publish(ALARMLWTTOPIC, 'Online',qos=0,retain=True)
             self.publish(ALARMMESSAGETOPIC, "",qos=0,retain=True)       # Emptry string removes topic.
-            self.publish(ALARMEXTMESSAGETOPIC, "",qos=0,retain=True)    # Emptry string removes topic.
+            #self.publish(ALARMEXTMESSAGETOPIC, "",qos=0,retain=True)    # Emptry string removes topic.
 
     def setdatetime(self):
         if self.connected == True:  #set current date and time if COMFORT_TIME Flag is set to True
