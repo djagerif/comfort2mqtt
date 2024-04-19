@@ -206,12 +206,13 @@ Set Comfort II Ultra Time and Date when the Add-on logs in and every day at 00:0
 
 a CSV file can be uploaded to the `addon_config` directory with the format as shown below. The first column is the `Zone Number` and the second column the `Zone Name`.
 
-Upload a file called `zones.csv` to the `addon_config` directory and the Zone Names from the file will be used to enrich the logging information. The `zones.csv` file allows for up to 128 zones. To upload a file to the `addon_config` directory you could use something like [Samba share][samba] Add-on or similar allowing filesystem access to seleced directories on Home Assistant.
+Upload a file called `zones.csv` to the `addon_config` directory and the Zone Names from the file will be used to enrich the logging information. The `zones.csv` file allows for up to 128 zones.
+
+To upload a file to the `addon_config` directory you could use something like [Samba share][samba] Add-on or similar allowing filesystem access to seleced directories on Home Assistant.
 
 [samba]:https://github.com/home-assistant/addons/tree/master/samba
 
-```
-1,FrontDoor
+```1,FrontDoor
 2,GarageDoor
 3,GaragePIR
 4,UtilityDoor
@@ -226,8 +227,8 @@ Upload a file called `zones.csv` to the `addon_config` directory and the Zone Na
 .
 .
 127,Zone127
-128,Zone128
-```
+128,Zone128```
+
 Zone Name lengths are permitted up to 30 characters but restricted to the following characters `[a-zA-Z0-9 _-]`. Names can be enclosed in quotes but is optional. Zone numbers must be numerical and are limited from 1 to 128.
 
 If you upload a file with incorrect `Zone Name` or `Number` information the file will be disregarded and an error message logged in the addon log file. If you upload a valid `zones.csv` file, but have not specified all the zones, only the zones with valid data will be used and the zones without will display the below message in the log file. As an example, on receipt of an `ER08` `Zone Open` message while arming or a Bypass Message when force-armed with an open zone.
