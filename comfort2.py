@@ -45,6 +45,7 @@ ALARMCOMMANDTOPIC = DOMAIN+"/alarm/set"
 ALARMAVAILABLETOPIC = DOMAIN+"/alarm/online"
 ALARMLWTTOPIC = DOMAIN+"/alarm/LWT"
 ALARMMESSAGETOPIC = DOMAIN+"/alarm/message"
+ALARMEXTMESSAGETOPIC = DOMAIN+"/alarm/ext_message"      # Extended Messages will be available here.
 ALARMTIMERTOPIC = DOMAIN+"/alarm/timer"
 ALARMDOORBELLTOPIC = DOMAIN+"/doorbell"
 
@@ -766,6 +767,7 @@ class Comfort2(mqtt.Client):
             self.subscribe(ALARMCOMMANDTOPIC)
             self.subscribe(ALARMSTATUSTOPIC)
             self.subscribe(ALARMBYPASSTOPIC)
+            # Alarm Message Topic + Extended Message Topic ???
 
             #logger.debug('ALARMNUMBEROFOUTPUTS: %s', str(ALARMNUMBEROFOUTPUTS))
             for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
@@ -1071,6 +1073,7 @@ class Comfort2(mqtt.Client):
             self.publish(ALARMAVAILABLETOPIC, 1,qos=0,retain=True)
             self.publish(ALARMLWTTOPIC, 'Online',qos=0,retain=True)
             self.publish(ALARMMESSAGETOPIC, "",qos=0,retain=True)       # Emptry string removes topic.
+            self.publish(ALARMEXTMESSAGETOPIC, "",qos=0,retain=True)    # Emptry string removes topic.
 
     def setdatetime(self):
         if self.connected == True:  #set current date and time if COMFORT_TIME Flag is set to True
