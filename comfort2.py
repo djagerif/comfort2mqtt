@@ -1291,7 +1291,8 @@ class Comfort2(mqtt.Client):
                                         logging.warning("Zone %s Not Ready", str(erMsg.zone))
 
                                     message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
-                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=0, retain=True)       # Emptry string removes topic.
+                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=0, retain=True)          # Empty string removes topic.
+                                    self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)                 # Updated to lowercase
 
                                     #if ZONEMAPFILE:
                                     #    logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name[str(erMsg.zone)]) 
