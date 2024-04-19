@@ -24,13 +24,15 @@ Even though this is a mostly Python implementation, it's currently only tested o
 
 ## Home Assistant Configuration
 
-Manual Sensor creation is required in your `configuration.yaml` file before this Add-on can start. Sample object configurations are shown below.
+Manual Sensor creation is required in your `configuration.yaml` file before this Add-on can start. 
+
+It must be noted that Comfort requires the `#` key during arming to acknowledge and bypass any open zones. Because the `Home Assistant Alarm Control Panel` does not have a`#` key, the `CUSTOM BYPASS` key is utilised for that purpose and send the appropriate `#` keycode (KD1A) to Comfort. Sample object configurations are shown below.
 
 ```
 mqtt: 
   alarm_control_panel:
     - name: Comfort Alarm
-      unique_id: "comfort2_alarm_a46ee0"        # E.G. Use last six digits of UCM/Eth03 MAC address
+      unique_id: "comfort2_alarm_a46ee0"        # E.G. Use last six digits of UCM/Eth03 MAC address to make it unique
       state_topic: "comfort2/alarm"
       command_topic: "comfort2/alarm/set"
       availability_topic: "comfort2/alarm/online"
@@ -44,6 +46,13 @@ mqtt:
       unique_id: 'comfort2_alarm_mode'
       availability_topic: "comfort2/alarm/online"
       state_topic: "comfort2/alarm"
+      payload_available: "1"
+      payload_not_available: "0"
+
+    - name: Alarm Message
+      unique_id: 'comfort2_alarm_message'
+      state_topic: "comfort2/alarm/message"
+      availability_topic: "comfort2/alarm/online"
       payload_available: "1"
       payload_not_available: "0"
 
@@ -86,14 +95,16 @@ mqtt:
       optimistic: false
       on_command_type: "first"
 ```
-Comfort II Ultra supports both Unsigned 8-bit and Signed 16-bit values however, many integrations like Clipsal C-BUS, uses Unsigned 8-bit values and sets Counter values to send 0xFF(255) for the 'On' and 0x00(0) for the 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `On` integer value accordingly.
+Comfort II Ultra supports both Unsigned 8-bit and Signed 16-bit values. However, many integrations like Clipsal C-BUS uses Unsigned 8-bit values and sets Counter values to send 0xFF(255) for the 'On' and 0x00(0) for the 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `payload_on` and `payload_off` integer values accordingly.
 
-The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable CFL-type light both mapped to their own Comfort Counters. You could map your Non-Dimmable Lights to Comfort Flags instead which would in the same manner as Counters except the states are only `0` or `1`.
+The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable light both mapped to their respective Comfort Counters. You could also map your Non-Dimmable Lights to Comfort Flags instead which would operate in the same manner as Counters except the `payload_on`value will be `1` rather than `255`.
+
+Because `Counters` can be used for many things, in this case the `Kitchen Light` example follows the [Brightness Without On Commands][ha-mqtt] chapter in the Home Assistant MQTT Light documentation.
 
 
 ## Hardware and Interface support
 
-This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. Firmware as tested, is `7.201`. If any other Comfort system, or firmware other than `7.201`, is used then results may be unexpected.
+This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. Comfort II Ultra firmware as tested is `7.201`. If any other Comfort system, model or firmware other than `7.201`, is used then results may be unexpected.
 
 The following Cytech Universal Communications Modules (UCM) Ethernet modules are supported:
 
@@ -105,14 +116,14 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 * [UCM/Eth03] - Recommended (LAN) - Firmware 7.176
 
-This software _requires_ a fully functional UCM/Ethernet or UCM/Wifi configuration. The UCM/Wifi is not recommended due to possible connectivity issues that could arise from switching between different AP's and other possible sources of RF noise. For best performance it is recommended to use the UCM/Eth03 which uses a physical LAN connection. Use a good quality CAT5e or better cable between the UCM/Eth03 and your network device.
+This software _requires_ a fully functional UCM/Ethernet or UCM/Wifi configuration with inactivity timeouts set to default values of 2 minutes. The UCM/Wifi is not recommended due to possible connectivity issues that could arise from switching between different AP's or other possible sources of RF noise. For best performance it is recommended to use the UCM/Eth03 which uses a physical LAN connection. Use a good quality CAT5e or better cable between the UCM/Eth03 and your network device.
 
-You must also have a reachable IP address on your network from Home Assistant to the Comfort II ethernet module (UCM). The default port is TCP/1002 which is Port #2 of a UCMEth03. If you have a segmented network with Firewalls then please ensure the required ports are open for communications.
+If your network is segmented using a firewall, or any other device, you must ensure all applicable ports are allowed between Home Assistant and the Comfort II Ethernet Module (UCM). The default port for the UCM/Eth03 is TCP/1002 which is Port #2 of a UCMEth03.
   
 **Note:** The UCM/WiFi uses port TCP/3000 as the default port. Any port may be used as long as there are no overlaps with existing services on the network.
 
 [ha-auto]: https://www.home-assistant.io/docs/mqtt/discovery/
-[ha-mqtt]: https://www.home-assistant.io/integrations/light.mqtt/#json-schema
+[ha-mqtt]: https://www.home-assistant.io/integrations/light.mqtt/#brightness-without-on-commands
 [mosquitto]: https://mosquitto.org/
 
 
@@ -139,15 +150,15 @@ The MQTT Broker exposed listener port. This can be any configured port on your M
 
 The MQTT Transport Protocol between the Add-on and MQTT Broker can either be `TCP` or `WebSockets`. The default is `TCP`.
 
-### Option: `Comfort II Port` (Optional)
+### Option: `Comfort II Ultra Port` (Optional)
 
 The Comfort II Ultra UCM/Eth03 TCP port used for connectivity. UCM/ETh03 can be changed so please check your Comfort II Ultra configuration and use the port that is configured for access. Note that only one client can connect to any given TCP port. The default is '1002'
 
-### Option: `Comfort II IP address`
+### Option: `Comfort II Ultra IP address`
 
 The Comfort II Ultra UCM/Eth03 IP address or Hostname used for connectivity.
 
-### Option: `Comfort II User Login ID`
+### Option: `Comfort II Ultra User Login ID`
 
 Cytech Comfort II User Login ID with the appropriate rights. Login ID has minimum 4 characters and 6 maximum. For full functionality you need at least Local Arm/Disarm and Remote Arm/Disarm capabilities on Comfort. See the Comfigurator [Programming Guide][progman],  `Security Settings` and `Sign-in Codes` sections for more information on user creation and rights.
 
@@ -164,34 +175,34 @@ This option controls the level of log output by the addon and can be changed to 
 
 Please note that each level automatically includes log messages from a more severe level, e.g. `DEBUG` also shows `INFO` messages. By default, the `log_level` is set to `INFO`, which is the recommended setting unless you are troubleshooting.
 
-### Option: `Comfort II Zone Inputs` - Under Development
+### Option: `Comfort II Ultra Zone Inputs` - Under Development
 
 Set number of Input zones.
 
-### Option: `Comfort II Zone Outputs` - Under Development
+### Option: `Comfort II Ultra Zone Outputs` - Under Development
 
 Set number of Output zones.
 
-### Option: `Comfort II SCS/RIO Inputs` - Under Development
+### Option: `Comfort II Ultra SCS/RIO Inputs` - Under Development
 
 Set number of SCS/RIO Inputs.
 
-### Option: `Comfort II SCS/RIO Outputs` - Under Development
+### Option: `Comfort II Ultra SCS/RIO Outputs` - Under Development
 
 Set number of SCS/RIO Outputs.
 
-### Option: `Comfort II Responses` (Optional)
+### Option: `Comfort II Ultra Responses` (Optional)
 
 This sets the number of Responses that the Add-on subscribes to. Valid range values are from 0 - 1024. If you subscribe to the first 100 responses and trigger a response number EG. 200, then it will not be sent to Comfort for execution. Only subscribed responses are executed. The Default value is `0`.
 
-### Option: `Set Comfort II Time and Date` (Optional)
+### Option: `Set Comfort II Ultra Time and Date` (Optional)
 
-Set the Comfort II Ultra Time and Date when the Add-on logs in and then 00:00 every day. The default value is `False`.
+Set Comfort II Ultra Time and Date when the Add-on logs in and every day at 00:00. The default value is `False`.
 
 
 ## Custom Zone Name File
 
-a CSV file can be uploaded to the `addon_config` directory with the format as shown below. Upload a file called `zones.csv` to the `addon_config` directory and the Zone Names from the file will be used to enrich the logging information.
+a CSV file can be uploaded to the `addon_config` directory with the format as shown below. Upload a file called `zones.csv` to the `addon_config` directory and the Zone Names from the file will be used to enrich the logging information. The `zones.csv` file allows for up to 128 zones. 
 
 ```
 1,FrontDoor
@@ -211,9 +222,9 @@ a CSV file can be uploaded to the `addon_config` directory with the format as sh
 127,Zone127
 128,Zone128
 ```
-Zone Name lengths are permitted up to 30 characters but restricted to the following characters `[a-zA-Z0-9 _-]`. Names can be enclosed in quotes but is optional. Zone numbers must be numerical and are limited from 0 to 128.
+Zone Name lengths are permitted up to 30 characters but restricted to the following characters `[a-zA-Z0-9 _-]`. Names can be enclosed in quotes but is optional. Zone numbers must be numerical and are limited from 1 to 128.
 
-If you upload a file with incorrect Zone Name, or Number, information then the file will be disregarded and an error message logged in the addon log file. If you upload a valid `zones.csv` file, but have not specified all the zones, then only the zones with data will be used and the missing ones will display the following message in the log file on receipt of a `ER08` Zone Open message on arming. The same is true for the Bypass Message when force-armed with an open zone.
+If you upload a file with incorrect `Zone Name` or `Number` information the file will be disregarded and an error message logged in the addon log file. If you upload a valid `zones.csv` file, but have not specified all the zones, only the zones with valid data will be used and the zones without will display the below message in the log file. As an example, on receipt of an `ER08` `Zone Open` message while arming or a Bypass Message when force-armed with an open zone.
 
 2024-04-16 22:41:13 WARNING  Zone 8 Not Ready (**N/A**)
 

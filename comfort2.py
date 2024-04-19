@@ -51,7 +51,6 @@ ALARMDOORBELLTOPIC = DOMAIN+"/doorbell"
 
 FIRST_LOGIN = True
 RUN = True
-ArmFromExternal = True      # Used to track Own vs External Arm requests. False means Local Arm via MQTT/HA.
 SAVEDTIME = datetime.now()  # Used for sending keepalives to Comfort.
 BYPASSEDZONES = []          # Global list of Bypassed Zones
 BROKERCONNECTED = False
@@ -721,7 +720,6 @@ class ComfortEXEntryExitDelayStarted(object):
 class Comfort2(mqtt.Client):
 
     global FIRST_LOGIN
-    global ArmFromExternal
     global RUN
 
     def init(self, mqtt_ip, mqtt_port, mqtt_username, mqtt_password, comfort_ip, comfort_port, comfort_pincode):
@@ -830,8 +828,6 @@ class Comfort2(mqtt.Client):
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg = 0):
 
-        #global ArmFromExternal
-
         #logger.debug("on_message")
         msgstr = msg.payload.decode()
         #logger.debug(msg.topic+" "+msgstr)
@@ -840,22 +836,16 @@ class Comfort2(mqtt.Client):
             if self.connected:
                 #logger.debug("msgstr: %s",msgstr)
                 if msgstr == "ARM_VACATION":
-                    #ArmFromExternal = True
                     self.comfortsock.sendall(("\x03m!04"+self.comfort_pincode+"\r").encode()) #Local arm to 04 vacation mode. Requires # for open zones
                 elif msgstr == "ARM_HOME":
-                    #ArmFromExternal = True
                     self.comfortsock.sendall(("\x03m!03"+self.comfort_pincode+"\r").encode()) #Local arm to 03 day mode. Requires # for open zones
                 elif msgstr == "ARM_NIGHT":
-                    #ArmFromExternal = True
                     self.comfortsock.sendall(("\x03m!02"+self.comfort_pincode+"\r").encode()) #Local arm to 02 night mode. Requires # for open zones
                 elif msgstr == "ARM_AWAY":
-                    #ArmFromExternal = True
                     self.comfortsock.sendall(("\x03m!01"+self.comfort_pincode+"\r").encode()) #Local arm to 01 away mode. Requires # for open zones + Exit door
                 elif msgstr == "ARM_CUSTOM_BYPASS":
-                    #ArmFromExternal = True
                     self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send '#' key code (KD1A)
                 elif msgstr == "DISARM":
-                    #ArmFromExternal = False
                     self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #Local arm to 00. disarm mode.
         elif msg.topic.startswith(DOMAIN+"/output") and msg.topic.endswith("/set"):
             #logger.debug("msgstr: %s",msgstr )
@@ -1120,7 +1110,6 @@ class Comfort2(mqtt.Client):
 
         global FIRST_LOGIN         # Used to track if Addon started up or not.
         global RUN
-        #global ArmFromExternal
         global SAVEDTIME
         global TIMEOUT
         global BROKERCONNECTED
@@ -1267,8 +1256,6 @@ class Comfort2(mqtt.Client):
                                     #logger.debug("RIO input %d state %d" % (ipMsgZ.input, ipMsgZ.state))
                                     self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
                             elif line[1:3] == "M?" or line[1:3] == "MD":
-                                if line[3:5] == "00":
-                                    ArmFromExternal = False     #Rest ArmFromExternal value on Disarm or Security Off.
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
                                 #logging.debug("Alarm Mode %s", mMsg.modename)
                                 self.publish(ALARMSTATETOPIC, mMsg.modename,qos=0,retain=False)      # Was True
@@ -1315,12 +1302,6 @@ class Comfort2(mqtt.Client):
                                     # Sending KD1A when receiving ER message confuses Comfort. When arming local to Night Mode it immediately goes into Arm Mode
                                     # Not all Zones are announced and it 'presses' the '#' key on your behalf. Tryingto find a fix...
                                     #self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
-#                                    logging.debug("Force Arm prevented. ER received from external keypad")  # Add ArmFromExternal as Global Boolen.
-#                                    if ArmFromExternal:
-#                                        logging.debug("ArmFromExternal = True. Don't send KD01")
-#                                    else:
-#                                        logging.debug("ArmFromExternal = False, Can send KD01")
-#                                        #self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
                             elif line[1:3] == "AM":
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, amMsg.message,qos=0,retain=True)
