@@ -595,10 +595,10 @@ class ComfortM_SecurityModeReport(object):
     def __init__(self, data={}):
         self.mode = int(data[2:4],16)
         #if self.mode == 0: self.modename = "Security Off"
-        if self.mode == 0: self.modename = "Disarmed"; logger.info("Security Off")
+        if self.mode == 0: self.modename = "disarmed"; logger.info("Security Off")
         elif self.mode == 1: self.modename = "armed_away"; logger.info("Armed Away Mode")
         elif self.mode == 2: self.modename = "armed_night"; logger.info("Armed Night Mode")
-        elif self.mode == 3: self.modename = "armed_home"; logger.info("Armed Day Mode")
+        elif self.mode == 3: self.modename = "Arm Home"; logger.info("Armed Day Mode")
         elif self.mode == 4: self.modename = "armed_vacation"; logger.info("Armed Vacation Mode")
 
 #The current alarm state can be found by sending the S? query
