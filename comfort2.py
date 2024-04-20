@@ -19,6 +19,7 @@
 ### The MQTT traffic can be encrypted with `TLS` or sent in clear-text. The Encryption option is currently not available. The default is `False`
 
 import csv
+import os
 from pathlib import Path
 import re
 import signal
@@ -765,8 +766,8 @@ class Comfort2(mqtt.Client):
 
             # You need to subscribe to your own topics to enable publish messages activating Comfort entities.
             self.subscribe(ALARMCOMMANDTOPIC)
-            self.subscribe(ALARMSTATUSTOPIC)
-            self.subscribe(ALARMBYPASSTOPIC)
+            #self.subscribe(ALARMSTATUSTOPIC)
+            #self.subscribe(ALARMBYPASSTOPIC)
             # Alarm Message Topic + Extended Message Topic ???
 
             #logger.debug('ALARMNUMBEROFOUTPUTS: %s', str(ALARMNUMBEROFOUTPUTS))
@@ -837,12 +838,18 @@ class Comfort2(mqtt.Client):
                 #logger.debug("msgstr: %s",msgstr)
                 if msgstr == "ARM_VACATION":
                     self.comfortsock.sendall(("\x03m!04"+self.comfort_pincode+"\r").encode()) #Local arm to 04 vacation mode. Requires # for open zones
+                    self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)
                 elif msgstr == "ARM_HOME":
                     self.comfortsock.sendall(("\x03m!03"+self.comfort_pincode+"\r").encode()) #Local arm to 03 day mode. Requires # for open zones
+                    self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)
                 elif msgstr == "ARM_NIGHT":
                     self.comfortsock.sendall(("\x03m!02"+self.comfort_pincode+"\r").encode()) #Local arm to 02 night mode. Requires # for open zones
+                    self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)
                 elif msgstr == "ARM_AWAY":
                     self.comfortsock.sendall(("\x03m!01"+self.comfort_pincode+"\r").encode()) #Local arm to 01 away mode. Requires # for open zones + Exit door
+                    self.publish(ALARMMESSAGETOPIC, "Please Exit...", qos=0, retain=False)
+                    self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)
+                    # Insert "Please Exit message here"
                 elif msgstr == "ARM_CUSTOM_BYPASS":
                     self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send '#' key code (KD1A)
                 elif msgstr == "DISARM":
@@ -1119,43 +1126,49 @@ class Comfort2(mqtt.Client):
         signal.signal(signal.SIGQUIT, self.exit_gracefully)
 
         zonemap = Path("config/zones.csv")
+        
         if zonemap.is_file():
-            logger.info ("Zone Mapping File detected.") 
+            file_stats = os.stat(zonemap)
+            if file_stats.st_size > 5120:
+                logger.warning ("Suspicious Zone Mapping File detected. Size is larger than anticipated. (%s Bytes)", file_stats.st_size) 
+                ZONEMAPFILE = False
+            else:
+                logger.info ("Zone Mapping File detected, %s Bytes", file_stats.st_size) 
                
-            # Initialize an empty dictionary
-            self.zone_to_name = {}
+                # Initialize an empty dictionary
+                self.zone_to_name = {}
 
-            # Open the CSV file
-            with open(zonemap, newline='') as csvfile:
-                # Create a CSV reader object
-                reader = csv.DictReader(csvfile)
+                # Open the CSV file
+                with open(zonemap, newline='') as csvfile:
+                    # Create a CSV reader object
+                    reader = csv.DictReader(csvfile)
     
-                # Iterate over each row in the CSV file
-                for row in reader:
-                    # Truncate the 'zone' numeric value to 3 characters (0-999) and 'name' to 30 characters. 
-                    #zone = row['zone'][:3]
+                    # Iterate over each row in the CSV file
+                    for row in reader:
+                        # Truncate the 'zone' numeric value to 3 characters (0-999) and 'name' to 30 characters. 
+                        #zone = row['zone'][:3]
 
-                    if self.CheckZoneNumberFormat(row['zone'][:3]):
-                        zone = row['zone'][:3]      # Check Zone Number sanity else blank.
-                        ZONEMAPFILE = True      # File available and data read into dictionary 'data'
-                    else: 
-                        zone = ""
-                        logger.error("Invalid Zone Number detected in 'zones.csv' file, file ignored.")
-                        ZONEMAPFILE = False
-                        break
+                        if self.CheckZoneNumberFormat(row['zone'][:3]):
+                            zone = row['zone'][:3]      # Check Zone Number sanity else blank.
+                            ZONEMAPFILE = True      # File available and data read into dictionary 'data'
+                        else: 
+                            zone = ""
+                            logger.error("Invalid Zone Number detected in 'zones.csv' file, file ignored.")
+                            ZONEMAPFILE = False
+                            break
 
-                    if self.CheckZoneNameFormat(row['name'][:30]): 
-                        name = row['name'][:30]      # Check Zone sanity else blank.
-                        ZONEMAPFILE = True      # File available and data read into dictionary 'data'
-                    else: 
-                        name = ""
-                        logger.error("Invalid Zone Name detected in 'zones.csv' file, file ignored.")
-                        ZONEMAPFILE = False      # File available and data read into dictionary 'data'
-                        break
+                        if self.CheckZoneNameFormat(row['name'][:30]): 
+                            name = row['name'][:30]      # Check Zone sanity else blank.
+                            ZONEMAPFILE = True      # File available and data read into dictionary 'data'
+                        else: 
+                            name = ""
+                            logger.error("Invalid Zone Name detected in 'zones.csv' file, file ignored.")
+                            ZONEMAPFILE = False      # File available and data read into dictionary 'data'
+                            break
 
 
-                    # Add the truncated value to the dictionary
-                    self.zone_to_name[zone] = name
+                        # Add the truncated value to the dictionary
+                        self.zone_to_name[zone] = name
 
             #zone = '100'
             #if zone in zone_to_name:
@@ -1292,22 +1305,24 @@ class Comfort2(mqtt.Client):
 
                                     message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
                                     self.publish(ALARMMESSAGETOPIC, message_topic, qos=0, retain=True)          # Empty string removes topic.
-                                    self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)                 # Updated to lowercase
+                                    #self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)                 # This is the correct state for Open Zones but it removes the buttons
+                                                                                                                # from the Keypad so you can't press '#'
 
                                     #if ZONEMAPFILE:
                                     #    logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name[str(erMsg.zone)]) 
                                     #else:   
                                     #    logging.warning("Zone %s Not Ready", str(erMsg.zone))
                                 else:
-                                    logging.info("All Zones Ready for Arming")
-                                    # Sending KD1A when receiving ER message confuses Comfort. When arming local to Night Mode it immediately goes into Arm Mode
-                                    # Not all Zones are announced and it 'presses' the '#' key on your behalf. Tryingto find a fix...
+                                    logging.info("Ready To Arm...")
+                                    # Sending KD1A when receiving ER message confuses Comfort. When arming local to any mode it immediately goes into Arm Mode
+                                    # Not all Zones are announced and it 'presses' the '#' key on your behalf.
                                     #self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
                             elif line[1:3] == "AM":
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, amMsg.message,qos=0,retain=True)
                                 if amMsg.triggered:
-                                    self.publish(ALARMSTATETOPIC, "triggered",qos=0,retain=False)    # Updated to lowercase
+                                    #self.publish(ALARMSTATETOPIC, "triggered",qos=0,retain=False)     # Original message
+                                    self.publish(ALARMSTATETOPIC, amMsg.message,qos=0,retain=True)    # Display message that triggered the condition in the State Topic.
                             elif line[1:3] == "AR":
                                 arMsg = ComfortARSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=0,retain=True)
@@ -1315,7 +1330,10 @@ class Comfort2(mqtt.Client):
                                 exMsg = ComfortEXEntryExitDelayStarted(line[1:])
                                 self.entryexitdelay = exMsg.delay
                                 self.entryexit_timer()
-                                self.publish(ALARMSTATETOPIC, "arming",qos=0,retain=False)      # Updated to lowercase
+                                if exMsg.type == 1:         # Entry Delay
+                                    self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)
+                                elif exMsg.type == 2:       # Exit Delay
+                                    self.publish(ALARMSTATETOPIC, "arming",qos=0,retain=False)
                             elif line[1:3] == "RP":
                                 if line[3:5] == "01":
                                     self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=0,retain=True)

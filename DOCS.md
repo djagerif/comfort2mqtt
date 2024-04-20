@@ -22,6 +22,89 @@ Even though this is a mostly Python implementation, it's currently only tested o
 **Please note:** This add-on requires configuration to connect with Home Assistant and Comfort II Ultra alarm system.
 
 
+## MQTT
+
+The following MQTT topics are published:
+```
+comfort2/alarm - current MQTT alarm state (disarmed, pending, armed_home, armed_away, armed_night, arm_vacation, triggered)
+comfort2/alarm/online - 1 for online, 0 for offline
+comfort2/alarm/message - Informational messages, e.g. the zone that triggered the alarm
+comfort2/alarm/timer - countdown entry/exit timer in seconds when arming to away mode or entering. updates every second.
+comfort2/alarm/status - Status of the alarm (Idle, Trouble, Alert, Alarm)
+comfort2/alarm/timer - Entry or Exit timer value
+comfort2/alarm/bypass - List of Bypassed zones. 1,3,5,7,9. '-1' indicates no zones bypassed
+comfort2/alarm/LWT - Online or Offline text status
+
+comfort2/doorbell - 0 for off/answered or 1 for on
+
+comfort2/input1 - 1 for open/active, 0 for closed/inactive. The state of the zone input. Can be set if it is a Virtual Input.
+comfort2/input1/bypass - for individual zone bypass status. 1 for bypassed, 0 for unbypassed. 
+...
+comfort2/input128 - Support for up to 128 zones.
+comfort2/input128/bypass - 1 for bypassed, 0 for unbypassed
+
+comfort2/input129 - Support for SCS/RIO inputs from 129 to 248 where applicable
+...
+comfort2/input248
+
+comfort2/timer1 - Numerical value for internal Timers
+...
+comfort2/timer64
+
+comfort2/output1 - 1 for on, 0 for off
+...
+comfort2/output128 - Support for up to 128 outputs.
+
+comfort2/output129 - Support for SCS/RIO outputs from 129 to 248 where applicable
+...
+comfort2/output248
+
+comfort2/flag1 - 1 for on, 0 for off
+...
+comfort2/flag254
+
+comfort2/sensor0 - 16-bit sensor value
+...
+comfort2/sensor31
+
+comfort2/counter0 - 16-bit counter value
+comfort2/counter0/state - 1 for On, 0 for Off. When used for lighting this indicates On|Off status while the counter value indicates brightness
+...
+comfort2/counter254
+comfort2/counter254/state
+```
+
+The following MQTT topics are subscribed.
+
+```
+comfort2/alarm/set - sent from Home Assistant, DISARM, ARMED_HOME, ARMED_NIGHT, ARMED_VACATION or ARMED_AWAY
+
+comfort2/input1/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input.
+...
+comfort2/input248/set
+
+comfort2/output1/set - 1 for on, 0 for off. activates the output
+...
+comfort2/output248/set
+
+comfort2/response1/set - value is ignored. Comfort response is activated as programmed in Comfigurator
+...
+comfort2/response1024/set
+
+comfort2/flag1/set - 1 for on, 0 for off
+...
+comfort2/flag254/set
+
+comfort2/counter0/set - 16-bit value
+...
+comfort2/counter254/set
+
+comfort2/sensor0/set - 16-bit value
+...
+comfort2/sensor31/set
+```
+
+
 ## Home Assistant Configuration
 
 Manual Sensor creation is required in your `configuration.yaml` file before this Add-on can start. 
