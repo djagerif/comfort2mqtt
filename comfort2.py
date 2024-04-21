@@ -88,16 +88,16 @@ mqtt_strings = ['Connection successful',
 logger = logging.getLogger(__name__)
 
 async def handle_config_update(event):
-    print ("Home Assistant configuration has been updated.")
+    logger.debug("Home Assistant configuration has been updated.")
 
 async def setup_platform(hass: HomeAssistant, config: dict):
-    print ("whatever")
+    logger.debug ("whatever")
     async_track_state_change(hass, "core_config_update", handle_config_update)
 
 async def main():
     config_dir = "/config"
     hass = HomeAssistant(config_dir = config_dir)
-    print ("Here")
+    logger.debug ("Here")
     await setup_platform(hass, {})
 
 
