@@ -308,21 +308,21 @@ This option controls the level of log output by the addon and can be changed to 
 
 Please note that each level automatically includes log messages from a more severe level, e.g. `DEBUG` also shows `INFO` messages. By default, the `log_level` is set to `INFO`, which is the recommended setting unless you are troubleshooting.
 
-### Option: `Comfort II Ultra Zone Inputs`
+### Option: `Comfort II Ultra Zone Inputs` (Optional)
 
 Set number of Published Comfort Inputs/Zones starting from Zone 1. Published Zones is a single contiguous block from 1 to <Value>. Default 8, Max. 128
 
-### Option: `Comfort II Ultra Zone Outputs`
+### Option: `Comfort II Ultra Zone Outputs` (Optional)
 
-Set number of Published Comfort Outputs starting from Output 1. Published Outputs is a single contiguous block from 1 to <Value>. 0 for None, Max. 128
+Set number of Published Comfort Outputs starting from Output 1. Published Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 128
 
-### Option: `Comfort II Ultra SCS/RIO Inputs`
+### Option: `Comfort II Ultra SCS/RIO Inputs` (Optional)
 
-Set number of Published SCS/RIO Inputs. Published SCS/RIO Inputs is a single contiguous block from 1 to <Value>. 0 for None, Max. 120. 
+Set number of Published SCS/RIO Inputs. Published SCS/RIO Inputs is a single contiguous block from 1 to <Value>. Default 0, Max. 120. 
 
-### Option: `Comfort II Ultra SCS/RIO Outputs`
+### Option: `Comfort II Ultra SCS/RIO Outputs` (Optional)
 
-Set number of Published SCS/RIO Outputs. Published SCS/RIO Outputs is a single contiguous block from 1 to <Value>. 0 for None, Max. 120. 
+Set number of Published SCS/RIO Outputs. Published SCS/RIO Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 120. 
 
 ### Option: `Comfort II Ultra Responses` (Optional)
 

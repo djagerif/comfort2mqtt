@@ -18,6 +18,9 @@
 ###
 ### The MQTT traffic can be encrypted with `TLS` or sent in clear-text. The Encryption option is currently not available. The default is `False`
 
+import asyncio
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.event import async_track_state_change
 import csv
 import os
 from pathlib import Path
@@ -83,6 +86,20 @@ mqtt_strings = ['Connection successful',
 				'Timeout waiting for PUBCOMP']
 
 logger = logging.getLogger(__name__)
+
+async def handle_config_update(event):
+    print ("Home Assistant configuration has been updated.")
+
+async def setup_platform(hass: HomeAssistant, config: dict):
+    print ("whatever")
+    async_track_state_change(hass, "core_config_update", handle_config_update)
+
+async def main():
+    config_dir = "/config"
+    hass = HomeAssistant(config_dir = config_dir)
+    print ("Here")
+    await setup_platform(hass, {})
+
 
 def boolean_string(s):
     if s not in {'false', 'true'}:
@@ -1473,6 +1490,8 @@ class Comfort2(mqtt.Client):
                 infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
                 infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 infot.wait_for_publish()
+
+asyncio.run(main())
 
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
 mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE)
