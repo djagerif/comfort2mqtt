@@ -38,7 +38,7 @@ comfort2/alarm/LWT - Online or Offline text status
 comfort2/doorbell - 0 for off/answered or 1 for on
 
 comfort2/input1 - 1 for open/active, 0 for closed/inactive. The state of the zone input. Can be set if it is a Virtual Input.
-comfort2/input1/bypass - for individual zone bypass status. 1 for bypassed, 0 for unbypassed. 
+comfort2/input1/bypass - for individual zone bypass status. 1 for bypassed, 0 for unbypassed. Only created on Arming/Disarming.
 ...
 comfort2/input128 - Support for up to 128 zones.
 comfort2/input128/bypass - 1 for bypassed, 0 for unbypassed
