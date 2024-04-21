@@ -201,7 +201,7 @@ Next you need to create an Automation that triggers on Home Assistant Restart an
 
 To find the addon name for `service: hassio.addon_restart` you can do a `ha addon` query from the commandline interface and look for the `slug:` keyword or, after starting the Add-on, note the `Hostname` from the Add-on `Info` tab.
 
-![Hostname](image-1.png)
+![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/0b30bded-fe82-4c1d-a278-2c2789a4ef1f)
 
 ```
 alias: Restart Comfort to MQTT Add-on
@@ -231,7 +231,7 @@ action:
       title: Comfort to MQTT Restart
   - service: hassio.addon_restart
     data:
-      addon: 7bef4a80_comfort2mqtt <- Your unique slug_name here !!
+      addon: 7bef4a80_comfort2mqtt <- Your unique slug_name/Hosatname here !!
 mode: single
 ```
 
