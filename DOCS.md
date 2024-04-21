@@ -199,7 +199,9 @@ First you need to enable this hidden entity created by the `Home Assistant Super
 
 Next you need to create an Automation that triggers on Home Assistant Restart and on Configruation.yaml file changes as per below.
 
-To find the addon name for `service: hassio.addon_restart` you can do a `ha addon` query from the commandline interface and look for the `slug:` keyword.
+To find the addon name for `service: hassio.addon_restart` you can do a `ha addon` query from the commandline interface and look for the `slug:` keyword or, after starting the Add-on, note the `Hostname` from the Add-on `Info` tab.
+
+![Hostname](image-1.png)
 
 ```
 alias: Restart Comfort to MQTT Add-on
