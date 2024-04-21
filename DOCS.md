@@ -229,7 +229,7 @@ action:
       title: Comfort to MQTT Restart
   - service: hassio.addon_restart
     data:
-      addon: 7bef4a80_comfort2mqtt
+      addon: 7bef4a80_comfort2mqtt <- Your unique slug_name here !!
 mode: single
 ```
 
