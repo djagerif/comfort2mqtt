@@ -195,7 +195,7 @@ First you need to enable this hidden entity created by the `Home Assistant Super
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/cedfc20a-3b38-405a-affe-e575c31057a0)
 
-It shoud be noted that this entity is not updated in real-time, it takes around 2 minutes to change state.
+- It shoud be noted that this entity is not updated in real-time, it takes around 2 minutes to change state.
 
 Next you need to create an Automation that triggers on Home Assistant Restart and on Configruation.yaml file changes as per below.
 
