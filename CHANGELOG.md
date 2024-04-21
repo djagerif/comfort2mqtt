@@ -1,3 +1,9 @@
-0.1.7
+## What’s changed
 
-    Initial ALPHA release
+## 🧰 Maintenance
+
+- 🎆 Added Automation to assist in Add-on restarts
+
+## ⬆️ Dependency updates
+
+- ⬆️ None
