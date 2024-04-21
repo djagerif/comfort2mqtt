@@ -19,7 +19,7 @@ The installation of this add-on is pretty straightforward and no different in co
 
 Even though this is a mostly Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Alpine Linux, other platforms remain untested and it's not clear if it will work or not.
 
-**Please note:** This add-on requires configuration to connect with Home Assistant and Comfort II Ultra alarm system.
+⚠️ This add-on requires configuration to connect with Home Assistant and Comfort II Ultra alarm system.
 
 
 ## MQTT
@@ -195,7 +195,7 @@ First you need to enable this hidden entity created by the `Home Assistant Super
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/cedfc20a-3b38-405a-affe-e575c31057a0)
 
-- It shoud be noted that this entity is not updated in real-time, it takes around 2 minutes to change state.
+⚠️ It shoud be noted that this entity is not updated in real-time, it takes around 2 minutes to change state.
 
 Next you need to create an Automation that triggers on Home Assistant Restart and on Configruation.yaml file changes as per below.
 
@@ -251,7 +251,7 @@ This software _requires_ a fully functional UCM/Ethernet or UCM/Wifi configurati
 
 If your network is segmented using a firewall, or any other device, you must ensure all applicable ports are allowed between Home Assistant and the Comfort II Ethernet Module (UCM). The default port for the UCM/Eth03 is TCP/1002 which is Port #2 of a UCMEth03.
   
-**Note:** The UCM/WiFi uses port TCP/3000 as the default port. Any port may be used as long as there are no overlaps with existing services on the network.
+⚠️ The UCM/WiFi uses port TCP/3000 as the default port. Any port may be used as long as there are no overlaps with existing services on the network.
 
 [ha-auto]: https://www.home-assistant.io/docs/mqtt/discovery/
 [ha-mqtt]: https://www.home-assistant.io/integrations/light.mqtt/#brightness-without-on-commands
