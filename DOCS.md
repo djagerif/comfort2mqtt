@@ -187,6 +187,51 @@ The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a
 Because `Counters` can be used for many things other than Lights, the `Kitchen Light` in the example follows the [Brightness Without On Commands][ha-mqtt] chapter in the Home Assistant MQTT Light documentation, with a few additions.
 
 
+## Home Assistant Automation (Optional)
+
+When Home Assistant Restarts (Not Reload), it only reloads Home Assistant itself, all Add-ons remain running which could lead to some entities display an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to restart the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded.
+
+First you need to enable this hidden entity created by the `Home Assistant Supervisor`.
+
+
+It shoud be noted that this entity is not updated in real-time, it takes around 2 minutes to change state.
+
+Next you need to create an Automation that triggers on Home Assistant Restart and on Configruation.yaml file changes as per below.
+
+To find the addon name for `service: hassio.addon_restart` you can do a `ha addon` query from the commandline interface and look for the `slug:` keyword.
+
+```
+alias: Restart Comfort to MQTT Add-on
+description: >-
+  When Home Assistant Config changes or restarts then reload Comfort to MQTT to
+  refresh all entities.
+trigger:
+  - platform: homeassistant
+    event: start
+    enabled: true
+    alias: When Home Assistant is Restarted
+  - platform: event
+    event_type: call_service
+    event_data:
+      domain: input_select
+      service: reload
+    alias: When Reload 'ALL YAML CONFIGURATION' from Developer Tools
+condition:
+  - condition: state
+    entity_id: binary_sensor.comfort_to_mqtt_running
+    state: "on"
+action:
+  - service: notify.persistent_notification
+    metadata: {}
+    data:
+      message: Home Assistant Restarted or Configuration Reloaded
+      title: Comfort to MQTT Restart
+  - service: hassio.addon_restart
+    data:
+      addon: 7bef4a80_comfort2mqtt
+mode: single
+```
+
 ## Hardware and Interface support
 
 This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. Comfort II Ultra firmware as tested is `7.201`. If any other Comfort system, model or firmware other than `7.201`, is used then results may be unexpected.
