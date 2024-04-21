@@ -36,7 +36,7 @@ from argparse import ArgumentParser
 DOMAIN = "comfort2"
 
 rand_hex_str = hex(randint(268435456, 4294967295))
-mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])   # Generate random client-id each time it starts.
+mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])   # Generate random client-id each time it starts for future development of a possible second instance.
 
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
@@ -236,18 +236,26 @@ COMFORT_RIO_OUTPUTS=str(option.alarm_rio_outputs)
 
 ALARMINPUTTOPIC = DOMAIN+"/input%d"   #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 ALARMINPUTBYPASSTOPIC = DOMAIN+"/input%d/bypass"    # Bypass Status.
+if int(COMFORT_INPUTS) < 8:
+    COMFORT_INPUTS = "8"
 ALARMVIRTUALINPUTRANGE = range(1,int(COMFORT_INPUTS)+1)   #set this according to your system. Starts at 1 -> {value}
 ALARMINPUTCOMMANDTOPIC = DOMAIN+"/input%d/set"   #input1,input2,... input128 for virtual inputs
 
 ALARMRIOINPUTTOPIC = DOMAIN+"/input%d"   #input129,input130,... input248 for every input. Physical SCS/RIO Inputs (Default 0), Max 120  
+if int(COMFORT_RIO_INPUTS) < 0:
+    COMFORT_RIO_INPUTS = "0"
 ALARMRIOINPUTRANGE = range(129,129+int(COMFORT_RIO_INPUTS))   #set this according to your system. Starts at 129 -> 248 (Max.)
 ALARMRIOINPUTCOMMANDTOPIC = DOMAIN+"/input%d/set"   #input129,input130,... input248 for SCS/RIO inputs. Cannot set as Virtual Input.
 
 ALARMOUTPUTTOPIC = DOMAIN+"/output%d" #output1,output2,... for every output
-ALARMNUMBEROFOUTPUTS = COMFORT_OUTPUTS    #set this according to your system. Physical Outputs (Default 0), Max 96
+if int(COMFORT_OUTPUTS) < 0:
+    COMFORT_OUTPUTS = "0"
+ALARMNUMBEROFOUTPUTS = int(COMFORT_OUTPUTS)    #set this according to your system. Physical Outputs (Default 0), Max 96
 ALARMOUTPUTCOMMANDTOPIC = DOMAIN+"/output%d/set" #output1/set,output2/set,... for every output
 
 ALARMRIOOUTPUTTOPIC = DOMAIN+"/output%d" #output129,output130,... for every SCS/RIO output
+if int(COMFORT_RIO_OUTPUTS) < 0:
+    COMFORT_RIO_OUTPUTS = "0"
 ALARMRIOOUTPUTRANGE = range(129,129+int(COMFORT_RIO_OUTPUTS))    #set this according to your system. Physical SCS/RIO Outputs (Default 0), Max 120
 ALARMRIOOUTPUTCOMMANDTOPIC = DOMAIN+"/output%d/set" #output129,output130,... output248 for SCS/RIO outputs.
 
@@ -444,6 +452,7 @@ class ComfortZ_ReportAllZones(object):
     def __init__(self, data={}):
         self.inputs = []
         b = (len(data) - 2) // 2   #variable number of zones reported
+        self.max_zones = b * 8
         for i in range(1,b+1):
             inputbits = int(data[2*i:2*i+2],16)
             for j in range(0,8):
@@ -453,6 +462,7 @@ class Comfort_Z_ReportAllZones(object):     #SCS/RIO z?
     def __init__(self, data={}):
         self.inputs = []    
         b = (len(data) - 2) // 2   #variable number of zones reported
+        self.max_zones = b * 8
         for i in range(1,b+1):  
             inputbits = int(data[2*i:2*i+2],16)
             for j in range(0,8): 
@@ -513,6 +523,7 @@ class ComfortY_ReportAllOutputs(object):
     def __init__(self, data={}):
         self.outputs = []
         b = (len(data) - 2) // 2   #variable number of outputs reported
+        self.max_zones = b * 8
         for i in range(1,b+1):
             outputbits = int(data[2*i:2*i+2],16)
             for j in range(0,8):
@@ -522,6 +533,7 @@ class Comfort_Y_ReportAllOutputs(object):
     def __init__(self, data={}):    
         self.outputs = []           
         b = (len(data) - 2) // 2   #variable number of outputs reported
+        self.max_zones = b * 8
         for i in range(1,b+1):  
             outputbits = int(data[2*i:2*i+2],16)
             for j in range(0,8):
@@ -773,7 +785,6 @@ class Comfort2(mqtt.Client):
             for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
                 #logger.debug('ALARMOUTPUTCOMMANDTOPIC %s', str(ALARMOUTPUTCOMMANDTOPIC % i))
-          
             for i in ALARMVIRTUALINPUTRANGE: #for virtual inputs #inputs+1 to 128
                 #logger.debug('ALARMINPUTCOMMANDTOPIC %s', str(ALARMINPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMINPUTCOMMANDTOPIC % i)
@@ -1257,16 +1268,18 @@ class Comfort2(mqtt.Client):
                                 #logger.debug("state %s" % ipMsgSR.state)
                                 #self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, self.HexToSigned16Decimal(ipMsgSR.state))
                                 self.publish(ALARMTIMERREPORTTOPIC % ipMsgTR.counter, ipMsgTR.state,qos=0,retain=False)
-                            elif line[1:3] == "Z?":
+                            elif line[1:3] == "Z?":     # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
                                     #print("input %d state %d" % (ipMsgZ.input, ipMsgZ.state))
                                     self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
-                            elif line[1:3] == "z?":
+                                logger.debug("Max. Reported Zones/Inputs: %d", zMsg.max_zones)
+                            elif line[1:3] == "z?": # SCS/RIO Inputs
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
                                     #logger.debug("RIO input %d state %d" % (ipMsgZ.input, ipMsgZ.state))
                                     self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
+                                logger.debug("Max. Reported SCS/RIO Inputs: %d", zMsg.max_zones)
                             elif line[1:3] == "M?" or line[1:3] == "MD":
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
                                 #logging.debug("Alarm Mode %s", mMsg.modename)
@@ -1351,16 +1364,18 @@ class Comfort2(mqtt.Client):
                                 ipMsg = ComfortOPOutputActivationReport(line[1:])
                                 #print("output %d state %d" % (ipMsg.output, ipMsg.state))
                                 self.publish(ALARMOUTPUTTOPIC % ipMsg.output, ipMsg.state,qos=0,retain=True)
-                            elif line[1:3] == "Y?":
+                            elif line[1:3] == "Y?":     # Comfort Outputs
                                 yMsg = ComfortY_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
                                     #print("output %d state %d" % (opMsgY.output, opMsgY.state))
                                     self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state,qos=0,retain=True)
-                            elif line[1:3] == "y?":
+                                logger.debug("Max. Reported Outputs: %d", yMsg.max_zones)
+                            elif line[1:3] == "y?":     # SCS/RIO Outputs
                                 yMsg = Comfort_Y_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
                                     #print("RIO output %d state %d" % (opMsgY.output, opMsgY.state))
                                     self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state)
+                                logger.debug("Max. Reported SCS/RIO Outputs: %d", yMsg.max_zones)
                             elif line[1:5] == "r?00":
                                 cMsg = Comfort_R_ReportAllSensors(line[1:])
                                 for cMsgr in cMsg.counters:
