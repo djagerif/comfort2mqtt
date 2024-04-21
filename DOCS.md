@@ -189,10 +189,11 @@ Because `Counters` can be used for many things other than Lights, the `Kitchen L
 
 ## Home Assistant Automation (Optional)
 
-When Home Assistant Restarts (Not Reload), it only reloads Home Assistant itself, all Add-ons remain running which could lead to some entities display an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to restart the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded.
+When Home Assistant Restarts (Not Reload), it only restarts Home Assistant itself, all Add-ons remain running which could lead to some entities display an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to restart the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded.
 
 First you need to enable this hidden entity created by the `Home Assistant Supervisor`.
 
+![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/cedfc20a-3b38-405a-affe-e575c31057a0)
 
 It shoud be noted that this entity is not updated in real-time, it takes around 2 minutes to change state.
 
