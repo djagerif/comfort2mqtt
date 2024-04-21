@@ -18,7 +18,7 @@ For more information about Cytech Comfort II Ultra alarm systems, please see [cy
 ## About
 This Addon is used to bridge an IP connected Cytech Comfort II Ultra Alarm system to MQTT for use in Home Assistant.
 
-> **Note:** This software is neither certified nor endorsed by Cytech Technology Pte Ltd.
+⚠️ This software is neither certified nor endorsed by Cytech Technology Pte Ltd.
 
 This is a customised version of the original comfort2mqtt project by `koochyrat`. More information about the original source project is available [here][koochyrat].
 
@@ -36,6 +36,6 @@ The following objects are currently supported:
 * Timer Reports [1-64]
 * Responses [1-1024]
 
-**Note:** This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. Firmware as tested, is `7.201`.
+⚠️ This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. Firmware as tested, is `7.201`.
 
 Copyright 2024 Ingo de Jager. Licensed under the GNU LGPL3+. For more details see `COPYING` and `COPYING.LESSER`.
