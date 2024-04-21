@@ -675,16 +675,15 @@ class Comfort_A_SecurityInformationReport(object):      # Not implemented.
         self.GG = int(data[18:20],16)   #GG = GSM ID =0 if no trouble
         #self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
         #logger.debug('a? - data: %s  - still under development', str(data[2:]))
-        alarm_type = ['','Intruder','Duress','LineCut','ArmFail','ZoneTrouble','ZoneAlert','LowBattery', \
-			          'PowerFail', 'Panic', 'EntryAlert','Tamper','Fire','Gas','FamilyCare','Perimeter', \
-			          'BypassZone','Disarm','CMSTest','SystemArmed','AlarmAbort','EntryWarning','SirenTrouble','AlarmType23', \
-			          'RS485Comms','Doorbell','HomeSafe','DialTest','AlarmType28','NewMessage','Temperature','SigninTamper']
+        alarm_type = ['','Intruder','Duress','LineCut','ArmFail','ZoneTrouble','ZoneAlert','LowBattery', 'PowerFail', 'Panic', 'EntryAlert', \
+                      'Tamper','Fire','Gas','FamilyCare','Perimeter', 'BypassZone','Disarm','CMSTest','SystemArmed', 'AlarmAbort', 'EntryWarning', \
+                      'SirenTrouble','AlarmType23', 'RS485Comms','Doorbell','HomeSafe','DialTest','AlarmType28','NewMessage','Temperature','SigninTamper']
         alarm_state = ['Idle','Trouble','Alert','Alarm']
         low_battery = ['Main','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
         self.type = alarm_type[self.AA]
         self.state = alarm_state[self.SS]
-        if self.alarm_type == "LowBattery" and self.BB == 0: self.battery = low_battery[0]
-        elif self.alarm_type == "LowBattery" and self.BB > 0:self.battery = low_battery[(self.BB - 32)]
+        if alarm_type == "LowBattery" and self.BB == 0: self.battery = low_battery[0]
+        elif alarm_type == "LowBattery" and self.BB > 0:self.battery = low_battery[(self.BB - 32)]
         #logger.debug('Battery ID: %s', self.id)
         #logger.debug('Alarm Type: %s', self.type)       # What happens if you have low battery and zone trouble ????
 
@@ -1284,9 +1283,9 @@ class Comfort2(mqtt.Client):
                                 else:
                                     logging.info("Comfort II Ultra detected (Firmware %d.%03d).", VMsg.version, VMsg.revision)
                                     #logging.info("Comfort II Ultra System Firmware %d.%03d ", VMsg.version, VMsg.revision)
-                            elif line[1:3] == "a?":
+                            elif line[1:3] == "a?":     # Not Implemented.
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
-                                logging.debug("Alarm Type: %s, Alarm State: %s ", aMsg.type, aMsg.state)
+                                #logging.debug("Alarm Type: %s, Alarm State: %s ", aMsg.type, aMsg.state)
                                 if aMsg.type == 'LowBattery':
                                     logging.debug("Low Battery %s", aMsg.battery)
                                 #self.publish(ALARMSTATUSTOPIC, aMsg.type,qos=0,retain=True)
