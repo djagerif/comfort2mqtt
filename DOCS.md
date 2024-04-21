@@ -333,7 +333,7 @@ This sets the number of Responses that the Add-on subscribes to. Valid range val
 Set Comfort II Ultra Time and Date when the Add-on logs in and automatically every day at midnight. The default value is `False`.
 
 
-## Custom Zone Name File
+## Custom Zone Name File (Optional)
 
 a CSV file can be uploaded to the `addon_config` directory with the format as shown below. The first column is the `Zone Number` and the second column the `Zone Name`.
 
