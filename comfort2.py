@@ -20,7 +20,7 @@
 
 import asyncio
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.event import async_track_state_change
+from homeassistant.helpers.event import async_call_later
 import csv
 import os
 from pathlib import Path
@@ -87,18 +87,43 @@ mqtt_strings = ['Connection successful',
 
 logger = logging.getLogger(__name__)
 
-async def handle_config_update(event):
-    logger.debug("Home Assistant configuration has been updated.")
+#async def handle_config_update(event):
+#    logger.debug("Home Assistant configuration has been updated.")
 
-async def setup_platform(hass: HomeAssistant, config: dict):
-    logger.debug ("whatever")
-    async_track_state_change(hass, "core_config_update", handle_config_update)
+#async def setup_platform(hass: HomeAssistant, config: dict):
+#    logger.debug ("whatever")
+#    async_track_state_change(hass, "core_config_update", handle_config_update)
 
-async def main():
-    config_dir = "/config"
-    hass = HomeAssistant(config_dir = config_dir)
-    logger.debug ("Here")
-    await setup_platform(hass, {})
+#async def main():
+#    config_dir = "/config"
+#    hass = HomeAssistant(config_dir = config_dir)
+#    logger.debug ("Here")
+#    await setup_platform(hass, {})
+
+async def listen_for_event(hass: HomeAssistant, event: str):
+    """Listen for a specific event."""
+    logger.debug("def listen_for_event()")
+    while True:
+        event = await hass.async_add_executor_job(hass.bus.wait_for_event, event)
+        if event:
+            logger.debug("Received event: %s", event)
+            # Check if the event is for reloading the add-on
+            if event.data.get('service') == 'reload_addon':
+                logger.debug("Reloading add-on...")
+                # Perform action to reload add-on
+
+#async def main(hass: HomeAssistant):
+#    """Main function."""
+#    await asyncio.gather(
+#        listen_for_event(hass, "call_service")
+#        # Add more events to listen for if needed
+#    )
+
+#if __name__ == "__main__":
+#    #config_dir = "/config"
+#    #hass = HomeAssistant(config_dir = config_dir)
+#    asyncio.run(run_program())
+
 
 
 def boolean_string(s):
@@ -1491,7 +1516,22 @@ class Comfort2(mqtt.Client):
                 infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 infot.wait_for_publish()
 
-asyncio.run(main())
+
+async def main():
+    config_dir = "/config"
+    logger.debug("def main()")
+    hass = HomeAssistant(config_dir=config_dir)
+
+    await listen_for_event(hass, "call_service")
+
+    while True:
+        Comfort2.run()
+
+    #mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
+    #mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE)
+    #mqttc.run()
+
+    #asyncio.run(run_program())
 
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
 mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE)
