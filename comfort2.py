@@ -95,6 +95,21 @@ def handle_event(event: Event):
         logger.debug("Reloading add-on...")
         # Perform action to reload add-on
 
+def setup(hass, config):
+    """Set up is called when Home Assistant is loading our component."""
+    count = 0
+
+    # Listener to handle fired events
+    def handle_event(event):
+        nonlocal count
+        count += 1
+        logger.debug("Answer %d is: %s", count, event.data.get('answer'))
+
+    # Listen for when example_component_my_cool_event is fired
+    hass.bus.listen("comfort2", handle_event)
+
+    # Return successful setup
+    return True
 
 #async def setup_platform(hass: HomeAssistant, config: dict):
 #    logger.debug ("whatever")
