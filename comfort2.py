@@ -18,9 +18,9 @@
 ###
 ### The MQTT traffic can be encrypted with `TLS` or sent in clear-text. The Encryption option is currently not available. The default is `False`
 
-import asyncio
+#import asyncio
 from homeassistant.core import HomeAssistant, Event
-from homeassistant.helpers.event import async_call_later, track_state_change
+#from homeassistant.helpers.event import async_call_later, track_state_change
 import csv
 import os
 from pathlib import Path
@@ -87,31 +87,13 @@ mqtt_strings = ['Connection successful',
 
 logger = logging.getLogger(__name__)
 
-async def handle_event(event: Event):
+def handle_event(event: Event):
     """Handle the received event."""
-    logger.debug("Received event: %s", event)
+    logger.debug("Received event: %s", event)    
     # Check if the event is for reloading the add-on
     if event.data.get('service') == 'reload_addon':
         logger.debug("Reloading add-on...")
         # Perform action to reload add-on
-
-async def main():
-    """Main function."""
-    # Initialize Home Assistant
-    hass = HomeAssistant(config_dir="/config")
-
-    # Register callback for the event
-    hass.bus.async_listen("call_service", handle_event)
-
-    # Your existing program logic here
-    while True:
-        # Your existing program logic here
-        #mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
-        #mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE)
-        #mqttc.run()
-        await asyncio.sleep(1)  # Example: Sleep for 1 second
-
-
 
 
 #async def setup_platform(hass: HomeAssistant, config: dict):
@@ -1265,6 +1247,12 @@ class Comfort2(mqtt.Client):
     
         try:
             while RUN:
+
+                #hass = HomeAssistant(config_dir="/config")
+                # Register callback for the event
+                #hass.bus.listen("call_service", handle_event)
+
+
                 try:
                     self.comfortsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     #print("Connecting to "+self.comfort_ip+" "+str(self.comfort_port))
@@ -1528,7 +1516,7 @@ class Comfort2(mqtt.Client):
                 self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 time.sleep(RETRY.seconds)
         except KeyboardInterrupt as e:
-            logging.debug("SIGINT (Ctrl-C) Intercepted")
+            logger.debug("SIGINT (Ctrl-C) Intercepted")
             logger.info('Shutting down.')
             if self.connected == True:
                 self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
@@ -1543,10 +1531,25 @@ class Comfort2(mqtt.Client):
                 infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 infot.wait_for_publish()
 
+# def main():
+#     """Main function."""
+#     # Initialize Home Assistant
+#     logger.debug("Running Main()")
+#     #hass = HomeAssistant()
+
+#     # Register callback for the event
+#     #hass.bus.listen("call_service", handle_event)#
+
+#     # Your existing program logic here
+
+#     while True:
+#         # Your existing program logic here
+#         pass
+
+
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
 mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE)
 mqttc.run()
 
-if __name__ == "__main__":
-    asyncio.run(main())
-    
+
+
