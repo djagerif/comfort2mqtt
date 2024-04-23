@@ -182,7 +182,9 @@ mqtt:
 ```
 Comfort II Ultra supports both Unsigned 8-bit and Signed 16-bit values. However, many integrations like Clipsal C-BUS uses Unsigned 8-bit values and sets Counter values of 0xFF(255) for 'On' and 0x00(0) for the 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `payload_on` and `payload_off` integer values accordingly.
 
-The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable light, both mapped to their respective Comfort Counters. You could also map your Non-Dimmable Lights to Comfort Flags which would operate in a similar manner as Counters except the `payload_on`value will be `1` rather than `255`. With the examples above you can also add the `Brightness` secondary info to the icons and it will display perfectly.
+The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable light, both mapped to their respective Comfort Counters. You could also map your Non-Dimmable Lights to Comfort Flags which would operate in a similar manner as Counters except the `payload_on`value will be `1` rather than `255`. With the Light examples above you can also add the `Brightness` secondary info to the Dimmer light icon and it will display as per below.
+
+![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/1d16931d-1cfd-4f55-83c0-16be5a90e777)
 
 Because `Counters` can be used for many things other than Lights, the `Kitchen Light` in the example follows the [Brightness Without On Commands][ha-mqtt] chapter in the Home Assistant MQTT Light documentation, with a few tweaks.
 
