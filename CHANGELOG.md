@@ -2,7 +2,7 @@
 
 ## 🧰 Maintenance
 
-- 🎆 Added Automation to assist in Add-on restarts
+- 🎆 None. Initial Alpha release
 
 ## ⬆️ Dependency updates
 

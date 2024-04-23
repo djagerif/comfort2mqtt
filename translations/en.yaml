@@ -23,7 +23,7 @@ configuration:
   #mqtt_encryption:
   #  name: MQTT Transport Encryption
   #  description: >-
-  #    Use TLS Encryption (Default False).
+  #    Use TLS Encryption (Default False). For future development !!!
   comfort_port:
     name: Comfort II Port
     description: >-
@@ -63,14 +63,6 @@ configuration:
     name: Comfort II Responses
     description: >-
       The number of Cytech Comfort II Responses that can be activated. Range from 0 - 1024 (Default is 0).
-  #alarm_flags:
-  #  name: Comfort II Flags
-  #  description: >-
-  #    Cytech Comfort II Flags on your system. Range from 0 - 254 (Default is 0).
-  #alarm_counters:
-  #  name: Comfort II Counters
-  #  description: >-
-  #    Cytech Comfort II Counters on your system. Range from 0 - 255 (Default is 0).
   comfort_time:
     name: Set Comfort II Time and Date
     description: >-
@@ -78,27 +70,20 @@ configuration:
   #require_certificate:
   #  name: Require Certificate
   #  description: >-
-  #    If enabled encryption will be enabled using the cert- and keyfile options.
+  #    If enabled encryption will be enabled using the cert- and keyfile options. For future development !!!
   #certfile:
   #  name: Certificate File
   #  description: >-
   #    A file containing a certificate, including its chain. Place this file in
-  #    the Home Assistant `ssl` folder.
+  #    the Home Assistant `ssl` folder.  For future development !!!
   #cafile:
   #  name: CA File
   #  description: >-
   #    A file containing a root certificate. Place this file in the Home
-  #    Assistant `ssl` folder.
+  #    Assistant `ssl` folder. For future development !!!
   #keyfile:
   #  name: Private Key File
   #  description: >-
   #    A file containing the private key. Place this file in the Home Assistant
-  #    `ssl` folder.
-  #customize:
-  #  name: Customize
-  #  description: >-
-  #    See the Documentation tab for more information about these options.
-  #debug:
-  #  name: Debug
-  #  description: >-
-  #    If enabled will turn on debug logging for mosquitto and the auth plugin.
+  #    `ssl` folder. For future development !!!
+  

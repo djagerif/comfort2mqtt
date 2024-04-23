@@ -1,5 +1,5 @@
 # Original Copyright(c) 2018 Khor Chin Heong (koochyrat@gmail.com)
-# Modified by Ingo de Jager 2023 (ingodejager@gmail.com)
+# Modified by Ingo de Jager 2024 (ingodejager@gmail.com)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# Notes:
+#
 ### Future Encryption option ###
 ### Option: `MQTT Transport Encryption` (Optional) - Not currently used
 ###
 ### The MQTT traffic can be encrypted with `TLS` or sent in clear-text. The Encryption option is currently not available. The default is `False`
 
-#import asyncio
-#from homeassistant.core import HomeAssistant, Event
-#from homeassistant.helpers.event import async_call_later, track_state_change
 import csv
 import os
 from pathlib import Path
@@ -39,17 +38,17 @@ from argparse import ArgumentParser
 DOMAIN = "comfort2"
 
 rand_hex_str = hex(randint(268435456, 4294967295))
-mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])   # Generate random client-id each time it starts for future development of a possible second instance.
+mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts, for future development of a possible second instance.
 
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
-ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"         # List of Bypassed Zones.
+ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"               # List of Bypassed Zones.
 
 ALARMCOMMANDTOPIC = DOMAIN+"/alarm/set"
 ALARMAVAILABLETOPIC = DOMAIN+"/alarm/online"
 ALARMLWTTOPIC = DOMAIN+"/alarm/LWT"
 ALARMMESSAGETOPIC = DOMAIN+"/alarm/message"
-#ALARMEXTMESSAGETOPIC = DOMAIN+"/alarm/ext_message"      # Extended Messages will be available here. Not implemented.
+#ALARMEXTMESSAGETOPIC = DOMAIN+"/alarm/ext_message"     # Extended Messages will be available here.  For future development !!!
 ALARMTIMERTOPIC = DOMAIN+"/alarm/timer"
 ALARMDOORBELLTOPIC = DOMAIN+"/doorbell"
 
@@ -122,6 +121,7 @@ group.add_argument(
          'TCP', 'WebSockets'),
     help='TCP or WebSockets Transport Protocol for MQTT broker. [default: TCP]')
 
+#  For future development !!!
 #group.add_argument(
 #    '--broker-encryption',
 #    required=False,
@@ -165,16 +165,6 @@ group.add_argument(
     type=int, default=0,
     help='Number of Responses')
 
-#group.add_argument(
-#    '--alarm-flags',
-#    type=int, default=0,
-#    help='Number of Flags')
-
-#group.add_argument(
-#    '--alarm-counters',
-#    type=int, default=0,
-#    help='Number of Counters')
-
 group.add_argument(
     '--alarm-rio-inputs',
     type=int, default=0,
@@ -194,7 +184,6 @@ group.add_argument(
 
 option = parser.parse_args()
 
-#logger.setLevel(option.verbosity)
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=option.verbosity,
@@ -208,7 +197,7 @@ MQTT_PASSWORD=option.broker_password
 MQTT_SERVER=option.broker_address
 MQTT_PORT=option.broker_port
 MQTT_PROTOCOL=option.broker_protocol
-#MQTT_ENCRYPTION=option.broker_encryption
+#MQTT_ENCRYPTION=option.broker_encryption               #  For future development !!!
 COMFORT_ADDRESS=option.comfort_address
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id
@@ -216,98 +205,72 @@ MQTT_LOG_LEVEL=option.verbosity
 COMFORT_INPUTS=int(option.alarm_inputs)
 COMFORT_OUTPUTS=int(option.alarm_outputs)
 COMFORT_RESPONSES=int(option.alarm_responses)
-##COMFORT_FLAGS=int(option.alarm_flags)
-##COMFORT_COUNTERS=int(option.alarm_counters)
 COMFORT_TIME=str(option.comfort_time)
 COMFORT_RIO_INPUTS=str(option.alarm_rio_inputs)
 COMFORT_RIO_OUTPUTS=str(option.alarm_rio_outputs)
 
-
-#MQTT_USER=$(bashio::config 'mqtt_user')
-#MQTT_PASSWORD=$(bashio::config 'mqtt_password')
-#MQTT_SERVER=$(bashio::config 'mqtt_broker_address')
-#MQTT_PORT=$(bashio::config 'mqtt_broker_port')
-#COMFORT_ADDRESS=$(bashio::config 'comfort_address')
-#COMFORT_PORT=$(bashio::config 'comfort_port')
-#COMFORT_LOGIN_ID=$(bashio::config 'comfort_login_id')
-#MQTT_CA_CERT_PATH=$(bashio::config 'broker_ca')
-#MQTT_CLIENT_CERT_PATH=$(bashio::config 'broker_client_cert')
-#MQTT_CLIENT_KEY_PATH=$(bashio::config 'broker_client_key')
-#MQTT_LOG_LEVEL=$(bashio::config 'log_verbosity')
-
-#Todo: Set Number of Zones and calculate virtual zones.
-
-ALARMINPUTTOPIC = DOMAIN+"/input%d"   #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
-ALARMINPUTBYPASSTOPIC = DOMAIN+"/input%d/bypass"    # Bypass Status.
+ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
+ALARMINPUTBYPASSTOPIC = DOMAIN+"/input%d/bypass"        # Bypass Status.
 if int(COMFORT_INPUTS) < 8:
     COMFORT_INPUTS = "8"
-ALARMVIRTUALINPUTRANGE = range(1,int(COMFORT_INPUTS)+1)   #set this according to your system. Starts at 1 -> {value}
-ALARMINPUTCOMMANDTOPIC = DOMAIN+"/input%d/set"   #input1,input2,... input128 for virtual inputs
+ALARMVIRTUALINPUTRANGE = range(1,int(COMFORT_INPUTS)+1) #set this according to your system. Starts at 1 -> {value}
+ALARMINPUTCOMMANDTOPIC = DOMAIN+"/input%d/set"          #input1,input2,... input128 for virtual inputs
 
-ALARMRIOINPUTTOPIC = DOMAIN+"/input%d"   #input129,input130,... input248 for every input. Physical SCS/RIO Inputs (Default 0), Max 120  
+ALARMRIOINPUTTOPIC = DOMAIN+"/input%d"                  #input129,input130,... input248 for every input. Physical SCS/RIO Inputs (Default 0), Max 120  
 if int(COMFORT_RIO_INPUTS) < 0:
     COMFORT_RIO_INPUTS = "0"
 ALARMRIOINPUTRANGE = range(129,129+int(COMFORT_RIO_INPUTS))   #set this according to your system. Starts at 129 -> 248 (Max.)
-ALARMRIOINPUTCOMMANDTOPIC = DOMAIN+"/input%d/set"   #input129,input130,... input248 for SCS/RIO inputs. Cannot set as Virtual Input.
+ALARMRIOINPUTCOMMANDTOPIC = DOMAIN+"/input%d/set"       #input129,input130,... input248 for SCS/RIO inputs. Cannot set as Virtual Input.
 
-ALARMOUTPUTTOPIC = DOMAIN+"/output%d" #output1,output2,... for every output
+ALARMOUTPUTTOPIC = DOMAIN+"/output%d"                   #output1,output2,... for every output
 if int(COMFORT_OUTPUTS) < 0:
     COMFORT_OUTPUTS = "0"
-ALARMNUMBEROFOUTPUTS = int(COMFORT_OUTPUTS)    #set this according to your system. Physical Outputs (Default 0), Max 96
-ALARMOUTPUTCOMMANDTOPIC = DOMAIN+"/output%d/set" #output1/set,output2/set,... for every output
+ALARMNUMBEROFOUTPUTS = int(COMFORT_OUTPUTS)             #set this according to your system. Physical Outputs (Default 0), Max 96
+ALARMOUTPUTCOMMANDTOPIC = DOMAIN+"/output%d/set"        #output1/set,output2/set,... for every output
 
-ALARMRIOOUTPUTTOPIC = DOMAIN+"/output%d" #output129,output130,... for every SCS/RIO output
+ALARMRIOOUTPUTTOPIC = DOMAIN+"/output%d"                #output129,output130,... for every SCS/RIO output
 if int(COMFORT_RIO_OUTPUTS) < 0:
     COMFORT_RIO_OUTPUTS = "0"
 ALARMRIOOUTPUTRANGE = range(129,129+int(COMFORT_RIO_OUTPUTS))    #set this according to your system. Physical SCS/RIO Outputs (Default 0), Max 120
-ALARMRIOOUTPUTCOMMANDTOPIC = DOMAIN+"/output%d/set" #output129,output130,... output248 for SCS/RIO outputs.
+ALARMRIOOUTPUTCOMMANDTOPIC = DOMAIN+"/output%d/set"     #output129,output130,... output248 for SCS/RIO outputs.
 
-ALARMNUMBEROFRESPONSES = COMFORT_RESPONSES    #set this according to your system. Default 0, Max 1024
-ALARMRESPONSECOMMANDTOPIC = DOMAIN+"/response%d/set" #response1,response2,... for every response
+ALARMNUMBEROFRESPONSES = COMFORT_RESPONSES              #set this according to your system. Default 0, Max 1024
+ALARMRESPONSECOMMANDTOPIC = DOMAIN+"/response%d/set"    #response1,response2,... for every response
 
-#ALARMNUMBEROFFLAGS = COMFORT_FLAGS    #set this according to your system. Default 254 (0-254), Max 254. 0 for None.
-ALARMNUMBEROFFLAGS = 254                # Max Flags for system
-ALARMFLAGTOPIC = DOMAIN+"/flag%d"   #flag1,flag2,...flag254
-ALARMFLAGCOMMANDTOPIC = DOMAIN+"/flag%d/set" #flag1/set,flag2/set,... flag254/set
+ALARMNUMBEROFFLAGS = 254                                # Max Flags for system
+ALARMFLAGTOPIC = DOMAIN+"/flag%d"                       #flag1,flag2,...flag254
+ALARMFLAGCOMMANDTOPIC = DOMAIN+"/flag%d/set"            #flag1/set,flag2/set,... flag254/set
 
-ALARMNUMBEROFSENSORS = 32       # Use system default = 32 (0-31)
-ALARMSENSORTOPIC = DOMAIN+"/sensor%d"   #sensor0,sensor1,...sensor31
-ALARMSENSORCOMMANDTOPIC = DOMAIN+"/sensor%d/set" #sensor0,sensor1,...sensor31
+ALARMNUMBEROFSENSORS = 32                               # Use system default = 32 (0-31)
+ALARMSENSORTOPIC = DOMAIN+"/sensor%d"                   #sensor0,sensor1,...sensor31
+ALARMSENSORCOMMANDTOPIC = DOMAIN+"/sensor%d/set"        #sensor0,sensor1,...sensor31
 
-ALARMNUMBEROFCOUNTERS = 255 #COMFORT_COUNTERS        # set according to system. Default 255 (0-254), Max 255
-ALARMCOUNTERINPUTRANGE = DOMAIN+"/counter%d"  #each counter represents a value EG. light level
-ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set" # set the counter to a value for between 0 (off) to 255 (full on) or any 16-bit value.
-ALARMCOUNTERSTATETOPIC = DOMAIN+"/counter%d/state" # Holds the state of the object, either ON or OFF depending on the value. # State On=1 or Off=0
+ALARMNUMBEROFCOUNTERS = 255                             # Hardcoded to 255
+ALARMCOUNTERINPUTRANGE = DOMAIN+"/counter%d"            #each counter represents a value EG. light level
+ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set"      # set the counter to a value for between 0 (off) to 255 (full on) or any 16-bit value.
+ALARMCOUNTERSTATETOPIC = DOMAIN+"/counter%d/state"      # Holds the state of the object, either ON or OFF depending on the value. # State On=1 or Off=0
 
-ALARMTIMERREPORTTOPIC = DOMAIN+"/timer%d"       #each timer instance.
-ALARMNUMBEROFTIMERS = 64                        # default timer instances. 1 - 64.
+ALARMTIMERREPORTTOPIC = DOMAIN+"/timer%d"               #each timer instance.
+ALARMNUMBEROFTIMERS = 64                                # default timer instances. 1 - 64.
 
 logger.info('Completed importing addon configuration options')
-#print ("")
 
 # The following variables values were passed through via the Home Assistant add on configuration options
 logger.debug('The following variable values were passed through via the Home Assistant')
 logger.debug('MQTT_USER = %s', MQTT_USER)
 logger.debug('MQTT_PASSWORD = ******')
 logger.debug('MQTT_SERVER = %s', MQTT_SERVER)
-#logger.debug('MQTT_PORT = %s', MQTT_PORT)
+logger.debug('MQTT_PORT = %s', MQTT_PORT)             
 logger.debug('MQTT_PROTOCOL = %s/%s', MQTT_PROTOCOL, MQTT_PORT)
-#logger.debug('MQTT_ENCRYPTION = %s', MQTT_ENCRYPTION)
+#logger.debug('MQTT_ENCRYPTION = %s', MQTT_ENCRYPTION)  #  For future development !!!
 logger.debug('COMFORT_ADDRESS = %s', COMFORT_ADDRESS)
 logger.debug('COMFORT_PORT = %s', COMFORT_PORT)
 logger.debug('COMFORT_LOGIN_ID = ******')
-#logger.debug('MQTT_CA_CERT_PATH = %s', MQTT_CA_CERT_PATH)
-#logger.debug('MQTT_CLIENT_CERT_PATH = %s', MQTT_CLIENT_CERT_PATH)
-#logger.debug('MQTT_CLIENT_KEY_PATH = %s', MQTT_CLIENT_KEY_PATH)
+#logger.debug('MQTT_CA_CERT_PATH = %s', MQTT_CA_CERT_PATH)          #  For future development !!!
+#logger.debug('MQTT_CLIENT_CERT_PATH = %s', MQTT_CLIENT_CERT_PATH)  #  For future development !!!
+#logger.debug('MQTT_CLIENT_KEY_PATH = %s', MQTT_CLIENT_KEY_PATH)    #  For future development !!!
 
 logger.debug('MQTT_LOG_LEVEL = %s', MQTT_LOG_LEVEL)
-##logger.debug('COMFORT_INPUTS= %s', COMFORT_INPUTS)
-##logger.debug('COMFORT_OUTPUTS= %s', COMFORT_OUTPUTS)
-##logger.debug('COMFORT_RIO_INPUTS= %s', COMFORT_RIO_INPUTS)
-##logger.debug('COMFORT_RIO_OUTPUTS= %s', COMFORT_RIO_OUTPUTS)
-##logger.debug('COMFORT_RESPONSES= %s', COMFORT_RESPONSES)
-##logger.debug('COMFORT_FLAGS= %s', COMFORT_FLAGS)
-##logger.debug('COMFORT_COUNTERS= %s', COMFORT_COUNTERS)
 logger.debug('COMFORT_TIME= %s', COMFORT_TIME)
 
 # Map HA variables to internal variables.
@@ -320,22 +283,12 @@ COMFORTIP = COMFORT_ADDRESS
 COMFORTPORT = int(COMFORT_PORT)
 PINCODE = COMFORT_LOGIN_ID
 
-# Used by Docker, please comment out below if HA above is used.
-
-#MQTTBROKERIP = os.environ['MQTTBROKERIP']
-#MQTTBROKERPORT = int(os.environ['MQTTBROKERPORT'])
-#MQTTUSERNAME = os.environ['MQTTUSERNAME']
-#MQTTPASSWORD = os.environ['MQTTPASSWORD']
-#COMFORTIP = os.environ['COMFORTIP']
-#COMFORTPORT = int(os.environ['COMFORTPORT'])
-#PINCODE = os.environ['COMFORTPIN']
-
 BUFFER_SIZE = 4096
-TIMEOUT = timedelta(seconds=30) #Comfort will disconnect if idle for 120 secs, so make sure this is less than that
+TIMEOUT = timedelta(seconds=30)                         #Comfort will disconnect if idle for 120 secs, so make sure this is less than that
 RETRY = timedelta(seconds=10)
 
 class ComfortLUUserLoggedIn(object):
-    def __init__(self, datastr="", user=1):     #changed to see what happens !!!
+    def __init__(self, datastr="", user=1):             
         if datastr:
             self.user = int(datastr[2:4], 16)
         else:
@@ -357,34 +310,24 @@ class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (coun
         if datastr:
             self.counter = int(datastr[2:4], 16)    #Integer value 3
             #logger.debug("ComfortCTCounterActivationReport[counter(int)]: %s", self.counter)
-            #self.state = self.ComfortSigned16(datastr[4:6]+datastr[6:8])                                # Use 16-bit format
-            self.value = self.ComfortSigned16(int("%s%s" % (datastr[6:8], datastr[4:6]),16))    # Use new 16-bit format
-            self.state = self.state = 1 if (int(datastr[4:6],16) > 0) else 0                             # 8-bit value used for state
-            #self.state = self.ComfortSigned16(hex(int("%s%s" % (datastr[6:8], datastr[4:6]),16)))       # Use new 16-bit format        state = FF7F
+            self.value = self.ComfortSigned16(int("%s%s" % (datastr[6:8], datastr[4:6]),16))            # Use new 16-bit format
+            self.state = self.state = 1 if (int(datastr[4:6],16) > 0) else 0                            # 8-bit value used for state
             #logger.debug("ComfortCTCounterActivationReport[state(int)]: %s", self.state)
         else:
             self.counter = counter
             self.value = value
             self.state = state
-            #self.state = self.byte_swap_16_bit(state)
 
-    def ComfortSigned16(self,value):     # Returns signed 16-bit value where required.
+    def ComfortSigned16(self,value):                                            # Returns signed 16-bit value where required.
         return -(value & 0x8000) | (value & 0x7fff)
     
-    #def ComfortSigned16(self,value):     # Returns signed 16-bit value where required.
-    #    #logger.debug("#313 ComfortSigned16[value]: %s", value)
-    #    value = self.byte_swap_16_bit(value)
-    #    #logger.debug("#315 ComfortSigned16[value]: %s", value[2:].zfill(4))
-    #    #return -(value & 0x8000) | (value & 0x7fff)
-    #    return self.HexToSigned16Decimal(value[2:].zfill(4))
-
-### Add Byte-Swap code below ###
-    def HexToSigned16Decimal(self,value):        # Returns Signed Decimal value from HEX string EG. FFFF = -1
+    ### Byte-Swap code below ###
+    def HexToSigned16Decimal(self,value):                                       # Returns Signed Decimal value from HEX string EG. FFFF = -1
         #logger.debug("#321 HexToSigned16Decimal[value]: %s", value)
         return -(int(value,16) & 0x8000) | (int(value,16) & 0x7fff)
 
     def byte_swap_16_bit(self, hex_string):
-        # Ensure the string is prefixed with '0x' for hex conversion
+        # Ensure the string is prefixed with '0x' for hex conversion            # Trying to cleanup strings.
         if not hex_string.startswith('0x'):
             hex_string = '0x' + hex_string
     
@@ -424,7 +367,6 @@ class ComfortBYBypassActivationReport(object):
     global BYPASSEDZONES
 
     def __init__(self, datastr="", zone=0, state=0):
-        #logger.debug("BY - still under development - update global table")
         if datastr:
             self.zone = int(datastr[2:4],16)
             self.state = int(datastr[4:6],16)
@@ -436,25 +378,23 @@ class ComfortBYBypassActivationReport(object):
             if (self.zone in BYPASSEDZONES):
                 BYPASSEDZONES.remove(self.zone)
                 if BYPASSEDZONES.count(-1) == 0 and len(BYPASSEDZONES) == 0:
-                    BYPASSEDZONES.append(-1)    # Add '-1' when last entry is removed.
+                    BYPASSEDZONES.append(-1)        # Add '-1' when last entry is removed.
             else:
                 logger.debug("ValueError Exception: Bypassed Zone does not appear in BYPASSEDZONES List[]")
-        elif (self.state == 1):   # State == 1 meaning must be in bypasszones
+        elif (self.state == 1):                     # State == 1 meaning must be in bypasszones
             if (self.zone not in BYPASSEDZONES):
-                #print ("Not in BYPASSEDZONES")
                 BYPASSEDZONES.append(self.zone)
-            if BYPASSEDZONES.count(-1) >= 1:     #Remove -1 that indicates empty list.
+            if BYPASSEDZONES.count(-1) >= 1:        #Remove -1 that indicates empty list.
                 BYPASSEDZONES.remove(-1)
 
         BYPASSEDZONES.sort(reverse=False)
         result_string = ','.join(map(str, BYPASSEDZONES))
-        #print ("result_string:"+result_string)
         self.value = result_string
 
 class ComfortZ_ReportAllZones(object):
     def __init__(self, data={}):
         self.inputs = []
-        b = (len(data) - 2) // 2   #variable number of zones reported
+        b = (len(data) - 2) // 2            #variable number of zones reported
         self.max_zones = b * 8
         for i in range(1,b+1):
             inputbits = int(data[2*i:2*i+2],16)
@@ -464,7 +404,7 @@ class ComfortZ_ReportAllZones(object):
 class Comfort_Z_ReportAllZones(object):     #SCS/RIO z?
     def __init__(self, data={}):
         self.inputs = []    
-        b = (len(data) - 2) // 2   #variable number of zones reported
+        b = (len(data) - 2) // 2            #variable number of zones reported
         self.max_zones = b * 8
         for i in range(1,b+1):  
             inputbits = int(data[2*i:2*i+2],16)
@@ -475,14 +415,12 @@ class Comfort_RSensorActivationReport(object):
     def __init__(self, datastr="", sensor=0, state=0):
         if datastr:
             self.sensor = int(datastr[2:4], 16)
-            #self.state = int(datastr[4:6], 16)
             self.value = self.ComfortSigned16(int("%s%s" % (datastr[6:8], datastr[4:6]),16))    # Use new 16-bit format
-            #print("self.state:%s" % (self.ComfortSigned16(int("%s%s" % (datastr[6:8], datastr[4:6]),16))))
         else:
             self.sensor = sensor
             self.value = state
 
-    def ComfortSigned16(self,value):     # Returns signed 16-bit value where required.
+    def ComfortSigned16(self,value):        # Returns signed 16-bit value where required.
         return -(value & 0x8000) | (value & 0x7fff)
 
 class Comfort_R_ReportAllSensors(object):
@@ -490,7 +428,7 @@ class Comfort_R_ReportAllSensors(object):
         #logger.debug("ReportAllSensors(data): %s", data)
         self.sensors = []
         self.counters = []
-        b = (len(data) - 8) // 4   #Fixed number of sensors reported from r?01 command. 0-15 and 16-31.
+        b = (len(data) - 8) // 4             #Fixed number of sensors reported from r?01 command. 0-15 and 16-31.
         self.RegisterStart = int(data[4:6],16)
         self.RegisterType = int(data[2:4],16)
         #logger.debug("len(data) - 8 // 4: %s", b)
@@ -498,11 +436,10 @@ class Comfort_R_ReportAllSensors(object):
         #logger.debug("RegisterType: %s", self.RegisterType)
         for i in range(0,b):
             if self.RegisterType == 1:  #Sensor
-                sensorbits = data[8+(4*i):8+(4*i)+4]        #0000
+                sensorbits = data[8+(4*i):8+(4*i)+4]
                 
                 #Swap bits here.
                 #Change to Signed value here.
-                #self.value = int("%s%s" % (sensorbits[2:4], sensorbits[0:2]),16)
                 self.value = int((sensorbits[2:4] + sensorbits[0:2]),16)
                 self.sensor =  self.RegisterStart+i
                 #logger.debug("Type:%d, Sensor:%s, Integer Value:%s" % (self.RegisterType, self.sensor, self.value))
@@ -516,7 +453,6 @@ class Comfort_R_ReportAllSensors(object):
                 #logger.debug("state: %s", self.state)
                 self.counter = self.RegisterStart+i
                 self.counters.append(ComfortCTCounterActivationReport("", self.RegisterStart+i, self.value, self.state))
-            #    #print("Type:%d, Register:%d, Inputbits:%d" % (self.RegisterType, self.RegisterStart+i, value))
     
     def ComfortSigned16(self,value):     # Returns signed 16-bit value from HEX value.
         return -(value & 0x8000) | (value & 0x7fff)
@@ -553,13 +489,10 @@ class ComfortB_ReportAllBypassZones(object):
         source_hex = int(data[4:], 16)
         # Convert the hex number to binary string
         binary_number = bin(source_hex)[2:].zfill(source_length)  # Convert to binary and zero-fill to 24 bits indicating all zones
-        #print ("binary_number:"+binary_number)
         # Determine the length of the binary number
         num_bits = len(binary_number)   #96
-        #print ("num_bits:"+str(num_bits))
         # Extract 8-bit segments from the binary number
         eight_bit_segments = [binary_number[i:i+8] for i in range(0, num_bits, 8)]
-        #print ("eight_bit_segments:"+str(eight_bit_segments))
         self.zones = []
         for i, segment in enumerate(eight_bit_segments, start=0):
             start_zone = 1 + (8 * i)
@@ -567,10 +500,8 @@ class ComfortB_ReportAllBypassZones(object):
                 if (start_zone + j - 1) < 129:     # Max 128 zones
                     zone_number = int(start_zone + j - 1)
                     zone_state = int(segment[8 - j],2)
-                    #logger.debug("Zone Number:%s, State:%s", zone_number, zone_state)
                     if zone_state == 1:
                         BYPASSEDZONES.append(zone_number)
-                        #logger.debug("BYPASSEDZONE.append(%d)(%d)", zone_number, zone_state)
                         self.zones.append(ComfortBYBypassActivationReport("", hex(zone_number), hex(zone_state)))
 
         if len(BYPASSEDZONES) == 0:      # If No Zones Bypassed, enter '-1' in the List[]
@@ -595,7 +526,6 @@ class Comfortf_ReportAllFlags(object):
         for i, segment in enumerate(eight_bit_segments, start=0):
             # Adjust flag numbering for subsequent iterations
             start_flag = 1 + (8 * i)
-            #end_flag = 8 + (8 * i)
             # Extract individual bit values and assign to flags
             flags = {}
             for j in range(1, 9):   # Flag 1 to 8 (Saved as 0 - 7)
@@ -609,7 +539,6 @@ class Comfortf_ReportAllFlags(object):
 class ComfortM_SecurityModeReport(object):
     def __init__(self, data={}):
         self.mode = int(data[2:4],16)
-        #if self.mode == 0: self.modename = "Security Off"
         if self.mode == 0: self.modename = "disarmed"; logger.info("Security Off")
         elif self.mode == 1: self.modename = "armed_away"; logger.info("Armed Away Mode")
         elif self.mode == 2: self.modename = "armed_night"; logger.info("Armed Night Mode")
@@ -676,7 +605,7 @@ class ComfortAMSystemAlarmReport(object):
 #Bit 6 = GSM trouble
 #Bit 7 = Unused
 
-class Comfort_A_SecurityInformationReport(object):      # Not implemented.
+class Comfort_A_SecurityInformationReport(object):      #  For future development !!!
     #a?000000000000000000
     def __init__(self, data={}):
         self.AA = int(data[2:4],16)     #AA is the current Alarm Type 01 to 1FH (Defaults can be changed in Comfigurator)
@@ -750,19 +679,14 @@ class Comfort2(mqtt.Client):
         logger.debug('SIGTSTP (Ctrl-Z) intercepted')
 
     def sigquit_handler(signum, frame):         # Ctrl-\ Keyboard Interrupt
+        global RUN
         logger.debug("SIGQUIT intercepted")
         RUN = False
 
-    #def handler(signum, frame):
-    #    logger.debug('SIGTSTP/SIGQUIT intercepted and ignored')
-
     signal.signal(signal.SIGTSTP, handler)
-    #signal.signal(signal.SIGQUIT, sigquit_handler)     # exit gracefully further down.
 
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc, properties):
-        #print("Broker Connected with result code "+str(rc))
-        #print("rc: %s", str(rc))
 
         global RUN
         global BROKERCONNECTED
@@ -770,19 +694,17 @@ class Comfort2(mqtt.Client):
         
         if rc == 'Success':
 
-            #RUN = True
             BROKERCONNECTED = True
 
             #logger.info('MQTT Broker %s (%s)', mqtt_strings[rc], str(rc))
             logger.info('MQTT Broker %s', str(rc))
 
-#Wait 3s Here.
+            #Wait 3s for Comfort to settle a bit.
 
             # You need to subscribe to your own topics to enable publish messages activating Comfort entities.
             self.subscribe(ALARMCOMMANDTOPIC)
             #self.subscribe(ALARMSTATUSTOPIC)
             #self.subscribe(ALARMBYPASSTOPIC)
-            # Alarm Message Topic + Extended Message Topic ???
 
             #logger.debug('ALARMNUMBEROFOUTPUTS: %s', str(ALARMNUMBEROFOUTPUTS))
             for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
@@ -860,9 +782,8 @@ class Comfort2(mqtt.Client):
                     self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)
                 elif msgstr == "ARM_AWAY":
                     self.comfortsock.sendall(("\x03m!01"+self.comfort_pincode+"\r").encode()) #Local arm to 01 away mode. Requires # for open zones + Exit door
-                    self.publish(ALARMMESSAGETOPIC, "Please Exit...", qos=0, retain=False)
+                    #self.publish(ALARMMESSAGETOPIC, "Please Exit...", qos=0, retain=False)   #  For future development in extended message !!!
                     self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)
-                    # Insert "Please Exit message here"
                 elif msgstr == "ARM_CUSTOM_BYPASS":
                     self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send '#' key code (KD1A)
                 elif msgstr == "DISARM":
@@ -910,11 +831,6 @@ class Comfort2(mqtt.Client):
                 state = int(msgstr)
                 if self.connected:
                     self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
-
-            #    state = int(msgstr)
-            #    if self.connected:
-            #        self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
-
         elif msg.topic.startswith(DOMAIN+"/sensor") and msg.topic.endswith("/set"): # sensor set
             #logger.debug("msg.topic: %s",msg.topic)
             sensor = int(msg.topic.split("/")[1][6:])
@@ -928,8 +844,6 @@ class Comfort2(mqtt.Client):
     
     def CheckZoneNameFormat(self,value):      # Checks CSV file Zone Name to only contain valid characters. Return False if it fails else True
         
-        #print ("ZoneNameFormat:" + str(value))
-        #pattern = r'^[a-zA-Z0-9_ -]+$'
         pattern = r'^(?![ ]{1,}).{1}[a-zA-Z0-9_ -]+$'
         return bool(re.match(pattern, value))
     
@@ -943,11 +857,6 @@ class Comfort2(mqtt.Client):
         else:
             return False
     
-    #def HexToSigned16Decimal(self,value):        # Returns Signed Decimal value from HEX string EG. FFFF = -1
-    #    #print("Value:", value)
-    #    return -(int(value,16) & 0x8000) | (int(value,16) & 0x7fff)
-    
-
     def HexToSigned16Decimal(self,value):        # Returns Signed Decimal value from HEX string EG. FFFF = -1
         #logger.debug("690-HexToSigned16Decimal[value]: %s",value)
         return -(int(value,16) & 0x8000) | (int(value,16) & 0x7fff)
@@ -968,26 +877,20 @@ class Comfort2(mqtt.Client):
 
     def on_publish(self, client, obj, mid, reason_codes, properties):
         #logger.debug("on_publish")
-        #logger.debug("client: " + str(client))
-        #logger.debug("mid: " + str(mid))
-        #logger.debug("obj: " + str(obj))
         pass
 
     def on_subscribe(self, client, userdata, mid, reason_codes, properties):
-        #print("subscribed "+str(userdata))
         for sub_result in reason_codes:
             if sub_result == 1:
-                logger.debug("QoS == 1")
+                #logger.debug("QoS Value == 1")              # For Information Only
+                pass
             if sub_result >= 128:
-                logger.debug("Error processing subscribe")
-        #pass
+                logger.debug("Error processing subscribe message")
 
     def on_log(self, client, userdata, level, buf):
-        #print("log: ",buf)
         pass
 
     def entryexit_timer(self):
-        #print("timer: "+str(self.entryexitdelay))
         self.publish(ALARMTIMERTOPIC, self.entryexitdelay,qos=0,retain=True)
         self.entryexitdelay -= 1
         if self.entryexitdelay >= 0:
@@ -996,12 +899,6 @@ class Comfort2(mqtt.Client):
     def readlines(self, recv_buffer=BUFFER_SIZE, delim='\r'):
 
         global FIRST_LOGIN
-        #global SAVEDTIME
-        #global TIMEOUT
-
-        #logger.debug("SAVEDTIME %s", SAVEDTIME)
-        #logger.debug("TIMEOUT %s", TIMEOUT)
-
         buffer = ''
         data = True
         while data:
@@ -1027,8 +924,7 @@ class Comfort2(mqtt.Client):
                     #logger.debug('data:%s', str(data))
                     #logger.debug('data:%s', str(data))
                     logger.debug('Comfort initiated disconnect (LU00).')
-                    self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
-                    # perhaps send 'LI' to logout gracefully - To be Tested !!!
+                    self.comfortsock.sendall("\x03LI\r".encode()) # Try and gracefully logout if possible.
                     FIRST_LOGIN = True
                 else:
                     # got a message do something :)
@@ -1085,7 +981,7 @@ class Comfort2(mqtt.Client):
             self.publish(ALARMAVAILABLETOPIC, 1,qos=0,retain=True)
             self.publish(ALARMLWTTOPIC, 'Online',qos=0,retain=True)
             self.publish(ALARMMESSAGETOPIC, "",qos=0,retain=True)       # Emptry string removes topic.
-            #self.publish(ALARMEXTMESSAGETOPIC, "",qos=0,retain=True)    # Emptry string removes topic.
+            #self.publish(ALARMEXTMESSAGETOPIC, "",qos=0,retain=True)    # Emptry string removes topic. For future development !!!
 
     def setdatetime(self):
         if self.connected == True:  #set current date and time if COMFORT_TIME Flag is set to True
@@ -1108,19 +1004,7 @@ class Comfort2(mqtt.Client):
         if self.connected == True:
             self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
         #logger.debug(signum)
-        if BROKERCONNECTED == True:      # MQTT Connected ??
-            infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
-            infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
-            infot.wait_for_publish()
-        RUN = False
-
-    def exit_gracefully2(self, signum, frame):
-        #self.kill_now = True
-        global RUN
-        if self.connected == True:
-            self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
-        #logger.debug("SIGHUP")
-        if BROKERCONNECTED == True:      # MQTT Connected ??
+        if BROKERCONNECTED == True:      # MQTT Connected
             infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
             infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
             infot.wait_for_publish()
@@ -1159,11 +1043,10 @@ class Comfort2(mqtt.Client):
                     # Iterate over each row in the CSV file
                     for row in reader:
                         # Truncate the 'zone' numeric value to 3 characters (0-999) and 'name' to 30 characters. 
-                        #zone = row['zone'][:3]
 
                         if self.CheckZoneNumberFormat(row['zone'][:3]):
-                            zone = row['zone'][:3]      # Check Zone Number sanity else blank.
-                            ZONEMAPFILE = True      # File available and data read into dictionary 'data'
+                            zone = row['zone'][:3]          # Check Zone Number sanity else blank.
+                            ZONEMAPFILE = True              # File available and data read into dictionary 'data'
                         else: 
                             zone = ""
                             logger.error("Invalid Zone Number detected in 'zones.csv' file, file ignored.")
@@ -1171,14 +1054,13 @@ class Comfort2(mqtt.Client):
                             break
 
                         if self.CheckZoneNameFormat(row['name'][:30]): 
-                            name = row['name'][:30]      # Check Zone sanity else blank.
-                            ZONEMAPFILE = True      # File available and data read into dictionary 'data'
+                            name = row['name'][:30]         # Check Zone sanity else blank.
+                            ZONEMAPFILE = True              # File available and data read into dictionary 'data'
                         else: 
                             name = ""
                             logger.error("Invalid Zone Name detected in 'zones.csv' file, file ignored.")
-                            ZONEMAPFILE = False      # File available and data read into dictionary 'data'
+                            ZONEMAPFILE = False             # File available and data read into dictionary 'data'
                             break
-
 
                         # Add the truncated value to the dictionary
                         self.zone_to_name[zone] = name
@@ -1195,18 +1077,14 @@ class Comfort2(mqtt.Client):
             while RUN:
                 try:
                     self.comfortsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    #print("Connecting to "+self.comfort_ip+" "+str(self.comfort_port))
                     logger.info('Connecting to Comfort (%s) on port %s', self.comfort_ip, str(self.comfort_port) )
                     self.comfortsock.connect((self.comfort_ip, self.comfort_port))
                     self.comfortsock.settimeout(TIMEOUT.seconds)
                     self.login()
-                    #if line[0:1] == "\x03":
                     for line in self.readlines():
-                        #if line[0:1] != "\x03":    # Trying to catch lines with incorrect STX character. Issues with Bus Monitor using \r as data instead of EOL.
-                        #    continue
                         if line[1:] != "cc00":
-                            logger.debug(line[1:])  	# Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
-                        if self.check_string(line[:3]):  #"\x03":   #check for valid prefix.
+                            logger.debug(line[1:])  	    # Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
+                        if self.check_string(line[:3]):     # Was "\x03":   #check for valid prefix now.
                             if line[1:3] == "LU":
                                 luMsg = ComfortLUUserLoggedIn(line[1:])
                                 if luMsg.user != 0:
@@ -1220,8 +1098,6 @@ class Comfort2(mqtt.Client):
                                     logger.debug("...Finished")
 
                                     self.connected = True  
-                                    #client.publish(ALARMSTATETOPIC, "disarmed")
-                                    #if BROKERCONNECTED == True:
                                     self.publish(ALARMCOMMANDTOPIC, "comm test",qos=0,retain=True)
                                     self.setdatetime()      # Set Date/Time if Option is enabled
                                     
@@ -1230,61 +1106,43 @@ class Comfort2(mqtt.Client):
                                         FIRST_LOGIN = False
                                 else:
                                     logger.debug("Disconnect (LU00) Received from Comfort.")
-                                    #logger.debug("FIRST_LOGIN:%s", str(FIRST_LOGIN))
-                                    #self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
-                                    #self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
-                                    #RUN = False
                                     FIRST_LOGIN = True
                                     break
-                            elif line[1:5] == "PS00":     # Set Date/Time once a day on receipt of PS command. Usually midnight or any time the system is armed.
-                                #logger.debug('In the PS00 section')
+                            elif line[1:5] == "PS00":       # Set Date/Time once a day on receipt of PS command. Usually midnight or any time the system is armed.
                                 self.setdatetime()          # Set Date/Time if Flag is set at 00:00 every day if option is enabled.
                             elif line[1:3] == "IP":
                                 ipMsg = ComfortIPInputActivationReport(line[1:])
-                                #print("input %d state %d" % (ipMsg.input, ipMsg.state))
                                 self.publish(ALARMINPUTTOPIC % ipMsg.input, ipMsg.state,qos=0,retain=True)
                             elif line[1:3] == "CT":
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
-                                #print("counter %d state %d" % (ipMsgCT.counter, ipMsgCT.state))
                                 self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=0,retain=True)     # Value Information
                                 self.publish(ALARMCOUNTERSTATETOPIC % ipMsgCT.counter, ipMsgCT.state,qos=0,retain=True)     # State Information
                             elif line[1:3] == "s?":
                                 ipMsgSQ = ComfortCTCounterActivationReport(line[1:])
-                                #logger.debug("sensor %s state %s" % (ipMsgSR.counter, ipMsgSR.state))
                                 self.publish(ALARMSENSORTOPIC % ipMsgSQ.counter, ipMsgSQ.state)
                             elif line[1:3] == "sr":
                                 ipMsgSR = ComfortCTCounterActivationReport(line[1:])
-                                #logger.debug("sensor %d state %d" % (ipMsgSR.counter, self.HexToSigned16Decimal(ipMsgSR.state)))
-                                #logger.debug("state %s" % ipMsgSR.state)
-                                #self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, self.HexToSigned16Decimal(ipMsgSR.state))
                                 self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, ipMsgSR.state)
                                 
                             elif line[1:3] == "TR":
                                 ipMsgTR = ComfortCTCounterActivationReport(line[1:])
-                                #logger.debug("timer %d value(s) %d" % (ipMsgTR.counter, ipMsgTR.state))
-                                #logger.debug("state %s" % ipMsgSR.state)
-                                #self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, self.HexToSigned16Decimal(ipMsgSR.state))
                                 self.publish(ALARMTIMERREPORTTOPIC % ipMsgTR.counter, ipMsgTR.state,qos=0,retain=False)
-                            elif line[1:3] == "Z?":     # Zones/Inputs
+                            elif line[1:3] == "Z?":                             # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
-                                    #print("input %d state %d" % (ipMsgZ.input, ipMsgZ.state))
                                     self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
                                 logger.debug("Max. Reported Zones/Inputs: %d", zMsg.max_zones)
-                            elif line[1:3] == "z?": # SCS/RIO Inputs
+                            elif line[1:3] == "z?":                             # SCS/RIO Inputs
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
-                                    #logger.debug("RIO input %d state %d" % (ipMsgZ.input, ipMsgZ.state))
                                     self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
                                 logger.debug("Max. Reported SCS/RIO Inputs: %d", zMsg.max_zones)
                             elif line[1:3] == "M?" or line[1:3] == "MD":
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
-                                #logging.debug("Alarm Mode %s", mMsg.modename)
                                 self.publish(ALARMSTATETOPIC, mMsg.modename,qos=0,retain=False)      # Was True
-                                self.entryexitdelay = 0    #zero out the countdown timer
+                                self.entryexitdelay = 0                         #zero out the countdown timer
                             elif line[1:3] == "S?":
                                 SMsg = ComfortS_SecurityModeReport(line[1:])
-                                #logging.debug("Alarm Mode %s", SMsg.modename)
                                 self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=0,retain=True)
                             elif line[1:3] == "V?":
                                 VMsg = ComfortV_SystemTypeReport(line[1:])
@@ -1292,20 +1150,14 @@ class Comfort2(mqtt.Client):
                                     logging.warning("Unsupported Comfort System detected (File System %d).", VMsg.filesystem)
                                 else:
                                     logging.info("Comfort II Ultra detected (Firmware %d.%03d).", VMsg.version, VMsg.revision)
-                                    #logging.info("Comfort II Ultra System Firmware %d.%03d ", VMsg.version, VMsg.revision)
-                            elif line[1:3] == "a?":     # Not Implemented.
+                            elif line[1:3] == "a?":     # Not Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
-                                #logging.debug("Alarm Type: %s, Alarm State: %s ", aMsg.type, aMsg.state)
                                 if aMsg.type == 'LowBattery':
                                     logging.debug("Low Battery %s", aMsg.battery)
                                 #self.publish(ALARMSTATUSTOPIC, aMsg.type,qos=0,retain=True)
-                            elif line[1:3] == "ER":                 ### Still to be looked at !!!! ###
+                            elif line[1:3] == "ER":           
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
                                 if not erMsg.zone == 0:
-                                    #Check if file is loaded, add enrichment here.
-
-                                    #print ("1:"+str(self.CheckZoneNumberFormat(str(erMsg.zone))))
-                                    #print ("3:"+str(ZONEMAPFILE))
 
                                     if ZONEMAPFILE & self.CheckZoneNumberFormat(str(erMsg.zone)):
                                         logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name.get(str(erMsg.zone),'N/A'))
@@ -1316,16 +1168,11 @@ class Comfort2(mqtt.Client):
                                     self.publish(ALARMMESSAGETOPIC, message_topic, qos=0, retain=True)          # Empty string removes topic.
                                     #self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)                 # This is the correct state for Open Zones but it removes the buttons
                                                                                                                 # from the Keypad so you can't press '#'
-
-                                    #if ZONEMAPFILE:
-                                    #    logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name[str(erMsg.zone)]) 
-                                    #else:   
-                                    #    logging.warning("Zone %s Not Ready", str(erMsg.zone))
                                 else:
                                     logging.info("Ready To Arm...")
                                     # Sending KD1A when receiving ER message confuses Comfort. When arming local to any mode it immediately goes into Arm Mode
                                     # Not all Zones are announced and it 'presses' the '#' key on your behalf.
-                                    #self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
+                                    # self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
                             elif line[1:3] == "AM":
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, amMsg.message,qos=0,retain=True)
@@ -1359,41 +1206,32 @@ class Comfort2(mqtt.Client):
                                     self.publish(ALARMMESSAGETOPIC, "Door Bell",qos=0,retain=True)
                             elif line[1:3] == "OP":
                                 ipMsg = ComfortOPOutputActivationReport(line[1:])
-                                #print("output %d state %d" % (ipMsg.output, ipMsg.state))
                                 self.publish(ALARMOUTPUTTOPIC % ipMsg.output, ipMsg.state,qos=0,retain=True)
                             elif line[1:3] == "Y?":     # Comfort Outputs
                                 yMsg = ComfortY_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
-                                    #print("output %d state %d" % (opMsgY.output, opMsgY.state))
                                     self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state,qos=0,retain=True)
                                 logger.debug("Max. Reported Outputs: %d", yMsg.max_zones)
                             elif line[1:3] == "y?":     # SCS/RIO Outputs
                                 yMsg = Comfort_Y_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
-                                    #print("RIO output %d state %d" % (opMsgY.output, opMsgY.state))
                                     self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state)
                                 logger.debug("Max. Reported SCS/RIO Outputs: %d", yMsg.max_zones)
                             elif line[1:5] == "r?00":
                                 cMsg = Comfort_R_ReportAllSensors(line[1:])
                                 for cMsgr in cMsg.counters:
-                                    #logger.debug("counter %s state %s" % (cMsgr.counter, cMsgr.state))
                                     self.publish(ALARMCOUNTERINPUTRANGE % cMsgr.counter, cMsgr.value,qos=0,retain=True)     # Value Information
                                     self.publish(ALARMCOUNTERSTATETOPIC % cMsgr.counter, cMsgr.state,qos=0,retain=True)     # State Information
                             elif line[1:5] == "r?01":
                                 sMsg = Comfort_R_ReportAllSensors(line[1:])
                                 for sMsgr in sMsg.sensors:
-                                    #print("sensor %d state %d" % (sMsgr.sensor, sMsgr.value))
                                     self.publish(ALARMSENSORTOPIC % sMsgr.sensor, sMsgr.value,qos=0,retain=False)           # Was True, test False
                             elif (line[1:3] == "f?") and (len(line) == 69):
                                 fMsg = Comfortf_ReportAllFlags(line[1:])
                                 for fMsgf in fMsg.flags:
-                                    #print("flag %d state %d" % (fMsgf.flag, fMsgf.state))
                                     self.publish(ALARMFLAGTOPIC % fMsgf.flag, fMsgf.state,qos=0,retain=True)
-                                    #logger.debug("fMsgf.flag: %s", fMsgf)    
-
                             elif (line[1:3] == "b?"):   # and (len(line) == 69):
                                 bMsg = ComfortB_ReportAllBypassZones(line[1:])
-                                #logger.debug("len(bMsg.value):%s", len(bMsg.value))
                                 if bMsg.value == "-1":
                                     logger.debug("Zones Bypassed: <None>")
                                     self.publish(ALARMBYPASSTOPIC, -1, qos=0, retain=True)
@@ -1401,33 +1239,17 @@ class Comfort2(mqtt.Client):
                                     logger.debug("Zones Bypassed: %s", bMsg.value)
                                     self.publish(ALARMBYPASSTOPIC, bMsg.value, qos=0,retain=True)
                                 for bMsgb in bMsg.zones:
-                                    #print("Zone %d Bypass State %d" % (bMsgb.zone, bMsgb.state))
                                     self.publish(ALARMINPUTBYPASSTOPIC % bMsgb.zone, bMsgb.state,qos=0,retain=True)
-                                #self.publish(ALARMINPUTBYPASSTOPIC, bMsg.zones, qos=0,retain=True)     # Issue here still !!
-                                #logger.debug("bMsg.zones: %s", bMsg.zones[1])
-
                             elif line[1:3] == "FL":
                                 flMsg = ComfortFLFlagActivationReport(line[1:])
-                                #print("flag %d state %d" % (flMsg.flag, flMsg.state))
                                 self.publish(ALARMFLAGTOPIC % flMsg.flag, flMsg.state,qos=0,retain=True)
                             elif line[1:3] == "BY":
                                 byMsg = ComfortBYBypassActivationReport(line[1:])   
-                                #print ("#1192"+str(byMsg.zone))
-                                #print ("#1193"+str(byMsg.state))
-                                #print ("#1194"+str(byMsg.value))
                                 if byMsg.state == 1:
-                                    #logger.debug("Zone %d Bypassed", byMsg.zone)
-                                    #if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)) & self.CheckZoneNameFormat(str(byMsg.zone)):
-                                    #    logging.debug("Zone %s Bypassed (%s)", str(byMsg.zone), self.zone_to_name[str(byMsg.zone)])
-                                    #else: logger.debug("Zone %d Bypassed", byMsg.zone)
                                     if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
                                         logging.warning("Zone %s Bypassed (%s)", str(byMsg.zone), self.zone_to_name.get(str(byMsg.zone),'N/A'))
                                     else: logging.warning("Zone %s Bypassed", str(byMsg.zone))
                                 else:
-                                    #logger.debug("Zone %d Unbypassed", byMsg.zone)
-                                    #if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)) & self.CheckZoneNameFormat(str(byMsg.zone)):
-                                    #    logging.debug("Zone %s Unbypassed (%s)", str(byMsg.zone), self.zone_to_name[str(byMsg.zone)])
-                                    #else: logger.debug("Zone %d Unbypassed", byMsg.zone)
                                     if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
                                         logging.info("Zone %s Unbypassed (%s)", str(byMsg.zone), self.zone_to_name.get(str(byMsg.zone),'N/A'))
                                     else: logging.info("Zone %s Unbypassed", str(byMsg.zone))
@@ -1440,10 +1262,8 @@ class Comfort2(mqtt.Client):
                                 logger.warning('Reset detected')
                                 self.login()
                             else:
-                                #print (SAVEDTIME)
                                 if datetime.now() > (SAVEDTIME + TIMEOUT):
                                     #logger.debug("Sending Keepalives")
-                                    #logger.debug("30 second Keepalive in run(), sending 'cc00'")
                                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                                     SAVEDTIME = datetime.now()
 
