@@ -19,7 +19,7 @@
 ### The MQTT traffic can be encrypted with `TLS` or sent in clear-text. The Encryption option is currently not available. The default is `False`
 
 #import asyncio
-from homeassistant.core import HomeAssistant, Event
+#from homeassistant.core import HomeAssistant, Event
 #from homeassistant.helpers.event import async_call_later, track_state_change
 import csv
 import os
@@ -86,69 +86,6 @@ mqtt_strings = ['Connection successful',
 				'Timeout waiting for PUBCOMP']
 
 logger = logging.getLogger(__name__)
-
-def handle_event(event: Event):
-    """Handle the received event."""
-    logger.debug("Received event: %s", event)    
-    # Check if the event is for reloading the add-on
-    if event.data.get('service') == 'reload_addon':
-        logger.debug("Reloading add-on...")
-        # Perform action to reload add-on
-
-def setup(hass, config):
-    """Set up is called when Home Assistant is loading our component."""
-    count = 0
-
-    # Listener to handle fired events
-    def handle_event(event):
-        nonlocal count
-        count += 1
-        logger.debug("Answer %d is: %s", count, event.data.get('answer'))
-
-    # Listen for when example_component_my_cool_event is fired
-    hass.bus.listen("comfort2", handle_event)
-
-    # Return successful setup
-    return True
-
-#async def setup_platform(hass: HomeAssistant, config: dict):
-#    logger.debug ("whatever")
-#    async_track_state_change(hass, "core_config_update", handle_config_update)
-
-#async def main():
-#    config_dir = "/config"
-#    hass = HomeAssistant(config_dir = config_dir)
-#    logger.debug ("Here")
-#    await setup_platform(hass, {})
-
-
-
-
-#async def listen_for_event(hass: HomeAssistant, event: str):
-#    """Listen for a specific event."""
-#    logger.debug("def listen_for_event()")
-#    while True:
-#        event = await hass.async_add_executor_job(hass.bus.wait_for_event, event)
-#        if event:
-#            logger.debug("Received event: %s", event)
-#            # Check if the event is for reloading the add-on
-#            if event.data.get('service') == 'reload_addon':
-#                logger.debug("Reloading add-on...")
-#                # Perform action to reload add-on
-
-#async def main(hass: HomeAssistant):
-#    """Main function."""
-#    await asyncio.gather(
-#        listen_for_event(hass, "call_service")
-#        # Add more events to listen for if needed
-#    )
-
-#if __name__ == "__main__":
-#    #config_dir = "/config"
-#    #hass = HomeAssistant(config_dir = config_dir)
-#    asyncio.run(run_program())
-
-
 
 def boolean_string(s):
     if s not in {'false', 'true'}:
@@ -1246,12 +1183,6 @@ class Comfort2(mqtt.Client):
                         # Add the truncated value to the dictionary
                         self.zone_to_name[zone] = name
 
-            #zone = '100'
-            #if zone in zone_to_name:
-            #print("Name zone_to_name:", zone_to_name)
-            #else:
-            #    print("Zone", zone, "not found in the dictionary.")
-
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         self.loop_start()
         #logging.debug("MQTT Broker Connected: %s", str(self.connected))
@@ -1262,12 +1193,6 @@ class Comfort2(mqtt.Client):
     
         try:
             while RUN:
-
-                #hass = HomeAssistant(config_dir="/config")
-                # Register callback for the event
-                #hass.bus.listen("call_service", handle_event)
-
-
                 try:
                     self.comfortsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     #print("Connecting to "+self.comfort_ip+" "+str(self.comfort_port))
@@ -1536,31 +1461,11 @@ class Comfort2(mqtt.Client):
             if self.connected == True:
                 self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
             RUN = False
-            #infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
-            #infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
-            #infot.wait_for_publish()
-            #sys.exit(130)
         finally:
             if BROKERCONNECTED == True:      # MQTT Connected ??
                 infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
                 infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 infot.wait_for_publish()
-
-# def main():
-#     """Main function."""
-#     # Initialize Home Assistant
-#     logger.debug("Running Main()")
-#     #hass = HomeAssistant()
-
-#     # Register callback for the event
-#     #hass.bus.listen("call_service", handle_event)#
-
-#     # Your existing program logic here
-
-#     while True:
-#         # Your existing program logic here
-#         pass
-
 
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
 mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE)
