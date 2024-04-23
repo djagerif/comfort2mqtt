@@ -3,8 +3,7 @@ FROM $BUILD_FROM
 
 # Install most Python deps here, because that way we don't need to include build tools in the
 # final image.
-#RUN apk add --update --no-cache \
-#	&& pip3 install paho-mqtt
+
 RUN apk update --no-cache && apk upgrade --no-cache
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install paho-mqtt

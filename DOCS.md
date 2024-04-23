@@ -180,22 +180,22 @@ mqtt:
       optimistic: false
       on_command_type: "first"
 ```
-Comfort II Ultra supports both Unsigned 8-bit and Signed 16-bit values. However, many integrations like Clipsal C-BUS uses Unsigned 8-bit values and sets Counter values to send 0xFF(255) for the 'On' and 0x00(0) for the 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `payload_on` and `payload_off` integer values accordingly.
+Comfort II Ultra supports both Unsigned 8-bit and Signed 16-bit values. However, many integrations like Clipsal C-BUS uses Unsigned 8-bit values and sets Counter values of 0xFF(255) for 'On' and 0x00(0) for the 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `payload_on` and `payload_off` integer values accordingly.
 
-The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable light both mapped to their respective Comfort Counters. You could also map your Non-Dimmable Lights to Comfort Flags instead which would operate in the same manner as Counters except the `payload_on`value will be `1` rather than `255`.
+The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable light, both mapped to their respective Comfort Counters. You could also map your Non-Dimmable Lights to Comfort Flags which would operate in a similar manner as Counters except the `payload_on`value will be `1` rather than `255`. With the examples above you can also add the `Brightness` secondary info to the icons and it will display perfectly.
 
-Because `Counters` can be used for many things other than Lights, the `Kitchen Light` in the example follows the [Brightness Without On Commands][ha-mqtt] chapter in the Home Assistant MQTT Light documentation, with a few additions.
+Because `Counters` can be used for many things other than Lights, the `Kitchen Light` in the example follows the [Brightness Without On Commands][ha-mqtt] chapter in the Home Assistant MQTT Light documentation, with a few tweaks.
 
 
 ## Home Assistant Automation (Optional)
 
 When Home Assistant Restarts (Not Reload), it only restarts Home Assistant itself, all Add-ons remain running which could lead to some entities display an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to restart the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded from `Developer tools` -> `YAML` -> `YAML configuration reloading`.
 
-First you need to enable this hidden entity created by the `Home Assistant Supervisor`.
+To automate this you need to enable this hidden entity created by the `Home Assistant Supervisor`.
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/cedfc20a-3b38-405a-affe-e575c31057a0)
 
-⚠️ It shoud be noted that this entity is not updated in real-time, it takes around 2 minutes to change state.
+⚠️ It should be noted that this entity is not updated in real-time, it takes around 2 minutes to change state.
 
 Next you need to create an Automation that triggers on Home Assistant Restart and on Configruation.yaml file changes as per below.
 
@@ -234,6 +234,7 @@ action:
       addon: 7bef4a80_comfort2mqtt <- Your unique slug_name/Hostname here !!
 mode: single
 ```
+
 
 ## Hardware and Interface support
 
