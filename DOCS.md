@@ -109,7 +109,7 @@ comfort2/sensor31/set
 
 Manual Sensor creation is required in your `configuration.yaml` file before this Add-on can start. 
 
-It must be noted that Comfort requires the `#` key during arming to acknowledge and bypass any open zones. Because the `Home Assistant Alarm Control Panel` does not have a`#` key, the `CUSTOM BYPASS` key is utilised for that purpose and send the appropriate `#` keycode (KD1A) to Comfort.
+![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) It must be noted that Comfort requires the `#` key during arming to acknowledge and bypass any open zones. Because the `Home Assistant Alarm Control Panel` does not have a`#` key, the `CUSTOM BYPASS` key is utilised for that purpose and send the appropriate `#` keycode (KD1A) to Comfort.
 
 Sample object configurations are shown below.
 
