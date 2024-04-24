@@ -4,6 +4,6 @@ build_from:
   armhf: ghcr.io/home-assistant/armhf-base-python:latest
   armv7: ghcr.io/home-assistant/armv7-base-python:latest
   i386: ghcr.io/home-assistant/i386-base-python:latest
-codenotary:
-  signer: notary@home-assistant.io
-  base_image: notary@home-assistant.io
+#codenotary:
+#  signer: notary@home-assistant.io
+#  base_image: notary@home-assistant.io
