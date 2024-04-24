@@ -2,7 +2,7 @@
 
 ## 🧰 Maintenance
 
-- 🎆 None. Initial Alpha release
+- 🎆 Development version.
 
 ## ⬆️ Dependency updates
 
