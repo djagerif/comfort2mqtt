@@ -54,4 +54,3 @@ schema:
   #broker_client_key: str?    # For future development !!!
   comfort_time: bool
 #image: "ghcr.io/djagerif/{arch}-addon-comfort2mqtt"  #  For future docker image release !!!
-  

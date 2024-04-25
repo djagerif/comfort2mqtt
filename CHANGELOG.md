@@ -1,9 +1,3 @@
-## What’s changed
+## 1.0.1
 
-## 🧰 Maintenance
-
-- 🎆 Development version.
-
-## ⬆️ Dependency updates
-
-- ⬆️ None
+- Initial development release
