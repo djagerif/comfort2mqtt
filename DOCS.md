@@ -191,7 +191,7 @@ Because `Counters` can be used for many things other than Lights, the `Kitchen L
 
 ## Home Assistant - Custom Card `#` (Optional)
 
-The native `Alarm Control Panel` card does not include a `#` key for confirmation, you need to create a seperate custom button card that can simulate the `#` key. One option is to install the Custom Button Card and then call the arm_bypass which is configured to send a `#` instead os actually arming in custom-bypass mode. The other is to design your own card that incorporates this key. Beliw is the easiest option to follow.
+The native `Alarm Control Panel` card does not include a `#` key for confirmation, you need to create a seperate custom button card that can simulate the `#` key. One option is to install the Custom Button Card and then call the arm_bypass which is configured to send a `#` instead os actually arming in `Custom bypass` mode. The other is to design your own card that incorporates this key. Below is the easiest option to follow.
 
 1. Download the `Custom Button Card` from https://github.com/custom-cards/button-card and intall it according to whichever method you prefer. Refer to the repository documentation for installation and configuration instructions for either manual or HACS installation.
 
@@ -210,7 +210,7 @@ tap_action:
     entity_id: alarm_control_panel.comfort_alarm
 ```
 
-![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/1d16931d-1cfd-4f55-83c0-16be5a90e777)
+![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) The Comfort to MQTT Add-on changesthe behaviour of the `Custom bypass` and uses it to send the `#` key. Please unselect the `Custom bypass` option when creating the `Alarm Control Panel` card.
 
 
 ## Home Assistant - Alarm State Colours (Optional)
@@ -243,7 +243,7 @@ alarm:
   secondary-text-color: "#5294E2" # For secondary titles
   ```
 
-3. Edit your `Alarm Control Panel` card and assign the `alarm` theme to it. This will now change the colours to reflect what Comfort uses for the Alarm states.
+3. Edit your `Alarm Control Panel` card and assign the new `alarm` theme to it. This will change the Alarm State colours to reflect what Comfort uses.
 
 
 ## Home Assistant  - Automation (Optional)
