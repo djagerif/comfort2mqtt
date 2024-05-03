@@ -189,7 +189,64 @@ The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a
 Because `Counters` can be used for many things other than Lights, the `Kitchen Light` in the example follows the [Brightness Without On Commands][ha-mqtt] chapter in the Home Assistant MQTT Light documentation, with a few tweaks.
 
 
-## Home Assistant Automation (Optional)
+## Home Assistant - Custom Card `#` (Optional)
+
+The native `Alarm Control Panel` card does not include a `#` key for confirmation, you need to create a seperate custom button card that can simulate the `#` key. One option is to install the Custom Button Card and then call the arm_bypass which is configured to send a `#` instead os actually arming in custom-bypass mode. The other is to design your own card that incorporates this key. Beliw is the easiest option to follow.
+
+1. Download the `Custom Button Card` from https://github.com/custom-cards/button-card and intall it according to whichever method you prefer. Refer to the repository documentation for installation and configuration instructions for either manual or HACS installation.
+
+2. Once installed, edit your dashboard and create new button using your newly installed custom button card. Below is a sample of the configuration that is required to make this button send a `#` key code to Comfort. Change the entity name to the one in your system.
+
+```
+type: custom:button-card
+name: 'Comfort # Key'
+icon: mdi:pound
+color: rgb(28, 128, 199)
+size: 10%
+tap_action:
+  action: call-service
+  service: alarm_control_panel.alarm_arm_custom_bypass
+  data:
+    entity_id: alarm_control_panel.comfort_alarm
+```
+
+![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/1d16931d-1cfd-4f55-83c0-16be5a90e777)
+
+
+## Home Assistant - Alarm State Colours (Optional)
+
+The native `Alarm Control Panel` uses Grey, Orange and Green for Disarmed, Arming/Pending and Armed, and Red is used for Triggered. These colours do not correlate to the Comfort II Ultra Alarm States. To change the colours to use Green, Orange and Red, you have to add a seperate Theme to you `Alarm Control Panel`card.
+
+1. Create a file called `themes.yaml`, it can actually be anything.yaml. Copy this file into your Home Assistant `/config/themes` directory. If the directory doesn't exist then create this directory.
+
+2. The contents of the themes.yamls file should look like the below. This is just a sample and might contain more than what is reguired, it is borrowed from the HA community.
+
+```
+alarm:
+  # Main colors
+  state-alarm_control_panel-armed_home-color: "#F44336" # Red
+  state-alarm_control_panel-armed_away-color: "#F44336" # Red
+  state-alarm_control_panel-arming-color: "#FF9800" # Orange
+  state-alarm_control_panel-disarmed-color: "#4CAF50" # Green
+  state-alarm_control_panel-pending-color: "#FF9800" # Orange
+  state-alarm_control_panel-triggered-color: "#F44336" # Red
+  state-alert-color: "#F44336" # Red
+  # Main colors
+  primary-color: "#5294E2" # Header
+  accent-color: "#E45E65" # Accent color
+  dark-primary-color: "var(--accent-color)" # Hyperlinks
+  light-primary-color: "var(--accent-color)" # Horizontal line in about
+  #
+  # Text colors
+  primary-text-color: "#FFFFFF" # Primary text colour, here is referencing dark-primary-color
+  text-primary-color: "var(--primary-text-color)" # Primary text colour
+  secondary-text-color: "#5294E2" # For secondary titles
+  ```
+
+3. Edit your `Alarm Control Panel` card and assign the `alarm` theme to it. This will now change the colours to reflect what Comfort uses for the Alarm states.
+
+
+## Home Assistant  - Automation (Optional)
 
 When Home Assistant Restarts (Not Reload), it only restarts Home Assistant itself, all Add-ons remain running which could lead to some entities display an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to restart the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded from `Developer tools` -> `YAML` -> `YAML configuration reloading`.
 
