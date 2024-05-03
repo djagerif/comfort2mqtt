@@ -210,16 +210,23 @@ tap_action:
     entity_id: alarm_control_panel.comfort_alarm
 ```
 
-![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) The Comfort to MQTT Add-on changesthe behaviour of the `Custom bypass` and uses it to send the `#` key. Please unselect the `Custom bypass` option when creating the `Alarm Control Panel` card.
+![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) The `Comfort to MQTT` Add-on changes the behaviour of the `Custom bypass` function and uses it to send the `#` key instead. Please unselect the `Custom bypass` option when creating the `Alarm Control Panel` card.
 
 
 ## Home Assistant - Alarm State Colours (Optional)
 
-The native `Alarm Control Panel` uses Grey, Orange and Green for Disarmed, Arming/Pending and Armed, and Red is used for Triggered. These colours do not correlate to the Comfort II Ultra Alarm States. To change the colours to use Green, Orange and Red, you have to add a seperate Theme to you `Alarm Control Panel`card.
+The native `Alarm Control Panel` uses Grey, Orange and Green for Disarmed, Arming/Pending and Armed, Red is used for Triggered. These colours does not correlate with the Comfort II Ultra Alarm States. To change the colours to use Green, Orange and Red, you have to add a seperate `Theme` to your `Alarm Control Panel` card.
 
-1. Create a file called `themes.yaml`, it can actually be anything.yaml. Copy this file into your Home Assistant `/config/themes` directory. If the directory doesn't exist then create this directory.
+1. Create a file called `themes.yaml`, it can actually be named anything.yaml. Copy this file into your Home Assistant `/config/themes` directory. If the directory doesn't exist then create this directory.
 
-2. The contents of the themes.yamls file should look like the below. This is just a sample and might contain more than what is reguired, it is borrowed from the HA community.
+2. Make sure your `configuration.yaml` file contains an include statement for this file or directory. If you have a directory inclusion then this file will be included automatically. Here is an example of a directory inclusion.
+
+```
+frontend:
+  themes: !include_dir_merge_named themes
+```
+
+3. The contents of the themes.yaml file should look like the below. This is just a sample and might contain more than what is reguired, it is borrowed, with thanks, from the HA community around the topic of custom colours.
 
 ```
 alarm:
@@ -243,7 +250,7 @@ alarm:
   secondary-text-color: "#5294E2" # For secondary titles
   ```
 
-3. Edit your `Alarm Control Panel` card and assign the new `alarm` theme to it. This will change the Alarm State colours to reflect what Comfort uses.
+3. Lastly, edit your `Alarm Control Panel` card and assign the new `alarm` theme to it. This will change the Alarm State colours to reflect what Comfort uses.
 
 
 ## Home Assistant  - Automation (Optional)
@@ -275,8 +282,8 @@ trigger:
   - platform: event
     event_type: call_service
     event_data:
-      domain: input_select
-      service: reload
+      domain: homeassistant
+      service: reload_all
     alias: When Reload 'ALL YAML CONFIGURATION' from Developer Tools
 condition:
   - condition: state
