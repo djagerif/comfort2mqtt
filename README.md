@@ -36,12 +36,8 @@ The following objects are currently supported:
 * Timer Reports [1-64]
 * Responses [1-1024]
 
-![img](https://github.com/djagerif/comfort2mqtt/assets/5621764/64abe350-6b37-4b79-8fea-12fa5e89353a#center)
- 
-img[src*='#center'] {
-    display: block;
-    margin: auto;
-}
+<div style="text-align:center"> <img src="https://github.com/djagerif/comfort2mqtt/assets/5621764/64abe350-6b37-4b79-8fea-12fa5e89353a" alt="Comfort II Ultra Keypad"/> </div>
+
 "https://github.com/djagerif/comfort2mqtt/assets/5621764/64abe350-6b37-4b79-8fea-12fa5e89353a"
 
 ⚠️ This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. Firmware as tested, is `7.201`.
