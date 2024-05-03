@@ -38,4 +38,6 @@ The following objects are currently supported:
 
 ⚠️ This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. Firmware as tested, is `7.201`.
 
+![alt text](image-2.png)
+
 Copyright 2024 Ingo de Jager. Licensed under the GNU LGPL3+. For more details see `COPYING` and `COPYING.LESSER`.
