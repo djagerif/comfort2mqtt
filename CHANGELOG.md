@@ -2,14 +2,6 @@
 All notable changes to this project will be documented in this file.
  
  
-## [Unreleased] - yyyy-mm-dd
- 
-### Added
-
-### Changed
- 
-### Fixed
- 
 ## [1.0.1] - 2024-05-05
   
 ### Added
@@ -18,6 +10,7 @@ All notable changes to this project will be documented in this file.
   
 ### Fixed
 Sanity Check improved for invalid data received from Comfort.
+
 
 ## [1.0.0] - 2024-05-04
 Initial release of Comfort to MQTT for Home Assistant.
