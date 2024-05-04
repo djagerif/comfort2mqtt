@@ -1294,7 +1294,7 @@ class Comfort2(mqtt.Client):
                                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                                     SAVEDTIME = datetime.now()
                         else:
-                            logger.warning("Invalid response received (%s)", line)
+                            logger.warning("Invalid response received (%s)", line.encode())
 
                 except socket.error as v:
                     ##errorcode = v[0]
