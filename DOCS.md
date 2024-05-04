@@ -443,12 +443,12 @@ Got questions?
 - The [Comfort Forums][comfortforums] for any questions or suggestions
 
 
-## Authors & contributors
+## Authors & Contributors
 
-The original source for this project was done by [koocyrat][koochyrat]. This project is a modified, and slightly extended version, of the same source project.
+The original source for this project was done by [koocyrat][koochyrat]. This project is a modified, and slightly extended version, of the same source project and adapted to a native Home Assistant Add-on. Among several posts, various Comfort forum members also had good suggestions which, in part, contributed to this project as inspiration.
 
 
-## License (Summary)
+## License
 
 ```
 Apache License
