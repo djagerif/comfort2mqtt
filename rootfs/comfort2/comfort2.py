@@ -1006,14 +1006,29 @@ class Comfort2(mqtt.Client):
                 self.comfortsock.sendall(("\x03DT%02d%02d%02d%02d%02d%02d\r" % (now.year, now.month, now.day, now.hour, now.minute, now.second)).encode())
 
     def check_string(self, s):
-        pattern = r'^\x03[a-zA-Z]{1}'
-        #length = len(s)
-        #start = hex(ord(s[0]))
-        #logger.debug('String: %s, Start: %s', s, start)
-        if re.match(pattern, s):
+        #h = s.encode()
+        #print("Encoded:" + str(h))
+
+        #pattern = r'\x03[a-zA-Z]{1}'
+        #pattern = re.compile(r'(\x03.*)$')
+        pattern = re.compile(r'(\x03[a-zA-Z0-9]*)$')
+        match = re.search(pattern, s)
+    
+        if match:
+            #matched_portion = match.group(1)
+            #print ("Matched Portion:" + str(matched_portion))
+            #length = len(matched_portion)
+            #first = hex(ord(matched_portion[0]))
+            #last = hex(ord(matched_portion[length-1]))
             return True
         else:
             return False
+
+        #pattern = r'^\x03[a-zA-Z]{1}'
+        #if re.match(pattern, s):
+        #    return True
+        #else:
+        #    return False
 
     def exit_gracefully(self, signum, frame):
         
@@ -1108,7 +1123,8 @@ class Comfort2(mqtt.Client):
                     for line in self.readlines():
                         if line[1:] != "cc00":
                             logger.debug(line[1:])  	    # Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
-                        if self.check_string(line[:3]):     # Check for "\x03":   #check for valid prefix now and a-zA-Z following character.
+                        #if self.check_string(line[:3]):     # Check for "\x03":   #check for valid prefix now and a-zA-Z following character.
+                        if self.check_string(line):         # Check for "(\x03[a-zA-Z0-9]*)$" in complete line.
                             if line[1:3] == "LU":
                                 luMsg = ComfortLUUserLoggedIn(line[1:])
                                 if luMsg.user != 0:
