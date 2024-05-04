@@ -1189,10 +1189,11 @@ class Comfort2(mqtt.Client):
                                 self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=0,retain=True)
                             elif line[1:3] == "V?":
                                 VMsg = ComfortV_SystemTypeReport(line[1:])
+                                logger.debug("VMsg")
                                 if VMsg.filesystem != 34:
                                     logging.warning("Unsupported Comfort System detected (File System %d).", VMsg.filesystem)
                                 else:
-                                    logging.info("Comfort II Ultra detected (Firmware %d.%03d).", VMsg.version, VMsg.revision)
+                                    logging.info("Comfort II Ultra detected (Firmware %d.%03d)", VMsg.version, VMsg.revision)
                             elif line[1:3] == "a?":     # Not Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
                                 if aMsg.type == 'LowBattery':
