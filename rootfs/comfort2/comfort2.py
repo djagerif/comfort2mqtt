@@ -1189,7 +1189,7 @@ class Comfort2(mqtt.Client):
                                 self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=0,retain=True)
                             elif line[1:3] == "V?":
                                 VMsg = ComfortV_SystemTypeReport(line[1:])
-                                logger.debug("VMsg")
+                                logger.debug("VMsg: %s", VMsg)
                                 if VMsg.filesystem != 34:
                                     logging.warning("Unsupported Comfort System detected (File System %d).", VMsg.filesystem)
                                 else:
