@@ -582,7 +582,7 @@ class ComfortAMSystemAlarmReport(object):
         #logger.debug('AM - data: %s', str(data))
         low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
         if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
-        elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Troubles"
+        elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
         elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
         elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
         elif self.alarm == 4: self.message = "Phone Trouble"
