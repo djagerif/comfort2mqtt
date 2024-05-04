@@ -1011,7 +1011,7 @@ class Comfort2(mqtt.Client):
 
         #pattern = r'\x03[a-zA-Z]{1}'
         #pattern = re.compile(r'(\x03.*)$')
-        pattern = re.compile(r'(\x03[a-zA-Z0-9]*)$')
+        pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')
         match = re.search(pattern, s)
     
         if match:
