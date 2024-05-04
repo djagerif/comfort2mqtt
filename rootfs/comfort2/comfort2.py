@@ -1,4 +1,7 @@
-# Original Copyright(c) 2018 Khor Chin Heong (koochyrat@gmail.com)
+# Copyright(c) 2018 Khor Chin Heong (koochyrat@gmail.com) for original project code and
+# additional Copyright(c) 2024 Ingo de Jager (ingodejager@gmail.com) for modifications done 
+# to the original project sources contained in this project.
+#
 # Modified by Ingo de Jager 2024 (ingodejager@gmail.com)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +30,7 @@
 #from homeassistant.helpers.event import async_track_state_change
 
 
-# Remember to install homeassistant libraries on build. pip install homeassistant
+# Remember to install homeassistant libraries on build. pip install homeassistant if required - Future Development!!
 #
 import csv
 import os
