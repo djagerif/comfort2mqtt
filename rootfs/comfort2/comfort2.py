@@ -1125,6 +1125,10 @@ class Comfort2(mqtt.Client):
                             logger.debug(line[1:])  	    # Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
                         #if self.check_string(line[:3]):     # Check for "\x03":   #check for valid prefix now and a-zA-Z following character.
                         if self.check_string(line):         # Check for "(\x03[a-zA-Z0-9]*)$" in complete line.
+                            # Santize 'line' here.
+                            pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')      # Extract 'legal' characters from line.
+                            match = re.search(pattern, line)
+                            line = match.group(1)
                             if line[1:3] == "LU":
                                 luMsg = ComfortLUUserLoggedIn(line[1:])
                                 if luMsg.user != 0:
