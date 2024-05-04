@@ -20,6 +20,15 @@
 ###
 ### The MQTT traffic can be encrypted with `TLS` or sent in clear-text. The Encryption option is currently not available. The default is `False`
 
+# Testing Event Monitorring.
+#import asyncio
+#from aiohttp import ClientSession
+#from homeassistant.core import HomeAssistant
+#from homeassistant.helpers.event import async_track_state_change
+
+
+# Remember to install homeassistant libraries on build. pip install homeassistant
+#
 import csv
 import os
 from pathlib import Path
@@ -52,37 +61,37 @@ ALARMMESSAGETOPIC = DOMAIN+"/alarm/message"
 ALARMTIMERTOPIC = DOMAIN+"/alarm/timer"
 ALARMDOORBELLTOPIC = DOMAIN+"/doorbell"
 
-FIRST_LOGIN = True
+FIRST_LOGIN = False         # Don't scan Comfort until MQTT connection is made.
 RUN = True
 SAVEDTIME = datetime.now()  # Used for sending keepalives to Comfort.
 BYPASSEDZONES = []          # Global list of Bypassed Zones
 BROKERCONNECTED = False
 ZONEMAPFILE = False         # Zone Number to Name CSV file present.
 
-mqtt_strings = ['Connection successful',
-				'Connection refused - incorrect protocol version',
-				'Connection refused - invalid client identifier',
-				'Connection refused - server unavailable',
-				'Connection refused - malformed username or password',
-				'Connection refused - not authorised',
-				'Connection lost or bad',
-				'Timeout waiting for Length bytes',
-				'Timeout waiting for Payload',
-				'Timeout waiting for CONNACK',
-				'Timeout waiting for SUBACK',
-				'Timeout waiting for UNSUBACK',
-				'Timeout waiting for PINGRESP',
-				'Malformed Remaining Length',
-				'Problem with the underlying communication port',
-				'Address could not be parsed',
-				'Malformed received MQTT packet',
-				'Subscription failure',
-				'Payload decoding failure',
-				'Failed to compile a Decoder',
-				'The received MQTT packet type is not supported on this client',
-				'Timeout waiting for PUBACK',
-				'Timeout waiting for PUBREC',
-				'Timeout waiting for PUBCOMP']
+# mqtt_strings = ['Connection successful',
+# 				'Connection refused - incorrect protocol version',
+# 				'Connection refused - invalid client identifier',
+# 				'Connection refused - server unavailable',
+# 				'Connection refused - malformed username or password',
+# 				'Connection refused - not authorised',
+# 				'Connection lost or bad',
+# 				'Timeout waiting for Length bytes',
+# 				'Timeout waiting for Payload',
+# 				'Timeout waiting for CONNACK',
+# 				'Timeout waiting for SUBACK',
+# 				'Timeout waiting for UNSUBACK',
+# 				'Timeout waiting for PINGRESP',
+# 				'Malformed Remaining Length',
+# 				'Problem with the underlying communication port',
+# 				'Address could not be parsed',
+# 				'Malformed received MQTT packet',
+# 				'Subscription failure',
+# 				'Payload decoding failure',
+# 				'Failed to compile a Decoder',
+# 				'The received MQTT packet type is not supported on this client',
+# 				'Timeout waiting for PUBACK',
+# 				'Timeout waiting for PUBREC',
+# 				'Timeout waiting for PUBCOMP']
 
 logger = logging.getLogger(__name__)
 
@@ -666,6 +675,7 @@ class Comfort2(mqtt.Client):
     global FIRST_LOGIN
     global RUN
 
+
     def init(self, mqtt_ip, mqtt_port, mqtt_username, mqtt_password, comfort_ip, comfort_port, comfort_pincode):
         self.mqtt_ip = mqtt_ip
         self.mqtt_port = mqtt_port
@@ -691,13 +701,15 @@ class Comfort2(mqtt.Client):
         global RUN
         global BROKERCONNECTED
         global FIRST_LOGIN
+
+        FIRST_LOGIN = True      # Set to True to start refresh on_connect
         
         if rc == 'Success':
 
             BROKERCONNECTED = True
 
             #logger.info('MQTT Broker %s (%s)', mqtt_strings[rc], str(rc))
-            logger.info('MQTT Broker %s', str(rc))
+            logger.info('MQTT Broker Connection %s', str(rc))
 
             #Wait 3s for Comfort to settle a bit.
 
@@ -744,21 +756,21 @@ class Comfort2(mqtt.Client):
                 self.readcurrentstate()
             
         else:
-            logger.error('MQTT Broker %s', str(rc))
+            logger.error('MQTT Broker Connection Failed (%s)', str(rc))
             BROKERCONNECTED = False
             #logger.info('MQTT Broker Connection Failed. Check MQTT Broker connection settings')
 
-    def on_disconnect(self, client, userdata, flags, rc, properties):  #client, userdata, flags, reason_code, properties
+    def on_disconnect(self, client, userdata, flags, reasonCode, properties):  #client, userdata, flags, reason_code, properties
 
         global FIRST_LOGIN
         global BROKERCONNECTED
 
-        if rc == 0:
-            logger.info('MQTT Broker %s', str(rc))
+        if reasonCode == 0:
+            logger.info('MQTT Broker Disconnect Successfull (%s)', str(reasonCode))
         else:
             #logger.error('MQTT Broker %s', str(rc))
             BROKERCONNECTED = False
-            logger.error('MQTT Broker Connection Failed (%s). Check Network or MQTT Broker connection settings', str(rc))
+            logger.error('MQTT Broker Connection Failed (%s). Check Network or MQTT Broker connection settings', str(reasonCode))
             FIRST_LOGIN = True
 
     # The callback for when a PUBLISH message is received from the server.
@@ -896,7 +908,7 @@ class Comfort2(mqtt.Client):
         if self.entryexitdelay >= 0:
             threading.Timer(1, self.entryexit_timer).start()
 
-    def readlines(self, recv_buffer=BUFFER_SIZE, delim='\r'):
+    def readlines(self, recv_buffer=BUFFER_SIZE, delim='\r'):       # Correct string values terminate with 0x0d (CR)
 
         global FIRST_LOGIN
         buffer = ''
@@ -921,7 +933,6 @@ class Comfort2(mqtt.Client):
                 raise
             else:
                 if len(data) == 0:
-                    #logger.debug('data:%s', str(data))
                     #logger.debug('data:%s', str(data))
                     logger.debug('Comfort initiated disconnect (LU00).')
                     self.comfortsock.sendall("\x03LI\r".encode()) # Try and gracefully logout if possible.
@@ -993,14 +1004,20 @@ class Comfort2(mqtt.Client):
 
     def check_string(self, s):
         pattern = r'^\x03[a-zA-Z]{1}'
+        #length = len(s)
+        #start = hex(ord(s[0]))
+        #logger.debug('String: %s, Start: %s', s, start)
         if re.match(pattern, s):
             return True
         else:
             return False
 
     def exit_gracefully(self, signum, frame):
-        #self.kill_now = True
+        
         global RUN
+        
+        logger.debug("SIGNUM: %s received", str(signum))
+        
         if self.connected == True:
             self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
         #logger.debug(signum)
@@ -1009,6 +1026,7 @@ class Comfort2(mqtt.Client):
             infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
             infot.wait_for_publish()
         RUN = False
+        exit(0)
 
     def run(self):
 
@@ -1022,7 +1040,7 @@ class Comfort2(mqtt.Client):
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         signal.signal(signal.SIGQUIT, self.exit_gracefully)
 
-        zonemap = Path("config/zones.csv")
+        zonemap = Path("/config/zones.csv")
         
         if zonemap.is_file():
             file_stats = os.stat(zonemap)
@@ -1066,13 +1084,16 @@ class Comfort2(mqtt.Client):
                         self.zone_to_name[zone] = name
 
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
-        self.loop_start()
+#        self.loop_start()
         #logging.debug("MQTT Broker Connected: %s", str(self.connected))
         if self.connected == True:
             BROKERCONNECTED = True
             self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
             self.will_set(ALARMLWTTOPIC, payload="Offline", qos=0, retain=True)
-    
+        #else:
+        #    logger.error ("MQTT Broker Offline")
+        self.loop_start()   
+
         try:
             while RUN:
                 try:
@@ -1084,18 +1105,21 @@ class Comfort2(mqtt.Client):
                     for line in self.readlines():
                         if line[1:] != "cc00":
                             logger.debug(line[1:])  	    # Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
-                        if self.check_string(line[:3]):     # Was "\x03":   #check for valid prefix now.
+                        if self.check_string(line[:3]):     # Check for "\x03":   #check for valid prefix now and a-zA-Z following character.
                             if line[1:3] == "LU":
                                 luMsg = ComfortLUUserLoggedIn(line[1:])
                                 if luMsg.user != 0:
                                     logger.info('Comfort Login Ok - User %s', (luMsg.user if luMsg.user != 254 else 'Engineer'))
 
-                                    logger.debug("Starting 3s delay...")
-                                    delay = timedelta(seconds=3)
-                                    endtime = datetime.now() + delay
-                                    while datetime.now() < endtime:
-                                       pass
-                                    logger.debug("...Finished")
+                                    if BROKERCONNECTED == True:
+                                        logger.info("Starting 3s delay...")
+                                        delay = timedelta(seconds=3)
+                                        endtime = datetime.now() + delay
+                                        while datetime.now() < endtime:
+                                            pass
+                                        logger.info("...Finished")
+                                    else:
+                                        logger.info("Waiting for MQTT Broker to come Online...")
 
                                     self.connected = True  
                                     self.publish(ALARMCOMMANDTOPIC, "comm test",qos=0,retain=True)
@@ -1266,14 +1290,17 @@ class Comfort2(mqtt.Client):
                                     #logger.debug("Sending Keepalives")
                                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                                     SAVEDTIME = datetime.now()
+                        else:
+                            logger.warning("Invalid response received (%s)", line)
 
                 except socket.error as v:
                     ##errorcode = v[0]
                     logger.error('Comfort Socket Error %s', str(v))
                     ##raise
                 logger.error('Lost connection to Comfort, reconnecting...')
-                self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
-                self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
+                if BROKERCONNECTED == True:      # MQTT Connected ??
+                    self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
+                    self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 time.sleep(RETRY.seconds)
         except KeyboardInterrupt as e:
             logger.debug("SIGINT (Ctrl-C) Intercepted")
@@ -1287,9 +1314,9 @@ class Comfort2(mqtt.Client):
                 infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 infot.wait_for_publish()
 
+
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
 mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE)
 mqttc.run()
-
 
 

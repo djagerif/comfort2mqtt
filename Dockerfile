@@ -8,11 +8,8 @@ RUN apk update --no-cache && apk upgrade --no-cache
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install paho-mqtt
 
-# Copy data for add-on
-COPY run.sh /
-COPY comfort2.py /
+# Copy root filesystem
+COPY rootfs /
 
-RUN chmod a+x /run.sh
-RUN chmod a+x /comfort2.py
-
-CMD [ "/run.sh" ]
+RUN chmod 755 /etc/services.d/comfort2mqtt/run
+RUN chmod 755 /etc/services.d/comfort2mqtt/finish

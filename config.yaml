@@ -8,12 +8,15 @@ apparmor: true
 panel_icon: "mdi:alarm-panel-outline"
 codenotary: notary@home-assistant.io
 url: https://github.com/djagerif/comfort2mqtt
+hassio_api: true
 arch:
   - aarch64
   - amd64
   - armhf
   - armv7
   - i386
+services:
+  - mqtt:need
 map:
   - addon_config:ro
 options:

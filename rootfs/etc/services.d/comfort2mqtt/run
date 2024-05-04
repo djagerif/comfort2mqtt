@@ -22,10 +22,9 @@ COMFORT_FLAGS=$(bashio::config 'alarm_flags')
 COMFORT_COUNTERS=$(bashio::config 'alarm_counters')
 COMFORT_TIME=$(bashio::config 'comfort_time')
 
-# Arguments that are always required.
+# Arguments for Comfort2MQTT to run.
 COMFORT_ARGS="--broker-address ${MQTT_SERVER:?unset}"
 
-# Simple arguments
 if [ "${MQTT_PORT}" != "null" ]; then
    COMFORT_ARGS="${COMFORT_ARGS} --broker-port ${MQTT_PORT}"
 fi
@@ -86,6 +85,6 @@ if [ "${MQTT_LOG_LEVEL}" != "null" ]; then
       COMFORT_ARGS="$COMFORT_ARGS --verbosity $MQTT_LOG_LEVEL"
 fi
 
-# "Running comfort2mqtt with flags: ${COMFORT_ARGS}"
-python3 comfort2.py $COMFORT_ARGS
-
+## Run Comfort2MQTT program
+bashio::log.info "Starting Comfort to MQTT..."
+exec python /comfort2/comfort2.py $COMFORT_ARGS
