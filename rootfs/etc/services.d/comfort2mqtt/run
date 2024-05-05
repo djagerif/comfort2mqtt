@@ -5,6 +5,7 @@
 MQTT_USER=$(bashio::config 'mqtt_user')
 MQTT_PASSWORD=$(bashio::config 'mqtt_password')
 MQTT_SERVER=$(bashio::config 'mqtt_broker_address')
+MQTT_PROTOCOL=$(bashio::config 'mqtt_protocol')
 MQTT_PORT=$(bashio::config 'mqtt_broker_port')
 COMFORT_ADDRESS=$(bashio::config 'comfort_address')
 COMFORT_PORT=$(bashio::config 'comfort_port')
@@ -24,6 +25,10 @@ COMFORT_TIME=$(bashio::config 'comfort_time')
 
 # Arguments for Comfort2MQTT to run.
 COMFORT_ARGS="--broker-address ${MQTT_SERVER:?unset}"
+
+if [ "${MQTT_PROTOCOL}" != "null" ]; then
+   COMFORT_ARGS="${COMFORT_ARGS} --broker-protocol ${MQTT_PROTOCOL}"
+fi
 
 if [ "${MQTT_PORT}" != "null" ]; then
    COMFORT_ARGS="${COMFORT_ARGS} --broker-port ${MQTT_PORT}"
