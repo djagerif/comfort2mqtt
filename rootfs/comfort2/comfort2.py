@@ -1,5 +1,5 @@
-# Copyright(c) 2018 Khor Chin Heong (koochyrat@gmail.com) for original project code and
-# additional Copyright(c) 2024 Ingo de Jager (ingodejager@gmail.com) for modifications done 
+# Copyright(c) 2018 Khor Chin Heong (koochyrat@gmail.com) for original project code and additional 
+# Copyright(c) 2024 Ingo de Jager (ingodejager@gmail.com) for modifications done 
 # to the original project sources contained in this project.
 #
 # Modified by Ingo de Jager 2024 (ingodejager@gmail.com)
