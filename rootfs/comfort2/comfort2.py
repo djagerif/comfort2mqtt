@@ -691,26 +691,12 @@ class Comfort2(mqtt.Client):
     def handler(signum, frame):                 # Ctrl-Z Keyboard Interrupt
         logger.debug('SIGTSTP (Ctrl-Z) intercepted')
 
-        if signum == signal.SIGHUP:
-            logger.debug("SIGHUP Received")
-        if signum == signal.SIGINT:
-            logger.debug("Keyboard interrupt")
-        if signum == signal.SIGTERM:
-            logger.debug("SIGTERM Received")
-        if signum == signal.SIGQUIT:
-            logger.debug("SIGQUIT Received")
-
-
     def sigquit_handler(signum, frame):         # Ctrl-\ Keyboard Interrupt
         global RUN
         logger.debug("SIGQUIT intercepted")
         RUN = False
 
     signal.signal(signal.SIGTSTP, handler)
-    signal.signal(signal.SIGUSR1, handler)
-    signal.signal(signal.SIGINT, handler)
-    signal.signal(signal.SIGHUP, handler)
-    signal.signal(signal.SIGTERM, handler)
 
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc, properties):
