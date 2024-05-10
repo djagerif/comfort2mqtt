@@ -1,10 +1,6 @@
 # Change Log
 All notable changes to this project will be documented in this file.
  
-## testing ##
-
-Remove MQTT_Runing from Automation restart - doesn't seem to trigger on Supervisor Upgrade.
-
 ## [1.0.1] - 2024-05-05
   
 ### Added
