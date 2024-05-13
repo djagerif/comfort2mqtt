@@ -98,6 +98,20 @@ ZONEMAPFILE = False         # Zone Number to Name CSV file present.
 
 logger = logging.getLogger(__name__)
 
+from requests import get
+import os
+
+TOKEN = os.getenv('SUPERVISOR_TOKEN')
+
+url = "http://supervisor/core/api/config"
+headers = {
+  "Authorization": "Bearer {}".format(TOKEN),
+  "content-type": "application/json",
+}
+response = get(url, headers=headers)
+logger.debug(response.text)
+
+
 def boolean_string(s):
     if s not in {'false', 'true'}:
         raise ValueError('Not a valid boolean string')
