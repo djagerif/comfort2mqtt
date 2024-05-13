@@ -228,7 +228,7 @@ def setup(hass, config):
         print(f"Answer {count} is: {event.data.get('answer')}")
 
     # Listen for when example_component_my_cool_event is fired
-    hass.bus.listen("example_component_my_cool_event", handle_event)
+    hass.bus.listen("comfort2_my_cool_event", handle_event)
 
     # Return successful setup
     return True
