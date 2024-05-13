@@ -101,16 +101,6 @@ logger = logging.getLogger(__name__)
 from requests import get
 import os
 
-TOKEN = os.getenv('SUPERVISOR_TOKEN')
-
-url = "http://supervisor/core/api/config"
-headers = {
-  "Authorization": "Bearer {}".format(TOKEN),
-  "content-type": "application/json",
-}
-response = get(url, headers=headers)
-logger.debug(response.text)
-
 
 def boolean_string(s):
     if s not in {'false', 'true'}:
@@ -215,6 +205,18 @@ logging.basicConfig(
     level=option.verbosity,
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+
+TOKEN = os.getenv('SUPERVISOR_TOKEN')
+
+url = "http://supervisor/core/api/config"
+headers = {
+    "Authorization": "Bearer {}".format(TOKEN),
+    "content-type": "application/json",
+}
+response = get(url, headers=headers)
+logger.debug(response.text)
+
+
 
 logger.info('Importing the add-on configuration options')
 
