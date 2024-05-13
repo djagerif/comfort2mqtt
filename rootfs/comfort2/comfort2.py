@@ -219,6 +219,8 @@ logging.basicConfig(
 def setup(hass, config):
     """Set up is called when Home Assistant is loading our component."""
     count = 0
+    print ("inside setup()-1")
+    logger.debug ("inside setup()-2")
 
     # Listener to handle fired events
     def handle_event(event):
@@ -228,7 +230,7 @@ def setup(hass, config):
         print(f"Answer {count} is: {event.data.get('answer')}")
 
     # Listen for when example_component_my_cool_event is fired
-    hass.bus.listen("comfort2_my_cool_event", handle_event)
+    hass.bus.listen("switch_counter_10", handle_event)
 
     # Return successful setup
     return True
