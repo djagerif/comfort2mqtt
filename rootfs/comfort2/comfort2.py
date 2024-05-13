@@ -101,10 +101,12 @@ ZONEMAPFILE = False         # Zone Number to Name CSV file present.
 logger = logging.getLogger(__name__)
 
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+    logger.debug("in setup_platform()")
     async_add_devices([MySensor(hass)])
 
 class MySensor(Entity):
     def __init__(self, hass):
+        logger.debug("in __init__()")
         hass.bus.async_listen("event type", self._handle_event)
 
     def _handle_event(self, call):
