@@ -8,6 +8,7 @@ RUN apk update --no-cache && apk upgrade --no-cache
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install paho-mqtt
 RUN pip install requests
+RUN pip install homeassistant
 
 # Copy root filesystem
 COPY rootfs /
