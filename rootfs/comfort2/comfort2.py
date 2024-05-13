@@ -46,6 +46,8 @@ from datetime import datetime, timedelta
 from random import randint
 import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
+import asyncio
+from homeassistant.helpers.entity import Entity
 
 DOMAIN = "comfort2"
 
@@ -98,8 +100,15 @@ ZONEMAPFILE = False         # Zone Number to Name CSV file present.
 
 logger = logging.getLogger(__name__)
 
-#from requests import get
-#import os
+def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+    async_add_devices([MySensor(hass)])
+
+class MySensor(Entity):
+    def __init__(self, hass):
+        hass.bus.async_listen("event type", self._handle_event)
+
+    def _handle_event(self, call):
+        logger.debug("Event received: %s", call.data)
 
 
 def boolean_string(s):
@@ -216,24 +225,8 @@ logging.basicConfig(
 #response = get(url, headers=headers)
 #logger.debug(response.text)
 
-def setup(hass, config):
-    """Set up is called when Home Assistant is loading our component."""
-    count = 0
-    print ("inside setup()-1")
-    logger.debug ("inside setup()-2")
 
-    # Listener to handle fired events
-    def handle_event(event):
-        nonlocal count
-        count += 1
-        logger.debug("Answer %d is: %s}", count, event.data.get('answer') )
-        print(f"Answer {count} is: {event.data.get('answer')}")
 
-    # Listen for when example_component_my_cool_event is fired
-    hass.bus.listen("switch_counter_10", handle_event)
-
-    # Return successful setup
-    return True
 
 logger.info('Importing the add-on configuration options')
 
