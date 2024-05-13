@@ -98,8 +98,8 @@ ZONEMAPFILE = False         # Zone Number to Name CSV file present.
 
 logger = logging.getLogger(__name__)
 
-from requests import get
-import os
+#from requests import get
+#import os
 
 
 def boolean_string(s):
@@ -206,17 +206,31 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-TOKEN = os.getenv('SUPERVISOR_TOKEN')
+#TOKEN = os.getenv('SUPERVISOR_TOKEN')
+#
+#url = "http://supervisor/core/api/config"
+#headers = {
+#    "Authorization": "Bearer {}".format(TOKEN),
+#    "content-type": "application/json",
+#}
+#response = get(url, headers=headers)
+#logger.debug(response.text)
 
-url = "http://supervisor/core/api/config"
-headers = {
-    "Authorization": "Bearer {}".format(TOKEN),
-    "content-type": "application/json",
-}
-response = get(url, headers=headers)
-logger.debug(response.text)
+def setup(hass, config):
+    """Set up is called when Home Assistant is loading our component."""
+    count = 0
 
+    # Listener to handle fired events
+    def handle_event(event):
+        nonlocal count
+        count += 1
+        logger.debug(f"Answer {count} is: {event.data.get('answer')}")
 
+    # Listen for when example_component_my_cool_event is fired
+    hass.bus.listen("example_component_my_cool_event", handle_event)
+
+    # Return successful setup
+    return True
 
 logger.info('Importing the add-on configuration options')
 
