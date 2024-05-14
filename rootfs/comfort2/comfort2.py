@@ -738,7 +738,7 @@ class Comfort2(mqtt.Client):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
                 #logger.debug('ALARMOUTPUTCOMMANDTOPIC %s', str(ALARMOUTPUTCOMMANDTOPIC % i))
             for i in ALARMVIRTUALINPUTRANGE: #for virtual inputs #inputs+1 to 128
-                logger.debug('ALARMINPUTCOMMANDTOPIC %s', str(ALARMINPUTCOMMANDTOPIC % i))
+                #logger.debug('ALARMINPUTCOMMANDTOPIC %s', str(ALARMINPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMINPUTCOMMANDTOPIC % i)
             
             for i in ALARMRIOINPUTRANGE: #for inputs 129 to Max Value

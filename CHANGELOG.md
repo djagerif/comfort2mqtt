@@ -3,7 +3,15 @@ All notable changes to this project will be documented in this file.
  
 ## Unreleased ##
 ## [1.0.2] ## 
-Remove MQTT_Runing from Automation restart - doesn't seem to trigger on Supervisor Upgrade.
+Minor bug-fix release.
+
+### Added
+
+### Changed
+ - Updated Automation to restart Add-on.
+ - removed random mqtt-client id generation. Client-ID is now just 'comfort2mqtt'
+
+### Fixed
 
 
 ## [1.0.1] - 2024-05-05
@@ -13,8 +21,8 @@ Remove MQTT_Runing from Automation restart - doesn't seem to trigger on Supervis
 ### Changed
   
 ### Fixed
-- Sanity Check improved for invalid data received from Comfort.
-- Fixed MQTT WebSockets connection.
+ - Sanity Check improved for invalid data received from Comfort.
+ - Fixed MQTT WebSockets connection.
 
 
 ## [1.0.0] - 2024-05-04
