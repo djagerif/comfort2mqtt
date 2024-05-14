@@ -46,8 +46,6 @@ from datetime import datetime, timedelta
 from random import randint
 import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
-import asyncio
-from homeassistant.helpers.entity import Entity
 
 DOMAIN = "comfort2"
 
@@ -99,19 +97,6 @@ ZONEMAPFILE = False         # Zone Number to Name CSV file present.
 # 				'Timeout waiting for PUBCOMP']
 
 logger = logging.getLogger(__name__)
-
-def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
-    logger.debug("in setup_platform()")
-    async_add_devices([MySensor(hass)])
-
-class MySensor(Entity):
-    def __init__(self, hass):
-        logger.debug("in __init__()")
-        hass.bus.async_listen("event type", self._handle_event)
-
-    def _handle_event(self, call):
-        logger.debug("Event received: %s", call.data)
-
 
 def boolean_string(s):
     if s not in {'false', 'true'}:
@@ -226,8 +211,6 @@ logging.basicConfig(
 #}
 #response = get(url, headers=headers)
 #logger.debug(response.text)
-
-
 
 
 logger.info('Importing the add-on configuration options')
@@ -919,14 +902,14 @@ class Comfort2(mqtt.Client):
         return hex(swapped_value)[2:].upper().zfill(4)
 
     def on_publish(self, client, obj, mid, reason_codes, properties):
-        logger.debug("on_publish")
+        #logger.debug("on_publish")
         pass
 
     def on_subscribe(self, client, userdata, mid, reason_codes, properties):
         for sub_result in reason_codes:
             if sub_result == 1:
                 #logger.debug("QoS Value == 1")              # For Information Only
-                logger.debug("on_subscribe")
+                #logger.debug("on_subscribe")
                 pass
             if sub_result >= 128:
                 logger.debug("Error processing subscribe message")
