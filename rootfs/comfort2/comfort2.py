@@ -969,36 +969,58 @@ class Comfort2(mqtt.Client):
 
     def readcurrentstate(self):
         if self.connected == True:
+
+            delay = timedelta(seconds=0.25)
+            endtime = datetime.now() + delay
+
             #get Comfort type
             self.comfortsock.sendall("\x03V?\r".encode())
-            #get Security Mode
-            self.comfortsock.sendall("\x03M?\r".encode())
-            #get all zone input states
-            self.comfortsock.sendall("\x03Z?\r".encode())
-            logger.info("Starting 3s delay...")
-            delay = timedelta(seconds=3)
-            endtime = datetime.now() + delay
             while datetime.now() < endtime:
                 pass
-            logger.info("...Finished")
+            #get Security Mode
+            self.comfortsock.sendall("\x03M?\r".encode())
+            while datetime.now() < endtime:
+                pass
+            #get all zone input states
+            self.comfortsock.sendall("\x03Z?\r".encode())
+            while datetime.now() < endtime:
+                pass
             #get all SCS/RIO input states
             self.comfortsock.sendall("\x03z?\r".encode())
+            while datetime.now() < endtime:
+                pass
             #get all output states
             self.comfortsock.sendall("\x03Y?\r".encode())
+            while datetime.now() < endtime:
+                pass
             #get all RIO output states
             self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all RIO Outputs
+            while datetime.now() < endtime:
+                pass
             #get all flag states
             self.comfortsock.sendall("\x03f?00\r".encode())
+            while datetime.now() < endtime:
+                pass
             #get Alarm Status Information
             self.comfortsock.sendall("\x03S?\r".encode())       # S? Status Request
+            while datetime.now() < endtime:
+                pass
             #get Alarm Additional Information
             self.comfortsock.sendall("\x03a?\r".encode())       # a? Status Request
+            while datetime.now() < endtime:
+                pass
             #get Bypassed Zones
             self.comfortsock.sendall("\x03b?00\r".encode())       # b?00 Bypassed Zones
+            while datetime.now() < endtime:
+                pass
 
             #get all sensor values. 0 - 31
             self.comfortsock.sendall("\x03r?010010\r".encode())
+            while datetime.now() < endtime:
+                pass
             self.comfortsock.sendall("\x03r?011010\r".encode())
+            while datetime.now() < endtime:
+                pass
 
             #Clear all Timer Reports
             for i in range(1, 65):
