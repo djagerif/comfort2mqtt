@@ -754,7 +754,7 @@ class Comfort2(mqtt.Client):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
                 #logger.debug('ALARMOUTPUTCOMMANDTOPIC %s', str(ALARMOUTPUTCOMMANDTOPIC % i))
             for i in ALARMVIRTUALINPUTRANGE: #for virtual inputs #inputs+1 to 128
-                #logger.debug('ALARMINPUTCOMMANDTOPIC %s', str(ALARMINPUTCOMMANDTOPIC % i))
+                logger.debug('ALARMINPUTCOMMANDTOPIC %s', str(ALARMINPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMINPUTCOMMANDTOPIC % i)
             
             for i in ALARMRIOINPUTRANGE: #for inputs 129 to Max Value
@@ -919,13 +919,14 @@ class Comfort2(mqtt.Client):
         return hex(swapped_value)[2:].upper().zfill(4)
 
     def on_publish(self, client, obj, mid, reason_codes, properties):
-        #logger.debug("on_publish")
+        logger.debug("on_publish")
         pass
 
     def on_subscribe(self, client, userdata, mid, reason_codes, properties):
         for sub_result in reason_codes:
             if sub_result == 1:
                 #logger.debug("QoS Value == 1")              # For Information Only
+                logger.debug("on_subscribe")
                 pass
             if sub_result >= 128:
                 logger.debug("Error processing subscribe message")
