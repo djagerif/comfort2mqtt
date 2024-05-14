@@ -326,7 +326,7 @@ class ComfortIPInputActivationReport(object):
         else:
             self.input = int(input)
             self.state = int(state)
-        logger.debug("input: %d, state: %d", self.input, self.state)
+        #logger.debug("input: %d, state: %d", self.input, self.state)
 
 
 class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (counter) 1E = 30; state FF00 = 65280
@@ -420,7 +420,7 @@ class ComfortZ_ReportAllZones(object):
     def __init__(self, data={}):
         self.inputs = []
         b = (len(data) - 2) // 2            #variable number of zones reported
-        logger.debug("data: %s", data)
+        #logger.debug("data: %s", data)
         self.max_zones = b * 8
         for i in range(1,b+1):
             inputbits = int(data[2*i:2*i+2],16)
@@ -1193,6 +1193,7 @@ class Comfort2(mqtt.Client):
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
                                     self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
+                                    logger.debug("ipMsgZ,input: %d, ipMsgZ.state: %d", ipMsgZ.input, ipMsgZ.state)    
                                 logger.debug("Max. Reported Zones/Inputs: %d", zMsg.max_zones)
                             elif line[1:3] == "z?":                             # SCS/RIO Inputs
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
