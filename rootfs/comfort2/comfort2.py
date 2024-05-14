@@ -975,6 +975,12 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall("\x03M?\r".encode())
             #get all zone input states
             self.comfortsock.sendall("\x03Z?\r".encode())
+            logger.info("Starting 3s delay...")
+            delay = timedelta(seconds=3)
+            endtime = datetime.now() + delay
+            while datetime.now() < endtime:
+                pass
+            logger.info("...Finished")
             #get all SCS/RIO input states
             self.comfortsock.sendall("\x03z?\r".encode())
             #get all output states
