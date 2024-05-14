@@ -970,7 +970,7 @@ class Comfort2(mqtt.Client):
     def readcurrentstate(self):
         if self.connected == True:
 
-            delay = timedelta(seconds=0.5)
+            delay = timedelta(seconds=1)
             endtime = datetime.now() + delay
 
             #get Comfort type
@@ -1221,8 +1221,12 @@ class Comfort2(mqtt.Client):
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
                                     result = self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state, retain=False)
+                                    delay = timedelta(seconds=0.1)
+                                    endtime = datetime.now() + delay
+                                    while datetime.now() < endtime:
+                                        pass
                                     logger.debug("ipMsgZ,input: %d, ipMsgZ.state: %d", ipMsgZ.input, ipMsgZ.state)
-                                    logger.debug("result: %s", result)
+                                    logger.debug("result: %s", result.rc)
                                 logger.debug("Max. Reported Zones/Inputs: %d", zMsg.max_zones)
                             elif line[1:3] == "z?":                             # SCS/RIO Inputs
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
