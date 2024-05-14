@@ -1198,8 +1198,7 @@ class Comfort2(mqtt.Client):
                                         logger.info("Waiting for MQTT Broker to come Online...")
 
                                     self.connected = True  
-                                    publish_result = self.publish(ALARMCOMMANDTOPIC, "comm test",qos=0,retain=True)
-                                    publish_result.wait_for_publish(1)
+                                    self.publish(ALARMCOMMANDTOPIC, "comm test",qos=0,retain=True)
                                     self.setdatetime()      # Set Date/Time if Option is enabled
                                     
                                     if FIRST_LOGIN == True:
