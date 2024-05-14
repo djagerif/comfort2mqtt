@@ -1,6 +1,9 @@
 # Change Log
 All notable changes to this project will be documented in this file.
  
+### Testing ###
+Change to Multiple publish on bulk updates.
+
 ## Unreleased ##
 ## [1.0.2] ## 
 Minor bug-fix release.
