@@ -1192,8 +1192,9 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "Z?":                             # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
-                                    self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
-                                    logger.debug("ipMsgZ,input: %d, ipMsgZ.state: %d", ipMsgZ.input, ipMsgZ.state)    
+                                    result = self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
+                                    logger.debug("ipMsgZ,input: %d, ipMsgZ.state: %d", ipMsgZ.input, ipMsgZ.state)
+                                    logger.debug("result: %s", result)
                                 logger.debug("Max. Reported Zones/Inputs: %d", zMsg.max_zones)
                             elif line[1:3] == "z?":                             # SCS/RIO Inputs
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
