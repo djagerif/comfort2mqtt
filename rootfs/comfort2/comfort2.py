@@ -50,7 +50,8 @@ from argparse import ArgumentParser
 DOMAIN = "comfort2"
 
 rand_hex_str = hex(randint(268435456, 4294967295))
-mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts, for future development of a possible second instance.
+#mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts, for future development of a possible second instance.
+mqtt_client_id = DOMAIN+"mqtt"
 
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
