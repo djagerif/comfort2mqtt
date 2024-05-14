@@ -1213,7 +1213,7 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "IP":
                                 ipMsg = ComfortIPInputActivationReport(line[1:])
                                 publish_result = self.publish(ALARMINPUTTOPIC % ipMsg.input, ipMsg.state,qos=0,retain=True)
-                                publish_result.wait_for_publish(1)
+                                if self.connected: publish_result.wait_for_publish(1)
                             elif line[1:3] == "CT":
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
                                 publish_result = self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=0,retain=True)     # Value Information
