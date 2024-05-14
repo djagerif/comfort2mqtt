@@ -326,7 +326,7 @@ class ComfortIPInputActivationReport(object):
         else:
             self.input = int(input)
             self.state = int(state)
-        logger.debug("input: %s, state: %s", input, state)
+        logger.debug("input: %d, state: %d", self.input, self.state)
 
 
 class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (counter) 1E = 30; state FF00 = 65280
