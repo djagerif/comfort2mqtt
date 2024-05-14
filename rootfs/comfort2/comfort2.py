@@ -1217,7 +1217,7 @@ class Comfort2(mqtt.Client):
                                 if publish_result.is_published() == False:
                                     logger.debug("Message is not yet published.")
                                     # This call will block until the message is published.
-                                    publish_result.wait_for_publish(1)
+                                publish_result.wait_for_publish(1)
                             elif line[1:3] == "CT":
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
                                 publish_result = self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=0,retain=True)     # Value Information
