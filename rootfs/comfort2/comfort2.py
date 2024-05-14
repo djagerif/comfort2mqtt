@@ -970,7 +970,7 @@ class Comfort2(mqtt.Client):
     def readcurrentstate(self):
         if self.connected == True:
 
-            delay = timedelta(seconds=0.25)
+            delay = timedelta(seconds=0.5)
             endtime = datetime.now() + delay
 
             #get Comfort type
