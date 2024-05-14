@@ -326,6 +326,7 @@ class ComfortIPInputActivationReport(object):
         else:
             self.input = int(input)
             self.state = int(state)
+        logger.debug("input: %s, state: %s", input, state)
 
 
 class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (counter) 1E = 30; state FF00 = 65280
@@ -419,6 +420,7 @@ class ComfortZ_ReportAllZones(object):
     def __init__(self, data={}):
         self.inputs = []
         b = (len(data) - 2) // 2            #variable number of zones reported
+        logger.debug("data: %s", data)
         self.max_zones = b * 8
         for i in range(1,b+1):
             inputbits = int(data[2*i:2*i+2],16)
@@ -429,7 +431,6 @@ class Comfort_Z_ReportAllZones(object):     #SCS/RIO z?
     def __init__(self, data={}):
         self.inputs = []    
         b = (len(data) - 2) // 2            #variable number of zones reported
-        logger.debug("data %s", data)
         self.max_zones = b * 8
         for i in range(1,b+1):  
             inputbits = int(data[2*i:2*i+2],16)
