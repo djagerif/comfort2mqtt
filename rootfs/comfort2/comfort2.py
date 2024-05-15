@@ -499,12 +499,10 @@ class Comfort_Y_ReportAllOutputs(object):
         self.outputs = []           
         b = (len(data) - 2) // 2   #variable number of outputs reported
         self.max_zones = b * 8
-        logger.debug("self.outputs[1]:%s", self.outputs)
         for i in range(1,b+1):  
             outputbits = int(data[2*i:2*i+2],16)
             for j in range(0,8):
                 self.outputs.append(ComfortOPOutputActivationReport("", 128+8*(i-1)+1+j,(outputbits>>j) & 1))
-        logger.debug("self.outputs[2]:%s", self.outputs)
 
 class ComfortB_ReportAllBypassZones(object):
 
@@ -724,6 +722,14 @@ class Comfort2(mqtt.Client):
         FIRST_LOGIN = True      # Set to True to start refresh on_connect
         
         if rc == 'Success':
+
+            # Delay 50msec
+            logger.debug('now(): %s', datetime.now())
+            delay = timedelta(milliseconds=50)
+            endtime = datetime.now() + delay
+            logger.debug('endtime: %s', endtime)
+            while datetime.now() < endtime:
+                pass
 
             BROKERCONNECTED = True
 
@@ -1246,15 +1252,11 @@ class Comfort2(mqtt.Client):
                                 publish_result.wait_for_publish(1)
                             elif line[1:3] == "Z?":                             # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
+                                #publish_result = self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state, retain=False)
+  
                                 for ipMsgZ in zMsg.inputs:
                                     publish_result = self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state, retain=False)
-                                    #publish_result.wait_for_publish(1) 
-                                    #delay = timedelta(seconds=0.1)
-                                    #endtime = datetime.now() + delay
-                                    #while datetime.now() < endtime:
-                                    #    pass
-                                    #logger.debug("ipMsgZ,input: %d, ipMsgZ.state: %d", ipMsgZ.input, ipMsgZ.state)
-                                    #logger.debug("result: %s", result.rc)
+
                                 logger.debug("Max. Reported Zones/Inputs: %d", zMsg.max_zones)
                             elif line[1:3] == "z?":                             # SCS/RIO Inputs
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
