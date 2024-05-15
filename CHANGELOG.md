@@ -2,13 +2,14 @@
 All notable changes to this project will be documented in this file.
  
 ### Testing ###
-Change to Multiple publish on bulk updates.
+Add 10mS delay between bulk publish messages on startup or reconnect.Z?, z?, Y?, y?, f?00, r?00, r?01
 
 ## Unreleased ##
 ## [1.0.2] ## 
 Minor bug-fix release.
 
 ### Added
+ - Add 10mS delay between bulk publish commands on startup or reconnect. (Z?, z?, Y?, y?, f?00, r?00, r?01)
 
 ### Changed
  - Updated Automation to restart Add-on.
