@@ -1350,13 +1350,13 @@ class Comfort2(mqtt.Client):
                                 yMsg = ComfortY_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
                                     publish_result = self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state,qos=0,retain=True)
-                                    publish_result.wait_for_publish(1)
+                                    #publish_result.wait_for_publish(1)
                                 logger.debug("Max. Reported Outputs: %d", yMsg.max_zones)
                             elif line[1:3] == "y?":     # SCS/RIO Outputs
                                 yMsg = Comfort_Y_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
                                     publish_result = self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state)
-                                    publish_result.wait_for_publish(1)
+                                    #publish_result.wait_for_publish(1)
                                 logger.debug("Max. Reported SCS/RIO Outputs: %d", yMsg.max_zones)
                             elif line[1:5] == "r?00":
                                 cMsg = Comfort_R_ReportAllSensors(line[1:])
