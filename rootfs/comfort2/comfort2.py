@@ -1212,9 +1212,8 @@ class Comfort2(mqtt.Client):
                                 self.setdatetime()          # Set Date/Time if Flag is set at 00:00 every day if option is enabled.
                             elif line[1:3] == "IP":
                                 ipMsg = ComfortIPInputActivationReport(line[1:])
-                                logger.debug('mqttc.is_connected (%s)', str(mqttc.is_connected))
                                 publish_result = self.publish(ALARMINPUTTOPIC % ipMsg.input, ipMsg.state,qos=0,retain=True)
-                                if mqttc.is_connected and publish_result.is_published:
+                                if BROKERCONNECTED and publish_result.is_published:
                                     logger.debug('message sent (%s%s)', ipMsg.input, ipMsg.state)
                                 else:
                                     logger.debug('message failed (%s%s)', ipMsg.input, ipMsg.state)
@@ -1247,7 +1246,7 @@ class Comfort2(mqtt.Client):
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
                                     publish_result = self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state, retain=False)
-                                    publish_result.wait_for_publish(1) 
+                                    #publish_result.wait_for_publish(1) 
                                     #delay = timedelta(seconds=0.1)
                                     #endtime = datetime.now() + delay
                                     #while datetime.now() < endtime:
