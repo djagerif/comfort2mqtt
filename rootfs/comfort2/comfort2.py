@@ -1439,8 +1439,8 @@ class Comfort2(mqtt.Client):
             RUN = False
         finally:
             if BROKERCONNECTED == True:      # MQTT Connected ??
-                infot = publish_result = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
-                infot = publish_result = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
+                infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
+                infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
                 infot.wait_for_publish(1)
 
 
