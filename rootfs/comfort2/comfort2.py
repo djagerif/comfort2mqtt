@@ -723,7 +723,7 @@ class Comfort2(mqtt.Client):
         
         if rc == 'Success':
 
-            # Delay 50msec
+            # Delay 10mSec
             #logger.debug('now(): %s', datetime.now())
             delay = timedelta(milliseconds=50)
             endtime = datetime.now() + delay
@@ -1047,7 +1047,7 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.sendall("\x03r?00%X00F\r".encode() % (i))
                 else:
                     self.comfortsock.sendall("\x03r?00%X010\r".encode() % (i))
-                time.sleep(0.05)
+                time.sleep(0.01)
             
             publish_result = self.publish(ALARMAVAILABLETOPIC, 1,qos=0,retain=True)
             ##publish_result.wait_for_publish(1)
@@ -1235,7 +1235,7 @@ class Comfort2(mqtt.Client):
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
                                 publish_result = self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=0,retain=True)     # Value Information
                                 ###publish_result.wait_for_publish(1)
-                                time.sleep(0.05)
+                                time.sleep(0.01)
                                 publish_result = self.publish(ALARMCOUNTERSTATETOPIC % ipMsgCT.counter, ipMsgCT.state,qos=0,retain=True)     # State Information
                                 ###publish_result.wait_for_publish(1)
                             elif line[1:3] == "s?":
@@ -1257,14 +1257,14 @@ class Comfort2(mqtt.Client):
   
                                 for ipMsgZ in zMsg.inputs:
                                     publish_result = self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state, retain=False)
-                                    time.sleep(0.05)    # 50mS delay between commands
+                                    time.sleep(0.01)    # 10mS delay between commands
 
                                 logger.debug("Max. Reported Zones/Inputs: %d", zMsg.max_zones)
                             elif line[1:3] == "z?":                             # SCS/RIO Inputs
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
                                     publish_result = self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
-                                    time.sleep(0.05)    # 50mS delay between commands
+                                    time.sleep(0.01)    # 10mS delay between commands
                                     ###publish_result.wait_for_publish(1)
                                 logger.debug("Max. Reported SCS/RIO Inputs: %d", zMsg.max_zones)
                             elif line[1:3] == "M?" or line[1:3] == "MD":
@@ -1357,14 +1357,14 @@ class Comfort2(mqtt.Client):
                                 yMsg = ComfortY_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
                                     publish_result = self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state,qos=0,retain=True)
-                                    time.sleep(0.05)    # 50mS delay between commands
+                                    time.sleep(0.01)    # 10mS delay between commands
                                     ###publish_result.wait_for_publish(1)
                                 logger.debug("Max. Reported Outputs: %d", yMsg.max_zones)
                             elif line[1:3] == "y?":     # SCS/RIO Outputs
                                 yMsg = Comfort_Y_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
                                     publish_result = self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state)
-                                    time.sleep(0.05)    # 50mS delay between commands
+                                    time.sleep(0.01)    # 10mS delay between commands
                                     ###publish_result.wait_for_publish(1)
                                 logger.debug("Max. Reported SCS/RIO Outputs: %d", yMsg.max_zones)
                             elif line[1:5] == "r?00":
@@ -1372,21 +1372,21 @@ class Comfort2(mqtt.Client):
                                 for cMsgr in cMsg.counters:
                                     publish_result = self.publish(ALARMCOUNTERINPUTRANGE % cMsgr.counter, cMsgr.value,qos=0,retain=True)     # Value Information
                                     ###publish_result.wait_for_publish(1)
-                                    time.sleep(0.05)    # 50mS delay between commands
+                                    time.sleep(0.01)    # 10mS delay between commands
                                     publish_result = self.publish(ALARMCOUNTERSTATETOPIC % cMsgr.counter, cMsgr.state,qos=0,retain=True)     # State Information
                                     ###publish_result.wait_for_publish(1)
-                                    time.sleep(0.05)    # 50mS delay between commands
+                                    time.sleep(0.01)    # 10mS delay between commands
                             elif line[1:5] == "r?01":
                                 sMsg = Comfort_R_ReportAllSensors(line[1:])
                                 for sMsgr in sMsg.sensors:
                                     publish_result = self.publish(ALARMSENSORTOPIC % sMsgr.sensor, sMsgr.value,qos=0,retain=False)           # Was True, test False
-                                    time.sleep(0.05)    # 50mS delay between commands
+                                    time.sleep(0.01)    # 10mS delay between commands
                                     ##publish_result.wait_for_publish(1)
                             elif (line[1:3] == "f?") and (len(line) == 69):
                                 fMsg = Comfortf_ReportAllFlags(line[1:])
                                 for fMsgf in fMsg.flags:
                                     publish_result = self.publish(ALARMFLAGTOPIC % fMsgf.flag, fMsgf.state,qos=0,retain=True)
-                                    time.sleep(0.05)    # 50mS delay between commands
+                                    time.sleep(0.01)    # 10mS delay between commands
                                     ###publish_result.wait_for_publish(1)
                             elif (line[1:3] == "b?"):   # and (len(line) == 69):
                                 bMsg = ComfortB_ReportAllBypassZones(line[1:])
@@ -1400,7 +1400,7 @@ class Comfort2(mqtt.Client):
                                     ##publish_result.wait_for_publish(1)
                                 for bMsgb in bMsg.zones:
                                     publish_result = self.publish(ALARMINPUTBYPASSTOPIC % bMsgb.zone, bMsgb.state,qos=0,retain=True)
-                                    time.sleep(0.05)    # 50mS delay between commands
+                                    time.sleep(0.01)    # 10mS delay between commands
                                     ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "FL":
                                 flMsg = ComfortFLFlagActivationReport(line[1:])
@@ -1419,10 +1419,10 @@ class Comfort2(mqtt.Client):
 
                                 publish_result = self.publish(ALARMINPUTBYPASSTOPIC % byMsg.zone, byMsg.state, qos=0, retain=True)
                                 ###publish_result.wait_for_publish(1)
-                                time.sleep(0.05)    # 50mS delay between commands
+                                time.sleep(0.01)    # 10mS delay between commands
                                 publish_result = self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=0,retain=True)
                                 ###publish_result.wait_for_publish(1)
-                                time.sleep(0.05)    # 50mS delay between commands
+                                time.sleep(0.01)    # 10mS delay between commands
 
                             elif line[1:3] == "RS":
                                 #on rare occassions comfort ucm might get reset (RS11), our session is no longer valid, need to relogin
