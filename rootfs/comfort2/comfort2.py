@@ -1258,7 +1258,7 @@ class Comfort2(mqtt.Client):
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
                                     publish_result = self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
-                                    publish_result.wait_for_publish(1)
+                                    #publish_result.wait_for_publish(1)
                                 logger.debug("Max. Reported SCS/RIO Inputs: %d", zMsg.max_zones)
                             elif line[1:3] == "M?" or line[1:3] == "MD":
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
