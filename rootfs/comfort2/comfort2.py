@@ -499,10 +499,12 @@ class Comfort_Y_ReportAllOutputs(object):
         self.outputs = []           
         b = (len(data) - 2) // 2   #variable number of outputs reported
         self.max_zones = b * 8
+        logger.debug("self.outputs[1]:%s", self.outputs)
         for i in range(1,b+1):  
             outputbits = int(data[2*i:2*i+2],16)
             for j in range(0,8):
                 self.outputs.append(ComfortOPOutputActivationReport("", 128+8*(i-1)+1+j,(outputbits>>j) & 1))
+        logger.debug("self.outputs[2]:%s", self.outputs)
 
 class ComfortB_ReportAllBypassZones(object):
 
