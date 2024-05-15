@@ -1212,12 +1212,14 @@ class Comfort2(mqtt.Client):
                                 self.setdatetime()          # Set Date/Time if Flag is set at 00:00 every day if option is enabled.
                             elif line[1:3] == "IP":
                                 ipMsg = ComfortIPInputActivationReport(line[1:])
-                                publish_result = self.publish(ALARMINPUTTOPIC % ipMsg.input, ipMsg.state,qos=0,retain=True)
-                                logger.debug('mqttc.isconnected (%s)', str(mqttc.isconnected))
-                                if mqttc.isconnected and publish_result._published:
+                                logger.debug('mqttc.is_connected (%s)', str(mqttc.is_connected))
+                                if mqttc.is_connected and publish_result._published:
                                     logger.debug('message sent (%s%s)', ipMsg.input, ipMsg.state)
                                 else:
                                     logger.debug('message failed (%s%s)', ipMsg.input, ipMsg.state)
+                                
+                                publish_result = self.publish(ALARMINPUTTOPIC % ipMsg.input, ipMsg.state,qos=0,retain=True)
+                                
                                 #logger.debug("result: %s", publish_result)
                                 #if publish_result.is_published() == False:
                                 #    logger.debug("Message is not yet published.")
