@@ -988,40 +988,40 @@ class Comfort2(mqtt.Client):
 
             #get Comfort type
             self.comfortsock.sendall("\x03V?\r".encode())
-            time.sleep(5)
+            time.sleep(0.25)
             #get Security Mode
             self.comfortsock.sendall("\x03M?\r".encode())
-            time.sleep(5)
+            time.sleep(0.25)
             #get all zone input states
             self.comfortsock.sendall("\x03Z?\r".encode())
-            time.sleep(5)
+            time.sleep(0.25)
             #get all SCS/RIO input states
             self.comfortsock.sendall("\x03z?\r".encode())
-            time.sleep(5)
+            time.sleep(0.25)
             #get all output states
             self.comfortsock.sendall("\x03Y?\r".encode())
-            time.sleep(5)
+            time.sleep(0.25)
             #get all RIO output states
             self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all RIO Outputs
-            time.sleep(5)
+            time.sleep(0.25)
             #get all flag states
             self.comfortsock.sendall("\x03f?00\r".encode())
-            time.sleep(5)
+            time.sleep(0.25)
             #get Alarm Status Information
             self.comfortsock.sendall("\x03S?\r".encode())       # S? Status Request
-            time.sleep(5)
+            time.sleep(0.25)
             #get Alarm Additional Information
             self.comfortsock.sendall("\x03a?\r".encode())       # a? Status Request
-            time.sleep(5)
+            time.sleep(0.25)
             #get Bypassed Zones
             self.comfortsock.sendall("\x03b?00\r".encode())       # b?00 Bypassed Zones
-            time.sleep(5)
+            time.sleep(0.25)
 
             #get all sensor values. 0 - 31
             self.comfortsock.sendall("\x03r?010010\r".encode())
-            time.sleep(5)
+            time.sleep(0.5)
             self.comfortsock.sendall("\x03r?011010\r".encode())
-            time.sleep(5)
+            time.sleep(0.25)
 
             #Clear all Timer Reports
             for i in range(1, 65):
@@ -1036,13 +1036,16 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.sendall("\x03r?00%X00F\r".encode() % (i))
                 else:
                     self.comfortsock.sendall("\x03r?00%X010\r".encode() % (i))
-                time.sleep(0.01)
+                time.sleep(0.25)
             
             publish_result = self.publish(ALARMAVAILABLETOPIC, 1,qos=0,retain=True)
             ##publish_result.wait_for_publish(1)
+            time.sleep(0.1)
             publish_result = self.publish(ALARMLWTTOPIC, 'Online',qos=0,retain=True)
+            time.sleep(0.1)
             ##publish_result.wait_for_publish(1)
             publish_result = self.publish(ALARMMESSAGETOPIC, "",qos=0,retain=True)       # Emptry string removes topic.
+            time.sleep(0.1)
             ##publish_result.wait_for_publish(1)
             #publish_result = self.publish(ALARMEXTMESSAGETOPIC, "",qos=0,retain=True)    # Emptry string removes topic. For future development !!!
 
