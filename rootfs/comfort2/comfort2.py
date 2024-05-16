@@ -988,52 +988,40 @@ class Comfort2(mqtt.Client):
 
             #get Comfort type
             self.comfortsock.sendall("\x03V?\r".encode())
-            while datetime.now() < endtime:
-                pass
+            time.sleep(1)
             #get Security Mode
             self.comfortsock.sendall("\x03M?\r".encode())
-            while datetime.now() < endtime:
-                pass
+            time.sleep(1)
             #get all zone input states
             self.comfortsock.sendall("\x03Z?\r".encode())
-            while datetime.now() < endtime:
-                pass
+            time.sleep(1)
             #get all SCS/RIO input states
             self.comfortsock.sendall("\x03z?\r".encode())
-            while datetime.now() < endtime:
-                pass
+            time.sleep(1)
             #get all output states
             self.comfortsock.sendall("\x03Y?\r".encode())
-            while datetime.now() < endtime:
-                pass
+            time.sleep(1)
             #get all RIO output states
             self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all RIO Outputs
-            while datetime.now() < endtime:
-                pass
+            time.sleep(1)
             #get all flag states
             self.comfortsock.sendall("\x03f?00\r".encode())
-            while datetime.now() < endtime:
-                pass
+            time.sleep(1)
             #get Alarm Status Information
             self.comfortsock.sendall("\x03S?\r".encode())       # S? Status Request
-            while datetime.now() < endtime:
-                pass
+            time.sleep(1)
             #get Alarm Additional Information
             self.comfortsock.sendall("\x03a?\r".encode())       # a? Status Request
-            while datetime.now() < endtime:
-                pass
+            time.sleep(1)
             #get Bypassed Zones
             self.comfortsock.sendall("\x03b?00\r".encode())       # b?00 Bypassed Zones
-            while datetime.now() < endtime:
-                pass
+            time.sleep(1)
 
             #get all sensor values. 0 - 31
             self.comfortsock.sendall("\x03r?010010\r".encode())
-            while datetime.now() < endtime:
-                pass
+            time.sleep(1)
             self.comfortsock.sendall("\x03r?011010\r".encode())
-            while datetime.now() < endtime:
-                pass
+            time.sleep(1)
 
             #Clear all Timer Reports
             for i in range(1, 65):
