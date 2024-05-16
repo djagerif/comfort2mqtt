@@ -723,14 +723,6 @@ class Comfort2(mqtt.Client):
         
         if rc == 'Success':
 
-            # Delay 10mSec
-            #logger.debug('now(): %s', datetime.now())
-            delay = timedelta(milliseconds=50)
-            endtime = datetime.now() + delay
-            #logger.debug('endtime: %s', endtime)
-            while datetime.now() < endtime:
-                pass
-
             BROKERCONNECTED = True
 
             #logger.info('MQTT Broker %s (%s)', mqtt_strings[rc], str(rc))
@@ -746,35 +738,44 @@ class Comfort2(mqtt.Client):
             #logger.debug('ALARMNUMBEROFOUTPUTS: %s', str(ALARMNUMBEROFOUTPUTS))
             for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
+                time.sleep(0.01)
                 #logger.debug('ALARMOUTPUTCOMMANDTOPIC %s', str(ALARMOUTPUTCOMMANDTOPIC % i))
             for i in ALARMVIRTUALINPUTRANGE: #for virtual inputs #inputs+1 to 128
                 #logger.debug('ALARMINPUTCOMMANDTOPIC %s', str(ALARMINPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMINPUTCOMMANDTOPIC % i)
+                time.sleep(0.01)
             
             for i in ALARMRIOINPUTRANGE: #for inputs 129 to Max Value
                 #logger.debug('ALARMRIOINPUTCOMMANDTOPIC %s', str(ALARMRIOINPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMRIOINPUTCOMMANDTOPIC % i)
+                time.sleep(0.01)
             for i in ALARMRIOOUTPUTRANGE: #for outputs 129 to Max Value
                 #logger.debug('ALARMRIOOUTPUTCOMMANDTOPIC %s', str(ALARMRIOOUTPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMRIOOUTPUTCOMMANDTOPIC % i)
+                time.sleep(0.01)
 
             for i in range(1, ALARMNUMBEROFFLAGS + 1):
                 if i >= 255:
                     break
                 #logger.debug('ALARMFLAGCOMMANDTOPIC %s', str(ALARMFLAGCOMMANDTOPIC % i))
                 self.subscribe(ALARMFLAGCOMMANDTOPIC % i)
+                time.sleep(0.01)
                 
                 ## Sensors ##
             for i in range(0, ALARMNUMBEROFSENSORS):
                 #logger.debug('ALARMSENSORCOMMANDTOPIC %s', str(ALARMSENSORCOMMANDTOPIC % i))
                 self.subscribe(ALARMSENSORCOMMANDTOPIC % i)
+                time.sleep(0.01)
 
             for i in range(0, ALARMNUMBEROFCOUNTERS + 1):
                 self.subscribe(ALARMCOUNTERCOMMANDTOPIC % i)    # Value or Level
+                time.sleep(0.01)
                 self.subscribe(ALARMCOUNTERSTATETOPIC % i)      # State On=1 or Off=0
+                time.sleep(0.01)
 
             for i in range(1, ALARMNUMBEROFRESPONSES + 1):      # Responses as specified from HA options.
                 self.subscribe(ALARMRESPONSECOMMANDTOPIC % i)
+                time.sleep(0.01)
 
 
             if FIRST_LOGIN == True:
@@ -983,8 +984,8 @@ class Comfort2(mqtt.Client):
     def readcurrentstate(self):
         if self.connected == True:
 
-            delay = timedelta(seconds=1)
-            endtime = datetime.now() + delay
+            #delay = timedelta(seconds=1)
+            #endtime = datetime.now() + delay
 
             #get Comfort type
             self.comfortsock.sendall("\x03V?\r".encode())
@@ -1019,7 +1020,7 @@ class Comfort2(mqtt.Client):
 
             #get all sensor values. 0 - 31
             self.comfortsock.sendall("\x03r?010010\r".encode())
-            time.sleep(0.5)
+            time.sleep(0.25)
             self.comfortsock.sendall("\x03r?011010\r".encode())
             time.sleep(0.25)
 
@@ -1189,10 +1190,9 @@ class Comfort2(mqtt.Client):
 
                                     if BROKERCONNECTED == True:
                                         logger.info("Starting 3s delay...")
-                                        delay = timedelta(seconds=3)
-                                        endtime = datetime.now() + delay
-                                        while datetime.now() < endtime:
-                                            pass
+                                        #delay = timedelta(seconds=3)
+                                        #endtime = datetime.now() + delay
+                                        time.sleep(3)
                                         logger.info("...Finished")
                                     else:
                                         logger.info("Waiting for MQTT Broker to come Online...")
