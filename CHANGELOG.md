@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
  
 ### Testing ###
-Add 10mS delay between bulk publish messages on startup or reconnect.Z?, z?, Y?, y?, f?00, r?00, r?01
+
 
 ## Unreleased ##
 ## [1.0.2] ## 
@@ -10,9 +10,10 @@ Minor bug-fix release.
 
 ### Added
  - Add 10mS delay between bulk publish commands on startup or reconnect. (Z?, z?, Y?, y?, f?00, r?00, r?01)
+ - Add 10mS for Comfort commands before next one is sent.
 
 ### Changed
- - Updated Automation to restart Add-on.
+ - Updated Automation to restart Add-on for MQTT configuration reload.
  - removed random mqtt-client id generation. Client-ID is now just 'comfort2mqtt'
 
 ### Fixed

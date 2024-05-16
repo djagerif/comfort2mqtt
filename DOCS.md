@@ -293,7 +293,7 @@ action:
   - service: notify.persistent_notification
     metadata: {}
     data:
-      message: Home Assistant Restarted or Configuration Reloaded
+      message: Home Assistant Restarted or MQTT Configuration Reloaded
       title: Comfort to MQTT Restart
   - service: hassio.addon_restart
     data:
