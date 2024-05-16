@@ -988,44 +988,45 @@ class Comfort2(mqtt.Client):
 
             #get Comfort type
             self.comfortsock.sendall("\x03V?\r".encode())
-            time.sleep(1)
+            time.sleep(5)
             #get Security Mode
             self.comfortsock.sendall("\x03M?\r".encode())
-            time.sleep(1)
+            time.sleep(5)
             #get all zone input states
             self.comfortsock.sendall("\x03Z?\r".encode())
-            time.sleep(1)
+            time.sleep(5)
             #get all SCS/RIO input states
             self.comfortsock.sendall("\x03z?\r".encode())
-            time.sleep(1)
+            time.sleep(5)
             #get all output states
             self.comfortsock.sendall("\x03Y?\r".encode())
-            time.sleep(1)
+            time.sleep(5)
             #get all RIO output states
             self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all RIO Outputs
-            time.sleep(1)
+            time.sleep(5)
             #get all flag states
             self.comfortsock.sendall("\x03f?00\r".encode())
-            time.sleep(1)
+            time.sleep(5)
             #get Alarm Status Information
             self.comfortsock.sendall("\x03S?\r".encode())       # S? Status Request
-            time.sleep(1)
+            time.sleep(5)
             #get Alarm Additional Information
             self.comfortsock.sendall("\x03a?\r".encode())       # a? Status Request
-            time.sleep(1)
+            time.sleep(5)
             #get Bypassed Zones
             self.comfortsock.sendall("\x03b?00\r".encode())       # b?00 Bypassed Zones
-            time.sleep(1)
+            time.sleep(5)
 
             #get all sensor values. 0 - 31
             self.comfortsock.sendall("\x03r?010010\r".encode())
-            time.sleep(1)
+            time.sleep(5)
             self.comfortsock.sendall("\x03r?011010\r".encode())
-            time.sleep(1)
+            time.sleep(5)
 
             #Clear all Timer Reports
             for i in range(1, 65):
                 publish_result = self.publish(ALARMTIMERREPORTTOPIC % i, 0,qos=0,retain=False)
+                time.sleep(0.01)
                 ##publish_result.wait_for_publish(1)
 
           #get all counter values
