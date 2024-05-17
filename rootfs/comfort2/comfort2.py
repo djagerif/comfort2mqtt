@@ -1197,13 +1197,16 @@ class Comfort2(mqtt.Client):
                                     else:
                                         logger.info("Waiting for MQTT Broker to come Online...")
 
+                                    logger.info("1")
                                     self.connected = True  
                                     self.publish(ALARMCOMMANDTOPIC, "comm test",qos=2,retain=True)
                                     self.setdatetime()      # Set Date/Time if Option is enabled
-                                    
+                                    logger.info("2")
+
                                     if FIRST_LOGIN == True:
                                         self.readcurrentstate()
                                         FIRST_LOGIN = False
+                                    logger.info("3")
                                 else:
                                     logger.debug("Disconnect (LU00) Received from Comfort.")
                                     FIRST_LOGIN = True
