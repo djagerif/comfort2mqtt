@@ -751,13 +751,13 @@ class Comfort2(mqtt.Client):
                 #logger.debug('ALARMRIOINPUTCOMMANDTOPIC %s', str(ALARMRIOINPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMRIOINPUTCOMMANDTOPIC % i)
                 time.sleep(0.01)
-            logger.debug("Subscribed to %d RIO Inputs", ALARMRIOINPUTRANGE[-1])
+            logger.debug("Subscribed to %d RIO Inputs", ALARMRIOINPUTRANGE[-1] - 128)
 
             for i in ALARMRIOOUTPUTRANGE: #for outputs 129 to Max Value
                 #logger.debug('ALARMRIOOUTPUTCOMMANDTOPIC %s', str(ALARMRIOOUTPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMRIOOUTPUTCOMMANDTOPIC % i)
                 time.sleep(0.01)
-            logger.debug("Subscribed to %d RIO Outputs", ALARMRIOOUTPUTRANGE[-1])
+            logger.debug("Subscribed to %d RIO Outputs", ALARMRIOOUTPUTRANGE[-1] - 128)
 
             for i in range(1, ALARMNUMBEROFFLAGS + 1):
                 if i >= 255:
@@ -1198,12 +1198,12 @@ class Comfort2(mqtt.Client):
                                 if luMsg.user != 0:
                                     logger.info('Comfort Login Ok - User %s', (luMsg.user if luMsg.user != 254 else 'Engineer'))
 
-                                    if BROKERCONNECTED == True:
-                                        logger.info("Starting 3s delay...")
+                                    if BROKERCONNECTED == True:     # Settle time for Comfort.
+                                        #logger.info("Starting 3s delay...")
                                         #delay = timedelta(seconds=3)
                                         #endtime = datetime.now() + delay
                                         time.sleep(3)
-                                        logger.info("...Finished")
+                                        #logger.info("...Finished")
                                     else:
                                         logger.info("Waiting for MQTT Broker to come Online...")
 
@@ -1249,6 +1249,8 @@ class Comfort2(mqtt.Client):
                                     publish_result = self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state, retain=False)
                                     time.sleep(0.01)    # 10mS delay between commands
                                 logger.debug("Max. Reported Zones/Inputs: %d", zMsg.max_zones)
+                                if zMsg.max_zones < int(COMFORT_INPUTS):
+                                    logger.warning("Max. Reported Zone Inputs of %d is less than the configured value of %d", zMsg.max_zones)
                             elif line[1:3] == "z?":                             # SCS/RIO Inputs
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
@@ -1349,6 +1351,8 @@ class Comfort2(mqtt.Client):
                                     time.sleep(0.01)    # 10mS delay between commands
                                     ###publish_result.wait_for_publish(1)
                                 logger.debug("Max. Reported Outputs: %d", yMsg.max_zones)
+                                if yMsg.max_zones < int(COMFORT_OUTPUTS):
+                                    logger.warning("Max. Reported Outputs of %d is less than the configured value of %d", yMsg.max_zones)
                             elif line[1:3] == "y?":     # SCS/RIO Outputs
                                 yMsg = Comfort_Y_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
