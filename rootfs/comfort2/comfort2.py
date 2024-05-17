@@ -734,25 +734,30 @@ class Comfort2(mqtt.Client):
             self.subscribe(ALARMCOMMANDTOPIC)
             #self.subscribe(ALARMSTATUSTOPIC)
             #self.subscribe(ALARMBYPASSTOPIC)
-
             #logger.debug('ALARMNUMBEROFOUTPUTS: %s', str(ALARMNUMBEROFOUTPUTS))
             for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
                 time.sleep(0.01)
                 #logger.debug('ALARMOUTPUTCOMMANDTOPIC %s', str(ALARMOUTPUTCOMMANDTOPIC % i))
+            logger.debug("Subscribed to %d Zone Outputs", ALARMNUMBEROFOUTPUTS)
+
             for i in ALARMVIRTUALINPUTRANGE: #for virtual inputs #inputs+1 to 128
                 #logger.debug('ALARMINPUTCOMMANDTOPIC %s', str(ALARMINPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMINPUTCOMMANDTOPIC % i)
                 time.sleep(0.01)
-            
+            logger.debug("Subscribed to %d Zone Inputs", ALARMVIRTUALINPUTRANGE)
+
             for i in ALARMRIOINPUTRANGE: #for inputs 129 to Max Value
                 #logger.debug('ALARMRIOINPUTCOMMANDTOPIC %s', str(ALARMRIOINPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMRIOINPUTCOMMANDTOPIC % i)
                 time.sleep(0.01)
+            logger.debug("Subscribed to %d RIO Inputs", ALARMRIOINPUTRANGE)
+
             for i in ALARMRIOOUTPUTRANGE: #for outputs 129 to Max Value
                 #logger.debug('ALARMRIOOUTPUTCOMMANDTOPIC %s', str(ALARMRIOOUTPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMRIOOUTPUTCOMMANDTOPIC % i)
                 time.sleep(0.01)
+            logger.debug("Subscribed to %d RIO Outputs", ALARMRIOOUTPUTRANGE)
 
             for i in range(1, ALARMNUMBEROFFLAGS + 1):
                 if i >= 255:
@@ -760,26 +765,31 @@ class Comfort2(mqtt.Client):
                 #logger.debug('ALARMFLAGCOMMANDTOPIC %s', str(ALARMFLAGCOMMANDTOPIC % i))
                 self.subscribe(ALARMFLAGCOMMANDTOPIC % i)
                 time.sleep(0.01)
+            logger.debug("Subscribed to %d Flags", ALARMNUMBEROFFLAGS)
                 
                 ## Sensors ##
             for i in range(0, ALARMNUMBEROFSENSORS):
                 #logger.debug('ALARMSENSORCOMMANDTOPIC %s', str(ALARMSENSORCOMMANDTOPIC % i))
                 self.subscribe(ALARMSENSORCOMMANDTOPIC % i)
                 time.sleep(0.01)
+            logger.debug("Subscribed to %d Sensors", ALARMNUMBEROFSENSORS)
 
             for i in range(0, ALARMNUMBEROFCOUNTERS + 1):
                 self.subscribe(ALARMCOUNTERCOMMANDTOPIC % i)    # Value or Level
                 time.sleep(0.01)
                 self.subscribe(ALARMCOUNTERSTATETOPIC % i)      # State On=1 or Off=0
                 time.sleep(0.01)
+            logger.debug("Subscribed to %d Counters", ALARMNUMBEROFCOUNTERS)
 
             for i in range(1, ALARMNUMBEROFRESPONSES + 1):      # Responses as specified from HA options.
                 self.subscribe(ALARMRESPONSECOMMANDTOPIC % i)
                 time.sleep(0.01)
-
+            logger.debug("Subscribed to %d Responses", ALARMNUMBEROFRESPONSES)
 
             if FIRST_LOGIN == True:
+                logger.debug("Synchronizing Comfort Data...")
                 self.readcurrentstate()
+                logger.debug("Done.")
             
         else:
             logger.error('MQTT Broker Connection Failed (%s)', str(rc))
@@ -1197,16 +1207,13 @@ class Comfort2(mqtt.Client):
                                     else:
                                         logger.info("Waiting for MQTT Broker to come Online...")
 
-                                    logger.info("1")
                                     self.connected = True  
                                     self.publish(ALARMCOMMANDTOPIC, "comm test",qos=2,retain=True)
                                     self.setdatetime()      # Set Date/Time if Option is enabled
-                                    logger.info("2")
 
                                     if FIRST_LOGIN == True:
                                         self.readcurrentstate()
                                         FIRST_LOGIN = False
-                                    logger.info("3")
                                 else:
                                     logger.debug("Disconnect (LU00) Received from Comfort.")
                                     FIRST_LOGIN = True
