@@ -1250,7 +1250,7 @@ class Comfort2(mqtt.Client):
                                     time.sleep(0.01)    # 10mS delay between commands
                                 logger.debug("Max. Reported Zones/Inputs: %d", zMsg.max_zones)
                                 if zMsg.max_zones < int(COMFORT_INPUTS):
-                                    logger.warning("Max. Reported Zone Inputs of %d is less than the configured value of %d", zMsg.max_zones)
+                                    logger.warning("Max. Reported Zone Inputs of %d is less than the configured value of %s", zMsg.max_zones, COMFORT_INPUTS)
                             elif line[1:3] == "z?":                             # SCS/RIO Inputs
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
@@ -1352,7 +1352,7 @@ class Comfort2(mqtt.Client):
                                     ###publish_result.wait_for_publish(1)
                                 logger.debug("Max. Reported Outputs: %d", yMsg.max_zones)
                                 if yMsg.max_zones < int(COMFORT_OUTPUTS):
-                                    logger.warning("Max. Reported Outputs of %d is less than the configured value of %d", yMsg.max_zones)
+                                    logger.warning("Max. Reported Outputs of %d is less than the configured value of %s", yMsg.max_zones, COMFORT_OUTPUTS)
                             elif line[1:3] == "y?":     # SCS/RIO Outputs
                                 yMsg = Comfort_Y_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
