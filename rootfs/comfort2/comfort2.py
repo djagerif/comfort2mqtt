@@ -596,7 +596,7 @@ class ComfortAMSystemAlarmReport(object):
         #logger.debug('AM - data: %s', str(data))
         low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
         if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
-        elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble1"
+        elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
         elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
         elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
         elif self.alarm == 4: self.message = "Phone Trouble"
@@ -1302,8 +1302,8 @@ class Comfort2(mqtt.Client):
                                     # self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
                             elif line[1:3] == "AM":
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
+                                logging.info("Message: %s", amMsg.message)
                                 publish_result = self.publish(ALARMMESSAGETOPIC, amMsg.message,qos=2,retain=True)
-                                ##publish_result.wait_for_publish(1)
                                 if amMsg.triggered:
                                     #publish_result = self.publish(ALARMSTATETOPIC, "triggered",qos=2,retain=False)     # Original message
                                     publish_result = self.publish(ALARMSTATETOPIC, amMsg.message,qos=2,retain=True)    # Display message that triggered the condition in the State Topic.
