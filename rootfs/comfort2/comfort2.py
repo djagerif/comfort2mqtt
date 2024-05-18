@@ -590,10 +590,10 @@ class ComfortERArmReadyNotReady(object):
 
 class ComfortAMSystemAlarmReport(object):
     def __init__(self, data={}):
+        logger.debug('AM - data: %s', str(data))
         self.alarm = int(data[2:4],16)
         self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
         self.parameter = int(data[4:6],16)
-        #logger.debug('AM - data: %s', str(data))
         low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
         if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
         elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
