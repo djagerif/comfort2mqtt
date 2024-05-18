@@ -594,6 +594,7 @@ class ComfortAMSystemAlarmReport(object):
         self.alarm = int(data[2:4],16)
         self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
         self.parameter = int(data[4:6],16)
+
         low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
         if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
         elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
@@ -791,7 +792,7 @@ class Comfort2(mqtt.Client):
             if FIRST_LOGIN == True:
                 logger.debug("Synchronizing Comfort Data...")
                 self.readcurrentstate()
-                logger.debug("Done.")
+                logger.debug("Synchronization Done.")
             
         else:
             logger.error('MQTT Broker Connection Failed (%s)', str(rc))
@@ -1305,10 +1306,10 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "AM":
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 logging.info("Message: %s", amMsg.message)
-                                publish_result = self.publish(ALARMMESSAGETOPIC, amMsg.message,qos=2,retain=True)
+                                publish_result = self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
                                 if amMsg.triggered:
-                                    #publish_result = self.publish(ALARMSTATETOPIC, "triggered",qos=2,retain=False)     # Original message
-                                    publish_result = self.publish(ALARMSTATETOPIC, amMsg.message,qos=2,retain=True)    # Display message that triggered the condition in the State Topic.
+                                    publish_result = self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
+                                    #publish_result = self.publish(ALARMSTATETOPIC, amMsg.message,qos=2,retain=True)    # Display message that triggered the condition in the State Topic.
                                     ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "AR":
                                 arMsg = ComfortARSystemAlarmReport(line[1:])
