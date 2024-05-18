@@ -235,7 +235,6 @@ COMFORT_RIO_OUTPUTS=str(option.alarm_rio_outputs)
 
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 ALARMINPUTBYPASSTOPIC = DOMAIN+"/input%d/bypass"        # Bypass Status.
-ALARMINPUTTROUBLETOPIC = DOMAIN+"/input%d/trouble"      # Trouble Status.
 if int(COMFORT_INPUTS) < 8:
     COMFORT_INPUTS = "8"
 ALARMVIRTUALINPUTRANGE = range(1,int(COMFORT_INPUTS)+1) #set this according to your system. Starts at 1 -> {value}
@@ -597,7 +596,7 @@ class ComfortAMSystemAlarmReport(object):
         #logger.debug('AM - data: %s', str(data))
         low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
         if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
-        elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
+        elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble1"
         elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
         elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
         elif self.alarm == 4: self.message = "Phone Trouble"
