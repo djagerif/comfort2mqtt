@@ -1054,6 +1054,7 @@ class Comfort2(mqtt.Client):
             time.sleep(0.1)
             publish_result = self.publish(ALARMLWTTOPIC, 'Online',qos=2,retain=True)
             time.sleep(0.1)
+            logger.info('Comfort to MQTT is now Online')
             ##publish_result.wait_for_publish(1)
             publish_result = self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)       # Emptry string removes topic.
             time.sleep(0.1)
