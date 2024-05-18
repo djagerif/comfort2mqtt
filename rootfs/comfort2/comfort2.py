@@ -323,15 +323,11 @@ class ComfortIPInputActivationReport(object):
     def __init__(self, datastr="", input=0, state=0):
         if datastr:
             self.input = int(datastr[2:4], 16)
-            if int(datastr[4:6], 16) >1:
-                return;
             self.state = int(datastr[4:6], 16)
         else:
             self.input = int(input)
-            if int(state) >1:
-                return;
             self.state = int(state)
-        #logger.debug("input: %d, state: %d", self.input, self.state)
+        logger.debug("input: %d, state: %d", self.input, self.state)
 
 
 class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (counter) 1E = 30; state FF00 = 65280
