@@ -890,6 +890,8 @@ class Comfort2(mqtt.Client):
             if self.connected:
                 self.comfortsock.sendall(("\x03s!%02X%s\r" % (sensor, self.DecimalToSigned16(state))).encode()) # sensor needs 16 bit signed number
                 #logger.debug("\x03s!%02X%s\r",sensor, self.DecimalToSigned16(state))
+        else:
+            logger.debug("msg.topic: %s",msg.topic)     # Check what was missed. Looking for LWT
 
     def DecimalToSigned16(self,value):      # Returns Comfort corrected HEX string value from signed 16-bit decimal value.
         return ('{:04X}'.format((int((value & 0xff) * 0x100 + (value & 0xff00) / 0x100))) )
@@ -1054,7 +1056,6 @@ class Comfort2(mqtt.Client):
             time.sleep(0.1)
             publish_result = self.publish(ALARMLWTTOPIC, 'Online',qos=2,retain=True)
             time.sleep(0.1)
-            logger.info('Comfort to MQTT is now Online')
             ##publish_result.wait_for_publish(1)
             publish_result = self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)       # Emptry string removes topic.
             time.sleep(0.1)
