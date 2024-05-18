@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
  
 ### Testing ###
-
+Add trouble state to Zone Inputs
 
 ## Unreleased ##
 ## [1.0.2] ## 

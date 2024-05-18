@@ -235,6 +235,7 @@ COMFORT_RIO_OUTPUTS=str(option.alarm_rio_outputs)
 
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 ALARMINPUTBYPASSTOPIC = DOMAIN+"/input%d/bypass"        # Bypass Status.
+ALARMINPUTTROUBLETOPIC = DOMAIN+"/input%d/trouble"      # Trouble Status.
 if int(COMFORT_INPUTS) < 8:
     COMFORT_INPUTS = "8"
 ALARMVIRTUALINPUTRANGE = range(1,int(COMFORT_INPUTS)+1) #set this according to your system. Starts at 1 -> {value}
@@ -890,9 +891,6 @@ class Comfort2(mqtt.Client):
             if self.connected:
                 self.comfortsock.sendall(("\x03s!%02X%s\r" % (sensor, self.DecimalToSigned16(state))).encode()) # sensor needs 16 bit signed number
                 #logger.debug("\x03s!%02X%s\r",sensor, self.DecimalToSigned16(state))
-        else:
-            if not msg.topic.endswith("/state"):
-                logger.debug("msg.topic: %s",msg.topic)     # Check what was missed. Looking for LWT
 
     def DecimalToSigned16(self,value):      # Returns Comfort corrected HEX string value from signed 16-bit decimal value.
         return ('{:04X}'.format((int((value & 0xff) * 0x100 + (value & 0xff00) / 0x100))) )
@@ -1225,7 +1223,9 @@ class Comfort2(mqtt.Client):
                                 self.setdatetime()          # Set Date/Time if Flag is set at 00:00 every day if option is enabled.
                             elif line[1:3] == "IP":
                                 ipMsg = ComfortIPInputActivationReport(line[1:])
-                                publish_result = self.publish(ALARMINPUTTOPIC % ipMsg.input, ipMsg.state,qos=2,retain=True)
+                                if ipMsg.state < 2:
+                                    publish_result = self.publish(ALARMINPUTTOPIC % ipMsg.input, ipMsg.state,qos=2,retain=True)
+                                    logger.debug("Input State: %d", ipMsg.state)
                             elif line[1:3] == "CT":
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
                                 publish_result = self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=2,retain=True)     # Value Information
