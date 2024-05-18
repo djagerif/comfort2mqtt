@@ -326,7 +326,7 @@ class ComfortIPInputActivationReport(object):
         else:
             self.input = int(input)
             self.state = int(state)
-        logger.debug("input: %d, state: %d", self.input, self.state)
+        #logger.debug("input: %d, state: %d", self.input, self.state)
 
 
 class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (counter) 1E = 30; state FF00 = 65280
@@ -1222,10 +1222,10 @@ class Comfort2(mqtt.Client):
                                 self.setdatetime()          # Set Date/Time if Flag is set at 00:00 every day if option is enabled.
                             elif line[1:3] == "IP":
                                 ipMsg = ComfortIPInputActivationReport(line[1:])
-                                logger.debug("Input State: %d", ipMsg.state)
+                                #logger.debug("Input State: %d", ipMsg.state)
                                 if ipMsg.state < 2:
                                     publish_result = self.publish(ALARMINPUTTOPIC % ipMsg.input, ipMsg.state,qos=2,retain=True)
-                                    logger.debug("Input State: %d", ipMsg.state)
+                                    #logger.debug("Input State: %d", ipMsg.state)
                             elif line[1:3] == "CT":
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
                                 publish_result = self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=2,retain=True)     # Value Information
