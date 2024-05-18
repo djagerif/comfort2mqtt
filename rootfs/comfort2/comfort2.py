@@ -751,14 +751,14 @@ class Comfort2(mqtt.Client):
                 #logger.debug('ALARMRIOINPUTCOMMANDTOPIC %s', str(ALARMRIOINPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMRIOINPUTCOMMANDTOPIC % i)
                 time.sleep(0.01)
-            if COMFORT_RIO_INPUTS > 0:              
+            if int(COMFORT_RIO_INPUTS) > 0:              
                 logger.debug("Subscribed to %d RIO Inputs", ALARMRIOINPUTRANGE[-1] - 128)
 
             for i in ALARMRIOOUTPUTRANGE: #for outputs 129 to Max Value
                 #logger.debug('ALARMRIOOUTPUTCOMMANDTOPIC %s', str(ALARMRIOOUTPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMRIOOUTPUTCOMMANDTOPIC % i)
                 time.sleep(0.01)
-            if COMFORT_RIO_OUTPUTS > 0:              
+            if int(COMFORT_RIO_OUTPUTS) > 0:              
                 logger.debug("Subscribed to %d RIO Outputs", ALARMRIOOUTPUTRANGE[-1] - 128)
 
             for i in range(1, ALARMNUMBEROFFLAGS + 1):
