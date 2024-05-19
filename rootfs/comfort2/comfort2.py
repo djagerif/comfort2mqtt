@@ -590,11 +590,9 @@ class ComfortERArmReadyNotReady(object):
 
 class ComfortAMSystemAlarmReport(object):
     def __init__(self, data={}):
-        logger.debug('AM - data: %s', str(data))
         self.alarm = int(data[2:4],16)
-        self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
+        self.triggered = True               # For Comfort Alarm State Alert, Trouble, Alarm
         self.parameter = int(data[4:6],16)
-
         low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
         if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
         elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
@@ -603,6 +601,7 @@ class ComfortAMSystemAlarmReport(object):
         elif self.alarm == 4: self.message = "Phone Trouble"
         elif self.alarm == 5: self.message = "Duress"
         elif self.alarm == 6: self.message = "Arm Failure"
+        elif self.alarm == 7: self.message = "Family Care"
         elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
         elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
         elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
@@ -619,6 +618,7 @@ class ComfortAMSystemAlarmReport(object):
         elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
         elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
         elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
+        else: self.message = "Unknown("+str(self.alarm)+")"
 
 #a? - Current Alarm Information Request/Reply
 #UCM a?AASS[XXYYBBzzRRTTGG]
@@ -729,7 +729,7 @@ class Comfort2(mqtt.Client):
             #logger.info('MQTT Broker %s (%s)', mqtt_strings[rc], str(rc))
             logger.info('MQTT Broker Connection %s', str(rc))
 
-            #Wait 3s for Comfort to settle a bit.
+            time.sleep(0.25)    # Short wait for MQTT to be ready to accept commands.
 
             # You need to subscribe to your own topics to enable publish messages activating Comfort entities.
             self.subscribe(ALARMCOMMANDTOPIC)
@@ -1305,12 +1305,11 @@ class Comfort2(mqtt.Client):
                                     # self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
                             elif line[1:3] == "AM":
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
-                                logging.info("Message: %s", amMsg.message)
+                                #logging.info("Message: %s", amMsg.message)
                                 publish_result = self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
                                 if amMsg.triggered:
                                     publish_result = self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
                                     #publish_result = self.publish(ALARMSTATETOPIC, amMsg.message,qos=2,retain=True)    # Display message that triggered the condition in the State Topic.
-                                    ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "AR":
                                 arMsg = ComfortARSystemAlarmReport(line[1:])
                                 publish_result = self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=2,retain=True)

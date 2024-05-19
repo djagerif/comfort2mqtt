@@ -2,7 +2,6 @@
 All notable changes to this project will be documented in this file.
  
 ### Testing ###
-Add trouble state to Zone Inputs
 
 ## Unreleased ##
 ## [1.0.2] ## 
@@ -17,6 +16,8 @@ Minor bug-fix release.
  - removed random mqtt-client id generation. Client-ID is now just 'comfort2mqtt'
 
 ### Fixed
+ - Alarm triggered state incorrectly set.
+ - Fix Zone Trouble from activating Zone Input.
 
 
 ## [1.0.1] - 2024-05-05
