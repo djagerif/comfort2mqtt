@@ -32,7 +32,6 @@
 
 # Remember to install homeassistant libraries on build. pip install homeassistant if required - Future Development!!
 #
-import hassapi as hass
 import csv
 import os
 from pathlib import Path
@@ -1406,7 +1405,6 @@ class Comfort2(mqtt.Client):
                                 publish_result = self.publish(ALARMFLAGTOPIC % flMsg.flag, flMsg.state,qos=2,retain=True)
                                 ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "BY":
-                                test()
                                 byMsg = ComfortBYBypassActivationReport(line[1:])   
                                 if byMsg.state == 1:
                                     if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
@@ -1458,12 +1456,6 @@ class Comfort2(mqtt.Client):
                 infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
                 infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
                 infot.wait_for_publish(1)
-
-class test(hass.Hass):
-    def __init__(self):
-        #self.type = int(data[2:4],16)
-        #self.delay = int(data[4:6],16)
-        logger.debug("here!! %s", str(self.get_state("binary_sensor.study_pir")))
 
 
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)

@@ -7,7 +7,6 @@ FROM $BUILD_FROM
 RUN apk update --no-cache && apk upgrade --no-cache
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install paho-mqtt
-RUN pip install hassapi
 
 # Copy root filesystem
 COPY rootfs /
