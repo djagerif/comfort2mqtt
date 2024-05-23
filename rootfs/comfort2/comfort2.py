@@ -1463,7 +1463,7 @@ class test(hass.Hass):
     def __init__(self):
         #self.type = int(data[2:4],16)
         #self.delay = int(data[4:6],16)
-        print (self.get_state("binary_sensor.study_pir"))
+        logger.debug("here!! %s", str(self.get_state("binary_sensor.study_pir")))
 
 
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
