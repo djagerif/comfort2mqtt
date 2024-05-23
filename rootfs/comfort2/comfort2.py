@@ -1406,6 +1406,7 @@ class Comfort2(mqtt.Client):
                                 publish_result = self.publish(ALARMFLAGTOPIC % flMsg.flag, flMsg.state,qos=2,retain=True)
                                 ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "BY":
+                                test()
                                 byMsg = ComfortBYBypassActivationReport(line[1:])   
                                 if byMsg.state == 1:
                                     if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
@@ -1448,7 +1449,6 @@ class Comfort2(mqtt.Client):
                 time.sleep(RETRY.seconds)
         except KeyboardInterrupt as e:
             logger.debug("SIGINT (Ctrl-C) Intercepted")
-            test()
             logger.info('Shutting down.')
             if self.connected == True:
                 self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
