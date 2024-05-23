@@ -32,6 +32,7 @@
 
 # Remember to install homeassistant libraries on build. pip install homeassistant if required - Future Development!!
 #
+import hassapi
 import csv
 import os
 from pathlib import Path
@@ -1447,6 +1448,7 @@ class Comfort2(mqtt.Client):
                 time.sleep(RETRY.seconds)
         except KeyboardInterrupt as e:
             logger.debug("SIGINT (Ctrl-C) Intercepted")
+            test('whatever')
             logger.info('Shutting down.')
             if self.connected == True:
                 self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
@@ -1456,6 +1458,12 @@ class Comfort2(mqtt.Client):
                 infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
                 infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
                 infot.wait_for_publish(1)
+
+class test(hassapi):
+    def __init__(self, data={}):
+        #self.type = int(data[2:4],16)
+        #self.delay = int(data[4:6],16)
+        print (self.get_state("input_number.input_slider_ls_stage"))
 
 
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
