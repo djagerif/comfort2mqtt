@@ -1,9 +1,6 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### Testing ###
-
-
 ## [1.0.2] - 2024-05-24 
 Minor bug-fix release.
 
