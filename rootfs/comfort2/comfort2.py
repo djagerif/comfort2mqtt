@@ -45,6 +45,7 @@ import logging
 from datetime import datetime, timedelta
 from random import randint
 import paho.mqtt.client as mqtt
+import paho.mqtt.publish as publishMulti
 from argparse import ArgumentParser
 
 DOMAIN = "comfort2"
@@ -1231,8 +1232,13 @@ class Comfort2(mqtt.Client):
                                     #logger.debug("Input State: %d", ipMsg.state)
                             elif line[1:3] == "CT":
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
-                                publish_result = self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=2,retain=True)     # Value Information
-                                ###publish_result.wait_for_publish(1)
+                                publishMulti.single(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=2,retain=True)     # Value Information
+                                
+                                ### Test Publish Multi ###
+                                #self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=2,retain=True)     # Value Information
+                                
+
+
                                 time.sleep(0.01)
                                 publish_result = self.publish(ALARMCOUNTERSTATETOPIC % ipMsgCT.counter, ipMsgCT.state,qos=2,retain=True)     # State Information
                                 ###publish_result.wait_for_publish(1)
