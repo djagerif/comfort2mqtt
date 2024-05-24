@@ -1,19 +1,6 @@
 # Change Log
 All notable changes to this project will be documented in this file.
- 
-### Testing ###
 
-## Unreleased ##
-## [1.0.3] ## 
-
-### Added
-
-### Changed
-
-### Fixed
-
-
-## [1.0.2] - 2024-05-24
 Minor bug-fix release.
 
 ### Added
@@ -28,7 +15,6 @@ Minor bug-fix release.
 ### Fixed
  - Alarm triggered state incorrectly set.
  - Prevent Zone Trouble state (2) from activating Zone Input.
-
 
 ## [1.0.1] - 2024-05-05
   
