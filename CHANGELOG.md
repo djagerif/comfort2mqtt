@@ -8,8 +8,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
   
 ### Fixed
-- Sanity Check improved for invalid data received from Comfort.
-- Fixed MQTT WebSockets connection.
+ - Sanity Check improved for invalid data received from Comfort.
+ - Fixed MQTT WebSockets connection.
 
 
 ## [1.0.0] - 2024-05-04

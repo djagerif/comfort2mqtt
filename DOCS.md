@@ -191,7 +191,7 @@ Because `Counters` can be used for many things other than Lights, the `Kitchen L
 
 ## Home Assistant - Custom Card `#` (Optional)
 
-The native `Alarm Control Panel` card does not include a `#` key for confirmation, you need to create a seperate custom button card that can simulate the `#` key. One option is to install the Custom Button Card and then call the arm_bypass which is configured to send a `#` instead os actually arming in `Custom bypass` mode. The other is to design your own card that incorporates this key. Below is the easiest option to follow.
+The native `Alarm Control Panel` card does not include a `#` key for confirmation, you need to create a seperate custom button card that can simulate the `#` key. One option is to install the Custom Button Card and then call 'arm_bypass' which is configured to send a `#` instead of actually arming in `Custom bypass` mode. The other is to design your own card that incorporates this key. Below is the easiest option to follow.
 
 1. Download the `Custom Button Card` from https://github.com/custom-cards/button-card and intall it according to whichever method you prefer. Refer to the repository documentation for installation and configuration instructions for either manual or HACS installation.
 
@@ -282,9 +282,9 @@ trigger:
   - platform: event
     event_type: call_service
     event_data:
-      domain: homeassistant
-      service: reload_all
-    alias: When Reload 'ALL YAML CONFIGURATION' from Developer Tools
+      domain: mqtt
+      service: reload
+    alias: When MQTT, or ALL, is reloaded from Developer Tools
 condition:
   - condition: state
     entity_id: binary_sensor.comfort_to_mqtt_running
@@ -293,7 +293,7 @@ action:
   - service: notify.persistent_notification
     metadata: {}
     data:
-      message: Home Assistant Restarted or Configuration Reloaded
+      message: Home Assistant Restarted or MQTT Configuration Reloaded
       title: Comfort to MQTT Restart
   - service: hassio.addon_restart
     data:

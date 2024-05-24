@@ -49,8 +49,9 @@ from argparse import ArgumentParser
 
 DOMAIN = "comfort2"
 
-rand_hex_str = hex(randint(268435456, 4294967295))
-mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts, for future development of a possible second instance.
+#rand_hex_str = hex(randint(268435456, 4294967295))
+#mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts, for future development of a possible second instance.
+mqtt_client_id = DOMAIN+"mqtt"
 
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
@@ -202,6 +203,17 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
+#TOKEN = os.getenv('SUPERVISOR_TOKEN')
+#
+#url = "http://supervisor/core/api/config"
+#headers = {
+#    "Authorization": "Bearer {}".format(TOKEN),
+#    "content-type": "application/json",
+#}
+#response = get(url, headers=headers)
+#logger.debug(response.text)
+
+
 logger.info('Importing the add-on configuration options')
 
 MQTT_USER=option.broker_username
@@ -314,6 +326,7 @@ class ComfortIPInputActivationReport(object):
         else:
             self.input = int(input)
             self.state = int(state)
+        #logger.debug("input: %d, state: %d", self.input, self.state)
 
 
 class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (counter) 1E = 30; state FF00 = 65280
@@ -407,6 +420,7 @@ class ComfortZ_ReportAllZones(object):
     def __init__(self, data={}):
         self.inputs = []
         b = (len(data) - 2) // 2            #variable number of zones reported
+        #logger.debug("data: %s", data)
         self.max_zones = b * 8
         for i in range(1,b+1):
             inputbits = int(data[2*i:2*i+2],16)
@@ -577,9 +591,8 @@ class ComfortERArmReadyNotReady(object):
 class ComfortAMSystemAlarmReport(object):
     def __init__(self, data={}):
         self.alarm = int(data[2:4],16)
-        self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
+        self.triggered = True               # For Comfort Alarm State Alert, Trouble, Alarm
         self.parameter = int(data[4:6],16)
-        #logger.debug('AM - data: %s', str(data))
         low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
         if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
         elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
@@ -588,6 +601,7 @@ class ComfortAMSystemAlarmReport(object):
         elif self.alarm == 4: self.message = "Phone Trouble"
         elif self.alarm == 5: self.message = "Duress"
         elif self.alarm == 6: self.message = "Arm Failure"
+        elif self.alarm == 7: self.message = "Family Care"
         elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
         elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
         elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
@@ -604,6 +618,7 @@ class ComfortAMSystemAlarmReport(object):
         elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
         elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
         elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
+        else: self.message = "Unknown("+str(self.alarm)+")"
 
 #a? - Current Alarm Information Request/Reply
 #UCM a?AASS[XXYYBBzzRRTTGG]
@@ -714,49 +729,70 @@ class Comfort2(mqtt.Client):
             #logger.info('MQTT Broker %s (%s)', mqtt_strings[rc], str(rc))
             logger.info('MQTT Broker Connection %s', str(rc))
 
-            #Wait 3s for Comfort to settle a bit.
+            time.sleep(0.25)    # Short wait for MQTT to be ready to accept commands.
 
             # You need to subscribe to your own topics to enable publish messages activating Comfort entities.
             self.subscribe(ALARMCOMMANDTOPIC)
             #self.subscribe(ALARMSTATUSTOPIC)
             #self.subscribe(ALARMBYPASSTOPIC)
-
             #logger.debug('ALARMNUMBEROFOUTPUTS: %s', str(ALARMNUMBEROFOUTPUTS))
             for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
+                time.sleep(0.01)
                 #logger.debug('ALARMOUTPUTCOMMANDTOPIC %s', str(ALARMOUTPUTCOMMANDTOPIC % i))
+            logger.debug("Subscribed to %d Zone Outputs", ALARMNUMBEROFOUTPUTS)
+
             for i in ALARMVIRTUALINPUTRANGE: #for virtual inputs #inputs+1 to 128
                 #logger.debug('ALARMINPUTCOMMANDTOPIC %s', str(ALARMINPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMINPUTCOMMANDTOPIC % i)
-            
+                time.sleep(0.01)
+            logger.debug("Subscribed to %d Zone Inputs", ALARMVIRTUALINPUTRANGE[-1])
+
             for i in ALARMRIOINPUTRANGE: #for inputs 129 to Max Value
                 #logger.debug('ALARMRIOINPUTCOMMANDTOPIC %s', str(ALARMRIOINPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMRIOINPUTCOMMANDTOPIC % i)
+                time.sleep(0.01)
+            if int(COMFORT_RIO_INPUTS) > 0:              
+                logger.debug("Subscribed to %d RIO Inputs", ALARMRIOINPUTRANGE[-1] - 128)
+
             for i in ALARMRIOOUTPUTRANGE: #for outputs 129 to Max Value
                 #logger.debug('ALARMRIOOUTPUTCOMMANDTOPIC %s', str(ALARMRIOOUTPUTCOMMANDTOPIC % i))
                 self.subscribe(ALARMRIOOUTPUTCOMMANDTOPIC % i)
+                time.sleep(0.01)
+            if int(COMFORT_RIO_OUTPUTS) > 0:              
+                logger.debug("Subscribed to %d RIO Outputs", ALARMRIOOUTPUTRANGE[-1] - 128)
 
             for i in range(1, ALARMNUMBEROFFLAGS + 1):
                 if i >= 255:
                     break
                 #logger.debug('ALARMFLAGCOMMANDTOPIC %s', str(ALARMFLAGCOMMANDTOPIC % i))
                 self.subscribe(ALARMFLAGCOMMANDTOPIC % i)
+                time.sleep(0.01)
+            logger.debug("Subscribed to %d Flags", ALARMNUMBEROFFLAGS)
                 
                 ## Sensors ##
             for i in range(0, ALARMNUMBEROFSENSORS):
                 #logger.debug('ALARMSENSORCOMMANDTOPIC %s', str(ALARMSENSORCOMMANDTOPIC % i))
                 self.subscribe(ALARMSENSORCOMMANDTOPIC % i)
+                time.sleep(0.01)
+            logger.debug("Subscribed to %d Sensors", ALARMNUMBEROFSENSORS)
 
             for i in range(0, ALARMNUMBEROFCOUNTERS + 1):
                 self.subscribe(ALARMCOUNTERCOMMANDTOPIC % i)    # Value or Level
+                time.sleep(0.01)
                 self.subscribe(ALARMCOUNTERSTATETOPIC % i)      # State On=1 or Off=0
+                time.sleep(0.01)
+            logger.debug("Subscribed to %d Counters", ALARMNUMBEROFCOUNTERS)
 
             for i in range(1, ALARMNUMBEROFRESPONSES + 1):      # Responses as specified from HA options.
                 self.subscribe(ALARMRESPONSECOMMANDTOPIC % i)
-
+                time.sleep(0.01)
+            logger.debug("Subscribed to %d Responses", ALARMNUMBEROFRESPONSES)
 
             if FIRST_LOGIN == True:
+                logger.debug("Synchronizing Comfort Data...")
                 self.readcurrentstate()
+                logger.debug("Synchronization Done.")
             
         else:
             logger.error('MQTT Broker Connection Failed (%s)', str(rc))
@@ -788,17 +824,21 @@ class Comfort2(mqtt.Client):
                 #logger.debug("msgstr: %s",msgstr)
                 if msgstr == "ARM_VACATION":
                     self.comfortsock.sendall(("\x03m!04"+self.comfort_pincode+"\r").encode()) #Local arm to 04 vacation mode. Requires # for open zones
-                    self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)
+                    publish_result = self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)
+                    ##publish_result.wait_for_publish(1)
                 elif msgstr == "ARM_HOME":
                     self.comfortsock.sendall(("\x03m!03"+self.comfort_pincode+"\r").encode()) #Local arm to 03 day mode. Requires # for open zones
-                    self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)
+                    publish_result = self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)
+                    ##publish_result.wait_for_publish(1)
                 elif msgstr == "ARM_NIGHT":
                     self.comfortsock.sendall(("\x03m!02"+self.comfort_pincode+"\r").encode()) #Local arm to 02 night mode. Requires # for open zones
-                    self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)
+                    publish_result = self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)
+                    ##publish_result.wait_for_publish(1)
                 elif msgstr == "ARM_AWAY":
                     self.comfortsock.sendall(("\x03m!01"+self.comfort_pincode+"\r").encode()) #Local arm to 01 away mode. Requires # for open zones + Exit door
-                    #self.publish(ALARMMESSAGETOPIC, "Please Exit...", qos=0, retain=False)   #  For future development in extended message !!!
-                    self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)
+                    #publish_result = self.publish(ALARMMESSAGETOPIC, "Please Exit...", qos=2, retain=False)   #  For future development in extended message !!!
+                    publish_result = self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)
+                    ##publish_result.wait_for_publish(1)
                 elif msgstr == "ARM_CUSTOM_BYPASS":
                     self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send '#' key code (KD1A)
                 elif msgstr == "DISARM":
@@ -898,6 +938,7 @@ class Comfort2(mqtt.Client):
         for sub_result in reason_codes:
             if sub_result == 1:
                 #logger.debug("QoS Value == 1")              # For Information Only
+                #logger.debug("on_subscribe")
                 pass
             if sub_result >= 128:
                 logger.debug("Error processing subscribe message")
@@ -906,7 +947,8 @@ class Comfort2(mqtt.Client):
         pass
 
     def entryexit_timer(self):
-        self.publish(ALARMTIMERTOPIC, self.entryexitdelay,qos=0,retain=True)
+        publish_result = self.publish(ALARMTIMERTOPIC, self.entryexitdelay,qos=2,retain=True)
+        ##publish_result.wait_for_publish(1)
         self.entryexitdelay -= 1
         if self.entryexitdelay >= 0:
             threading.Timer(1, self.entryexit_timer).start()
@@ -954,34 +996,52 @@ class Comfort2(mqtt.Client):
 
     def readcurrentstate(self):
         if self.connected == True:
+
+            #delay = timedelta(seconds=1)
+            #endtime = datetime.now() + delay
+
             #get Comfort type
             self.comfortsock.sendall("\x03V?\r".encode())
+            time.sleep(0.1)
             #get Security Mode
             self.comfortsock.sendall("\x03M?\r".encode())
+            time.sleep(0.1)
             #get all zone input states
             self.comfortsock.sendall("\x03Z?\r".encode())
+            time.sleep(0.1)
             #get all SCS/RIO input states
             self.comfortsock.sendall("\x03z?\r".encode())
+            time.sleep(0.1)
             #get all output states
             self.comfortsock.sendall("\x03Y?\r".encode())
+            time.sleep(0.1)
             #get all RIO output states
             self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all RIO Outputs
+            time.sleep(0.1)
             #get all flag states
             self.comfortsock.sendall("\x03f?00\r".encode())
+            time.sleep(0.1)
             #get Alarm Status Information
             self.comfortsock.sendall("\x03S?\r".encode())       # S? Status Request
+            time.sleep(0.1)
             #get Alarm Additional Information
             self.comfortsock.sendall("\x03a?\r".encode())       # a? Status Request
+            time.sleep(0.1)
             #get Bypassed Zones
             self.comfortsock.sendall("\x03b?00\r".encode())       # b?00 Bypassed Zones
+            time.sleep(0.1)
 
             #get all sensor values. 0 - 31
             self.comfortsock.sendall("\x03r?010010\r".encode())
+            time.sleep(0.1)
             self.comfortsock.sendall("\x03r?011010\r".encode())
+            time.sleep(0.1)
 
             #Clear all Timer Reports
             for i in range(1, 65):
-                self.publish(ALARMTIMERREPORTTOPIC % i, 0,qos=0,retain=False)
+                publish_result = self.publish(ALARMTIMERREPORTTOPIC % i, 0,qos=2,retain=False)
+                time.sleep(0.01)
+                ##publish_result.wait_for_publish(1)
 
           #get all counter values
             for i in range(0, int((ALARMNUMBEROFCOUNTERS+1) / 16)):          # Counters 0 to 254 Using 256/16 = 16 iterations
@@ -990,12 +1050,18 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.sendall("\x03r?00%X00F\r".encode() % (i))
                 else:
                     self.comfortsock.sendall("\x03r?00%X010\r".encode() % (i))
-                time.sleep(0.05)
+                time.sleep(0.1)
             
-            self.publish(ALARMAVAILABLETOPIC, 1,qos=0,retain=True)
-            self.publish(ALARMLWTTOPIC, 'Online',qos=0,retain=True)
-            self.publish(ALARMMESSAGETOPIC, "",qos=0,retain=True)       # Emptry string removes topic.
-            #self.publish(ALARMEXTMESSAGETOPIC, "",qos=0,retain=True)    # Emptry string removes topic. For future development !!!
+            publish_result = self.publish(ALARMAVAILABLETOPIC, 1,qos=2,retain=True)
+            ##publish_result.wait_for_publish(1)
+            time.sleep(0.1)
+            publish_result = self.publish(ALARMLWTTOPIC, 'Online',qos=2,retain=True)
+            time.sleep(0.1)
+            ##publish_result.wait_for_publish(1)
+            publish_result = self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)       # Emptry string removes topic.
+            time.sleep(0.1)
+            ##publish_result.wait_for_publish(1)
+            #publish_result = self.publish(ALARMEXTMESSAGETOPIC, "",qos=2,retain=True)    # Emptry string removes topic. For future development !!!
 
     def setdatetime(self):
         if self.connected == True:  #set current date and time if COMFORT_TIME Flag is set to True
@@ -1040,8 +1106,8 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
         #logger.debug(signum)
         if BROKERCONNECTED == True:      # MQTT Connected
-            infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
-            infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
+            infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
+            infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
             infot.wait_for_publish()
         RUN = False
         exit(0)
@@ -1106,8 +1172,9 @@ class Comfort2(mqtt.Client):
         #logging.debug("MQTT Broker Connected: %s", str(self.connected))
         if self.connected == True:
             BROKERCONNECTED = True
-            self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
-            self.will_set(ALARMLWTTOPIC, payload="Offline", qos=0, retain=True)
+            publish_result = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
+            ###publish_result.wait_for_publish(1)
+            self.will_set(ALARMLWTTOPIC, payload="Offline", qos=2, retain=True)
         #else:
         #    logger.error ("MQTT Broker Offline")
         self.loop_start()   
@@ -1134,20 +1201,19 @@ class Comfort2(mqtt.Client):
                                 if luMsg.user != 0:
                                     logger.info('Comfort Login Ok - User %s', (luMsg.user if luMsg.user != 254 else 'Engineer'))
 
-                                    if BROKERCONNECTED == True:
-                                        logger.info("Starting 3s delay...")
-                                        delay = timedelta(seconds=3)
-                                        endtime = datetime.now() + delay
-                                        while datetime.now() < endtime:
-                                            pass
-                                        logger.info("...Finished")
+                                    if BROKERCONNECTED == True:     # Settle time for Comfort.
+                                        #logger.info("Starting 3s delay...")
+                                        #delay = timedelta(seconds=3)
+                                        #endtime = datetime.now() + delay
+                                        time.sleep(3)
+                                        #logger.info("...Finished")
                                     else:
                                         logger.info("Waiting for MQTT Broker to come Online...")
 
                                     self.connected = True  
-                                    self.publish(ALARMCOMMANDTOPIC, "comm test",qos=0,retain=True)
+                                    self.publish(ALARMCOMMANDTOPIC, "comm test",qos=2,retain=True)
                                     self.setdatetime()      # Set Date/Time if Option is enabled
-                                    
+
                                     if FIRST_LOGIN == True:
                                         self.readcurrentstate()
                                         FIRST_LOGIN = False
@@ -1159,38 +1225,53 @@ class Comfort2(mqtt.Client):
                                 self.setdatetime()          # Set Date/Time if Flag is set at 00:00 every day if option is enabled.
                             elif line[1:3] == "IP":
                                 ipMsg = ComfortIPInputActivationReport(line[1:])
-                                self.publish(ALARMINPUTTOPIC % ipMsg.input, ipMsg.state,qos=0,retain=True)
+                                #logger.debug("Input State: %d", ipMsg.state)
+                                if ipMsg.state < 2:
+                                    publish_result = self.publish(ALARMINPUTTOPIC % ipMsg.input, ipMsg.state,qos=2,retain=True)
+                                    #logger.debug("Input State: %d", ipMsg.state)
                             elif line[1:3] == "CT":
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
-                                self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=0,retain=True)     # Value Information
-                                self.publish(ALARMCOUNTERSTATETOPIC % ipMsgCT.counter, ipMsgCT.state,qos=0,retain=True)     # State Information
+                                self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=2,retain=True)     # Value Information
+                                time.sleep(0.01)
+                                self.publish(ALARMCOUNTERSTATETOPIC % ipMsgCT.counter, ipMsgCT.state,qos=2,retain=True)     # State Information
+                                ###publish_result.wait_for_publish(1)
                             elif line[1:3] == "s?":
                                 ipMsgSQ = ComfortCTCounterActivationReport(line[1:])
-                                self.publish(ALARMSENSORTOPIC % ipMsgSQ.counter, ipMsgSQ.state)
+                                publish_result = self.publish(ALARMSENSORTOPIC % ipMsgSQ.counter, ipMsgSQ.state)
+                                ###publish_result.wait_for_publish(1)
                             elif line[1:3] == "sr":
                                 ipMsgSR = ComfortCTCounterActivationReport(line[1:])
-                                self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, ipMsgSR.state)
-                                
+                                publish_result = self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, ipMsgSR.state)
+                                ###publish_result.wait_for_publish(1)
                             elif line[1:3] == "TR":
                                 ipMsgTR = ComfortCTCounterActivationReport(line[1:])
-                                self.publish(ALARMTIMERREPORTTOPIC % ipMsgTR.counter, ipMsgTR.state,qos=0,retain=False)
+                                publish_result = self.publish(ALARMTIMERREPORTTOPIC % ipMsgTR.counter, ipMsgTR.state,qos=2,retain=False)
+                                ###publish_result.wait_for_publish(1)
                             elif line[1:3] == "Z?":                             # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
+                                #publish_result = self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state, retain=False)
                                 for ipMsgZ in zMsg.inputs:
-                                    self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
+                                    publish_result = self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state, retain=False)
+                                    time.sleep(0.01)    # 10mS delay between commands
                                 logger.debug("Max. Reported Zones/Inputs: %d", zMsg.max_zones)
+                                if zMsg.max_zones < int(COMFORT_INPUTS):
+                                    logger.warning("Max. Reported Zone Inputs of %d is less than the configured value of %s", zMsg.max_zones, COMFORT_INPUTS)
                             elif line[1:3] == "z?":                             # SCS/RIO Inputs
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
-                                    self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
+                                    publish_result = self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
+                                    time.sleep(0.01)    # 10mS delay between commands
+                                    ###publish_result.wait_for_publish(1)
                                 logger.debug("Max. Reported SCS/RIO Inputs: %d", zMsg.max_zones)
                             elif line[1:3] == "M?" or line[1:3] == "MD":
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
-                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=0,retain=False)      # Was True
+                                publish_result = self.publish(ALARMSTATETOPIC, mMsg.modename,qos=2,retain=False)      # Was True
+                                ##publish_result.wait_for_publish(1)
                                 self.entryexitdelay = 0                         #zero out the countdown timer
                             elif line[1:3] == "S?":
                                 SMsg = ComfortS_SecurityModeReport(line[1:])
-                                self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=0,retain=True)
+                                publish_result = self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=2,retain=True)
+                                ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "V?":
                                 VMsg = ComfortV_SystemTypeReport(line[1:])
                                 if VMsg.filesystem != 34:
@@ -1201,7 +1282,7 @@ class Comfort2(mqtt.Client):
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
                                 if aMsg.type == 'LowBattery':
                                     logging.debug("Low Battery %s", aMsg.battery)
-                                #self.publish(ALARMSTATUSTOPIC, aMsg.type,qos=0,retain=True)
+                                #publish_result = self.publish(ALARMSTATUSTOPIC, aMsg.type,qos=2,retain=True)
                             elif line[1:3] == "ER":           
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
                                 if not erMsg.zone == 0:
@@ -1212,8 +1293,9 @@ class Comfort2(mqtt.Client):
                                         logging.warning("Zone %s Not Ready", str(erMsg.zone))
 
                                     message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
-                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=0, retain=True)          # Empty string removes topic.
-                                    #self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)                 # This is the correct state for Open Zones but it removes the buttons
+                                    publish_result = self.publish(ALARMMESSAGETOPIC, message_topic, qos=2, retain=True)          # Empty string removes topic.
+                                    ##publish_result.wait_for_publish(1)
+                                    #self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)                 # This is the correct state for Open Zones but it removes the buttons
                                                                                                                 # from the Keypad so you can't press '#'
                                 else:
                                     logging.info("Ready To Arm...")
@@ -1222,74 +1304,105 @@ class Comfort2(mqtt.Client):
                                     # self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
                             elif line[1:3] == "AM":
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
-                                self.publish(ALARMMESSAGETOPIC, amMsg.message,qos=0,retain=True)
+                                #logging.info("Message: %s", amMsg.message)
+                                publish_result = self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
                                 if amMsg.triggered:
-                                    #self.publish(ALARMSTATETOPIC, "triggered",qos=0,retain=False)     # Original message
-                                    self.publish(ALARMSTATETOPIC, amMsg.message,qos=0,retain=True)    # Display message that triggered the condition in the State Topic.
+                                    publish_result = self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
+                                    #publish_result = self.publish(ALARMSTATETOPIC, amMsg.message,qos=2,retain=True)    # Display message that triggered the condition in the State Topic.
                             elif line[1:3] == "AR":
                                 arMsg = ComfortARSystemAlarmReport(line[1:])
-                                self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=0,retain=True)
+                                publish_result = self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=2,retain=True)
+                                ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "EX":
                                 exMsg = ComfortEXEntryExitDelayStarted(line[1:])
                                 self.entryexitdelay = exMsg.delay
                                 self.entryexit_timer()
                                 if exMsg.type == 1:         # Entry Delay
-                                    self.publish(ALARMSTATETOPIC, "pending",qos=0,retain=False)
+                                    publish_result = self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)
+                                    ##publish_result.wait_for_publish(1)
                                 elif exMsg.type == 2:       # Exit Delay
-                                    self.publish(ALARMSTATETOPIC, "arming",qos=0,retain=False)
+                                    publish_result = self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
+                                    ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "RP":
                                 if line[3:5] == "01":
-                                    self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=0,retain=True)
+                                    publish_result = self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=2,retain=True)
+                                    ##publish_result.wait_for_publish(1)
                                 elif line[3:5] == "00":
-                                    self.publish(ALARMMESSAGETOPIC, "",qos=0,retain=True)   # Stopped Ringing
+                                    publish_result = self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)   # Stopped Ringing
+                                    ##publish_result.wait_for_publish(1)
                                 elif line[3:5] == "FF":
-                                    self.publish(ALARMMESSAGETOPIC, "Phone Answer",qos=0,retain=True)
+                                    publish_result = self.publish(ALARMMESSAGETOPIC, "Phone Answer",qos=2,retain=True)
+                                    ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "DB":
                                 if line[3:5] == "FF":
-                                    self.publish(ALARMMESSAGETOPIC, "",qos=0,retain=True)
-                                    self.publish(ALARMDOORBELLTOPIC, 0,qos=0,retain=True)
+                                    publish_result = self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)
+                                    ##publish_result.wait_for_publish(1)
+                                    publish_result = self.publish(ALARMDOORBELLTOPIC, 0,qos=2,retain=True)
+                                    ##publish_result.wait_for_publish(1)
                                 else:
-                                    self.publish(ALARMDOORBELLTOPIC, 1, qos=0,retain=True)
-                                    self.publish(ALARMMESSAGETOPIC, "Door Bell",qos=0,retain=True)
+                                    publish_result = self.publish(ALARMDOORBELLTOPIC, 1, qos=2,retain=True)
+                                    ##publish_result.wait_for_publish(1)
+                                    publish_result = self.publish(ALARMMESSAGETOPIC, "Door Bell",qos=2,retain=True)
+                                    ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "OP":
                                 ipMsg = ComfortOPOutputActivationReport(line[1:])
-                                self.publish(ALARMOUTPUTTOPIC % ipMsg.output, ipMsg.state,qos=0,retain=True)
+                                publish_result = self.publish(ALARMOUTPUTTOPIC % ipMsg.output, ipMsg.state,qos=2,retain=True)
+                                ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "Y?":     # Comfort Outputs
                                 yMsg = ComfortY_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
-                                    self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state,qos=0,retain=True)
+                                    publish_result = self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state,qos=2,retain=True)
+                                    time.sleep(0.01)    # 10mS delay between commands
+                                    ###publish_result.wait_for_publish(1)
                                 logger.debug("Max. Reported Outputs: %d", yMsg.max_zones)
+                                if yMsg.max_zones < int(COMFORT_OUTPUTS):
+                                    logger.warning("Max. Reported Outputs of %d is less than the configured value of %s", yMsg.max_zones, COMFORT_OUTPUTS)
                             elif line[1:3] == "y?":     # SCS/RIO Outputs
                                 yMsg = Comfort_Y_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
-                                    self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state)
+                                    publish_result = self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state)
+                                    time.sleep(0.01)    # 10mS delay between commands
+                                    ###publish_result.wait_for_publish(1)
                                 logger.debug("Max. Reported SCS/RIO Outputs: %d", yMsg.max_zones)
                             elif line[1:5] == "r?00":
                                 cMsg = Comfort_R_ReportAllSensors(line[1:])
                                 for cMsgr in cMsg.counters:
-                                    self.publish(ALARMCOUNTERINPUTRANGE % cMsgr.counter, cMsgr.value,qos=0,retain=True)     # Value Information
-                                    self.publish(ALARMCOUNTERSTATETOPIC % cMsgr.counter, cMsgr.state,qos=0,retain=True)     # State Information
+                                    publish_result = self.publish(ALARMCOUNTERINPUTRANGE % cMsgr.counter, cMsgr.value,qos=2,retain=True)     # Value Information
+                                    ###publish_result.wait_for_publish(1)
+                                    time.sleep(0.01)    # 10mS delay between commands
+                                    publish_result = self.publish(ALARMCOUNTERSTATETOPIC % cMsgr.counter, cMsgr.state,qos=2,retain=True)     # State Information
+                                    ###publish_result.wait_for_publish(1)
+                                    time.sleep(0.01)    # 10mS delay between commands
                             elif line[1:5] == "r?01":
                                 sMsg = Comfort_R_ReportAllSensors(line[1:])
                                 for sMsgr in sMsg.sensors:
-                                    self.publish(ALARMSENSORTOPIC % sMsgr.sensor, sMsgr.value,qos=0,retain=False)           # Was True, test False
+                                    publish_result = self.publish(ALARMSENSORTOPIC % sMsgr.sensor, sMsgr.value,qos=2,retain=False)           # Was True, test False
+                                    time.sleep(0.01)    # 10mS delay between commands
+                                    ##publish_result.wait_for_publish(1)
                             elif (line[1:3] == "f?") and (len(line) == 69):
                                 fMsg = Comfortf_ReportAllFlags(line[1:])
                                 for fMsgf in fMsg.flags:
-                                    self.publish(ALARMFLAGTOPIC % fMsgf.flag, fMsgf.state,qos=0,retain=True)
+                                    publish_result = self.publish(ALARMFLAGTOPIC % fMsgf.flag, fMsgf.state,qos=2,retain=True)
+                                    time.sleep(0.01)    # 10mS delay between commands
+                                    ###publish_result.wait_for_publish(1)
                             elif (line[1:3] == "b?"):   # and (len(line) == 69):
                                 bMsg = ComfortB_ReportAllBypassZones(line[1:])
                                 if bMsg.value == "-1":
                                     logger.debug("Zones Bypassed: <None>")
-                                    self.publish(ALARMBYPASSTOPIC, -1, qos=0, retain=True)
+                                    publish_result = self.publish(ALARMBYPASSTOPIC, -1, qos=2, retain=True)
+                                    ##publish_result.wait_for_publish(1)
                                 else:
                                     logger.debug("Zones Bypassed: %s", bMsg.value)
-                                    self.publish(ALARMBYPASSTOPIC, bMsg.value, qos=0,retain=True)
+                                    publish_result = self.publish(ALARMBYPASSTOPIC, bMsg.value, qos=2,retain=True)
+                                    ##publish_result.wait_for_publish(1)
                                 for bMsgb in bMsg.zones:
-                                    self.publish(ALARMINPUTBYPASSTOPIC % bMsgb.zone, bMsgb.state,qos=0,retain=True)
+                                    publish_result = self.publish(ALARMINPUTBYPASSTOPIC % bMsgb.zone, bMsgb.state,qos=2,retain=True)
+                                    time.sleep(0.01)    # 10mS delay between commands
+                                    ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "FL":
                                 flMsg = ComfortFLFlagActivationReport(line[1:])
-                                self.publish(ALARMFLAGTOPIC % flMsg.flag, flMsg.state,qos=0,retain=True)
+                                publish_result = self.publish(ALARMFLAGTOPIC % flMsg.flag, flMsg.state,qos=2,retain=True)
+                                ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "BY":
                                 byMsg = ComfortBYBypassActivationReport(line[1:])   
                                 if byMsg.state == 1:
@@ -1301,8 +1414,12 @@ class Comfort2(mqtt.Client):
                                         logging.info("Zone %s Unbypassed (%s)", str(byMsg.zone), self.zone_to_name.get(str(byMsg.zone),'N/A'))
                                     else: logging.info("Zone %s Unbypassed", str(byMsg.zone))
 
-                                self.publish(ALARMINPUTBYPASSTOPIC % byMsg.zone, byMsg.state, qos=0, retain=True)
-                                self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=0,retain=True)
+                                publish_result = self.publish(ALARMINPUTBYPASSTOPIC % byMsg.zone, byMsg.state, qos=2, retain=True)
+                                ###publish_result.wait_for_publish(1)
+                                time.sleep(0.01)    # 10mS delay between commands
+                                publish_result = self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=2,retain=True)
+                                ###publish_result.wait_for_publish(1)
+                                time.sleep(0.01)    # 10mS delay between commands
 
                             elif line[1:3] == "RS":
                                 #on rare occassions comfort ucm might get reset (RS11), our session is no longer valid, need to relogin
@@ -1322,8 +1439,10 @@ class Comfort2(mqtt.Client):
                     ##raise
                 logger.error('Lost connection to Comfort, reconnecting...')
                 if BROKERCONNECTED == True:      # MQTT Connected ??
-                    self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
-                    self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
+                    publish_result = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
+                    ##publish_result.wait_for_publish(1)
+                    publish_result = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
+                    ##publish_result.wait_for_publish(1)
                 time.sleep(RETRY.seconds)
         except KeyboardInterrupt as e:
             logger.debug("SIGINT (Ctrl-C) Intercepted")
@@ -1333,9 +1452,9 @@ class Comfort2(mqtt.Client):
             RUN = False
         finally:
             if BROKERCONNECTED == True:      # MQTT Connected ??
-                infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=0,retain=True)
-                infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=0,retain=True)
-                infot.wait_for_publish()
+                infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
+                infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
+                infot.wait_for_publish(1)
 
 
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
