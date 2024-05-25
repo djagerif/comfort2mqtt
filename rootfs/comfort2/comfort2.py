@@ -209,7 +209,7 @@ logging.basicConfig(
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
 #
-uri = "ws://supervisor/core/websocket"
+uri = "ws://homeassistant/api/websocket"
 #
 auth_message = json.dumps({
     "type": "auth",
