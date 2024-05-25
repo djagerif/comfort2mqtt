@@ -25,6 +25,10 @@
 
 # Testing Event Monitorring.
 #import asyncio
+
+import json
+import websocket
+
 #from aiohttp import ClientSession
 #from homeassistant.core import HomeAssistant
 #from homeassistant.helpers.event import async_track_state_change
@@ -203,15 +207,25 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-#TOKEN = os.getenv('SUPERVISOR_TOKEN')
+TOKEN = os.getenv('SUPERVISOR_TOKEN')
 #
-#url = "http://supervisor/core/api/config"
-#headers = {
-#    "Authorization": "Bearer {}".format(TOKEN),
-#    "content-type": "application/json",
-#}
-#response = get(url, headers=headers)
-#logger.debug(response.text)
+uri = "ws://homeassistant/api/websocket"
+#
+auth_message = json.dumps({
+    "type": "auth",
+    "access_token": TOKEN
+})
+
+headers = {
+    "Authorization": "Bearer {}".format(TOKEN),
+    "content-type": "application/json",
+}
+
+websocket.WebSocketApp(uri)
+websocket.send(auth_message)
+get_states_message = json.dumps({"id": 1,"type": "get_states"})
+response = websocket.send(get_states_message)
+logger.debug(response)
 
 
 logger.info('Importing the add-on configuration options')
@@ -1402,9 +1416,6 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "FL":
                                 flMsg = ComfortFLFlagActivationReport(line[1:])
                                 publish_result = self.publish(ALARMFLAGTOPIC % flMsg.flag, flMsg.state,qos=2,retain=True)
-                                if flMsg.flag == 1 and flMsg.state == 1:
-                                    logger.debug("testing Flag 1 refresh")
-                                    self.readcurrentstate()
                                 ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "BY":
                                 byMsg = ComfortBYBypassActivationReport(line[1:])   
