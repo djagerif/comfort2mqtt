@@ -209,7 +209,7 @@ logging.basicConfig(
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
 #
-uri = "ws://homeassistant/api/websocket"
+uri = "ws://supervisor/core/websocket"
 #
 auth_message = json.dumps({
     "type": "auth",
@@ -221,11 +221,6 @@ headers = {
     "content-type": "application/json",
 }
 
-websocket.WebSocketApp(uri)
-websocket.send(auth_message)
-get_states_message = json.dumps({"id": 1,"type": "get_states"})
-response = websocket.send(get_states_message)
-logger.debug(response)
 
 
 logger.info('Importing the add-on configuration options')
