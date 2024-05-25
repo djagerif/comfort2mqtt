@@ -1402,6 +1402,9 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "FL":
                                 flMsg = ComfortFLFlagActivationReport(line[1:])
                                 publish_result = self.publish(ALARMFLAGTOPIC % flMsg.flag, flMsg.state,qos=2,retain=True)
+                                if flMsg.flag == 1 and flMsg.state == 1:
+                                    logger.debug("testing Flag 1 refresh")
+                                    self.readcurrentstate()
                                 ##publish_result.wait_for_publish(1)
                             elif line[1:3] == "BY":
                                 byMsg = ComfortBYBypassActivationReport(line[1:])   
