@@ -1475,11 +1475,11 @@ class Comfort2(mqtt.Client):
                                 #on rare occassions comfort ucm might get reset (RS11), our session is no longer valid, need to relogin
                                 logger.warning('Reset detected')
                                 self.login()
-                            #else:
-                            #    if datetime.now() > (SAVEDTIME + TIMEOUT):
-                            #        #logger.debug("Sending Keepalives")
-                            #        self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
-                            #        SAVEDTIME = datetime.now()
+                            else:
+                                if datetime.now() > (SAVEDTIME + TIMEOUT):  # If no command sent in 2 minutes then send keepalive.
+                                    #logger.debug("Sending Keepalives")
+                                    self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                                    SAVEDTIME = datetime.now()
                         else:
                             logger.warning("Invalid response received (%s)", line.encode())
 
