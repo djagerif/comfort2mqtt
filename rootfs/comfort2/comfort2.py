@@ -824,6 +824,8 @@ class Comfort2(mqtt.Client):
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg = 0):
 
+        global SAVEDTIME
+
         #logger.debug("on_message")
         msgstr = msg.payload.decode()
         #logger.debug(msg.topic+" "+msgstr)
@@ -833,51 +835,62 @@ class Comfort2(mqtt.Client):
                 #logger.debug("msgstr: %s",msgstr)
                 if msgstr == "ARM_VACATION":
                     self.comfortsock.sendall(("\x03m!04"+self.comfort_pincode+"\r").encode()) #Local arm to 04 vacation mode. Requires # for open zones
+                    SAVEDTIME = datetime.now()
                     publish_result = self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)
                     ##publish_result.wait_for_publish(1)
                 elif msgstr == "ARM_HOME":
                     self.comfortsock.sendall(("\x03m!03"+self.comfort_pincode+"\r").encode()) #Local arm to 03 day mode. Requires # for open zones
+                    SAVEDTIME = datetime.now()
                     publish_result = self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)
                     ##publish_result.wait_for_publish(1)
                 elif msgstr == "ARM_NIGHT":
                     self.comfortsock.sendall(("\x03m!02"+self.comfort_pincode+"\r").encode()) #Local arm to 02 night mode. Requires # for open zones
+                    SAVEDTIME = datetime.now()
                     publish_result = self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)
                     ##publish_result.wait_for_publish(1)
                 elif msgstr == "ARM_AWAY":
                     self.comfortsock.sendall(("\x03m!01"+self.comfort_pincode+"\r").encode()) #Local arm to 01 away mode. Requires # for open zones + Exit door
+                    SAVEDTIME = datetime.now()
                     #publish_result = self.publish(ALARMMESSAGETOPIC, "Please Exit...", qos=2, retain=False)   #  For future development in extended message !!!
                     publish_result = self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)
                     ##publish_result.wait_for_publish(1)
                 elif msgstr == "ARM_CUSTOM_BYPASS":
                     self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send '#' key code (KD1A)
+                    SAVEDTIME = datetime.now()
                 elif msgstr == "DISARM":
                     self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #Local arm to 00. disarm mode.
+                    SAVEDTIME = datetime.now()
         elif msg.topic.startswith(DOMAIN+"/output") and msg.topic.endswith("/set"):
             #logger.debug("msgstr: %s",msgstr )
             output = int(msg.topic.split("/")[1][6:])
             state = int(msgstr)
             if self.connected:
                 self.comfortsock.sendall(("\x03O!%02X%02X\r" % (output, state)).encode())
+                SAVEDTIME = datetime.now()
         elif msg.topic.startswith(DOMAIN+"/response") and msg.topic.endswith("/set"):
             response = int(msg.topic.split("/")[1][8:])
             if self.connected:
                 if (response in range(1, ALARMNUMBEROFRESPONSES + 1)) and (response in range(256, 1025)):   # Check for  valid response numbers > 255 but less than Max.
                     result = self.DecimalToSigned16(response)                                               # Returns hex value.
                     self.comfortsock.sendall(("\x03R!%s\r" % result).encode())                              # Response with 16-bit converted hex number
+                    SAVEDTIME = datetime.now()
                 elif (response in range(1, ALARMNUMBEROFRESPONSES + 1)) and (response in range(1, 256)):    # Check for 8-bit values
                     self.comfortsock.sendall(("\x03R!%02X\r" % response).encode())                          # Response with 8-bit number
+                    SAVEDTIME = datetime.now()
                 logger.debug("Activating Response %d",response )
         elif msg.topic.startswith(DOMAIN+"/input") and msg.topic.endswith("/set"):
             virtualinput = int(msg.topic.split("/")[1][5:])
             state = int(msgstr)
             if self.connected:
                 self.comfortsock.sendall(("\x03I!%02X%02X\r" % (virtualinput, state)).encode())
+                SAVEDTIME = datetime.now()
                 #logger.debug("VirtualInput: %s, State: %s",virtualinput,state )
         elif msg.topic.startswith(DOMAIN+"/flag") and msg.topic.endswith("/set"):
             flag = int(msg.topic.split("/")[1][4:])
             state = int(msgstr)
             if self.connected:
                 self.comfortsock.sendall(("\x03F!%02X%02X\r" % (flag, state)).encode()) #was F!
+                SAVEDTIME = datetime.now()
                 #logger.debug("Flag Set: %s, State: %s",flag,state )
         elif msg.topic.startswith(DOMAIN+"/counter") and msg.topic.endswith("/set"): # counter set
             counter = int(msg.topic.split("/")[1][7:])
@@ -887,20 +900,24 @@ class Comfort2(mqtt.Client):
                 state = 255
                 if self.connected:
                     self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
+                    SAVEDTIME = datetime.now()
             elif msgstr == "OFF":
                 state = 0
                 if self.connected:
                     self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
+                    SAVEDTIME = datetime.now()
             else:
                 state = int(msgstr)
                 if self.connected:
                     self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
+                    SAVEDTIME = datetime.now()
         elif msg.topic.startswith(DOMAIN+"/sensor") and msg.topic.endswith("/set"): # sensor set
             #logger.debug("msg.topic: %s",msg.topic)
             sensor = int(msg.topic.split("/")[1][6:])
             state = int(msgstr)
             if self.connected:
                 self.comfortsock.sendall(("\x03s!%02X%s\r" % (sensor, self.DecimalToSigned16(state))).encode()) # sensor needs 16 bit signed number
+                SAVEDTIME = datetime.now()
                 #logger.debug("\x03s!%02X%s\r",sensor, self.DecimalToSigned16(state))
 
     def DecimalToSigned16(self,value):      # Returns Comfort corrected HEX string value from signed 16-bit decimal value.
@@ -993,6 +1010,7 @@ class Comfort2(mqtt.Client):
                     #logger.debug('data:%s', str(data))
                     logger.debug('Comfort initiated disconnect (LU00).')
                     self.comfortsock.sendall("\x03LI\r".encode()) # Try and gracefully logout if possible.
+                    SAVEDTIME = datetime.now()
                     FIRST_LOGIN = True
                 else:
                     # got a message do something :)
@@ -1004,9 +1022,12 @@ class Comfort2(mqtt.Client):
         return
 
     def login(self):
+        global SAVEDTIME
         self.comfortsock.sendall(("\x03LI"+self.comfort_pincode+"\r").encode())
+        SAVEDTIME = datetime.now()
 
     def readcurrentstate(self):
+        global SAVEDTIME
         if self.connected == True:
 
             #delay = timedelta(seconds=1)
@@ -1014,39 +1035,51 @@ class Comfort2(mqtt.Client):
 
             #get Comfort type
             self.comfortsock.sendall("\x03V?\r".encode())
+            SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get Security Mode
             self.comfortsock.sendall("\x03M?\r".encode())
+            SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get all zone input states
             self.comfortsock.sendall("\x03Z?\r".encode())
+            SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get all SCS/RIO input states
             self.comfortsock.sendall("\x03z?\r".encode())
+            SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get all output states
             self.comfortsock.sendall("\x03Y?\r".encode())
+            SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get all RIO output states
             self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all RIO Outputs
+            SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get all flag states
             self.comfortsock.sendall("\x03f?00\r".encode())
+            SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get Alarm Status Information
             self.comfortsock.sendall("\x03S?\r".encode())       # S? Status Request
+            SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get Alarm Additional Information
             self.comfortsock.sendall("\x03a?\r".encode())       # a? Status Request
+            SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get Bypassed Zones
             self.comfortsock.sendall("\x03b?00\r".encode())       # b?00 Bypassed Zones
+            SAVEDTIME = datetime.now()
             time.sleep(0.1)
 
             #get all sensor values. 0 - 31
             self.comfortsock.sendall("\x03r?010010\r".encode())
+            SAVEDTIME = datetime.now()
             time.sleep(0.1)
             self.comfortsock.sendall("\x03r?011010\r".encode())
+            SAVEDTIME = datetime.now()
             time.sleep(0.1)
 
             #Clear all Timer Reports
@@ -1062,6 +1095,7 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.sendall("\x03r?00%X00F\r".encode() % (i))
                 else:
                     self.comfortsock.sendall("\x03r?00%X010\r".encode() % (i))
+                SAVEDTIME = datetime.now()
                 time.sleep(0.1)
             
             publish_result = self.publish(ALARMAVAILABLETOPIC, 1,qos=2,retain=True)
@@ -1076,12 +1110,14 @@ class Comfort2(mqtt.Client):
             #publish_result = self.publish(ALARMEXTMESSAGETOPIC, "",qos=2,retain=True)    # Emptry string removes topic. For future development !!!
 
     def setdatetime(self):
+        global SAVEDTIME
         if self.connected == True:  #set current date and time if COMFORT_TIME Flag is set to True
             #logger.debug('COMFORT_TIME=%s', COMFORT_TIME)
             if COMFORT_TIME == 'True':
                 logger.info('Setting Comfort Date/Time')
                 now = datetime.now()
                 self.comfortsock.sendall(("\x03DT%02d%02d%02d%02d%02d%02d\r" % (now.year, now.month, now.day, now.hour, now.minute, now.second)).encode())
+                SAVEDTIME = datetime.now()
 
     def check_string(self, s):
         #h = s.encode()
@@ -1111,11 +1147,13 @@ class Comfort2(mqtt.Client):
     def exit_gracefully(self, signum, frame):
         
         global RUN
+        global SAVEDTIME
         
         logger.debug("SIGNUM: %s received", str(signum))
         
         if self.connected == True:
             self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
+            SAVEDTIME = datetime.now()
         #logger.debug(signum)
         if BROKERCONNECTED == True:      # MQTT Connected
             infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
@@ -1437,11 +1475,11 @@ class Comfort2(mqtt.Client):
                                 #on rare occassions comfort ucm might get reset (RS11), our session is no longer valid, need to relogin
                                 logger.warning('Reset detected')
                                 self.login()
-                            else:
-                                if datetime.now() > (SAVEDTIME + TIMEOUT):
+                            #else:
+                            #    if datetime.now() > (SAVEDTIME + TIMEOUT):
                             #        #logger.debug("Sending Keepalives")
                             #        self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
-                                    SAVEDTIME = datetime.now()
+                            #        SAVEDTIME = datetime.now()
                         else:
                             logger.warning("Invalid response received (%s)", line.encode())
 
