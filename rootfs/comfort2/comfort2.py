@@ -209,7 +209,7 @@ logging.basicConfig(
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
 #
-uri = "ws://homeassistant/api/websocket"
+uri = "ws://supervisor/core/websocket"
 #
 auth_message = json.dumps({
     "type": "auth",
@@ -965,6 +965,7 @@ class Comfort2(mqtt.Client):
     def readlines(self, recv_buffer=BUFFER_SIZE, delim='\r'):       # Correct string values terminate with 0x0d (CR)
 
         global FIRST_LOGIN
+        global SAVEDTIME
         buffer = ''
         data = True
         while data:
@@ -977,6 +978,8 @@ class Comfort2(mqtt.Client):
                 if err == 'timed out':
                     #logger.debug("Timeout in readlines(), retry later")
                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                    SAVEDTIME = datetime.now()
+                    time.sleep(0.1)
                     continue
                 else:
                     logger.error ("readlines() error %s", e)
@@ -1434,11 +1437,11 @@ class Comfort2(mqtt.Client):
                                 #on rare occassions comfort ucm might get reset (RS11), our session is no longer valid, need to relogin
                                 logger.warning('Reset detected')
                                 self.login()
-                            else:
-                                if datetime.now() > (SAVEDTIME + TIMEOUT):
-                                    #logger.debug("Sending Keepalives")
-                                    self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
-                                    SAVEDTIME = datetime.now()
+                            #else:
+                            #    if datetime.now() > (SAVEDTIME + TIMEOUT):
+                            #        #logger.debug("Sending Keepalives")
+                            #        self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                            #        SAVEDTIME = datetime.now()
                         else:
                             logger.warning("Invalid response received (%s)", line.encode())
 
