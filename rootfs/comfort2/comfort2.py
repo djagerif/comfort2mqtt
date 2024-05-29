@@ -1451,10 +1451,8 @@ class Comfort2(mqtt.Client):
                     ##raise
                 logger.error('Lost connection to Comfort, reconnecting...')
                 if BROKERCONNECTED == True:      # MQTT Connected ??
-                    publish_result = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
-                    ##publish_result.wait_for_publish(1)
-                    publish_result = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
-                    ##publish_result.wait_for_publish(1)
+                    self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
+                    self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
                 time.sleep(RETRY.seconds)
         except KeyboardInterrupt as e:
             logger.debug("SIGINT (Ctrl-C) Intercepted")
