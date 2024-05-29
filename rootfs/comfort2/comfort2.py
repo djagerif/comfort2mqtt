@@ -1480,6 +1480,7 @@ class Comfort2(mqtt.Client):
                                     #logger.debug("Sending Keepalives")
                                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                                     SAVEDTIME = datetime.now()
+                                    time.sleep(0.1)
                         else:
                             logger.warning("Invalid response received (%s)", line.encode())
 
