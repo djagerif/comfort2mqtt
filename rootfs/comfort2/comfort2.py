@@ -28,6 +28,9 @@
 
 import json
 import websocket
+import coloredlogs
+
+coloredlogs.install()
 
 #from aiohttp import ClientSession
 #from homeassistant.core import HomeAssistant
@@ -200,6 +203,8 @@ group.add_argument(
     help='Verbosity of logging to emit [default: %(default)s]')
 
 option = parser.parse_args()
+
+
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
