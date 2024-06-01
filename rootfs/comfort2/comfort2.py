@@ -28,9 +28,7 @@
 
 import json
 import websocket
-import coloredlogs
-
-coloredlogs.install()
+import colorlog
 
 #from aiohttp import ClientSession
 #from homeassistant.core import HomeAssistant
@@ -205,6 +203,11 @@ group.add_argument(
 option = parser.parse_args()
 
 
+handler = colorlog.StreamHandler()
+handler = colorlog
+handler.setFormatter(colorlog.ColoredFormatter('%(log_color)s%(levelname)s:%(name)s:%(message)s'))
+logger = colorlog.getLogger('example')
+logger.addHandler(handler)
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
