@@ -1,4 +1,4 @@
-name: "Comfort to MQTT"
+name: "Comfort to MQTT - Dev"
 description: "Cytech Comfort II Ultra to MQTT bridge"
 version: "1.0.4"
 slug: "comfort2mqtt"
