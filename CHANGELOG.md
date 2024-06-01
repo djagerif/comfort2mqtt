@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 ### Changed
- - Optimised Comfort Keepalives.
+ - Optimised Comfort Keepalives, added update to all Comfort Send commands.
 
 ### Fixed
 

@@ -47,7 +47,7 @@ import datetime
 import threading
 import logging
 from datetime import datetime, timedelta
-from random import randint
+#from random import randint
 import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
@@ -71,7 +71,7 @@ ALARMDOORBELLTOPIC = DOMAIN+"/doorbell"
 
 FIRST_LOGIN = False         # Don't scan Comfort until MQTT connection is made.
 RUN = True
-SAVEDTIME = datetime.now()  # Used for sending keepalives to Comfort.
+#SAVEDTIME = datetime.now()  # Used for sending keepalives to Comfort.
 BYPASSEDZONES = []          # Global list of Bypassed Zones
 BROKERCONNECTED = False
 ZONEMAPFILE = False         # Zone Number to Name CSV file present.
@@ -1240,9 +1240,14 @@ class Comfort2(mqtt.Client):
                     for line in self.readlines():
                         if line[1:] != "cc00":
                             logger.debug(line[1:])  	    # Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
+
+                            if datetime.now() > SAVEDTIME + TIMEOUT:            #
+                                self.comfortsock.sendall("\x03cc00\r".encode()) # Keepalive check when data comes in.
+                                SAVEDTIME = datetime.now()                      # Update SavedTime variable
+                                time.sleep(0.1)
+
                         #if self.check_string(line[:3]):     # Check for "\x03":   #check for valid prefix now and a-zA-Z following character.
                         if self.check_string(line):         # Check for "(\x03[a-zA-Z0-9]*)$" in complete line.
-                            # Santize 'line' here.
                             pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')      # Extract 'legal' characters from line.
                             match = re.search(pattern, line)
                             line = match.group(1)
