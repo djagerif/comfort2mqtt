@@ -25,7 +25,7 @@ options:
   mqtt_password: null
   mqtt_broker_port: 1883
   mqtt_protocol: TCP
-  #mqtt_encryption: false     # For future development !!!
+  mqtt_encryption: false
   comfort_address: null
   comfort_port: 1002
   comfort_login_id: null
@@ -42,7 +42,7 @@ schema:
   mqtt_password: password
   mqtt_broker_port: int(1024,65535)?
   mqtt_protocol: list(TCP|WebSockets)?
-  #mqtt_encryption: bool?     #  For future development !!!
+  mqtt_encryption: bool?
   comfort_address: str
   comfort_port: int?
   comfort_login_id: password
@@ -52,9 +52,9 @@ schema:
   alarm_rio_inputs: int(0,120)?
   alarm_rio_outputs: int(0,120)?
   alarm_responses: int(0,1024)?
-  #broker_ca: str?            #  For future development !!!
-  #broker_client_cert: str?   #  For future development !!!
-  #broker_client_key: str?    # For future development !!!
+  broker_ca: str?
+  broker_client_cert: str?
+  broker_client_key: str?
   comfort_time: bool
 #image: "ghcr.io/djagerif/{arch}-addon-comfort2mqtt"  #  For future docker image release !!!
   

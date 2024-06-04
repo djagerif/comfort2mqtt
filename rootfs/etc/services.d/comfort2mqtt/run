@@ -10,9 +10,10 @@ MQTT_PORT=$(bashio::config 'mqtt_broker_port')
 COMFORT_ADDRESS=$(bashio::config 'comfort_address')
 COMFORT_PORT=$(bashio::config 'comfort_port')
 COMFORT_LOGIN_ID=$(bashio::config 'comfort_login_id')
-#MQTT_CA_CERT_PATH=$(bashio::config 'broker_ca')                #  For future development !!!
-#MQTT_CLIENT_CERT_PATH=$(bashio::config 'broker_client_cert')   #  For future development !!!
-#MQTT_CLIENT_KEY_PATH=$(bashio::config 'broker_client_key')     #  For future development !!!
+MQTT_USE_TLS=$(bashio::config 'mqtt_encryption')
+MQTT_CA_CERT_PATH=$(bashio::config 'broker_ca')
+MQTT_CLIENT_CERT_PATH=$(bashio::config 'broker_client_cert')
+MQTT_CLIENT_KEY_PATH=$(bashio::config 'broker_client_key')
 MQTT_LOG_LEVEL=$(bashio::config 'log_verbosity')
 COMFORT_INPUTS=$(bashio::config 'alarm_inputs')
 COMFORT_OUTPUTS=$(bashio::config 'alarm_outputs')
@@ -41,6 +42,52 @@ fi
 if [ "${MQTT_PASSWORD}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --broker-password ${MQTT_PASSWORD}"
 fi
+
+# MQTT use TLS
+if [ "${MQTT_USE_TLS}" != "null" ]; then
+      COMFORT_ARGS="${COMFORT_ARGS} --broker-encryption ${MQTT_USE_TLS}"
+fi
+
+
+if [ "${MQTT_USE_TLS}" == true ]; then
+    echo "Using TLS to connect to MQTT broker."
+
+    # Using TLS, check for certificates directory
+    if [ "${MQTT_CA_CERT_PATH}" != "null" ]; then
+          if [ -d "${MQTT_CA_CERT_PATH}" ]; then
+              echo "Using custom certificates in ${MQTT_CA_CERT_PATH}"
+              COMFORT_ARGS="${COMFORT_ARGS} --broker-ca ${MQTT_CA_CERT_PATH}"
+          else
+              echo "${MQTT_CA_CERT_PATH} not found, using Python CA store."
+          fi
+     else
+          echo "Certificates Directory was not provided, using Python CA store."
+     fi
+
+    # Client certificates
+    if [ "${MQTT_CLIENT_CERT_PATH}" == "null" ]; then
+        echo  "No value was provided for CMQTTD_CLIENT_CERT_PATH, not using "
+        echo "client certificates for authentication."
+    elif [ "${MQTT_CLIENT_KEY_PATH}" == "null" ]; then
+        echo  "No value was provided for CMQTTD_CLIENT_KEY_PATH, not using "
+        echo "client certificates for authentication."
+    elif [ -e "${MQTT_CLIENT_CERT_PATH}" ] && [ -e "${MQTT_CLIENT_KEY_PATH}" ]; then
+        echo "Using client cert: ${MQTT_CLIENT_CERT_PATH}"
+        echo "Using client key: ${MQTT_CLIENT_KEY_PATH}"
+        COMFORT_ARGS="${MQTT_ARGS} --broker-client-cert ${MQTT_CLIENT_CERT_PATH} --broker-client-key ${MQTT_CLIENT_KEY_PATH}"
+    else
+        echo "${MQTT_CLIENT_CERT_PATH} and/or ${MQTT_CLIENT_KEY_PATH} not found, not using "
+        echo "client certificates for authentication."
+    fi
+else
+    echo "Disabling TLS support."
+    COMFORT_ARGS="${MQTT_ARGS} --broker-disable-tls"
+fi
+
+
+
+
+
 
 if [ "${COMFORT_ADDRESS}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --comfort-address ${COMFORT_ADDRESS}"

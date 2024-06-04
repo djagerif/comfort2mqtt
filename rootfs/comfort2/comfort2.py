@@ -23,6 +23,7 @@
 ###
 ### The MQTT traffic can be encrypted with `TLS` or sent in clear-text. The Encryption option is currently not available. The default is `False`
 #
+import ssl
 import csv
 import os
 import json
@@ -102,11 +103,28 @@ group.add_argument(
     help='TCP or WebSockets Transport Protocol for MQTT broker. [default: TCP]')
 
 #  For future development !!!
-#group.add_argument(
-#    '--broker-encryption',
-#    required=False,
-#    type=boolean_string, default='false',
-#    help='Use TLS encryption. [default: False]')
+group.add_argument(
+    '--broker-encryption',
+    type=boolean_string, default='false',
+    help='Use MQTT TLS encryption. [default: False]')
+
+group.add_argument(
+    '--broker-ca',
+    help='Path to directory containing CA certificates to trust. If not '
+         'specified, the default (Python) CA store is used instead.')
+group.add_argument(
+    '--broker-client-cert',
+    help='Path to PEM-encoded client certificate (public part). If not '
+         'specified, client authentication will not be used. Must also '
+         'supply the private key (--broker-client-key).')
+
+group.add_argument(
+    '--broker-client-key',
+    help='Path to PEM-encoded client key (private part). If not '
+         'specified, client authentication will not be used. Must also '
+         'supply the public key (--broker-client-cert). If this file is encrypted, Python '
+         'will prompt for the password at the command-line.')
+
 
 group = parser.add_argument_group('Comfort System options')
 group.add_argument(
@@ -194,7 +212,10 @@ MQTT_PASSWORD=option.broker_password
 MQTT_SERVER=option.broker_address
 MQTT_PORT=option.broker_port
 MQTT_PROTOCOL=option.broker_protocol
-#MQTT_ENCRYPTION=option.broker_encryption               #  For future development !!!
+MQTT_ENCRYPTION=option.broker_encryption                    #  For future development !!!
+MQTT_CA_CERT_PATH=option.broker_ca                          #  For future development !!!
+MQTT_CLIENT_CERT_PATH=option.broker_client_cert             #  For future development !!!
+MQTT_CLIENT_KEY_PATH=option.broker_client_key               #  For future development !!!
 COMFORT_ADDRESS=option.comfort_address
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id
@@ -257,15 +278,18 @@ logger.debug('The following variable values were passed through via the Home Ass
 logger.debug('MQTT_USER = %s', MQTT_USER)
 logger.debug('MQTT_PASSWORD = ******')
 logger.debug('MQTT_SERVER = %s', MQTT_SERVER)
-logger.debug('MQTT_PORT = %s', MQTT_PORT)             
-logger.debug('MQTT_PROTOCOL = %s/%s', MQTT_PROTOCOL, MQTT_PORT)
-#logger.debug('MQTT_ENCRYPTION = %s', MQTT_ENCRYPTION)  #  For future development !!!
+#logger.debug('MQTT_PORT = %s', MQTT_PORT)             
+#logger.debug('MQTT_PROTOCOL = %s/%s', MQTT_PROTOCOL, MQTT_PORT)
+
+if not MQTT_ENCRYPTION: logger.debug('MQTT_PROTOCOL = %s/%s (Unsecure)', MQTT_PROTOCOL, MQTT_PORT)
+else: logger.debug('MQTT_PROTOCOL = %s/%s (Encrypted)', MQTT_PROTOCOL, MQTT_PORT)
+
 logger.debug('COMFORT_ADDRESS = %s', COMFORT_ADDRESS)
 logger.debug('COMFORT_PORT = %s', COMFORT_PORT)
 logger.debug('COMFORT_LOGIN_ID = ******')
-#logger.debug('MQTT_CA_CERT_PATH = %s', MQTT_CA_CERT_PATH)          #  For future development !!!
-#logger.debug('MQTT_CLIENT_CERT_PATH = %s', MQTT_CLIENT_CERT_PATH)  #  For future development !!!
-#logger.debug('MQTT_CLIENT_KEY_PATH = %s', MQTT_CLIENT_KEY_PATH)    #  For future development !!!
+logger.debug('MQTT_CA_CERT_PATH = %s', MQTT_CA_CERT_PATH)          #  For future development !!!
+logger.debug('MQTT_CLIENT_CERT_PATH = %s', MQTT_CLIENT_CERT_PATH)  #  For future development !!!
+logger.debug('MQTT_CLIENT_KEY_PATH = %s', MQTT_CLIENT_KEY_PATH)    #  For future development !!!
 
 logger.debug('MQTT_LOG_LEVEL = %s', MQTT_LOG_LEVEL)
 logger.debug('COMFORT_TIME= %s', COMFORT_TIME)
@@ -1397,13 +1421,33 @@ class Comfort2(mqtt.Client):
             if self.connected == True:
                 self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
             RUN = False
+            self.loop_stop
         finally:
             if BROKERCONNECTED == True:      # MQTT Connected ??
                 infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
                 infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
                 infot.wait_for_publish(1)
+                self.loop_stop
 
 
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
+
+if not MQTT_ENCRYPTION:
+    logging.warning('Transport Layer Security disabled!')
+    #port = option.broker_port
+else:
+    tls_args = {}
+    if option.broker_ca:
+        tls_args['ca_certs'] = option.broker_ca
+    if option.broker_client_cert:
+        tls_args['certfile'] = option.broker_client_cert
+        tls_args['keyfile'] = option.broker_client_key
+    mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)
+    mqttc.tls_insecure_set(True)
+    #port = option.broker_port
+
+#mqttc.tls_set(ca_certs="ca.crt", certfile="client.crt", keyfile="client.key", tls_version=ssl.PROTOCOL_TLSv1_2)
+#mqttc.tls_insecure_set(True)
+
 mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE)
 mqttc.run()

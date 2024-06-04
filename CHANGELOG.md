@@ -4,11 +4,12 @@ All notable changes to this project will be documented in this file.
 ## [1.0.4] - Unreleased
 
 ### Added
-
+ - loop.stop on mqtt server shutdown.
+ 
 ### Changed
- - Optimised Comfort Keepalives, added update to all Comfort Send commands.
 
 ### Fixed
+
 
 ## [1.0.3] - 2024-06-01
 
