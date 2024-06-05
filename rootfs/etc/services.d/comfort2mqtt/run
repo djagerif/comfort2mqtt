@@ -81,7 +81,7 @@ if [ "${MQTT_USE_TLS}" == true ]; then
     fi
 else
     echo "Disabling TLS support."
-    COMFORT_ARGS="${MQTT_ARGS} --broker-disable-tls"
+    COMFORT_ARGS="${MQTT_ARGS} --broker-encryption false"
 fi
 
 

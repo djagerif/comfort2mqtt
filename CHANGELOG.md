@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
  - loop.stop on mqtt server shutdown.
- 
+ - MQTT Broker Encryption.
+
 ### Changed
 
 ### Fixed
