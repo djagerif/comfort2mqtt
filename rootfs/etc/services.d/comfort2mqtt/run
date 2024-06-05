@@ -60,7 +60,7 @@ if [ "${MQTT_USE_TLS}" == true ]; then
     #     if [ -f "${MQTT_CA_CERT_PATH}" ]; then
     #         bashio::log.info "Here #3 ${MQTT_CA_CERT_PATH}"
     #         bashio::log.info "Using custom certificates in ${MQTT_CA_CERT_PATH}"
-    #         COMFORT_ARGS="${COMFORT_ARGS} --broker-ca ${MQTT_CA_CERT_PATH}"
+             COMFORT_ARGS="${COMFORT_ARGS} --broker-ca ${MQTT_CA_CERT_PATH}"
     #     else
     #         bashio::log.info "Here #4 ${MQTT_CA_CERT_PATH}"
     #         bashio::log.info "${MQTT_CA_CERT_PATH} not found, using Python CA store."
