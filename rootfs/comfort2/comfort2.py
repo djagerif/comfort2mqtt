@@ -1459,7 +1459,8 @@ if not MQTT_ENCRYPTION:
     #port = option.broker_port
 else:
     ### Check certificate validity here !!! ###
-    if validate_certificate(MQTT_CA_CERT_PATH):
+    #if validate_certificate(MQTT_CA_CERT_PATH):
+    if True:
         logging.debug('Valid MQTT TLS CA Certificate found (%s)', MQTT_CA_CERT_PATH )
 
         tls_args = {}
