@@ -24,22 +24,22 @@ configuration:
     name: MQTT Transport Encryption
     description: >-
       Use TLS Encryption for MQTT Transport (Default False).
-  cafile:
+  broker_ca:
     name: CA Certificate File
     description: >-
       A file containing a CA certificate. Place this file in the Home
       Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
 
   require_certificate:
-    name: Require Certificate
+    name: Require Certificate Authentication
     description: >-
       If enabled encryption will be enabled using the Client Certificate and Keyfile options.
-  certfile:
+  broker_client_cert:
     name: Client Certificate File
     description: >-
       A file containing a Client Certificate, including its chain. Place this file in the Home
       Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
-  keyfile:
+  broker_client_key:
     name: Client Private Key File
     description: >-
       A file containing the Client Private key. Place this file in the Home

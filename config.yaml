@@ -27,6 +27,7 @@ options:
   mqtt_protocol: TCP
   mqtt_encryption: false
   broker_ca: null
+  require_certificate: false
   broker_client_cert: null
   broker_client_key: null
   comfort_address: null
@@ -47,6 +48,7 @@ schema:
   mqtt_protocol: list(TCP|WebSockets)?
   mqtt_encryption: bool?
   broker_ca: str?
+  require_certificate: bool?
   broker_client_cert: str?
   broker_client_key: str?
   comfort_address: str
