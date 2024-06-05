@@ -1439,7 +1439,8 @@ def validate_certificate(certificate):
     logger.info('certificate: %s', "" + certificate)
 
     if not os.path.isfile(certificate):
-        return False
+        return 2
+    logger.info('Got Here !!')
     x509 = crypto.load_certificate(crypto.FILETYPE_PEM, open("" + certificate).read())
     ValidTo = x509.get_notAfter().decode()          # ValidTo - 20290603175630Z
     ValidFrom = x509.get_notBefore().decode()       # ValidFrom - 20240603175630Z
@@ -1452,47 +1453,77 @@ def validate_certificate(certificate):
     ValidFrom = datetime.strptime(ValidFrom, datetime_format)
     
     if (datetime.now() >= ValidFrom) and (datetime.now() < ValidTo):
-        return True
+        return 0
     else:
-        return False
+        return 1
 
 
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
 
 certs: str = "/config/certificates"             # Certificates directory
 ca_cert = os.sep.join([certs, MQTT_CA_CERT])
-
-#client_cert = Path("/config/certificates/")
-#client_key = Path("/config/certificates/")
+client_cert = os.sep.join([certs, MQTT_CLIENT_CERT])
+client_key = os.sep.join([certs, MQTT_CLIENT_KEY])
 
 if not MQTT_ENCRYPTION:
     logging.warning('MQTT Transport Layer Security disabled.')
     #port = option.broker_port
 else:
     ### Check certificate validity here !!! ###
-    if validate_certificate(ca_cert):
-    #if True:
-        logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
+    #switch (validate_certificate(ca_cert)) {
+    match  validate_certificate(ca_cert):
+        case 1:     # Invalid Certificate
+            logging.warning('MQTT TLS CA Certificate not valid (%s)', MQTT_CA_CERT )
+            logging.error("Reverting MQTT Port to default '1883' (Unencrypted)")
+            MQTTBROKERPORT = 1883
+            MQTT_ENCRYPTION = False
 
-        tls_args = {}
-        if ca_cert:
-            tls_args['ca_certs'] = ca_cert
-        else:
+        case 2:     # Certificate not found
             logging.error('No MQTT TLS CA Certificate found, disabling TLS')
             logging.error("Reverting MQTT Port to default '1883'")
             MQTTBROKERPORT = 1883
             MQTT_ENCRYPTION = False
-            # Disable TLS here !!!!
-        if option.broker_client_cert:
-            tls_args['certfile'] = option.broker_client_cert
-            tls_args['keyfile'] = option.broker_client_key
-        mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)
-        mqttc.tls_insecure_set(True)
-    else:
-        logging.warning('MQTT TLS CA Certificate not valid (%s)', MQTT_CA_CERT )
-        logging.error("Reverting MQTT Port to default '1883' (Unencrypted)")
-        MQTTBROKERPORT = 1883
-        MQTT_ENCRYPTION = False
+
+        case 3:     # Invalid Client Certificate or Key
+            logging.warning('Client Key or Certificate not valid (%s)', MQTT_CA_CERT )
+
+        case 0:     # Valid Certificate
+            logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
+            tls_args = {}
+            tls_args['ca_certs'] = ca_cert
+            mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)
+            mqttc.tls_insecure_set(True)
+
+        case _:
+            # code block
+            pass
+    
+
+#    if validate_certificate(ca_cert):
+#    #if True:
+#        logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
+#
+#        tls_args = {}
+#        if ca_cert:
+#            tls_args['ca_certs'] = ca_cert
+#        else:
+#            logging.error('No MQTT TLS CA Certificate found, disabling TLS')
+#            logging.error("Reverting MQTT Port to default '1883'")
+#            MQTTBROKERPORT = 1883
+#            MQTT_ENCRYPTION = False
+#            # Disable TLS here !!!!
+
+#        if option.broker_client_cert:
+#            tls_args['certfile'] = option.broker_client_cert
+#            tls_args['keyfile'] = option.broker_client_key
+
+#        mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)
+#        mqttc.tls_insecure_set(True)
+#    else:
+#        logging.warning('MQTT TLS CA Certificate not valid (%s)', MQTT_CA_CERT )
+#        logging.error("Reverting MQTT Port to default '1883' (Unencrypted)")
+#        MQTTBROKERPORT = 1883
+#        MQTT_ENCRYPTION = False
 
 #mqttc.tls_set(ca_certs="ca.crt", certfile="client.crt", keyfile="client.key", tls_version=ssl.PROTOCOL_TLSv1_2)
 mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE)
