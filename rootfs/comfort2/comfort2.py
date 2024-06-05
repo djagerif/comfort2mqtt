@@ -1462,8 +1462,8 @@ mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQT
 
 certs: str = "/config/certificates"             # Certificates directory
 if((MQTT_CA_CERT and MQTT_CA_CERT.strip())): ca_cert = os.sep.join([certs, MQTT_CA_CERT])
-if((MQTT_CLIENT_CERT and MQTT_CLIENT_CERT.strip())): ca_cert = os.sep.join([certs, MQTT_CLIENT_CERT])
-if((MQTT_CLIENT_KEY and MQTT_CLIENT_KEY.strip())): ca_cert = os.sep.join([certs, MQTT_CLIENT_KEY])
+if((MQTT_CLIENT_CERT and MQTT_CLIENT_CERT.strip())): client_cert = os.sep.join([certs, MQTT_CLIENT_CERT])
+if((MQTT_CLIENT_KEY and MQTT_CLIENT_KEY.strip())): client_key = os.sep.join([certs, MQTT_CLIENT_KEY])
 
 #ca_cert = os.sep.join([certs, MQTT_CA_CERT])
 #client_cert = os.sep.join([certs, MQTT_CLIENT_CERT])
