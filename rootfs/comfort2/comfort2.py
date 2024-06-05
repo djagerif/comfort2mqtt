@@ -1459,9 +1459,11 @@ def validate_certificate(certificate):
 
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
 
-ca_cert = Path("/config/certificates/" + MQTT_CA_CERT_PATH)
-client_cert = Path("/config/certificates/")
-client_key = Path("/config/certificates/")
+certs: str = "/config/certificates"             # Certificates directory
+ca_cert = os.sep.join([certs, MQTT_CA_CERT_PATH])
+
+#client_cert = Path("/config/certificates/")
+#client_key = Path("/config/certificates/")
 
 if not MQTT_ENCRYPTION:
     logging.warning('MQTT Transport Layer Security disabled.')
