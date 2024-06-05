@@ -66,10 +66,10 @@ if [ "${MQTT_USE_TLS}" == true ]; then
 
     # Client certificates
     if [ "${MQTT_CLIENT_CERT_PATH}" == "null" ]; then
-        bashio::log.info  "No value was provided for CMQTTD_CLIENT_CERT_PATH, not using "
+        bashio::log.info  "No value was provided for MQTT_CLIENT_CERT_PATH, not using "
         bashio::log.info "client certificates for authentication."
     elif [ "${MQTT_CLIENT_KEY_PATH}" == "null" ]; then
-        bashio::log.info  "No value was provided for CMQTTD_CLIENT_KEY_PATH, not using "
+        bashio::log.info  "No value was provided for MQTT_CLIENT_KEY_PATH, not using "
         bashio::log.info "client certificates for authentication."
     elif [ -e "${MQTT_CLIENT_CERT_PATH}" ] && [ -e "${MQTT_CLIENT_KEY_PATH}" ]; then
         bashio::log.info "Using client cert: ${MQTT_CLIENT_CERT_PATH}"

@@ -1433,7 +1433,7 @@ class Comfort2(mqtt.Client):
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
 
 if not MQTT_ENCRYPTION:
-    logging.warning('Transport Layer Security disabled!')
+    logging.warning('MQTT Transport Layer Security disabled!')
     #port = option.broker_port
 else:
     tls_args = {}
