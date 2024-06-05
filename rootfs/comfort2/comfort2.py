@@ -1135,9 +1135,6 @@ class Comfort2(mqtt.Client):
         signal.signal(signal.SIGQUIT, self.exit_gracefully)
 
         zonemap = Path("/config/zones.csv")
-        ca_cert = Path("/config/certificates/" + MQTT_CA_CERT_PATH)
-        client_cert = Path("/config/certificates/")
-        client_key = Path("/config/certificates/")
         
         logger.debug ("ca_cert: %s", ca_cert) 
 
@@ -1439,11 +1436,11 @@ class Comfort2(mqtt.Client):
 
 def validate_certificate(certificate):
     # Check Valid Certificate file and Valid Dates. NotBefore and NotAfter must be within datetime.now()
-    logger.info('cetrificate: %s', certificate)
+    logger.info('certificate: %s', "" + certificate)
 
     if not os.path.isfile(certificate):
         return False
-    x509 = crypto.load_certificate(crypto.FILETYPE_PEM, open(certificate).read())
+    x509 = crypto.load_certificate(crypto.FILETYPE_PEM, open("" + certificate).read())
     ValidTo = x509.get_notAfter().decode()          # ValidTo - 20290603175630Z
     ValidFrom = x509.get_notBefore().decode()       # ValidFrom - 20240603175630Z
 
@@ -1462,18 +1459,22 @@ def validate_certificate(certificate):
 
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
 
+ca_cert = Path("/config/certificates/" + MQTT_CA_CERT_PATH)
+client_cert = Path("/config/certificates/")
+client_key = Path("/config/certificates/")
+
 if not MQTT_ENCRYPTION:
     logging.warning('MQTT Transport Layer Security disabled.')
     #port = option.broker_port
 else:
     ### Check certificate validity here !!! ###
-    if validate_certificate(MQTT_CA_CERT_PATH):
+    if validate_certificate(ca_cert):
     #if True:
-        logging.debug('Valid MQTT TLS CA Certificate found (%s)', MQTT_CA_CERT_PATH )
+        logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
 
         tls_args = {}
-        if MQTT_CA_CERT_PATH:
-            tls_args['ca_certs'] = MQTT_CA_CERT_PATH
+        if ca_cert:
+            tls_args['ca_certs'] = ca_cert
         else:
             logging.error('No MQTT TLS CA Certificate found, disabling TLS')
             logging.error("Reverting MQTT Port to default '1883'")
