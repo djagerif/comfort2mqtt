@@ -1135,7 +1135,13 @@ class Comfort2(mqtt.Client):
         signal.signal(signal.SIGQUIT, self.exit_gracefully)
 
         zonemap = Path("/config/zones.csv")
+        ca_cert = Path("/config/certificates/" + MQTT_CA_CERT_PATH)
+        client_cert = Path("/config/certificates/")
+        client_key = Path("/config/certificates/")
         
+        logger.debug ("ca_cert: %s", ca_cert) 
+
+
         if zonemap.is_file():
             file_stats = os.stat(zonemap)
             if file_stats.st_size > 5120:
