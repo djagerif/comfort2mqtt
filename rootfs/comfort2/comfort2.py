@@ -1467,19 +1467,19 @@ else:
     ### Check certificate validity here !!! ###
     match  validate_certificate(ca_cert):
         case 1:     # Invalid Certificate
-            logging.warning('MQTT TLS CA Certificate not valid (%s)', MQTT_CA_CERT )
-            logging.error("Reverting MQTT Port to default '1883' (Unencrypted)")
+            logging.warning('MQTT TLS CA Certificate Expired or not Valid (%s)', MQTT_CA_CERT )
+            logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
             MQTTBROKERPORT = 1883
             MQTT_ENCRYPTION = False
 
         case 2:     # Certificate not found
-            logging.error('No MQTT TLS CA Certificate found, disabling TLS')
-            logging.error("Reverting MQTT Port to default '1883'")
+            logging.warning('No MQTT TLS CA Certificate found, disabling TLS')
+            logging.warning("Reverting MQTT Port to default '1883'")
             MQTTBROKERPORT = 1883
             MQTT_ENCRYPTION = False
 
         case 3:     # Invalid Client Certificate or Key
-            logging.warning('Client Key or Certificate not valid (%s)', MQTT_CA_CERT )
+            logging.warning('Client Key or Certificate Expired or not Valid (%s)', MQTT_CA_CERT )
 
         case 0:     # Valid Certificate
             logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
