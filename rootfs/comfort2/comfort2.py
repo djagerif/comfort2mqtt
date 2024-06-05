@@ -24,7 +24,7 @@
 ### The MQTT traffic can be encrypted with `TLS` or sent in clear-text. The Encryption option is currently not available. The default is `False`
 #
 import ssl
-from OpenSSL import crypto
+#from OpenSSL import crypto
 import csv
 import os
 import json
