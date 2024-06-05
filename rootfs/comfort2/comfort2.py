@@ -24,7 +24,7 @@
 ### The MQTT traffic can be encrypted with `TLS` or sent in clear-text. The Encryption option is currently not available. The default is `False`
 #
 import ssl
-#from OpenSSL import crypto
+from OpenSSL import crypto
 import csv
 import os
 import json
@@ -1459,8 +1459,8 @@ if not MQTT_ENCRYPTION:
     #port = option.broker_port
 else:
     ### Check certificate validity here !!! ###
-    #if validate_certificate(MQTT_CA_CERT_PATH):
-    if True:
+    if validate_certificate(MQTT_CA_CERT_PATH):
+    #if True:
         logging.debug('Valid MQTT TLS CA Certificate found (%s)', MQTT_CA_CERT_PATH )
 
         tls_args = {}
