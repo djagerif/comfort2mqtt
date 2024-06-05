@@ -26,3 +26,4 @@ platform
 venv
 debian_platform_install.sh
 .coverage
+certificates/*
