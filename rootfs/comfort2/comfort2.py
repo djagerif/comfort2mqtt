@@ -1433,6 +1433,8 @@ class Comfort2(mqtt.Client):
 
 def validate_certificate(certificate):
     # Check Valid Certificate file and Valid Dates. NotBefore and NotAfter must be within datetime.now()
+    logger.info('cetrificate: %s', certificate)
+
     if not os.path.isfile(certificate):
         return False
     x509 = crypto.load_certificate(crypto.FILETYPE_PEM, open(certificate).read())
