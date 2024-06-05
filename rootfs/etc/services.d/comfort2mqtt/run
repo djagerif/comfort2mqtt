@@ -52,17 +52,23 @@ fi
 if [ "${MQTT_USE_TLS}" == true ]; then
     bashio::log.info "Using TLS to connect to MQTT broker."
 
+    bashio::log.info "Here #1 ${MQTT_CA_CERT_PATH}"
+
     # Using TLS, check for certificates directory
     if [ "${MQTT_CA_CERT_PATH}" != "null" ]; then
-          if [ -d "${MQTT_CA_CERT_PATH}" ]; then
-              bashio::log.info "Using custom certificates in ${MQTT_CA_CERT_PATH}"
-              COMFORT_ARGS="${COMFORT_ARGS} --broker-ca ${MQTT_CA_CERT_PATH}"
-          else
-              bashio::log.info "${MQTT_CA_CERT_PATH} not found, using Python CA store."
-          fi
-     else
-          bashio::log.info "Certificates Directory was not provided, using Python CA store."
-     fi
+        bashio::log.info "Here #2 ${MQTT_CA_CERT_PATH}"
+        if [ -f "${MQTT_CA_CERT_PATH}" ]; then
+            bashio::log.info "Here #3 ${MQTT_CA_CERT_PATH}"
+            bashio::log.info "Using custom certificates in ${MQTT_CA_CERT_PATH}"
+            COMFORT_ARGS="${COMFORT_ARGS} --broker-ca ${MQTT_CA_CERT_PATH}"
+        else
+            bashio::log.info "Here #4 ${MQTT_CA_CERT_PATH}"
+            bashio::log.info "${MQTT_CA_CERT_PATH} not found, using Python CA store."
+        fi
+    else
+        bashio::log.info "Here #5 ${MQTT_CA_CERT_PATH}"
+        bashio::log.info "Certificates Directory was not provided, using Python CA store."
+    fi
 
     # Client certificates
     if [ "${MQTT_CLIENT_CERT_PATH}" == "null" ]; then
