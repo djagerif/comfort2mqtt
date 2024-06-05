@@ -214,9 +214,9 @@ MQTT_SERVER=option.broker_address
 MQTT_PORT=option.broker_port
 MQTT_PROTOCOL=option.broker_protocol
 MQTT_ENCRYPTION=option.broker_encryption                    #  For future development !!!
-MQTT_CA_CERT_PATH=option.broker_ca                          #  For future development !!!
-MQTT_CLIENT_CERT_PATH=option.broker_client_cert             #  For future development !!!
-MQTT_CLIENT_KEY_PATH=option.broker_client_key               #  For future development !!!
+MQTT_CA_CERT=option.broker_ca                          #  For future development !!!
+MQTT_CLIENT_CERT=option.broker_client_cert             #  For future development !!!
+MQTT_CLIENT_KEY=option.broker_client_key               #  For future development !!!
 COMFORT_ADDRESS=option.comfort_address
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id
@@ -288,9 +288,9 @@ else: logger.debug('MQTT_PROTOCOL = %s/%s (Encrypted)', MQTT_PROTOCOL, MQTT_PORT
 logger.debug('COMFORT_ADDRESS = %s', COMFORT_ADDRESS)
 logger.debug('COMFORT_PORT = %s', COMFORT_PORT)
 logger.debug('COMFORT_LOGIN_ID = ******')
-logger.debug('MQTT_CA_CERT_PATH = %s', MQTT_CA_CERT_PATH)          #  For future development !!!
-logger.debug('MQTT_CLIENT_CERT_PATH = %s', MQTT_CLIENT_CERT_PATH)  #  For future development !!!
-logger.debug('MQTT_CLIENT_KEY_PATH = %s', MQTT_CLIENT_KEY_PATH)    #  For future development !!!
+logger.debug('MQTT_CA_CERT = %s', MQTT_CA_CERT)          #  For future development !!!
+logger.debug('MQTT_CLIENT_CERT = %s', MQTT_CLIENT_CERT)  #  For future development !!!
+logger.debug('MQTT_CLIENT_KEY = %s', MQTT_CLIENT_KEY)    #  For future development !!!
 
 logger.debug('MQTT_LOG_LEVEL = %s', MQTT_LOG_LEVEL)
 logger.debug('COMFORT_TIME= %s', COMFORT_TIME)
@@ -1460,7 +1460,7 @@ def validate_certificate(certificate):
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
 
 certs: str = "/config/certificates"             # Certificates directory
-ca_cert = os.sep.join([certs, MQTT_CA_CERT_PATH])
+ca_cert = os.sep.join([certs, MQTT_CA_CERT])
 
 #client_cert = Path("/config/certificates/")
 #client_key = Path("/config/certificates/")
@@ -1489,7 +1489,7 @@ else:
         mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)
         mqttc.tls_insecure_set(True)
     else:
-        logging.warning('MQTT TLS CA Certificate not valid (%s)', MQTT_CA_CERT_PATH )
+        logging.warning('MQTT TLS CA Certificate not valid (%s)', MQTT_CA_CERT )
         logging.error("Reverting MQTT Port to default '1883' (Unencrypted)")
         MQTTBROKERPORT = 1883
         MQTT_ENCRYPTION = False

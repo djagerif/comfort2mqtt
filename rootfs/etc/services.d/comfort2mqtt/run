@@ -11,9 +11,9 @@ COMFORT_ADDRESS=$(bashio::config 'comfort_address')
 COMFORT_PORT=$(bashio::config 'comfort_port')
 COMFORT_LOGIN_ID=$(bashio::config 'comfort_login_id')
 MQTT_USE_TLS=$(bashio::config 'mqtt_encryption')
-MQTT_CA_CERT_PATH=$(bashio::config 'broker_ca')
-MQTT_CLIENT_CERT_PATH=$(bashio::config 'broker_client_cert')
-MQTT_CLIENT_KEY_PATH=$(bashio::config 'broker_client_key')
+MQTT_CA_CERT=$(bashio::config 'broker_ca')
+MQTT_CLIENT_CERT=$(bashio::config 'broker_client_cert')
+MQTT_CLIENT_KEY=$(bashio::config 'broker_client_key')
 MQTT_LOG_LEVEL=$(bashio::config 'log_verbosity')
 COMFORT_INPUTS=$(bashio::config 'alarm_inputs')
 COMFORT_OUTPUTS=$(bashio::config 'alarm_outputs')
@@ -52,37 +52,37 @@ fi
 if [ "${MQTT_USE_TLS}" == true ]; then
     bashio::log.info "Using TLS to encrypt MQTT broker traffic."
 
-    # bashio::log.info "Here #1 ${MQTT_CA_CERT_PATH}"
+    # bashio::log.info "Here #1 ${MQTT_CA_CERT}"
 
     # # Using TLS, check for certificates directory
-    # if [ "${MQTT_CA_CERT_PATH}" != "null" ]; then
-    #     bashio::log.info "Here #2 ${MQTT_CA_CERT_PATH}"
-    #     if [ -f "${MQTT_CA_CERT_PATH}" ]; then
-    #         bashio::log.info "Here #3 ${MQTT_CA_CERT_PATH}"
-    #         bashio::log.info "Using custom certificates in ${MQTT_CA_CERT_PATH}"
-             COMFORT_ARGS="${COMFORT_ARGS} --broker-ca ${MQTT_CA_CERT_PATH}"
+    # if [ "${MQTT_CA_CERT}" != "null" ]; then
+    #     bashio::log.info "Here #2 ${MQTT_CA_CERT}"
+    #     if [ -f "${MQTT_CA_CERT}" ]; then
+    #         bashio::log.info "Here #3 ${MQTT_CA_CERT}"
+    #         bashio::log.info "Using custom certificates in ${MQTT_CA_CERT}"
+             COMFORT_ARGS="${COMFORT_ARGS} --broker-ca ${MQTT_CA_CERT}"
     #     else
-    #         bashio::log.info "Here #4 ${MQTT_CA_CERT_PATH}"
-    #         bashio::log.info "${MQTT_CA_CERT_PATH} not found, using Python CA store."
+    #         bashio::log.info "Here #4 ${MQTT_CA_CERT}"
+    #         bashio::log.info "${MQTT_CA_CERT} not found, using Python CA store."
     #     fi
     # else
-    #     bashio::log.info "Here #5 ${MQTT_CA_CERT_PATH}"
+    #     bashio::log.info "Here #5 ${MQTT_CA_CERT}"
     #     bashio::log.info "Certificates Directory was not provided, using Python CA store."
     # fi
 
     # # Client certificates
-    # if [ "${MQTT_CLIENT_CERT_PATH}" == "null" ]; then
-    #     bashio::log.info  "No value was provided for MQTT_CLIENT_CERT_PATH, not using "
+    # if [ "${MQTT_CLIENT_CERT}" == "null" ]; then
+    #     bashio::log.info  "No value was provided for MQTT_CLIENT_CERT, not using "
     #     bashio::log.info "client certificates for authentication."
-    # elif [ "${MQTT_CLIENT_KEY_PATH}" == "null" ]; then
-    #     bashio::log.info  "No value was provided for MQTT_CLIENT_KEY_PATH, not using "
+    # elif [ "${MQTT_CLIENT_KEY}" == "null" ]; then
+    #     bashio::log.info  "No value was provided for MQTT_CLIENT_KEY, not using "
     #     bashio::log.info "client certificates for authentication."
-    # elif [ -e "${MQTT_CLIENT_CERT_PATH}" ] && [ -e "${MQTT_CLIENT_KEY_PATH}" ]; then
-    #     bashio::log.info "Using client cert: ${MQTT_CLIENT_CERT_PATH}"
-    #     bashio::log.info "Using client key: ${MQTT_CLIENT_KEY_PATH}"
-    #     COMFORT_ARGS="${COMFORT_ARGS} --broker-client-cert ${MQTT_CLIENT_CERT_PATH} --broker-client-key ${MQTT_CLIENT_KEY_PATH}"
+    # elif [ -e "${MQTT_CLIENT_CERT}" ] && [ -e "${MQTT_CLIENT_KEY}" ]; then
+    #     bashio::log.info "Using client cert: ${MQTT_CLIENT_CERT}"
+    #     bashio::log.info "Using client key: ${MQTT_CLIENT_KEY}"
+    #     COMFORT_ARGS="${COMFORT_ARGS} --broker-client-cert ${MQTT_CLIENT_CERT} --broker-client-key ${MQTT_CLIENT_KEY}"
     # else
-    #     bashio::log.info "${MQTT_CLIENT_CERT_PATH} and/or ${MQTT_CLIENT_KEY_PATH} not found, not using "
+    #     bashio::log.info "${MQTT_CLIENT_CERT} and/or ${MQTT_CLIENT_KEY} not found, not using "
     #     bashio::log.info "client certificates for authentication."
     # fi
 else
