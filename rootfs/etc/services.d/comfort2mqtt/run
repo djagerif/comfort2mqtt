@@ -48,7 +48,6 @@ if [ "${MQTT_USE_TLS}" != "null" ]; then
       COMFORT_ARGS="${COMFORT_ARGS} --broker-encryption ${MQTT_USE_TLS}"
 fi
 
-
 if [ "${MQTT_USE_TLS}" == true ]; then
     bashio::log.info "Using TLS to encrypt MQTT broker traffic."
 
@@ -80,7 +79,7 @@ if [ "${MQTT_USE_TLS}" == true ]; then
     # elif [ -e "${MQTT_CLIENT_CERT}" ] && [ -e "${MQTT_CLIENT_KEY}" ]; then
     #     bashio::log.info "Using client cert: ${MQTT_CLIENT_CERT}"
     #     bashio::log.info "Using client key: ${MQTT_CLIENT_KEY}"
-    #     COMFORT_ARGS="${COMFORT_ARGS} --broker-client-cert ${MQTT_CLIENT_CERT} --broker-client-key ${MQTT_CLIENT_KEY}"
+          COMFORT_ARGS="${COMFORT_ARGS} --broker-client-cert ${MQTT_CLIENT_CERT} --broker-client-key ${MQTT_CLIENT_KEY}"
     # else
     #     bashio::log.info "${MQTT_CLIENT_CERT} and/or ${MQTT_CLIENT_KEY} not found, not using "
     #     bashio::log.info "client certificates for authentication."
@@ -89,8 +88,6 @@ else
     bashio::log.warning "Disabling TLS support for MQTT broker."
     #COMFORT_ARGS="${COMFORT_ARGS} --broker-encryption false"
 fi
-
-
 
 if [ "${COMFORT_ADDRESS}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --comfort-address ${COMFORT_ADDRESS}"
