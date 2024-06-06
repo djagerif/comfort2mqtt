@@ -3,8 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.4] - Unreleased
 
+## To Do ##
+ - Test Client/Server certificates
+
 ### Added
- - loop.stop on mqtt server shutdown.
+ - Improve MQTT server shutdown.
  - MQTT Broker Encryption.
 
 ### Changed

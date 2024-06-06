@@ -1455,18 +1455,20 @@ def validate_certificate(certificate):
 
 mqttc = Comfort2(mqtt.CallbackAPIVersion.VERSION2, mqtt_client_id, transport=MQTT_PROTOCOL)
 
-certs: str = "/config/certificates"             # Certificates directory
+certs: str = "/config/certificates"                 # Certificates directory
+if MQTT_ENCRYPTION and not os.path.isdir(certs):    # Display warning if Encryption is enabled but directory holding certificates is not found.
+    logging.warning('/config/certificates directory not found.')
+
 if((MQTT_CA_CERT and MQTT_CA_CERT.strip())): ca_cert = os.sep.join([certs, MQTT_CA_CERT])
 if((MQTT_CLIENT_CERT and MQTT_CLIENT_CERT.strip())): client_cert = os.sep.join([certs, MQTT_CLIENT_CERT])
 if((MQTT_CLIENT_KEY and MQTT_CLIENT_KEY.strip())): client_key = os.sep.join([certs, MQTT_CLIENT_KEY])
 
 if not MQTT_ENCRYPTION:
     logging.warning('MQTT Transport Layer Security disabled.')
-    #port = option.broker_port
 else:
     ### Check certificate validity here !!! ###
     match  validate_certificate(ca_cert):
-        case 1:     # Invalid Certificate
+        case 1:     # Invalid CA Certificate
             logging.warning('MQTT TLS CA Certificate Expired or not Valid (%s)', MQTT_CA_CERT )
             logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
             MQTTBROKERPORT = 1883
@@ -1479,7 +1481,7 @@ else:
             MQTT_ENCRYPTION = False
 
         case 3:     # Invalid Client Certificate or Key
-            logging.warning('Client Key or Certificate Expired or not Valid (%s)', MQTT_CA_CERT )
+            logging.warning('Client Key or Certificate Expired or not Valid')
 
         case 0:     # Valid Certificate
             logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
