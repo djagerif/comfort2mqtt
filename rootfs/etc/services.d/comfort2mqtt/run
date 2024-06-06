@@ -48,6 +48,14 @@ if [ "${MQTT_USE_TLS}" != "null" ]; then
       COMFORT_ARGS="${COMFORT_ARGS} --broker-encryption ${MQTT_USE_TLS}"
 fi
 
+if [ "${MQTT_CLIENT_CERT}" != "null" ]; then
+      COMFORT_ARGS="${COMFORT_ARGS} --broker-client-cert ${MQTT_CLIENT_CERT}"
+fi
+
+if [ "${MQTT_CLIENT_KEY}" != "null" ]; then
+      COMFORT_ARGS="${COMFORT_ARGS} --broker-client-key ${MQTT_CLIENT_KEY}"
+fi
+
 if [ "${MQTT_USE_TLS}" == true ]; then
     bashio::log.info "Using TLS to encrypt MQTT broker traffic."
 
