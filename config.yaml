@@ -28,8 +28,8 @@ options:
   mqtt_encryption: false
   broker_ca: null
   require_certificate: false
-  #broker_client_cert: null
-  #broker_client_key: null
+  broker_client_cert: null
+  broker_client_key: null
   comfort_address: null
   comfort_port: 1002
   comfort_login_id: null
