@@ -16,11 +16,7 @@ configuration:
     name: MQTT Broker Port
     description: >-
       MQTT Broker TCP port. Range from 1024 - 65535 (Default 1883).
-      Common Port Defaults:
-       - Normal MQTT - 1883 (Unencrypted)
-       - MQTT over WebSocket - 1884 (Unencrypted)
-       - Normal MQTT with SSL - 8883 (Encrypted)
-       - MQTT over WebSocket with SSL - 8884 (Encrypted)
+      Common Port Defaults: Normal MQTT - 1883 (Unencrypted), MQTT over WebSocket - 1884 (Unencrypted), Normal MQTT with SSL - 8883 (Encrypted), MQTT over WebSocket with SSL - 8884 (Encrypted).
   mqtt_protocol:
     name: MQTT Transport Protocol
     description: >-
