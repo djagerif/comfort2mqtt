@@ -29,11 +29,10 @@ configuration:
     description: >-
       A file containing a CA certificate. Place this file in the Home
       Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
-
   require_certificate:
     name: Require Certificate Authentication
     description: >-
-      If enabled encryption will be enabled using the Client Certificate and Keyfile options.
+      If enabled, encryption will be enabled using the Client Certificate and Key file options.
   broker_client_cert:
     name: Client Certificate File
     description: >-
@@ -44,7 +43,6 @@ configuration:
     description: >-
       A file containing the Client Private key. Place this file in the Home
       Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
-
   comfort_port:
     name: Comfort II Port
     description: >-
