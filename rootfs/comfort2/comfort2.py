@@ -232,7 +232,7 @@ COMFORT_RIO_INPUTS=str(option.alarm_rio_inputs)
 COMFORT_RIO_OUTPUTS=str(option.alarm_rio_outputs)
 
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
-ALARMINPUTBYPASSTOPIC = DOMAIN+"/input%d/bypass"        # Bypass Status.
+#ALARMINPUTBYPASSTOPIC = DOMAIN+"/input%d/bypass"        # Bypass Status.
 if int(COMFORT_INPUTS) < 8:
     COMFORT_INPUTS = "8"
 ALARMVIRTUALINPUTRANGE = range(1,int(COMFORT_INPUTS)+1) #set this according to your system. Starts at 1 -> {value}
@@ -1416,9 +1416,9 @@ class Comfort2(mqtt.Client):
                                 else:
                                     logger.debug("Zones Bypassed: %s", bMsg.value)
                                     self.publish(ALARMBYPASSTOPIC, bMsg.value, qos=2,retain=True)
-                                for bMsgb in bMsg.zones:
-                                    self.publish(ALARMINPUTBYPASSTOPIC % bMsgb.zone, bMsgb.state,qos=2,retain=True)
-                                    time.sleep(0.01)    # 10mS delay between commands
+                                #for bMsgb in bMsg.zones:
+                                #    self.publish(ALARMINPUTBYPASSTOPIC % bMsgb.zone, bMsgb.state,qos=2,retain=True)
+                                #    time.sleep(0.01)    # 10mS delay between commands
                             elif line[1:3] == "FL":
                                 flMsg = ComfortFLFlagActivationReport(line[1:])
                                 self.publish(ALARMFLAGTOPIC % flMsg.flag, flMsg.state,qos=2,retain=True)
