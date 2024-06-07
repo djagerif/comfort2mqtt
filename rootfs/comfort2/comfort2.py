@@ -1282,7 +1282,7 @@ class Comfort2(mqtt.Client):
                                 for ipMsgZ in zMsg.inputs:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
                                     _name = self.zone_to_name.get(str(ipMsgZ.input))
-                                    ZoneCache[ipMsg.input] = ipMsgZ.state           # Update local ZoneCache
+                                    ZoneCache[ipMsgZ.input] = ipMsgZ.state           # Update local ZoneCache
                                     MQTT_MSG=json.dumps({"Time": _time, 
                                                          "Name": _name, 
                                                          "State": ipMsgZ.state,
