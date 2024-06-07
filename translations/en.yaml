@@ -45,6 +45,10 @@ configuration:
     description: >-
       A file containing the Client Private key. Place this file in the Home
       Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
+  comfort_port:
+    name: Comfort II Port
+    description: >-
+      Cytech Comfort II UCM/Ethernet TCP Port. Range from 1 - 65535 (Default is 1002).
   comfort_address:
     name: Comfort II IP address
     description: >-
@@ -84,8 +88,3 @@ configuration:
     name: Set Comfort II Time and Date
     description: >-
       Set Cytech Comfort II Time and Date on successful logon and once a day at midnight (Default is False).
-network:
-  comfort_port:
-    name: Comfort II Port
-    description: >-
-      Cytech Comfort II UCM/Ethernet TCP Port. Range from 1 - 65535 (Default is 1002).
