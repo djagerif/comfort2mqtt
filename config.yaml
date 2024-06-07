@@ -40,12 +40,11 @@ options:
   alarm_rio_outputs: 0
   alarm_responses: 0
   comfort_time: false
+  message: "custom things"
   random:
   - haha
   - hihi
 schema:
-  random:
-  - "match(^\\w*$)"
   mqtt_broker_address: str
   mqtt_user: str
   mqtt_password: password
@@ -66,4 +65,6 @@ schema:
   alarm_rio_outputs: int(0,120)?
   alarm_responses: int(0,1024)?
   comfort_time: bool
+  random:
+  - "match(^\\w*$)"
 #image: "ghcr.io/djagerif/{arch}-addon-comfort2mqtt"  #  For future docker image release !!!
