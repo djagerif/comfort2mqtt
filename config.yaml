@@ -39,6 +39,7 @@ options:
   alarm_rio_inputs: 0
   alarm_rio_outputs: 0
   alarm_responses: 0
+network:
   comfort_time: false
 schema:
   mqtt_broker_address: str
