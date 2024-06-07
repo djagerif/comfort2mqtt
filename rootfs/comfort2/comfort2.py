@@ -1248,6 +1248,7 @@ class Comfort2(mqtt.Client):
                                                          "Bypass": 0
                                                         })
                                     self.publish(ALARMINPUTTOPIC % ipMsg.input, MQTT_MSG,qos=2,retain=True)
+                                    time.sleep(0.01)
 
                             elif line[1:3] == "CT":
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
@@ -1391,8 +1392,27 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "FL":
                                 flMsg = ComfortFLFlagActivationReport(line[1:])
                                 self.publish(ALARMFLAGTOPIC % flMsg.flag, flMsg.state,qos=2,retain=True)
+#                            elif line[1:3] == "BY":
+#                                byMsg = ComfortBYBypassActivationReport(line[1:])   
+#                                if byMsg.state == 1:
+#                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
+#                                        logging.warning("Zone %s Bypassed (%s)", str(byMsg.zone), self.zone_to_name.get(str(byMsg.zone),'N/A'))
+#                                    else: logging.warning("Zone %s Bypassed", str(byMsg.zone))
+#                                else:
+#                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
+#                                        logging.info("Zone %s Unbypassed (%s)", str(byMsg.zone), self.zone_to_name.get(str(byMsg.zone),'N/A'))
+#                                    else: logging.info("Zone %s Unbypassed", str(byMsg.zone))
+#
+#                                self.publish(ALARMINPUTBYPASSTOPIC % byMsg.zone, byMsg.state, qos=2, retain=True)
+#                                time.sleep(0.01)    # 10mS delay between commands
+#                                self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=2,retain=True)
+#                                time.sleep(0.01)    # 10mS delay between commands
+
                             elif line[1:3] == "BY":
                                 byMsg = ComfortBYBypassActivationReport(line[1:])   
+                                _time = datetime.now().replace(microsecond=0).isoformat()
+                                _name = self.zone_to_name.get(str(byMsg.input))
+
                                 if byMsg.state == 1:
                                     if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
                                         logging.warning("Zone %s Bypassed (%s)", str(byMsg.zone), self.zone_to_name.get(str(byMsg.zone),'N/A'))
@@ -1402,9 +1422,15 @@ class Comfort2(mqtt.Client):
                                         logging.info("Zone %s Unbypassed (%s)", str(byMsg.zone), self.zone_to_name.get(str(byMsg.zone),'N/A'))
                                     else: logging.info("Zone %s Unbypassed", str(byMsg.zone))
 
-                                self.publish(ALARMINPUTBYPASSTOPIC % byMsg.zone, byMsg.state, qos=2, retain=True)
+                                #self.publish(ALARMINPUTBYPASSTOPIC % byMsg.zone, byMsg.state, qos=2, retain=True)
+                                MQTT_MSG=json.dumps({"Time": _time, 
+                                                     "Name": _name, 
+                                                     "Bypass": byMsg.state
+                                                    })
+                                self.publish(ALARMINPUTTOPIC % ipMsg.input, MQTT_MSG,qos=2,retain=True)
                                 time.sleep(0.01)    # 10mS delay between commands
-                                self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=2,retain=True)
+
+                                self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=2,retain=True)  # Add Zone to list of zones.
                                 time.sleep(0.01)    # 10mS delay between commands
 
                             elif line[1:3] == "RS":
