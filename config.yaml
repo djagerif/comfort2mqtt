@@ -40,7 +40,12 @@ options:
   alarm_rio_outputs: 0
   alarm_responses: 0
   comfort_time: false
+  random:
+  - haha
+  - hihi
 schema:
+  random:
+  - "match(^\\w*$)"
   mqtt_broker_address: str
   mqtt_user: str
   mqtt_password: password
