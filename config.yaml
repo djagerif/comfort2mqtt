@@ -65,7 +65,6 @@ schema:
   alarm_responses: int(0,1024)?
   comfort_time: bool
   network:
-    type:
     schema:
       host: 
         type: string
