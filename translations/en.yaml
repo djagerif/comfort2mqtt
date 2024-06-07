@@ -88,4 +88,6 @@ configuration:
     name: Set Comfort II Time and Date
     description: >-
       Set Cytech Comfort II Time and Date on successful logon and once a day at midnight (Default is False).
+Network:
+
   
