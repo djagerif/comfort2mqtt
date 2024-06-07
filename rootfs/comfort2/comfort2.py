@@ -1442,7 +1442,7 @@ class Comfort2(mqtt.Client):
                                 byMsg = ComfortBYBypassActivationReport(line[1:])   
                                 _time = datetime.now().replace(microsecond=0).isoformat()
                                 _name = self.zone_to_name.get(str(byMsg.zone))
-                                _state = BypassCache[byMsg.zone]
+                                _state = ZoneCache[byMsg.zone]
 
                                 if byMsg.state == 1:
                                     if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
@@ -1462,7 +1462,7 @@ class Comfort2(mqtt.Client):
                                 self.publish(ALARMINPUTTOPIC % byMsg.zone, MQTT_MSG,qos=2,retain=True)
                                 time.sleep(0.01)    # 10mS delay between commands
 
-                                self.publish(ALARMBYPASSTOPIC, byMsg.zone, qos=2,retain=True)  # Add Zone to list of zones.
+                                self.publish(ALARMBYPASSTOPIC, byMsg.zones, qos=2,retain=True)  # Add Zone to list of zones.
                                 time.sleep(0.01)    # 10mS delay between commands
 
                             elif line[1:3] == "RS":
