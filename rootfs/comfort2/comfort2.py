@@ -1230,12 +1230,25 @@ class Comfort2(mqtt.Client):
                                     break
                             elif line[1:5] == "PS00":       # Set Date/Time once a day on receipt of PS command. Usually midnight or any time the system is armed.
                                 self.setdatetime()          # Set Date/Time if Flag is set at 00:00 every day if option is enabled.
+#                            elif line[1:3] == "IP":
+#                                ipMsg = ComfortIPInputActivationReport(line[1:])
+#                                #logger.debug("Input State: %d", ipMsg.state)
+#                                if ipMsg.state < 2:
+#                                    self.publish(ALARMINPUTTOPIC % ipMsg.input, ipMsg.state,qos=2,retain=True)
+#                                    #logger.debug("Input State: %d", ipMsg.state)
+
                             elif line[1:3] == "IP":
                                 ipMsg = ComfortIPInputActivationReport(line[1:])
-                                #logger.debug("Input State: %d", ipMsg.state)
                                 if ipMsg.state < 2:
-                                    self.publish(ALARMINPUTTOPIC % ipMsg.input, ipMsg.state,qos=2,retain=True)
-                                    #logger.debug("Input State: %d", ipMsg.state)
+                                    _time = datetime.now().replace(microsecond=0).isoformat()
+                                    _name = self.zone_to_name.get(str(ipMsg.input))
+                                    MQTT_MSG=json.dumps({"Time": _time, 
+                                                         "Name": _name, 
+                                                         "State": ipMsg.state,
+                                                         "Bypass": 0
+                                                        })
+                                    self.publish(ALARMINPUTTOPIC % ipMsg.input, MQTT_MSG,qos=2,retain=True)
+
                             elif line[1:3] == "CT":
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
                                 self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=2,retain=True)     # Value Information
@@ -1466,10 +1479,10 @@ if((MQTT_CLIENT_KEY and MQTT_CLIENT_KEY.strip())): client_key = os.sep.join([cer
 if not MQTT_ENCRYPTION:
     logging.warning('MQTT Transport Layer Security disabled.')
 else:
-    ### Check certificate validity here !!! ###
+    ### Check certificate validity here !!! ###  To Do Client Certt and Client Key !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     match  validate_certificate(ca_cert):
         case 1:     # Invalid CA Certificate
-            logging.warning('MQTT TLS CA Certificate Expired or not Valid (%s)', MQTT_CA_CERT )
+            logging.warning('MQTT TLS CA Certificate Expired or not Valid (%s)', ca_cert )
             logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
             MQTTBROKERPORT = 1883
             MQTT_ENCRYPTION = False

@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 
 ## To Do ##
  - Test Client/Server certificates
+ - Change Counters (Stave/Value) and Inputs(State/Bypass) to JSON format.
+ - Try port busy error or warning on Comfort.
 
 ### Added
  - Improve MQTT server shutdown.
