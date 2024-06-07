@@ -1462,7 +1462,7 @@ class Comfort2(mqtt.Client):
                                 self.publish(ALARMINPUTTOPIC % byMsg.zone, MQTT_MSG,qos=2,retain=True)
                                 time.sleep(0.01)    # 10mS delay between commands
 
-                                self.publish(ALARMBYPASSTOPIC, byMsg.zones, qos=2,retain=True)  # Add Zone to list of zones.
+                                self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=2,retain=True)  # Add Zone to list of zones.
                                 time.sleep(0.01)    # 10mS delay between commands
 
                             elif line[1:3] == "RS":
