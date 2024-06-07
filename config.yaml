@@ -65,6 +65,7 @@ schema:
   alarm_rio_outputs: int(0,120)?
   alarm_responses: int(0,1024)?
   comfort_time: bool
+  message: str
   random:
   - "match(^\\w*$)"
 #image: "ghcr.io/djagerif/{arch}-addon-comfort2mqtt"  #  For future docker image release !!!
