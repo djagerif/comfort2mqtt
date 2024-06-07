@@ -512,11 +512,12 @@ class Comfort_Y_ReportAllOutputs(object):
 
 class ComfortB_ReportAllBypassZones(object):
 
-    global BYPASSEDZONES
-    global BypassCache
-    global CacheState
-        
     def __init__(self, data={}):
+
+        global BYPASSEDZONES    
+        global CacheState
+        global BypassCache
+
         BYPASSEDZONES.clear()      #Clear contents and rebuild again.
         source_length = (len(data[4:]) * 4)    #96
         # Convert the string to a hexadecimal value
