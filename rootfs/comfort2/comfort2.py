@@ -67,6 +67,7 @@ BROKERCONNECTED = False
 ZONEMAPFILE = False         # Zone Number to Name CSV file present.
 ZoneCache = {}              # Zone Cache dictionary.
 BypassCache = {}            # Zone Bypass Cache dictionary.
+CacheState = False          # Initial Cache state. False when not in sync. True when in Sync.
 
 logger = logging.getLogger(__name__)
 
@@ -513,6 +514,7 @@ class ComfortB_ReportAllBypassZones(object):
 
     global BYPASSEDZONES
     global BypassCache
+    global CacheState
         
     def __init__(self, data={}):
         BYPASSEDZONES.clear()      #Clear contents and rebuild again.
@@ -536,6 +538,7 @@ class ComfortB_ReportAllBypassZones(object):
                     if zone_state == 1:
                         BYPASSEDZONES.append(zone_number)
                         self.zones.append(ComfortBYBypassActivationReport("", hex(zone_number), hex(zone_state)))
+        CacheState = True
 
         if len(BYPASSEDZONES) == 0:      # If No Zones Bypassed, enter '-1' in the List[]
             BYPASSEDZONES.append(-1)
@@ -1142,6 +1145,7 @@ class Comfort2(mqtt.Client):
         global ZONEMAPFILE
         global ZoneCache
         global BypassCache
+        global CacheState
 
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         signal.signal(signal.SIGQUIT, self.exit_gracefully)
@@ -1251,7 +1255,7 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "IP":
                                 ipMsg = ComfortIPInputActivationReport(line[1:])
-                                if ipMsg.state < 2:
+                                if ipMsg.state < 2 and CacheState:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
                                     _name = self.zone_to_name.get(str(ipMsg.input))
                                     ZoneCache[ipMsg.input] = ipMsg.state           # Update local ZoneCache
@@ -1263,7 +1267,7 @@ class Comfort2(mqtt.Client):
                                     self.publish(ALARMINPUTTOPIC % ipMsg.input, MQTT_MSG,qos=2,retain=True)
                                     time.sleep(0.01)
 
-                            elif line[1:3] == "CT":
+                            elif line[1:3] == "CT" and CacheState:
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
                                 self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=2,retain=True)     # Value Information
                                 time.sleep(0.01)
@@ -1433,7 +1437,7 @@ class Comfort2(mqtt.Client):
 #                                self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=2,retain=True)
 #                                time.sleep(0.01)    # 10mS delay between commands
 
-                            elif line[1:3] == "BY":
+                            elif line[1:3] == "BY" and CacheState:
                                 byMsg = ComfortBYBypassActivationReport(line[1:])   
                                 _time = datetime.now().replace(microsecond=0).isoformat()
                                 _name = self.zone_to_name.get(str(byMsg.zone))
