@@ -1427,7 +1427,7 @@ class Comfort2(mqtt.Client):
                                                      "Name": _name, 
                                                      "Bypass": byMsg.state
                                                     })
-                                self.publish(ALARMINPUTTOPIC % ipMsg.input, MQTT_MSG,qos=2,retain=True)
+                                self.publish(ALARMINPUTTOPIC % byMsg.zone, MQTT_MSG,qos=2,retain=True)
                                 time.sleep(0.01)    # 10mS delay between commands
 
                                 self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=2,retain=True)  # Add Zone to list of zones.
