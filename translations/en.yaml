@@ -1,4 +1,3 @@
----
 configuration:
   mqtt_broker_address:
     name: MQTT Broker Address
