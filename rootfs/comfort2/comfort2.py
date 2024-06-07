@@ -1443,6 +1443,7 @@ class Comfort2(mqtt.Client):
                                 _time = datetime.now().replace(microsecond=0).isoformat()
                                 _name = self.zone_to_name.get(str(byMsg.zone))
                                 _state = ZoneCache[byMsg.zone]
+                                BypassCache[byMsg.zone] = byMsg.state
 
                                 if byMsg.state == 1:
                                     if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
