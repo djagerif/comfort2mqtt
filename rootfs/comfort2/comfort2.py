@@ -1026,6 +1026,10 @@ class Comfort2(mqtt.Client):
         global BypassCache
         if self.connected == True:
 
+            #get Bypassed Zones
+            self.comfortsock.sendall("\x03b?00\r".encode())       # b?00 Bypassed Zones first
+            SAVEDTIME = datetime.now()
+            time.sleep(0.1)
             #get Comfort type
             self.comfortsock.sendall("\x03V?\r".encode())
             SAVEDTIME = datetime.now()
@@ -1060,10 +1064,6 @@ class Comfort2(mqtt.Client):
             time.sleep(0.1)
             #get Alarm Additional Information
             self.comfortsock.sendall("\x03a?\r".encode())       # a? Status Request
-            SAVEDTIME = datetime.now()
-            time.sleep(0.1)
-            #get Bypassed Zones
-            self.comfortsock.sendall("\x03b?00\r".encode())       # b?00 Bypassed Zones
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
 
