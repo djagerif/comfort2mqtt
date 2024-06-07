@@ -512,6 +512,7 @@ class Comfort_Y_ReportAllOutputs(object):
 class ComfortB_ReportAllBypassZones(object):
 
     global BYPASSEDZONES
+    global BypassCache
         
     def __init__(self, data={}):
         BYPASSEDZONES.clear()      #Clear contents and rebuild again.
@@ -531,6 +532,7 @@ class ComfortB_ReportAllBypassZones(object):
                 if (start_zone + j - 1) < 129:     # Max 128 zones
                     zone_number = int(start_zone + j - 1)
                     zone_state = int(segment[8 - j],2)
+                    BypassCache[zone_number] = zone_state   # Populate Cache on startup.
                     if zone_state == 1:
                         BYPASSEDZONES.append(zone_number)
                         self.zones.append(ComfortBYBypassActivationReport("", hex(zone_number), hex(zone_state)))
@@ -1018,6 +1020,7 @@ class Comfort2(mqtt.Client):
 
     def readcurrentstate(self):
         global SAVEDTIME
+        global BypassCache
         if self.connected == True:
 
             #get Comfort type
