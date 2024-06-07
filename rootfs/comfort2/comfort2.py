@@ -1280,8 +1280,20 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "Z?":                             # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
-                                    self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state, retain=False)
+                                    _time = datetime.now().replace(microsecond=0).isoformat()
+                                    _name = self.zone_to_name.get(str(ipMsgZ.input))
+                                    ZoneCache[ipMsg.input] = ipMsgZ.state           # Update local ZoneCache
+                                    MQTT_MSG=json.dumps({"Time": _time, 
+                                                         "Name": _name, 
+                                                         "State": ipMsgZ.state,
+                                                         "Bypass": BypassCache[ipMsgZ.input]
+                                                        })
+                                    self.publish(ALARMINPUTTOPIC % ipMsgZ.input, MQTT_MSG,qos=2,retain=False)
+                                    
+                                    #self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state, retain=False)
                                     time.sleep(0.01)    # 10mS delay between commands
+                                
+
                                 logger.debug("Max. Reported Zones/Inputs: %d", zMsg.max_zones)
                                 if zMsg.max_zones < int(COMFORT_INPUTS):
                                     logger.warning("Max. Reported Zone Inputs of %d is less than the configured value of %s", zMsg.max_zones, COMFORT_INPUTS)
