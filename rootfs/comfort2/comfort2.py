@@ -1411,7 +1411,7 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "BY":
                                 byMsg = ComfortBYBypassActivationReport(line[1:])   
                                 _time = datetime.now().replace(microsecond=0).isoformat()
-                                _name = self.zone_to_name.get(str(byMsg.input))
+                                _name = self.zone_to_name.get(str(byMsg.zone))
 
                                 if byMsg.state == 1:
                                     if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
