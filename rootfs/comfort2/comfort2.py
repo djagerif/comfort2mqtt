@@ -516,9 +516,9 @@ class ComfortB_ReportAllBypassZones(object):
 
         global BYPASSEDZONES    
         global CacheState
-        global BypassCache
+        global BypassCache          # Only for Comfort Zone Inputs, not for RIO Inputs.
 
-        BYPASSEDZONES.clear()      #Clear contents and rebuild again.
+        BYPASSEDZONES.clear()       #Clear contents and rebuild again.
         source_length = (len(data[4:]) * 4)    #96
         # Convert the string to a hexadecimal value
         source_hex = int(data[4:], 16)
@@ -1040,11 +1040,11 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get all zone input states
-            self.comfortsock.sendall("\x03Z?\r".encode())
+            self.comfortsock.sendall("\x03Z?\r".encode())       # Comfort Zones/Inputs
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get all SCS/RIO input states
-            self.comfortsock.sendall("\x03z?\r".encode())
+            self.comfortsock.sendall("\x03z?\r".encode())       # Comfort SCS/RIO Inputs
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get all output states
@@ -1263,7 +1263,7 @@ class Comfort2(mqtt.Client):
                                     MQTT_MSG=json.dumps({"Time": _time, 
                                                          "Name": _name, 
                                                          "State": ipMsg.state,
-                                                         "Bypass": BypassCache[ipMsg.input]
+                                                         "Bypass": BypassCache[ipMsg.input] if ipMsg.input <= 128 else None
                                                         })
                                     self.publish(ALARMINPUTTOPIC % ipMsg.input, MQTT_MSG,qos=2,retain=True)
                                     time.sleep(0.01)

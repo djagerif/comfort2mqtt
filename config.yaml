@@ -19,10 +19,6 @@ services:
   - mqtt:need
 map:
   - addon_config:ro
-ports:
-  5050/tcp: 5050
-ports_description:
-  5050/tcp: AppDaemon
 options:
   mqtt_broker_address: core-mosquitto
   mqtt_user: null
