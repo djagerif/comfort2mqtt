@@ -1510,7 +1510,7 @@ class Comfort2(mqtt.Client):
                                 #_name = self.zone_to_name.get(str(byMsg.zone))
                                 _name = self.zone_to_name.get(str(byMsg.zone)) if ZONEMAPFILE else "input" + str(byMsg.zone)
                                 _state = ZoneCache[byMsg.zone]
-                                BypassCache[byMsg.zone] = byMsg.state
+                                BypassCache[byMsg.zone] = byMsg.state if byMsg.zone <= 128 else ''
 
                                 if byMsg.state == 1:
                                     if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
@@ -1525,7 +1525,7 @@ class Comfort2(mqtt.Client):
                                 MQTT_MSG=json.dumps({"Time": _time, 
                                                      "Name": _name,
                                                      "State": _state, 
-                                                     "Bypass": byMsg.state
+                                                     "Bypass": byMsg.state if byMsg.zone <= 128 else ''
                                                     })
                                 self.publish(ALARMINPUTTOPIC % byMsg.zone, MQTT_MSG,qos=2,retain=True)
                                 time.sleep(0.01)    # 10mS delay between commands
