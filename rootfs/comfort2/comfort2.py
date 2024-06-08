@@ -1289,7 +1289,7 @@ class Comfort2(mqtt.Client):
                                 _time = datetime.now().replace(microsecond=0).isoformat()
                                 MQTT_MSG=json.dumps({"Time": _time, 
                                                      "Value": ipMsgCT.value, 
-                                                     "State": ipMsg.state
+                                                     "State": ipMsgCT.state
                                                     })
                                 self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, MQTT_MSG,qos=2,retain=True)
                                 time.sleep(0.01)
