@@ -5,16 +5,19 @@ All notable changes to this project will be documented in this file.
 
 ## To Do ##
  - Test Client/Server certificates
- - Change Counters (Stave/Value) and Inputs(State/Bypass) to JSON format.
+ - Change Counters (State/Value), Inputs(State/Bypass) and Outputs to JSON format. Incl time, desc and bypass + state.
  - Try port busy error or warning on Comfort.
- - Fix IP > 128 to exclude BypassCache. Crash with keyError.
+ - Fix IP > 128 to exclude BypassCache. Crash with keyError. Done
+ - Add description file for outputs. Use combined file, update file to include type.
 
 ### Added
  - Improve MQTT server shutdown.
  - MQTT Broker Encryption.
+ 
 
 ### Changed
  - Increased "zones.csv" permitted size to 10KB. Zone Names Max. 30 characters.
+ - Changed object reporting to JSON format for Zones, Outputs and Counters.
 
 ### Fixed
 

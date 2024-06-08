@@ -922,9 +922,12 @@ class Comfort2(mqtt.Client):
         return ('{:04X}'.format((int((value & 0xff) * 0x100 + (value & 0xff00) / 0x100))) )
     
     def CheckZoneNameFormat(self,value):      # Checks CSV file Zone Name to only contain valid characters. Return False if it fails else True
-        
         pattern = r'^(?![ ]{1,}).{1}[a-zA-Z0-9_ -/]+$'
         return bool(re.match(pattern, value))
+    
+    def CheckZoneTypeFormat(self,value):      # Checks CSV file Zone Type to only contain valid characters. Return False if it fails else True
+        pattern = r'[io]'
+        return bool(re.fullmatch(pattern, value))
     
     def CheckZoneNumberFormat(self,value):      # Checks CSV file Zone Number to only contain valid characters. Return False if it fails else True
         pattern = r'^[0-9]+$'
@@ -1053,7 +1056,7 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get all RIO output states
-            self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all RIO Outputs
+            self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all SCS/RIO Outputs
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get all flag states
@@ -1152,18 +1155,20 @@ class Comfort2(mqtt.Client):
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         signal.signal(signal.SIGQUIT, self.exit_gracefully)
 
-        zonemap = Path("/config/zones.csv")
+        #zonemap = Path("/config/zones.csv")
+        zonemap = Path("/config/outputs.csv")       # Test combined file format. Added zone type a column 1.
 
         if zonemap.is_file():
             file_stats = os.stat(zonemap)
-            if file_stats.st_size > 10240:
-                logger.warning ("Suspicious Zone Mapping File detected. Size is larger than anticipated 10KB. (%s Bytes)", file_stats.st_size) 
+            if file_stats.st_size > 20480:
+                logger.warning ("Suspicious Zone Mapping File detected. Size is larger than anticipated 20KB. (%s Bytes)", file_stats.st_size) 
                 ZONEMAPFILE = False
             else:
                 logger.info ("Zone Mapping File detected, %s Bytes", file_stats.st_size) 
                
                 # Initialize an empty dictionary
                 self.zone_to_name = {}
+                self.output_to_name = {}
 
                 # Open the CSV file
                 with open(zonemap, newline='') as csvfile:
@@ -1176,7 +1181,14 @@ class Comfort2(mqtt.Client):
 
                         if self.CheckZoneNumberFormat(row['zone'][:3]):
                             zone = row['zone'][:3]          # Check Zone Number sanity else blank.
-                            ZONEMAPFILE = True              # File available and data read into dictionary 'data'
+                            if self.CheckZoneTypeFormat(row['type']):
+                                _type = row['type']              # Check Zone Number sanity else blank.
+                                ZONEMAPFILE = True               # Type is either 'i' or 'o'
+                            else:
+                                zone = ""
+                                logger.error("Invalid Zone Number/Type detected in 'zones.csv' file, file ignored.")
+                                ZONEMAPFILE = False
+                                break    
                         else: 
                             zone = ""
                             logger.error("Invalid Zone Number detected in 'zones.csv' file, file ignored.")
@@ -1193,7 +1205,10 @@ class Comfort2(mqtt.Client):
                             break
 
                         # Add the truncated value to the dictionary
-                        self.zone_to_name[zone] = name
+                        if _type == 'i':
+                            self.zone_to_name[zone] = name      # Zone/Input Names
+                        else:
+                            self.output_to_name[zone] = name    # Output Names
 
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         #logging.debug("MQTT Broker Connected: %s", str(self.connected))
@@ -1389,20 +1404,61 @@ class Comfort2(mqtt.Client):
                                     self.publish(ALARMMESSAGETOPIC, "Door Bell",qos=2,retain=True)
                             elif line[1:3] == "OP":
                                 ipMsg = ComfortOPOutputActivationReport(line[1:])
-                                self.publish(ALARMOUTPUTTOPIC % ipMsg.output, ipMsg.state,qos=2,retain=True)
+
+                                if ipMsg.state < 2:
+                                    _time = datetime.now().replace(microsecond=0).isoformat()
+                                    _name = self.output_to_name.get(str(ipMsg.output)) if ZONEMAPFILE else "output" + str(ipMsg.output)
+                                    #ZoneCache[ipMsg.input] = ipMsg.state           # Update local ZoneCache
+                                    MQTT_MSG=json.dumps({"Time": _time, 
+                                                         "Name": _name, 
+                                                         "State": ipMsg.state
+                                                        })
+                                    self.publish(ALARMINPUTTOPIC % ipMsg.output, MQTT_MSG,qos=2,retain=True)
+                                    time.sleep(0.01)
+
+
+
+
+                                #self.publish(ALARMOUTPUTTOPIC % ipMsg.output, ipMsg.state,qos=2,retain=True)
                             elif line[1:3] == "Y?":     # Comfort Outputs
                                 yMsg = ComfortY_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
-                                    self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state,qos=2,retain=True)
+                                    _time = datetime.now().replace(microsecond=0).isoformat()
+                                    _name = self.output_to_name.get(str(opMsgY.output)) if ZONEMAPFILE else "input" + str(opMsgY.output)
+                                    ZoneCache[ipMsgZ.output] = opMsgY.state           # Update local ZoneCache
+                                    MQTT_MSG=json.dumps({"Time": _time, 
+                                                         "Name": _name, 
+                                                         "State": opMsgY.state
+                                                        })
+                                    self.publish(ALARMOUTPUTTOPIC % opMsgY.output, MQTT_MSG,qos=2,retain=False)
                                     time.sleep(0.01)    # 10mS delay between commands
+
+
+
+
+                                    #self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state,qos=2,retain=True)
+                                    #time.sleep(0.01)    # 10mS delay between commands
                                 logger.debug("Max. Reported Outputs: %d", yMsg.max_zones)
                                 if yMsg.max_zones < int(COMFORT_OUTPUTS):
                                     logger.warning("Max. Reported Outputs of %d is less than the configured value of %s", yMsg.max_zones, COMFORT_OUTPUTS)
                             elif line[1:3] == "y?":     # SCS/RIO Outputs
                                 yMsg = Comfort_Y_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
-                                    self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state)
+                                    _time = datetime.now().replace(microsecond=0).isoformat()
+                                    _name = self.output_to_name.get(str(opMsgY.output)) if ZONEMAPFILE else "input" + str(opMsgY.output)
+                                    ZoneCache[ipMsgZ.output] = opMsgY.state           # Update local ZoneCache
+                                    MQTT_MSG=json.dumps({"Time": _time, 
+                                                         "Name": _name, 
+                                                         "State": opMsgY.state
+                                                        })
+                                    self.publish(ALARMOUTPUTTOPIC % opMsgY.output, MQTT_MSG,qos=2,retain=False)
                                     time.sleep(0.01)    # 10mS delay between commands
+
+                                    #self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state)
+                                    #time.sleep(0.01)    # 10mS delay between commands
+
+
+
                                 logger.debug("Max. Reported SCS/RIO Outputs: %d", yMsg.max_zones)
                             elif line[1:5] == "r?00":
                                 cMsg = Comfort_R_ReportAllSensors(line[1:])
