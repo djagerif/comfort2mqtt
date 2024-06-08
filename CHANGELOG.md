@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
  - Test Client/Server certificates
  - Change Counters (Stave/Value) and Inputs(State/Bypass) to JSON format.
  - Try port busy error or warning on Comfort.
+ - Fix IP > 128 to exclude BypassCache. Crash with keyError.
+ - Try Network section in Configuration
 
 ### Added
  - Improve MQTT server shutdown.
