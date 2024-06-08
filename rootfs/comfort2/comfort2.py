@@ -923,7 +923,7 @@ class Comfort2(mqtt.Client):
     
     def CheckZoneNameFormat(self,value):      # Checks CSV file Zone Name to only contain valid characters. Return False if it fails else True
         
-        pattern = r'^(?![ ]{1,}).{1}[a-zA-Z0-9_ -]+$'
+        pattern = r'^(?![ ]{1,}).{1}[a-zA-Z0-9_ -/]+$'
         return bool(re.match(pattern, value))
     
     def CheckZoneNumberFormat(self,value):      # Checks CSV file Zone Number to only contain valid characters. Return False if it fails else True
