@@ -1413,11 +1413,8 @@ class Comfort2(mqtt.Client):
                                                          "Name": _name, 
                                                          "State": ipMsg.state
                                                         })
-                                    self.publish(ALARMINPUTTOPIC % ipMsg.output, MQTT_MSG,qos=2,retain=True)
+                                    self.publish(ALARMOUTPUTTOPIC % ipMsg.output, MQTT_MSG,qos=2,retain=True)
                                     time.sleep(0.01)
-
-
-
 
                                 #self.publish(ALARMOUTPUTTOPIC % ipMsg.output, ipMsg.state,qos=2,retain=True)
                             elif line[1:3] == "Y?":     # Comfort Outputs
