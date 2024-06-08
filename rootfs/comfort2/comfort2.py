@@ -67,7 +67,7 @@ BROKERCONNECTED = False
 ZONEMAPFILE = False         # Zone Number to Name CSV file present.
 ZoneCache = {}              # Zone Cache dictionary.
 BypassCache = {}            # Zone Bypass Cache dictionary.
-CacheState = False          # Initial Cache state. False when not in sync. True when in Sync.
+CacheState = False          # Initial Cache state. False when not in sync with Bypass Zones (b?). True, when in Sync.
 
 logger = logging.getLogger(__name__)
 
@@ -434,6 +434,7 @@ class ComfortZ_ReportAllZones(object):
 
 class Comfort_Z_ReportAllZones(object):     #SCS/RIO z?
     def __init__(self, data={}):
+
         self.inputs = []    
         b = (len(data) - 2) // 2            #variable number of zones reported
         self.max_zones = b * 8
