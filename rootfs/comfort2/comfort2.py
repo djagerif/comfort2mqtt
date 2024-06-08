@@ -1510,7 +1510,7 @@ class Comfort2(mqtt.Client):
                                 #_name = self.zone_to_name.get(str(byMsg.zone))
                                 _name = self.zone_to_name.get(str(byMsg.zone)) if ZONEMAPFILE else "input" + str(byMsg.zone)
                                 _state = ZoneCache[byMsg.zone]
-                                BypassCache[byMsg.zone] = byMsg.state if byMsg.zone <= 128 else ''
+                                BypassCache[byMsg.zone] = byMsg.state if byMsg.zone <= 128 else None
 
                                 if byMsg.state == 1:
                                     if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
