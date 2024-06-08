@@ -537,7 +537,7 @@ class ComfortB_ReportAllBypassZones(object):
                     zone_number = int(start_zone + j - 1)
                     zone_state = int(segment[8 - j],2)
                     BypassCache[zone_number] = zone_state   # Populate Cache on startup.
-                    if zone_state == 1:
+                    if zone_state == 1 and zone_number <= 128:
                         BYPASSEDZONES.append(zone_number)
                         self.zones.append(ComfortBYBypassActivationReport("", hex(zone_number), hex(zone_state)))
         CacheState = True
@@ -1530,8 +1530,9 @@ class Comfort2(mqtt.Client):
                                 self.publish(ALARMINPUTTOPIC % byMsg.zone, MQTT_MSG,qos=2,retain=True)
                                 time.sleep(0.01)    # 10mS delay between commands
 
-                                self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=2,retain=True)  # Add Zone to list of zones.
-                                time.sleep(0.01)    # 10mS delay between commands
+                                if byMsg.zone <= 128:
+                                    self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=2,retain=True)  # Add Zone to list of zones.
+                                    time.sleep(0.01)    # 10mS delay between commands
 
                             elif line[1:3] == "RS":
                                 #on rare occassions comfort ucm might get reset (RS11), our session is no longer valid, need to relogin
