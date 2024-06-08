@@ -1525,7 +1525,7 @@ class Comfort2(mqtt.Client):
                                 MQTT_MSG=json.dumps({"Time": _time, 
                                                      "Name": _name,
                                                      "State": _state, 
-                                                     "Bypass": byMsg.state if byMsg.zone <= 128 else ''
+                                                     "Bypass": byMsg.state if byMsg.zone <= 128 else None
                                                     })
                                 self.publish(ALARMINPUTTOPIC % byMsg.zone, MQTT_MSG,qos=2,retain=True)
                                 time.sleep(0.01)    # 10mS delay between commands
