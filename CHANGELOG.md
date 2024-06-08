@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
  - MQTT Broker Encryption.
 
 ### Changed
+ - Increased "zones.csv" permitted size to 10KB. Zone Names Max. 30 characters.
 
 ### Fixed
 

@@ -1155,8 +1155,8 @@ class Comfort2(mqtt.Client):
 
         if zonemap.is_file():
             file_stats = os.stat(zonemap)
-            if file_stats.st_size > 5120:
-                logger.warning ("Suspicious Zone Mapping File detected. Size is larger than anticipated. (%s Bytes)", file_stats.st_size) 
+            if file_stats.st_size > 10240:
+                logger.warning ("Suspicious Zone Mapping File detected. Size is larger than anticipated 10KB. (%s Bytes)", file_stats.st_size) 
                 ZONEMAPFILE = False
             else:
                 logger.info ("Zone Mapping File detected, %s Bytes", file_stats.st_size) 
@@ -1258,7 +1258,8 @@ class Comfort2(mqtt.Client):
                                 ipMsg = ComfortIPInputActivationReport(line[1:])
                                 if ipMsg.state < 2 and CacheState:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
-                                    _name = self.zone_to_name.get(str(ipMsg.input))
+                                    #_name = self.zone_to_name.get(str(ipMsg.input))
+                                    _name = self.zone_to_name.get(str(ipMsg.input)) if ZONEMAPFILE else "input" + str(ipMsg.input)
                                     ZoneCache[ipMsg.input] = ipMsg.state           # Update local ZoneCache
                                     MQTT_MSG=json.dumps({"Time": _time, 
                                                          "Name": _name, 
@@ -1286,7 +1287,7 @@ class Comfort2(mqtt.Client):
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
-                                    _name = self.zone_to_name.get(str(ipMsgZ.input))
+                                    _name = self.zone_to_name.get(str(ipMsgZ.input)) if ZONEMAPFILE else "input" + str(ipMsgZ.input)
                                     ZoneCache[ipMsgZ.input] = ipMsgZ.state           # Update local ZoneCache
                                     MQTT_MSG=json.dumps({"Time": _time, 
                                                          "Name": _name, 
@@ -1441,7 +1442,8 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "BY" and CacheState:
                                 byMsg = ComfortBYBypassActivationReport(line[1:])   
                                 _time = datetime.now().replace(microsecond=0).isoformat()
-                                _name = self.zone_to_name.get(str(byMsg.zone))
+                                #_name = self.zone_to_name.get(str(byMsg.zone))
+                                _name = self.zone_to_name.get(str(byMsg.zone)) if ZONEMAPFILE else "input" + str(byMsg.zone)
                                 _state = ZoneCache[byMsg.zone]
                                 BypassCache[byMsg.zone] = byMsg.state
 
