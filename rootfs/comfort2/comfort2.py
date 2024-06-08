@@ -928,7 +928,7 @@ class Comfort2(mqtt.Client):
     def CheckZoneNumberFormat(self,value):      # Checks CSV file Zone Number to only contain valid characters. Return False if it fails else True
         pattern = r'^[0-9]+$'
         if bool(re.match(pattern, value)):
-            if value.isnumeric() & (int(value) <= 128):
+            if value.isnumeric() & (int(value) <= 248):
                 return True
             else:
                 return False
