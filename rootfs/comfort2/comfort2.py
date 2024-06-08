@@ -1307,8 +1307,19 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "z?":                             # SCS/RIO Inputs
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
-                                    self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
+                                    _time = datetime.now().replace(microsecond=0).isoformat()
+                                    _name = self.zone_to_name.get(str(ipMsgZ.input)) if ZONEMAPFILE else "input" + str(ipMsgZ.input)
+                                    ZoneCache[ipMsgZ.input] = ipMsgZ.state           # Update local ZoneCache
+                                    MQTT_MSG=json.dumps({"Time": _time, 
+                                                         "Name": _name, 
+                                                         "State": ipMsgZ.state,
+                                                         "Bypass": BypassCache[ipMsg.input] if ipMsg.input <= 128 else None
+                                                        })
+                                    self.publish(ALARMINPUTTOPIC % ipMsgZ.input, MQTT_MSG,qos=2,retain=False)
                                     time.sleep(0.01)    # 10mS delay between commands
+
+                                    #self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state)
+                                    #time.sleep(0.01)    # 10mS delay between commands
                                 logger.debug("Max. Reported SCS/RIO Inputs: %d", zMsg.max_zones)
                             elif line[1:3] == "M?" or line[1:3] == "MD":
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
