@@ -270,7 +270,7 @@ ALARMSENSORCOMMANDTOPIC = DOMAIN+"/sensor%d/set"        #sensor0,sensor1,...sens
 ALARMNUMBEROFCOUNTERS = 255                             # Hardcoded to 255
 ALARMCOUNTERINPUTRANGE = DOMAIN+"/counter%d"            #each counter represents a value EG. light level
 ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set"      # set the counter to a value for between 0 (off) to 255 (full on) or any 16-bit value.
-ALARMCOUNTERSTATETOPIC = DOMAIN+"/counter%d/state"      # Holds the state of the object, either ON or OFF depending on the value. # State On=1 or Off=0
+#ALARMCOUNTERSTATETOPIC = DOMAIN+"/counter%d/state"      # Holds the state of the object, either ON or OFF depending on the value. # State On=1 or Off=0
 
 ALARMTIMERREPORTTOPIC = DOMAIN+"/timer%d"               #each timer instance.
 ALARMNUMBEROFTIMERS = 64                                # default timer instances. 1 - 64.
@@ -792,8 +792,8 @@ class Comfort2(mqtt.Client):
             for i in range(0, ALARMNUMBEROFCOUNTERS + 1):
                 self.subscribe(ALARMCOUNTERCOMMANDTOPIC % i)    # Value or Level
                 time.sleep(0.01)
-                self.subscribe(ALARMCOUNTERSTATETOPIC % i)      # State On=1 or Off=0
-                time.sleep(0.01)
+                #self.subscribe(ALARMCOUNTERSTATETOPIC % i)      # State On=1 or Off=0
+                #time.sleep(0.01)
             logger.debug("Subscribed to %d Counters", ALARMNUMBEROFCOUNTERS)
 
             for i in range(1, ALARMNUMBEROFRESPONSES + 1):      # Responses as specified from HA options.
@@ -1155,9 +1155,8 @@ class Comfort2(mqtt.Client):
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         signal.signal(signal.SIGQUIT, self.exit_gracefully)
 
-        #zonemap = Path("/config/zones.csv")
-        zonemap = Path("/config/outputs.csv")       # Test combined file format. Added zone type a column 1.
-
+        zonemap = Path("/config/zones.csv")
+        
         if zonemap.is_file():
             file_stats = os.stat(zonemap)
             if file_stats.st_size > 20480:
@@ -1285,11 +1284,20 @@ class Comfort2(mqtt.Client):
                                     self.publish(ALARMINPUTTOPIC % ipMsg.input, MQTT_MSG,qos=2,retain=True)
                                     time.sleep(0.01)
 
-                            elif line[1:3] == "CT" and CacheState:
+                            elif line[1:3] == "CT":     # and CacheState:
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
-                                self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=2,retain=True)     # Value Information
+                                _time = datetime.now().replace(microsecond=0).isoformat()
+                                MQTT_MSG=json.dumps({"Time": _time, 
+                                                     "Value": ipMsgCT.value, 
+                                                     "State": ipMsg.state
+                                                    })
+                                self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, MQTT_MSG,qos=2,retain=True)
                                 time.sleep(0.01)
-                                self.publish(ALARMCOUNTERSTATETOPIC % ipMsgCT.counter, ipMsgCT.state,qos=2,retain=True)     # State Information
+
+
+                                #self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, ipMsgCT.value,qos=2,retain=True)     # Value Information
+                                #time.sleep(0.01)
+                                #self.publish(ALARMCOUNTERSTATETOPIC % ipMsgCT.counter, ipMsgCT.state,qos=2,retain=True)     # State Information
                             elif line[1:3] == "s?":
                                 ipMsgSQ = ComfortCTCounterActivationReport(line[1:])
                                 self.publish(ALARMSENSORTOPIC % ipMsgSQ.counter, ipMsgSQ.state)
@@ -1460,10 +1468,20 @@ class Comfort2(mqtt.Client):
                             elif line[1:5] == "r?00":
                                 cMsg = Comfort_R_ReportAllSensors(line[1:])
                                 for cMsgr in cMsg.counters:
-                                    self.publish(ALARMCOUNTERINPUTRANGE % cMsgr.counter, cMsgr.value,qos=2,retain=True)     # Value Information
+
+                                    _time = datetime.now().replace(microsecond=0).isoformat()
+                                    MQTT_MSG=json.dumps({"Time": _time, 
+                                                         "Value": cMsgr.value, 
+                                                         "State": cMsgr.state
+                                                        })
+                                    self.publish(ALARMCOUNTERINPUTRANGE % cMsgr.counter, MQTT_MSG,qos=2,retain=False)
                                     time.sleep(0.01)    # 10mS delay between commands
-                                    self.publish(ALARMCOUNTERSTATETOPIC % cMsgr.counter, cMsgr.state,qos=2,retain=True)     # State Information
-                                    time.sleep(0.01)    # 10mS delay between commands
+
+                                    #self.publish(ALARMCOUNTERINPUTRANGE % cMsgr.counter, cMsgr.value,qos=2,retain=True)     # Value Information
+                                    #time.sleep(0.01)    # 10mS delay between commands
+                                    #self.publish(ALARMCOUNTERSTATETOPIC % cMsgr.counter, cMsgr.state,qos=2,retain=True)     # State Information
+                                    #time.sleep(0.01)    # 10mS delay between commands
+
                             elif line[1:5] == "r?01":
                                 sMsg = Comfort_R_ReportAllSensors(line[1:])
                                 for sMsgr in sMsg.sensors:

@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
  - Try port busy error or warning on Comfort.
  - Fix IP > 128 to exclude BypassCache. Crash with keyError. Done
  - Add description file for outputs. Use combined file, update file to include type. Done.
- - Limit BY to <= 128
+ - Limit BY to <= 128. Done.
 
 ### Added
  - Improve MQTT server shutdown.
