@@ -1425,7 +1425,7 @@ class Comfort2(mqtt.Client):
                                 for opMsgY in yMsg.outputs:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
                                     _name = self.output_to_name.get(str(opMsgY.output)) if ZONEMAPFILE else "input" + str(opMsgY.output)
-                                    ZoneCache[ipMsgZ.output] = opMsgY.state           # Update local ZoneCache
+                                    #ZoneCache[opMsgY.output] = opMsgY.state           # Update local ZoneCache
                                     MQTT_MSG=json.dumps({"Time": _time, 
                                                          "Name": _name, 
                                                          "State": opMsgY.state
@@ -1446,7 +1446,7 @@ class Comfort2(mqtt.Client):
                                 for opMsgY in yMsg.outputs:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
                                     _name = self.output_to_name.get(str(opMsgY.output)) if ZONEMAPFILE else "input" + str(opMsgY.output)
-                                    ZoneCache[ipMsgZ.output] = opMsgY.state           # Update local ZoneCache
+                                    #ZoneCache[opMsgY.output] = opMsgY.state           # Update local ZoneCache
                                     MQTT_MSG=json.dumps({"Time": _time, 
                                                          "Name": _name, 
                                                          "State": opMsgY.state
