@@ -5,11 +5,14 @@ All notable changes to this project will be documented in this file.
 
 ## To Do ##
  - Test Client/Server certificates
- - Change Counters (State/Value), Inputs(State/Bypass) and Outputs to JSON format. Incl time, desc and bypass + state. Counters Outstanding !!
- - Try port busy error or warning on Comfort.
+ - Change Counters (State/Value), Inputs(State/Bypass) and Outputs to JSON format. Incl time, desc, bypass + state. Done.
+ - Try port busy error or warning on Comfort. Done
  - Fix IP > 128 to exclude BypassCache. Crash with keyError. Done
- - Add description file for outputs. Use combined file, update file to include type. Done.
+ - Add description file for outputs. Use combined file, update file to include type. Done. Revisit!!
  - Limit BY to <= 128. Done.
+ - Add optional descriptions for Flags, Responses, Counters, Sensors, Timers.
+ - Check QoS on sent 'SET' commands. Done
+ - Add JSON format to ALARM. Incoude Type,Ver,FS,MPU and SN.
 
 ### Added
  - Improve MQTT server shutdown.

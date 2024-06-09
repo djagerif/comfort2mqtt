@@ -876,7 +876,7 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.sendall(("\x03R!%02X\r" % response).encode())                          # Response with 8-bit number
                     SAVEDTIME = datetime.now()
                 logger.debug("Activating Response %d",response )
-        elif msg.topic.startswith(DOMAIN+"/input") and msg.topic.endswith("/set"):
+        elif msg.topic.startswith(DOMAIN+"/input") and msg.topic.endswith("/set"):                          # Can only set the State, the Bypass, Name and Time cannot be changed.
             virtualinput = int(msg.topic.split("/")[1][5:])
             state = int(msgstr)
             if self.connected:
@@ -1140,6 +1140,10 @@ class Comfort2(mqtt.Client):
         RUN = False
         exit(0)
 
+    def add_descriptions(self, file):    # Checks optional object description files and populate dictionaries accordingly.
+
+        return file
+
     def run(self):
 
         global FIRST_LOGIN         # Used to track if Addon started up or not.
@@ -1155,7 +1159,7 @@ class Comfort2(mqtt.Client):
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         signal.signal(signal.SIGQUIT, self.exit_gracefully)
 
-        zonemap = Path("/config/zones.csv")
+        zonemap = self.add_descriptions(Path("/config/zones.csv"))
         
         if zonemap.is_file():
             file_stats = os.stat(zonemap)
@@ -1300,10 +1304,10 @@ class Comfort2(mqtt.Client):
                                 #self.publish(ALARMCOUNTERSTATETOPIC % ipMsgCT.counter, ipMsgCT.state,qos=2,retain=True)     # State Information
                             elif line[1:3] == "s?":
                                 ipMsgSQ = ComfortCTCounterActivationReport(line[1:])
-                                self.publish(ALARMSENSORTOPIC % ipMsgSQ.counter, ipMsgSQ.state)
+                                self.publish(ALARMSENSORTOPIC % ipMsgSQ.counter, ipMsgSQ.state, qos=2, retain=False)
                             elif line[1:3] == "sr":
                                 ipMsgSR = ComfortCTCounterActivationReport(line[1:])
-                                self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, ipMsgSR.state)
+                                self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, ipMsgSR.state, qos=2, retain=False)
                             elif line[1:3] == "TR":
                                 ipMsgTR = ComfortCTCounterActivationReport(line[1:])
                                 self.publish(ALARMTIMERREPORTTOPIC % ipMsgTR.counter, ipMsgTR.state,qos=2,retain=False)
@@ -1320,7 +1324,7 @@ class Comfort2(mqtt.Client):
                                                         })
                                     self.publish(ALARMINPUTTOPIC % ipMsgZ.input, MQTT_MSG,qos=2,retain=False)
                                     
-                                    #self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state, retain=False)
+                                    #self.publish(ALARMINPUTTOPIC % ipMsgZ.input, ipMsgZ.state, qos=2, retain=False)
                                     time.sleep(0.01)    # 10mS delay between commands
                                 
 
