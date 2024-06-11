@@ -1581,6 +1581,7 @@ class Comfort2(mqtt.Client):
         global RESPONSEMAPFILE
         global SCSRIOMAPFILE
 
+
         global input_properties
         global counter_properties
         global flag_properties
