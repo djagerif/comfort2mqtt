@@ -1550,7 +1550,7 @@ class Comfort2(mqtt.Client):
 
         return file
     
-    def sanitize_filename(input_string, valid_extensions=None):     # Thanks ChatGPT :-)
+    def sanitize_filename(self, input_string, valid_extensions=None):     # Thanks ChatGPT :-)
         """
         Sanitize the input filename string to ensure it is a valid filename with an extension,
         and prevent directory tree walking.
