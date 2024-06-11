@@ -1740,7 +1740,7 @@ class Comfort2(mqtt.Client):
                                     self.publish(ALARMINPUTTOPIC % ipMsg.input, MQTT_MSG,qos=2,retain=True)
                                     time.sleep(0.01)
 
-                            elif line[1:3] == "CT":     # and CacheState:
+                            elif line[1:3] == "CT" and CacheState:
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
                                 _time = datetime.now().replace(microsecond=0).isoformat()
                                 _name = counter_properties[str(ipMsgCT.counter)] if COUNTERMAPFILE else "counter" + str(ipMsgCT.counter)
