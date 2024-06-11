@@ -26,7 +26,7 @@
 import xml.etree.ElementTree as ET
 import ssl
 from OpenSSL import crypto
-import csv
+#import csv
 import os
 import json
 from pathlib import Path
@@ -142,17 +142,21 @@ group = parser.add_argument_group('Comfort System options')
 group.add_argument(
     '--comfort-address',
     required=True,
-    help='Address of the Comfort system')
+    help='IP Address of the Comfort II system')
 
 group.add_argument(
     '--comfort-port',
     type=int, default=1002,
-    help='Port to use to connect to the Comfort system. [default: 1002]')
+    help='Port to use to connect to the Comfort II system. [default: 1002]')
 
 group.add_argument(
     '--comfort-login-id',
     required=True,
-    help='Comfort system Login ID.')
+    help='Comfort II system Login ID.')
+
+group.add_argument(
+    '--comfort-cclx-file',
+    help='Comfort II (CCLX) Configuration file.')
 
 group.add_argument(
     '--comfort-time',
@@ -231,6 +235,7 @@ MQTT_CLIENT_KEY=option.broker_client_key               #  For future development
 COMFORT_ADDRESS=option.comfort_address
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id
+COMFORT_CCLX_FILE=option.comfort_cclx_file
 MQTT_LOG_LEVEL=option.verbosity
 COMFORT_INPUTS=int(option.alarm_inputs)
 COMFORT_OUTPUTS=int(option.alarm_outputs)
@@ -299,6 +304,7 @@ else: logger.debug('MQTT_PROTOCOL = %s/%s (Encrypted)', MQTT_PROTOCOL, MQTT_PORT
 logger.debug('COMFORT_ADDRESS = %s', COMFORT_ADDRESS)
 logger.debug('COMFORT_PORT = %s', COMFORT_PORT)
 logger.debug('COMFORT_LOGIN_ID = ******')
+logger.debug('COMFORT_CCLX_FILE = %s', COMFORT_CCLX_FILE)
 logger.debug('MQTT_CA_CERT = %s', MQTT_CA_CERT)          #  For future development !!!
 logger.debug('MQTT_CLIENT_CERT = %s', MQTT_CLIENT_CERT)  #  For future development !!!
 logger.debug('MQTT_CLIENT_KEY = %s', MQTT_CLIENT_KEY)    #  For future development !!!

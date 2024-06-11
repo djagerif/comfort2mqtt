@@ -61,7 +61,7 @@ configuration:
   comfort_cclx_file:
     name: Comfort II Configuration file
     description: >-
-      Comfort II Configuration file, also referred to s the 'CCLX' file to be used for object enrichment EG. Zone Names etc.  
+      Comfort II Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc.
   log_verbosity:
     name: Global Log Verbosity
     description: >-
