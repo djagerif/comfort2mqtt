@@ -33,6 +33,7 @@ options:
   comfort_address: null
   comfort_port: 1002
   comfort_login_id: null
+  comfort_cclx_file: null
   log_verbosity: INFO
   alarm_inputs: 8
   alarm_outputs: 0
@@ -54,6 +55,7 @@ schema:
   comfort_address: str
   comfort_port: int?
   comfort_login_id: password
+  comfort_cclx_file: str?
   log_verbosity: list(DEBUG|INFO|WARNING|ERROR|CRITICAL)?
   alarm_inputs: int(8,128)?
   alarm_outputs: int(0,128)?

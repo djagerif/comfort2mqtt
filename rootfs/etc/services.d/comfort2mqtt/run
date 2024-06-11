@@ -137,6 +137,10 @@ if [ "${COMFORT_COUNTERS}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --alarm-counters ${COMFORT_COUNTERS}"
 fi
 
+if [ "${COMFORT_CCLX_FILE}" != "null" ]; then
+    COMFORT_ARGS="${COMFORT_ARGS} --alarm-cclx-file ${COMFORT_CCLX_FILE}"
+fi
+
 if [ "${COMFORT_TIME}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --comfort-time ${COMFORT_TIME}"
 fi

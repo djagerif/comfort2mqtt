@@ -58,6 +58,10 @@ configuration:
     description: >-
       Cytech Comfort II User Login ID with at least Read-Only access. Login ID has minimum 4 characters and 6 as maximum.
       For full functionality you need Read/Write access as well as Disarm capabilities.
+  comfort_cclx_file:
+    name: Comfort II Configuration file
+    description: >-
+      Comfort II Configuration file, also referred to s the 'CCLX' file to be used for object enrichment EG. Zone Names etc.  
   log_verbosity:
     name: Global Log Verbosity
     description: >-

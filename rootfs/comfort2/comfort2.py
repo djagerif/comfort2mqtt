@@ -1267,8 +1267,6 @@ class Comfort2(mqtt.Client):
 
     def add_descriptions(self, file):    # Checks optional object description files and populate dictionaries accordingly.
 
-        ### To Do !!! Check for KeyError if zone does not exist in CCLS file. ###
-
         global ZONEMAPFILE
         global COUNTERMAPFILE
         global FLAGMAPFILE
@@ -1560,7 +1558,7 @@ class Comfort2(mqtt.Client):
         global OUTPUTMAPFILE
         global TIMERMAPFILE
         global SENSORMAPFILE
-        global RESPONSEMAPFILE
+        #global RESPONSEMAPFILE
         global SCSRIOMAPFILE
 
 
@@ -1570,7 +1568,7 @@ class Comfort2(mqtt.Client):
         global output_properties
         global timer_properties
         global sensor_properties
-        global response_properties
+        #global response_properties
         global scsrio_properties
 
         global ZoneCache
