@@ -1549,6 +1549,40 @@ class Comfort2(mqtt.Client):
             logger.info ("Comfigurator (CCLX) File Not Found")
 
         return file
+    
+    def sanitize_filename(input_string, valid_extensions=None):     # Thanks ChatGPT :-)
+        """
+        Sanitize the input filename string to ensure it is a valid filename with an extension,
+        and prevent directory tree walking.
+
+        :param input_string: The user input string to sanitize.
+        :param valid_extensions: List of valid extensions (e.g., ['cclx']). None to allow any extension.
+        :return: A sanitized filename or None if invalid.
+        """
+        # Define a regular expression pattern for a valid filename (alphanumeric and specific special characters)
+        valid_filename_pattern = r'^[\w\-. ]+$'  # Alphanumeric characters, underscores, hyphens, dots, and spaces
+    
+        # Split the filename and extension
+        base, ext = os.path.splitext(input_string)
+    
+        # Check if the base name is valid
+        if not re.match(valid_filename_pattern, base):
+            return None
+    
+        # Validate the extension if a list of valid extensions is provided
+        if valid_extensions:
+            ext = ext.lstrip('.').lower()
+            if ext not in valid_extensions:
+                return None
+    
+        # Join the base and extension back
+        sanitized_filename = f"{base}.{ext}" if ext else base
+    
+        # Ensure no directory traversal characters are present
+        if '..' in sanitized_filename or '/' in sanitized_filename or '\\' in sanitized_filename:
+            return None
+    
+        return sanitized_filename
 
     def run(self):
 
@@ -1589,7 +1623,8 @@ class Comfort2(mqtt.Client):
 
         #zonemap = self.add_descriptions(Path("/config/zones.csv"))
         
-        self.add_descriptions(Path("/config/comfigurator.cclx"))
+        #self.add_descriptions(Path("/config/comfigurator.cclx"))
+        self.add_descriptions(Path("/config/" + self.sanitize_filename(COMFORT_CCLX_FILE,'cclx')))
               
         
         # if zonemap.is_file():
