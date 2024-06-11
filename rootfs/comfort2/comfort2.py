@@ -1191,7 +1191,10 @@ class Comfort2(mqtt.Client):
 
             for i in range(1, 65):
                 _time = datetime.now().replace(microsecond=0).isoformat()
-                _name = timer_properties[str(i)] if TIMERMAPFILE else "timer" + str(i)
+                try:
+                    _name = timer_properties[str(i)] if TIMERMAPFILE else "Timer" + "{:02d}".format(i)
+                except KeyError as e:
+                    _name = "Timer" + "{:02d}".format(i)
                 MQTT_MSG=json.dumps({"Time": _time, 
                                      "Name": _name,
                                      "Value": 0
