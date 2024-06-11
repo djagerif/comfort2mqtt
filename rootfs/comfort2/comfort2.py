@@ -66,6 +66,7 @@ RUN = True
 BYPASSEDZONES = []          # Global list of Bypassed Zones
 BROKERCONNECTED = False
 ZONEMAPFILE = False         # Zone Number to Name CSV file present.
+TIMERMAPFILE = False
 ZoneCache = {}              # Zone Cache dictionary.
 BypassCache = {}            # Zone Bypass Cache dictionary.
 CacheState = False          # Initial Cache state. False when not in sync with Bypass Zones (b?). True, when in Sync.
