@@ -1603,7 +1603,7 @@ class Comfort2(mqtt.Client):
 
         #zonemap = self.add_descriptions(Path("/config/zones.csv"))
         
-        self.add_descriptions(Path("/root/config/test.cclx"))
+        self.add_descriptions(Path("/config/comfigurator.cclx"))
               
         
         # if zonemap.is_file():
