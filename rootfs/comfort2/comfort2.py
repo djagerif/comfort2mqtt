@@ -1630,8 +1630,9 @@ class Comfort2(mqtt.Client):
                 #logging.debug ("/config/" + config_filename)
                 self.add_descriptions(Path("/config/" + config_filename))
             else:
-                logging.info("Missing or Illegal Comfigurator CCLX file detected.")
-              
+                logging.info("Illegal Comfigurator CCLX file detected, no enrichment will be loaded.")
+        else:
+            logging.info("Missing Comfigurator CCLX file, no enrichment will be loaded.")
         
         # if zonemap.is_file():
         #     file_stats = os.stat(zonemap)
