@@ -1797,7 +1797,7 @@ class Comfort2(mqtt.Client):
                                     try:
                                         _name = input_properties[str(ipMsgZ.input)]['Name'] if ZONEMAPFILE else "Zone" + str(ipMsgZ.input)
                                     except KeyError as e:
-                                        logging.error ("Zone %s not in CCLX file, ignoring CCLX 'Name' and 'ZoneWord' enrichment", str(e))
+                                        logging.debug ("Zone %s not in CCLX file, ignoring CCLX 'Name' and 'ZoneWord' enrichment", str(e))
                                         _name = "Zone" + str(ipMsgZ.input)
                                     try:
                                         _zoneword = input_properties[str(ipMsgZ.input)]['ZoneWord'] if ZONEMAPFILE else ""
@@ -1828,7 +1828,7 @@ class Comfort2(mqtt.Client):
                                     try:
                                         _name = scsrio_properties[str(ipMsgZ.input)] if SCSRIOMAPFILE else "ScsRioResp" + str(ipMsgZ.input)
                                     except KeyError as e:
-                                        logging.error ("SCS/RIO Input %s not in CCLX file, ignoring CCLX enrichment", str(e))
+                                        logging.debug ("SCS/RIO Input %s not in CCLX file, ignoring CCLX enrichment", str(e))
                                         _name = "ScsRioResp" + str(ipMsgZ.input)
                                     ZoneCache[ipMsgZ.input] = ipMsgZ.state           # Update local ZoneCache
                                     MQTT_MSG=json.dumps({"Time": _time, 
@@ -1865,7 +1865,7 @@ class Comfort2(mqtt.Client):
                                 if not erMsg.zone == 0:
 
                                     if ZONEMAPFILE & self.CheckIndexNumberFormat(str(erMsg.zone)):
-                                        logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.input_properties[str(erMsg.zone)])
+                                        logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), input_properties[str(erMsg.zone)]['Name'])
                                     else: 
                                         logging.warning("Zone %s Not Ready", str(erMsg.zone))
 
@@ -1939,7 +1939,7 @@ class Comfort2(mqtt.Client):
                                     try:
                                         _name = output_properties[str(opMsgY.output)] if OUTPUTMAPFILE else "Output" + "{:03d}".format(opMsgY.output)
                                     except KeyError as e:
-                                        logging.error ("Output %s not in CCLX file, ignoring CCLX enrichment", str(e))
+                                        logging.debug ("Output %s not in CCLX file, ignoring CCLX enrichment", str(e))
                                         _name = "Output" + "{:03d}".format(opMsgY.output)
                                     #ZoneCache[ipMsgZ.input] = ipMsgZ.state           # Update local ZoneCache
                                     MQTT_MSG=json.dumps({"Time": _time, 
@@ -1969,7 +1969,7 @@ class Comfort2(mqtt.Client):
                                     try:
                                         _name = output_properties[str(opMsgY.output)] if OUTPUTMAPFILE else "ScsRioOutput" + str(opMsgY.output)
                                     except KeyError as e:
-                                        logging.error ("SCS/RIO Output %s not in CCLX file, ignoring CCLX enrichment", str(e))
+                                        logging.debug ("SCS/RIO Output %s not in CCLX file, ignoring CCLX enrichment", str(e))
                                         _name = "ScsRioOutput" + str(opMsgY.output)
                                     #_name = self.output_to_name.get(str(opMsgY.output)) if ZONEMAPFILE else "input" + str(opMsgY.output)
                                     MQTT_MSG=json.dumps({"Time": _time, 
@@ -2014,7 +2014,7 @@ class Comfort2(mqtt.Client):
                                     try:
                                         _name = sensor_properties[str(sMsgr.sensor)] if SENSORMAPFILE else "sensor" + str(sMsgr.sensor)
                                     except KeyError as e:
-                                        logging.error ("Sensor %s not in CCLX file, ignoring CCLX enrichment", str(e))
+                                        logging.debug ("Sensor %s not in CCLX file, ignoring CCLX enrichment", str(e))
                                         _name = "sensor" + str(sMsgr.sensor)
                                     MQTT_MSG=json.dumps({"Time": _time, 
                                                          "Name": _name,
@@ -2031,7 +2031,7 @@ class Comfort2(mqtt.Client):
                                     try:
                                         _name = flag_properties[str(fMsgf.flag)] if FLAGMAPFILE else "flag" + str(fMsgf.flag)
                                     except KeyError as e:
-                                        logging.error ("Flag %s not in CCLX file, ignoring CCLX enrichment", str(e))
+                                        logging.debug ("Flag %s not in CCLX file, ignoring CCLX enrichment", str(e))
                                         _name = "flag" + str(fMsgf.flag)
                                     MQTT_MSG=json.dumps({"Time": _time, 
                                                          "Name": _name,
