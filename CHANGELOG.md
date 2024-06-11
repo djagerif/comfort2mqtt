@@ -8,11 +8,12 @@ All notable changes to this project will be documented in this file.
  - Change Counters (State/Value), Inputs(State/Bypass) and Outputs to JSON format. Incl time, desc, bypass + state. Done.
  - Try port busy error or warning on Comfort. Done
  - Fix IP > 128 to exclude BypassCache. Crash with keyError. Done
- - Add description file for outputs. Use combined file, update file to include type. Done. Revisit!!
+ - Add description file for outputs. Use combined file, update file to include type. Done, using CCLX file.
  - Limit BY to <= 128. Done.
- - Add optional descriptions for Flags, Responses, Counters, Sensors, Timers.
+ - Add optional descriptions for Flags, Counters, Sensors, Timers. Done.
  - Check QoS on sent 'SET' commands. Done
- - Add JSON format to ALARM. Incoude Type,Ver,FS,MPU and SN.
+ - Add JSON format to ALARM. Include Type,Ver,FS,MPU and SN.
+ - Add file name to options.
 
 ### Added
  - Improve MQTT server shutdown.

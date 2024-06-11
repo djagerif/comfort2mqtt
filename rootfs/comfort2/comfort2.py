@@ -947,107 +947,107 @@ class Comfort2(mqtt.Client):
         else:
             return False
     
-    def check_descriptions(self, file, max_size = 10240):    # Checks optional object description files and populate dictionaries accordingly.
+#     def check_descriptions(self, file, max_size = 10240):    # Checks optional object description files and populate dictionaries accordingly.
 
-        global ZONEMAPFILE
-        global OUTPUTMAPFILE
-        global FLAGMAPFILE
-        global RESPONSEMAPFILE
-        global COUNTERMAPFILE
-        global SENSORMAPFILE
+#         global ZONEMAPFILE
+#         global OUTPUTMAPFILE
+#         global FLAGMAPFILE
+#         #global RESPONSEMAPFILE
+#         global COUNTERMAPFILE
+#         global SENSORMAPFILE
 
-        global zone_to_name
-        global output_to_name
-        global flag_to_name
-        global response_to_name
-        global counter_to_name
-        global sensor_to_name
+#         global zone_to_name
+#         global output_to_name
+#         global flag_to_name
+#         #global response_to_name
+#         global counter_to_name
+#         global sensor_to_name
                 
-        if file.is_file():
-            file_stats = os.stat(file)
-            if file_stats.st_size > 20480:
-                logger.warning ("Suspicious '%s' Mapping File detected. Size is larger than anticipated %d bytes. (%s Bytes)", file, max_size, file_stats.st_size) 
-                if file == 'zones.csv': ZONEMAPFILE = False
-                if file == 'outputs.csv': OUTPUTMAPFILE = False
-                if file == 'flags.csv': FLAGMAPFILE = False
-                if file == 'responses.csv': RESPONSEMAPFILE = False
-                if file == 'counters.csv': COUNTERMAPFILE = False
-                if file == 'sensors.csv': SENSORMAPFILE = False
-            else:
-                logger.info ("'%s' mapping file detected, %s Bytes", file, file_stats.st_size) 
+#         if file.is_file():
+#             file_stats = os.stat(file)
+#             if file_stats.st_size > 20480:
+#                 logger.warning ("Suspicious '%s' Mapping File detected. Size is larger than anticipated %d bytes. (%s Bytes)", file, max_size, file_stats.st_size) 
+#                 if file == 'zones.csv': ZONEMAPFILE = False
+#                 if file == 'outputs.csv': OUTPUTMAPFILE = False
+#                 if file == 'flags.csv': FLAGMAPFILE = False
+#                 if file == 'responses.csv': RESPONSEMAPFILE = False
+#                 if file == 'counters.csv': COUNTERMAPFILE = False
+#                 if file == 'sensors.csv': SENSORMAPFILE = False
+#             else:
+#                 logger.info ("'%s' mapping file detected, %s Bytes", file, file_stats.st_size) 
                
-                # Initialize an empty dictionary
-                if file == 'zones.csv': self.zone_to_name = {}
-                if file == 'outputs.csv': self.output_to_name = {}
-                if file == 'flags.csv': self.flag_to_name = {}
-                if file == 'responses.csv': self.response_to_name = {}
-                if file == 'counters.csv': self.counter_to_name = {}
-                if file == 'sensors.csv': self.sensor_to_name = {}
+#                 # Initialize an empty dictionary
+#                 if file == 'zones.csv': self.zone_to_name = {}
+#                 if file == 'outputs.csv': self.output_to_name = {}
+#                 if file == 'flags.csv': self.flag_to_name = {}
+#                 if file == 'responses.csv': self.response_to_name = {}
+#                 if file == 'counters.csv': self.counter_to_name = {}
+#                 if file == 'sensors.csv': self.sensor_to_name = {}
 
-                # Open the CSV file
-                with open(file, newline='') as csvfile:
-                    # Create a CSV reader object
-                    reader = csv.DictReader(csvfile)
+#                 # Open the CSV file
+#                 with open(file, newline='') as csvfile:
+#                     # Create a CSV reader object
+#                     reader = csv.DictReader(csvfile)
     
-                    # Iterate over each row in the CSV file
-                    for row in reader:
-                        # Truncate the 'index' numeric value to 4 characters (0-9999) and 'name' to 30 characters. 
+#                     # Iterate over each row in the CSV file
+#                     for row in reader:
+#                         # Truncate the 'index' numeric value to 4 characters (0-9999) and 'name' to 30 characters. 
 
-                        if self.CheckIndexNumberFormat(row['index'][:4]):
-                            index = row['index'][:4]          # Check Zone Number sanity else blank.
-                            print (index)
-                            if file == 'zones.csv': ZONEMAPFILE = True
-                            if file == 'outputs.csv': OUTPUTMAPFILE = True
-                            if file == 'flags.csv': FLAGMAPFILE = True
-                            if file == 'responses.csv': RESPONSEMAPFILE = True
-                            if file == 'counters.csv': COUNTERMAPFILE = True
-                            if file == 'sensors.csv': SENSORMAPFILE = True
-                        else: 
-                            index = ""
-                            logger.error("Invalid Index Number detected in '%s' file, file ignored.", file)
-                            if file == 'zones.csv': ZONEMAPFILE = False
-                            if file == 'outputs.csv': OUTPUTMAPFILE = False
-                            if file == 'flags.csv': FLAGMAPFILE = False
-                            if file == 'responses.csv': RESPONSEMAPFILE = False
-                            if file == 'counters.csv': COUNTERMAPFILE = False
-                            if file == 'sensors.csv': SENSORMAPFILE = False
-                            break
+#                         if self.CheckIndexNumberFormat(row['index'][:4]):
+#                             index = row['index'][:4]          # Check Zone Number sanity else blank.
+#                             print (index)
+#                             if file == 'zones.csv': ZONEMAPFILE = True
+#                             if file == 'outputs.csv': OUTPUTMAPFILE = True
+#                             if file == 'flags.csv': FLAGMAPFILE = True
+#                             if file == 'responses.csv': RESPONSEMAPFILE = True
+#                             if file == 'counters.csv': COUNTERMAPFILE = True
+#                             if file == 'sensors.csv': SENSORMAPFILE = True
+#                         else: 
+#                             index = ""
+#                             logger.error("Invalid Index Number detected in '%s' file, file ignored.", file)
+#                             if file == 'zones.csv': ZONEMAPFILE = False
+#                             if file == 'outputs.csv': OUTPUTMAPFILE = False
+#                             if file == 'flags.csv': FLAGMAPFILE = False
+#                             if file == 'responses.csv': RESPONSEMAPFILE = False
+#                             if file == 'counters.csv': COUNTERMAPFILE = False
+#                             if file == 'sensors.csv': SENSORMAPFILE = False
+#                             break
 
-                        if self.CheckIndexNameFormat(row['name'][:30]): 
-                            name = row['name'][:30]         # Check Zone sanity else blank.
-                            if file == 'zones.csv': ZONEMAPFILE = True
-                            if file == 'outputs.csv': OUTPUTMAPFILE = True
-                            if file == 'flags.csv': FLAGMAPFILE = True
-                            if file == 'responses.csv': RESPONSEMAPFILE = True
-                            if file == 'counters.csv': COUNTERMAPFILE = True
-                            if file == 'sensors.csv': SENSORMAPFILE = True
-                        else: 
-                            name = ""
-                            logger.error("Invalid Index Name detected in '%s' file, file ignored.", file)
-                            if file == 'zones.csv': ZONEMAPFILE = False
-                            if file == 'outputs.csv': OUTPUTMAPFILE = False
-                            if file == 'flags.csv': FLAGMAPFILE = False
-                            if file == 'responses.csv': RESPONSEMAPFILE = False
-                            if file == 'counters.csv': COUNTERMAPFILE = False
-                            if file == 'sensors.csv': SENSORMAPFILE = False
-                            break
+#                         if self.CheckIndexNameFormat(row['name'][:30]): 
+#                             name = row['name'][:30]         # Check Zone sanity else blank.
+#                             if file == 'zones.csv': ZONEMAPFILE = True
+#                             if file == 'outputs.csv': OUTPUTMAPFILE = True
+#                             if file == 'flags.csv': FLAGMAPFILE = True
+#                             if file == 'responses.csv': RESPONSEMAPFILE = True
+#                             if file == 'counters.csv': COUNTERMAPFILE = True
+#                             if file == 'sensors.csv': SENSORMAPFILE = True
+#                         else: 
+#                             name = ""
+#                             logger.error("Invalid Index Name detected in '%s' file, file ignored.", file)
+#                             if file == 'zones.csv': ZONEMAPFILE = False
+#                             if file == 'outputs.csv': OUTPUTMAPFILE = False
+#                             if file == 'flags.csv': FLAGMAPFILE = False
+#                             if file == 'responses.csv': RESPONSEMAPFILE = False
+#                             if file == 'counters.csv': COUNTERMAPFILE = False
+#                             if file == 'sensors.csv': SENSORMAPFILE = False
+#                             break
 
-                        # Add the truncated value to the dictionary
-                        if file == 'zones.csv': self.zone_to_name[index] = name         # Zone/Input Names
-                        if file == 'outputs.csv': self.output_to_name[index] = name     # Output Names
-                        if file == 'flags.csv': self.flag_to_name[index] = name         # Flag Names
-                        if file == 'responses.csv': self.response_to_name[index] = name # Response Names
-                        if file == 'counters.csv': self.counter_to_name[index] = name   # Counter Names
-                        if file == 'sensors.csv': self.sensor_to_name[index] = name     # Sensor Names
+#                         # Add the truncated value to the dictionary
+#                         if file == 'zones.csv': self.zone_to_name[index] = name         # Zone/Input Names
+#                         if file == 'outputs.csv': self.output_to_name[index] = name     # Output Names
+#                         if file == 'flags.csv': self.flag_to_name[index] = name         # Flag Names
+#                         if file == 'responses.csv': self.response_to_name[index] = name # Response Names
+#                         if file == 'counters.csv': self.counter_to_name[index] = name   # Counter Names
+#                         if file == 'sensors.csv': self.sensor_to_name[index] = name     # Sensor Names
                             
-#        else:
-#            logger.debug ("Not a %s file", file)    # Temporary for testing
-#
-#        try:
-#            logger.debug("File: %s, Max Size: %d, File Size: %d", file, max_size, file_stats.st_size)
-#        except:
-#            pass
-        return file
+# #        else:
+# #            logger.debug ("Not a %s file", file)    # Temporary for testing
+# #
+# #        try:
+# #            logger.debug("File: %s, Max Size: %d, File Size: %d", file, max_size, file_stats.st_size)
+# #        except:
+# #            pass
+#         return file
 
     def HexToSigned16Decimal(self,value):        # Returns Signed Decimal value from HEX string EG. FFFF = -1
         #logger.debug("690-HexToSigned16Decimal[value]: %s",value)
@@ -1275,7 +1275,7 @@ class Comfort2(mqtt.Client):
         global OUTPUTMAPFILE
         global TIMERMAPFILE
         global SENSORMAPFILE
-        global RESPONSEMAPFILE
+        #global RESPONSEMAPFILE
         global SCSRIOMAPFILE
 
         global input_properties
@@ -1284,16 +1284,9 @@ class Comfort2(mqtt.Client):
         global output_properties
         global timer_properties
         global sensor_properties
-        global response_properties
+        #global response_properties
         global scsrio_properties
         
-        # Initialize empty dictionaries
-        #self.flag_to_name = {}
-        #self.output_to_name = {}
-        #self.timer_to_name = {}
-        #self.sensor_to_name = {}
-        #self.response_to_name = {}
-
         if file.is_file():
             file_stats = os.stat(file)
             logger.info ("Comfigurator (CCLX) File detected, %s Bytes", file_stats.st_size)
@@ -1306,7 +1299,7 @@ class Comfort2(mqtt.Client):
             output_properties = {}
             timer_properties = {}
             sensor_properties = {}
-            response_properties = {}
+            #response_properties = {}
             scsrio_properties = {}
 
             for zone in root.iter('Zone'):
@@ -1408,7 +1401,6 @@ class Comfort2(mqtt.Client):
 
                 #logging.debug ("Number: %s, Name: %s", number, flag_properties['Name'])
 
-
             for output in root.iter('Output'):
                 #OutputName = output.attrib.get('Name')
                 #logger.debug ("Output Name: '%s'", OutputName)
@@ -1436,8 +1428,6 @@ class Comfort2(mqtt.Client):
                 output_properties[number] = name
 
                 #logging.debug ("Number: %s, Name: %s", number, output_properties['Name'])
-
-
 
             for timer in root.iter('Timer'):
                 #TimerName = timer.attrib.get('Name')
@@ -1467,7 +1457,6 @@ class Comfort2(mqtt.Client):
 
                 #logging.debug ("Number: %s, Name: %s", number, timer_properties['Name'])
 
-
             for sensor in root.iter('SensorResponse'):
                 #SensorName = sensor.attrib.get('Name')
                 #logger.debug ("Sensor Name: '%s'", SensorName) 
@@ -1496,41 +1485,34 @@ class Comfort2(mqtt.Client):
 
                 #logging.debug ("Number: %s, Name: %s", number, sensor_properties['Name'])
 
+            # for response in root.iter('Response'):
+            #     name = ''
+            #     number = ''
+            #     description = ''
+            #     name = response.attrib.get('Name')
+            #     number = response.attrib.get('Number')
+            #     description = response.attrib.get('Description')
 
-            for response in root.iter('Response'):
-                #ResponseName = response.attrib.get('Name')
-                #ResponseDescription = response.attrib.get('Description')
-                name = ''
-                number = ''
-                description = ''
-                name = response.attrib.get('Name')
-                number = response.attrib.get('Number')
-                description = response.attrib.get('Description')
-
-                if self.CheckIndexNumberFormat(number):
-                    RESPONSEMAPFILE = True               
-                else:
-                    number = ''
-                    logger.error("Invalid Response Number detected in '%s'.", file)
-                    RESPONSEMAPFILE = False
-                    break
-                if self.CheckZoneNameFormat(name): 
-                    RESPONSEMAPFILE = True              
-                else:
-                    name = ''
-                    logger.error("Invalid Response Name detected in '%s'.", file)
-                    RESPONSEMAPFILE = False             
-                    break
+            #     if self.CheckIndexNumberFormat(number):
+            #         RESPONSEMAPFILE = True               
+            #     else:
+            #         number = ''
+            #         logger.error("Invalid Response Number detected in '%s'.", file)
+            #         RESPONSEMAPFILE = False
+            #         break
+            #     if self.CheckZoneNameFormat(name): 
+            #         RESPONSEMAPFILE = True              
+            #     else:
+            #         name = ''
+            #         logger.error("Invalid Response Name detected in '%s'.", file)
+            #         RESPONSEMAPFILE = False             
+            #         break
                 
-                # Add the truncated value to the dictionary
-                inner_dict = {}
-                inner_dict['Name'] = name
-                inner_dict['Description'] = description.strip()
-                response_properties[number] = inner_dict
-                
-                #logging.debug ("Number: %s, Name: %s, Description: %s", number, response_properties[number]['Name'], response_properties[number]['Description'])
-  
-                #logger.debug ("Response Name/Description: '%s'/'%s'", ResponseName, ResponseDescription)
+            #     # Add the truncated value to the dictionary
+            #     inner_dict = {}
+            #     inner_dict['Name'] = name
+            #     inner_dict['Description'] = description.strip()
+            #     response_properties[number] = inner_dict
                 
             for scsrio in root.iter('ScsRioResponse'):
                 name = ''
