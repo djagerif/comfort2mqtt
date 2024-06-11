@@ -1707,7 +1707,7 @@ class Comfort2(mqtt.Client):
 #                                    self.publish(ALARMINPUTTOPIC % ipMsg.input, ipMsg.state,qos=2,retain=True)
 #                                    #logger.debug("Input State: %d", ipMsg.state)
 
-                            elif line[1:3] == "IP":
+                            elif line[1:3] == "IP" and CacheState:
                                 ipMsg = ComfortIPInputActivationReport(line[1:])
                                 if ipMsg.state < 2 and CacheState:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
@@ -1759,7 +1759,7 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "s?":
                                 ipMsgSQ = ComfortCTCounterActivationReport(line[1:])
                                 self.publish(ALARMSENSORTOPIC % ipMsgSQ.counter, ipMsgSQ.state, qos=2, retain=False)
-                            elif line[1:3] == "sr":
+                            elif line[1:3] == "sr" and CacheState:
                                 ipMsgSR = ComfortCTCounterActivationReport(line[1:])
                                 _name = sensor_properties[str(ipMsgSR.counter)] if SENSORMAPFILE else "Sensor" + "{:02d}".format(ipMsgSR.counter)
                                 MQTT_MSG=json.dumps({"Time": _time, 
