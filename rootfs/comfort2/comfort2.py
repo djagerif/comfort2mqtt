@@ -1624,12 +1624,13 @@ class Comfort2(mqtt.Client):
         #zonemap = self.add_descriptions(Path("/config/zones.csv"))
         
         #self.add_descriptions(Path("/config/comfigurator.cclx"))
-        config_filename = self.sanitize_filename(COMFORT_CCLX_FILE,'cclx')
-        if config_filename:
-            #logging.debug ("/config/" + config_filename)
-            self.add_descriptions(Path("/config/" + config_filename))
-        else:
-            logging.info("Missing or Illegal Comfigurator CCLX file detected.")
+        if COMFORT_CCLX_FILE != None:
+            config_filename = self.sanitize_filename(COMFORT_CCLX_FILE,'cclx')
+            if config_filename:
+                #logging.debug ("/config/" + config_filename)
+                self.add_descriptions(Path("/config/" + config_filename))
+            else:
+                logging.info("Missing or Illegal Comfigurator CCLX file detected.")
               
         
         # if zonemap.is_file():
