@@ -23,6 +23,7 @@
 ###
 ### The MQTT traffic can be encrypted with `TLS` or sent in clear-text. The Encryption option is currently not available. The default is `False`
 #
+import xml.etree.ElementTree as ET
 import ssl
 from OpenSSL import crypto
 import csv
@@ -925,20 +926,122 @@ class Comfort2(mqtt.Client):
         pattern = r'^(?![ ]{1,}).{1}[a-zA-Z0-9_ -/]+$'
         return bool(re.match(pattern, value))
     
-    def CheckZoneTypeFormat(self,value):      # Checks CSV file Zone Type to only contain valid characters. Return False if it fails else True
-        pattern = r'[io]'
-        return bool(re.fullmatch(pattern, value))
+    #def CheckZoneTypeFormat(self,value):      # Checks CSV file Zone Type to only contain valid characters. Return False if it fails else True
+    #    pattern = r'[io]'
+    #    return bool(re.fullmatch(pattern, value))
     
-    def CheckZoneNumberFormat(self,value):      # Checks CSV file Zone Number to only contain valid characters. Return False if it fails else True
+    def CheckIndexNumberFormat(self,value,max_index = 1024):      # Checks CSV file Zone Number to only contain valid characters. Return False if it fails else True
         pattern = r'^[0-9]+$'
         if bool(re.match(pattern, value)):
-            if value.isnumeric() & (int(value) <= 248):
+            if value.isnumeric() & (int(value) <= max_index):
                 return True
             else:
                 return False
         else:
             return False
     
+    def check_descriptions(self, file, max_size = 10240):    # Checks optional object description files and populate dictionaries accordingly.
+
+        global ZONEMAPFILE
+        global OUTPUTMAPFILE
+        global FLAGMAPFILE
+        global RESPONSEMAPFILE
+        global COUNTERMAPFILE
+        global SENSORMAPFILE
+
+        global zone_to_name
+        global output_to_name
+        global flag_to_name
+        global response_to_name
+        global counter_to_name
+        global sensor_to_name
+                
+        if file.is_file():
+            file_stats = os.stat(file)
+            if file_stats.st_size > 20480:
+                logger.warning ("Suspicious '%s' Mapping File detected. Size is larger than anticipated %d bytes. (%s Bytes)", file, max_size, file_stats.st_size) 
+                if file == 'zones.csv': ZONEMAPFILE = False
+                if file == 'outputs.csv': OUTPUTMAPFILE = False
+                if file == 'flags.csv': FLAGMAPFILE = False
+                if file == 'responses.csv': RESPONSEMAPFILE = False
+                if file == 'counters.csv': COUNTERMAPFILE = False
+                if file == 'sensors.csv': SENSORMAPFILE = False
+            else:
+                logger.info ("'%s' mapping file detected, %s Bytes", file, file_stats.st_size) 
+               
+                # Initialize an empty dictionary
+                if file == 'zones.csv': self.zone_to_name = {}
+                if file == 'outputs.csv': self.output_to_name = {}
+                if file == 'flags.csv': self.flag_to_name = {}
+                if file == 'responses.csv': self.response_to_name = {}
+                if file == 'counters.csv': self.counter_to_name = {}
+                if file == 'sensors.csv': self.sensor_to_name = {}
+
+                # Open the CSV file
+                with open(file, newline='') as csvfile:
+                    # Create a CSV reader object
+                    reader = csv.DictReader(csvfile)
+    
+                    # Iterate over each row in the CSV file
+                    for row in reader:
+                        # Truncate the 'index' numeric value to 4 characters (0-9999) and 'name' to 30 characters. 
+
+                        if self.CheckIndexNumberFormat(row['index'][:4]):
+                            index = row['index'][:4]          # Check Zone Number sanity else blank.
+                            print (index)
+                            if file == 'zones.csv': ZONEMAPFILE = True
+                            if file == 'outputs.csv': OUTPUTMAPFILE = True
+                            if file == 'flags.csv': FLAGMAPFILE = True
+                            if file == 'responses.csv': RESPONSEMAPFILE = True
+                            if file == 'counters.csv': COUNTERMAPFILE = True
+                            if file == 'sensors.csv': SENSORMAPFILE = True
+                        else: 
+                            index = ""
+                            logger.error("Invalid Index Number detected in '%s' file, file ignored.", file)
+                            if file == 'zones.csv': ZONEMAPFILE = False
+                            if file == 'outputs.csv': OUTPUTMAPFILE = False
+                            if file == 'flags.csv': FLAGMAPFILE = False
+                            if file == 'responses.csv': RESPONSEMAPFILE = False
+                            if file == 'counters.csv': COUNTERMAPFILE = False
+                            if file == 'sensors.csv': SENSORMAPFILE = False
+                            break
+
+                        if self.CheckIndexNameFormat(row['name'][:30]): 
+                            name = row['name'][:30]         # Check Zone sanity else blank.
+                            if file == 'zones.csv': ZONEMAPFILE = True
+                            if file == 'outputs.csv': OUTPUTMAPFILE = True
+                            if file == 'flags.csv': FLAGMAPFILE = True
+                            if file == 'responses.csv': RESPONSEMAPFILE = True
+                            if file == 'counters.csv': COUNTERMAPFILE = True
+                            if file == 'sensors.csv': SENSORMAPFILE = True
+                        else: 
+                            name = ""
+                            logger.error("Invalid Index Name detected in '%s' file, file ignored.", file)
+                            if file == 'zones.csv': ZONEMAPFILE = False
+                            if file == 'outputs.csv': OUTPUTMAPFILE = False
+                            if file == 'flags.csv': FLAGMAPFILE = False
+                            if file == 'responses.csv': RESPONSEMAPFILE = False
+                            if file == 'counters.csv': COUNTERMAPFILE = False
+                            if file == 'sensors.csv': SENSORMAPFILE = False
+                            break
+
+                        # Add the truncated value to the dictionary
+                        if file == 'zones.csv': self.zone_to_name[index] = name         # Zone/Input Names
+                        if file == 'outputs.csv': self.output_to_name[index] = name     # Output Names
+                        if file == 'flags.csv': self.flag_to_name[index] = name         # Flag Names
+                        if file == 'responses.csv': self.response_to_name[index] = name # Response Names
+                        if file == 'counters.csv': self.counter_to_name[index] = name   # Counter Names
+                        if file == 'sensors.csv': self.sensor_to_name[index] = name     # Sensor Names
+                            
+#        else:
+#            logger.debug ("Not a %s file", file)    # Temporary for testing
+#
+#        try:
+#            logger.debug("File: %s, Max Size: %d, File Size: %d", file, max_size, file_stats.st_size)
+#        except:
+#            pass
+        return file
+
     def HexToSigned16Decimal(self,value):        # Returns Signed Decimal value from HEX string EG. FFFF = -1
         #logger.debug("690-HexToSigned16Decimal[value]: %s",value)
         return -(int(value,16) & 0x8000) | (int(value,16) & 0x7fff)
@@ -1027,6 +1130,10 @@ class Comfort2(mqtt.Client):
         SAVEDTIME = datetime.now()
 
     def readcurrentstate(self):
+        
+        global TIMERMAPFILE
+        global timer_properties
+        
         global SAVEDTIME
         global BypassCache
         if self.connected == True:
@@ -1081,8 +1188,16 @@ class Comfort2(mqtt.Client):
             time.sleep(0.1)
 
             #Clear all Timer Reports
+
             for i in range(1, 65):
-                self.publish(ALARMTIMERREPORTTOPIC % i, 0,qos=2,retain=False)
+                _time = datetime.now().replace(microsecond=0).isoformat()
+                _name = timer_properties[str(i)] if TIMERMAPFILE else "timer" + str(i)
+                MQTT_MSG=json.dumps({"Time": _time, 
+                                     "Name": _name,
+                                     "Value": 0
+                                    })
+                self.publish(ALARMTIMERREPORTTOPIC % i, MQTT_MSG,qos=2,retain=False)
+                #self.publish(ALARMTIMERREPORTTOPIC % i, 0,qos=2,retain=False)
                 time.sleep(0.01)
 
           #get all counter values
@@ -1142,6 +1257,301 @@ class Comfort2(mqtt.Client):
 
     def add_descriptions(self, file):    # Checks optional object description files and populate dictionaries accordingly.
 
+        ### To Do !!! Check for KeyError if zone does not exist in CCLS file. ###
+
+        global ZONEMAPFILE
+        global COUNTERMAPFILE
+        global FLAGMAPFILE
+        global OUTPUTMAPFILE
+        global TIMERMAPFILE
+        global SENSORMAPFILE
+        global RESPONSEMAPFILE
+        global SCSRIOMAPFILE
+
+        global input_properties
+        global counter_properties
+        global flag_properties
+        global output_properties
+        global timer_properties
+        global sensor_properties
+        global response_properties
+        global scsrio_properties
+        
+        # Initialize empty dictionaries
+        #self.flag_to_name = {}
+        #self.output_to_name = {}
+        #self.timer_to_name = {}
+        #self.sensor_to_name = {}
+        #self.response_to_name = {}
+
+        if file.is_file():
+            file_stats = os.stat(file)
+            logger.info ("Comfigurator (CCLX) File detected, %s Bytes", file_stats.st_size)
+            tree = ET.parse(file)
+            root = tree.getroot()
+
+            input_properties = {}
+            counter_properties = {}
+            flag_properties = {}
+            output_properties = {}
+            timer_properties = {}
+            sensor_properties = {}
+            response_properties = {}
+            scsrio_properties = {}
+
+            for zone in root.iter('Zone'):
+                name = ''
+                number = ''
+                virtualinput = ''
+                ZoneWord1 = ''
+                ZoneWord2 = ''
+                ZoneWord3 = ''
+                ZoneWord4 = ''
+                ZoneWord = ''
+                name = zone.attrib.get('Name')
+                number = zone.attrib.get('Number')
+                virtualinput = zone.attrib.get('VirtualInput')
+                ZoneWord1 = zone.attrib.get('ZoneWord1')
+                if ZoneWord1 != None: ZoneWord = ZoneWord1
+                ZoneWord2 = zone.attrib.get('ZoneWord2')
+                if ZoneWord2 != None: ZoneWord = ZoneWord + " " +ZoneWord2
+                ZoneWord3 = zone.attrib.get('ZoneWord3')
+                if ZoneWord3 != None: ZoneWord = ZoneWord + " " +ZoneWord3
+                ZoneWord4 = zone.attrib.get('ZoneWord4')
+                if ZoneWord4 != None: ZoneWord = ZoneWord + " " +ZoneWord4
+
+                if self.CheckIndexNumberFormat(number):
+                    ZONEMAPFILE = True               
+                else:
+                    number = ''
+                    logger.error("Invalid Zone Number detected in '%s'.", file)
+                    ZONEMAPFILE = False
+                    break
+                if self.CheckZoneNameFormat(name): 
+                    ZONEMAPFILE = True              
+                else:
+                    name = ''
+                    logger.error("Invalid Zone Name detected in '%s'.", file)
+                    ZONEMAPFILE = False             
+                    break
+
+                # Add the truncated value to the dictionary
+                inner_dict = {}
+                inner_dict['Name'] = name
+                inner_dict['ZoneWord'] = ZoneWord.strip()
+                inner_dict['VirtualInput'] = virtualinput
+                input_properties[number] = inner_dict
+                
+                #logging.debug ("Number: %s, Name: %s, ZoneWord: %s, VirtualInput: %s", number, input_properties[number]['Name'], input_properties[number]['ZoneWord'], input_properties[number]['VirtualInput'])
+                
+            for counter in root.iter('Counter'):
+                name = ''
+                number = ''
+                name = counter.attrib.get('Name')
+                number = counter.attrib.get('Number')
+
+                if self.CheckIndexNumberFormat(number):
+                    COUNTERMAPFILE = True               
+                else:
+                    number = ''
+                    logger.error("Invalid Counter Number detected in '%s'.", file)
+                    COUNTERMAPFILE = False
+                    break
+                if self.CheckZoneNameFormat(name): 
+                    COUNTERMAPFILE = True              
+                else:
+                    name = ''
+                    logger.error("Invalid Counter Name detected in '%s'.", file)
+                    COUNTERMAPFILE = False             
+                    break
+
+                # Add the truncated value to the dictionary
+                counter_properties[number] = name
+
+                #logging.debug ("Number: %s, Name: %s", number, counter_properties['Name'])
+
+            for flag in root.iter('Flag'):
+                #FlagName = flag.attrib.get('Name')
+                #logger.debug ("Flag Name: '%s'", FlagName)
+                name = ''
+                number = ''
+                name = flag.attrib.get('Name')
+                number = flag.attrib.get('Number')
+
+                if self.CheckIndexNumberFormat(number):
+                    FLAGMAPFILE = True               
+                else:
+                    number = ''
+                    logger.error("Invalid Flag Number detected in '%s'.", file)
+                    FLAGMAPFILE = False
+                    break
+                if self.CheckZoneNameFormat(name): 
+                    FLAGMAPFILE = True              
+                else:
+                    name = ''
+                    logger.error("Invalid Flag Name detected in '%s'.", file)
+                    FLAGMAPFILE = False             
+                    break
+
+                # Add the truncated value to the dictionary
+                flag_properties[number] = name
+
+                #logging.debug ("Number: %s, Name: %s", number, flag_properties['Name'])
+
+
+            for output in root.iter('Output'):
+                #OutputName = output.attrib.get('Name')
+                #logger.debug ("Output Name: '%s'", OutputName)
+                name = ''
+                number = ''
+                name = output.attrib.get('Name')
+                number = output.attrib.get('Number')
+
+                if self.CheckIndexNumberFormat(number):
+                    OUTPUTMAPFILE = True               
+                else:
+                    number = ''
+                    logger.error("Invalid Output Number detected in '%s'.", file)
+                    OUTPUTMAPFILE = False
+                    break
+                if self.CheckZoneNameFormat(name): 
+                    OUTPUTMAPFILE = True              
+                else:
+                    name = ''
+                    logger.error("Invalid Output Name detected in '%s'.", file)
+                    OUTPUTMAPFILE = False             
+                    break
+
+                # Add the truncated value to the dictionary
+                output_properties[number] = name
+
+                #logging.debug ("Number: %s, Name: %s", number, output_properties['Name'])
+
+
+
+            for timer in root.iter('Timer'):
+                #TimerName = timer.attrib.get('Name')
+                #logger.debug ("Timer Name: '%s'", TimerName)
+                name = ''
+                number = ''
+                name = timer.attrib.get('Name')
+                number = timer.attrib.get('Number')
+
+                if self.CheckIndexNumberFormat(number):
+                    TIMERMAPFILE = True               
+                else:
+                    number = ''
+                    logger.error("Invalid Timer Number detected in '%s'.", file)
+                    TIMERMAPFILE = False
+                    break
+                if self.CheckZoneNameFormat(name): 
+                    TIMERMAPFILE = True              
+                else:
+                    name = ''
+                    logger.error("Invalid Timer Name detected in '%s'.", file)
+                    TIMERMAPFILE = False             
+                    break
+
+                # Add the truncated value to the dictionary
+                timer_properties[number] = name
+
+                #logging.debug ("Number: %s, Name: %s", number, timer_properties['Name'])
+
+
+            for sensor in root.iter('SensorResponse'):
+                #SensorName = sensor.attrib.get('Name')
+                #logger.debug ("Sensor Name: '%s'", SensorName) 
+                name = ''
+                number = ''
+                name = sensor.attrib.get('Name')
+                number = sensor.attrib.get('Number')
+
+                if self.CheckIndexNumberFormat(number):
+                    SENSORMAPFILE = True               
+                else:
+                    number = ''
+                    logger.error("Invalid Sensor Number detected in '%s'.", file)
+                    SENSORMAPFILE = False
+                    break
+                if self.CheckZoneNameFormat(name): 
+                    SENSORMAPFILE = True              
+                else:
+                    name = ''
+                    logger.error("Invalid Sensor Name detected in '%s'.", file)
+                    SENSORMAPFILE = False             
+                    break
+
+                # Add the truncated value to the dictionary
+                sensor_properties[number] = name
+
+                #logging.debug ("Number: %s, Name: %s", number, sensor_properties['Name'])
+
+
+            for response in root.iter('Response'):
+                #ResponseName = response.attrib.get('Name')
+                #ResponseDescription = response.attrib.get('Description')
+                name = ''
+                number = ''
+                description = ''
+                name = response.attrib.get('Name')
+                number = response.attrib.get('Number')
+                description = response.attrib.get('Description')
+
+                if self.CheckIndexNumberFormat(number):
+                    RESPONSEMAPFILE = True               
+                else:
+                    number = ''
+                    logger.error("Invalid Response Number detected in '%s'.", file)
+                    RESPONSEMAPFILE = False
+                    break
+                if self.CheckZoneNameFormat(name): 
+                    RESPONSEMAPFILE = True              
+                else:
+                    name = ''
+                    logger.error("Invalid Response Name detected in '%s'.", file)
+                    RESPONSEMAPFILE = False             
+                    break
+                
+                # Add the truncated value to the dictionary
+                inner_dict = {}
+                inner_dict['Name'] = name
+                inner_dict['Description'] = description.strip()
+                response_properties[number] = inner_dict
+                
+                #logging.debug ("Number: %s, Name: %s, Description: %s", number, response_properties[number]['Name'], response_properties[number]['Description'])
+  
+                #logger.debug ("Response Name/Description: '%s'/'%s'", ResponseName, ResponseDescription)
+                
+            for scsrio in root.iter('ScsRioResponse'):
+                name = ''
+                number = ''
+                name = scsrio.attrib.get('Name')
+                number = scsrio.attrib.get('Number')
+
+                if self.CheckIndexNumberFormat(number):
+                    SCSRIOMAPFILE = True               
+                else:
+                    number = ''
+                    logger.error("Invalid SCS/RIO Number detected in '%s'.", file)
+                    SCSRIOMAPFILE = False
+                    break
+                if self.CheckZoneNameFormat(name): 
+                    SCSRIOMAPFILE = True              
+                else:
+                    name = ''
+                    logger.error("Invalid SCS/RIO Name detected in '%s'.", file)
+                    SCSRIOMAPFILE = False             
+                    break
+
+                # Add the truncated value to the dictionary
+                scsrio_properties[number] = name
+
+                #counter_properties[number] = name
+                #logging.debug ("Number: %s, Name: %s", number, counter_properties[number])
+
+        else:
+            logger.info ("Comfigurator (CCLX) File Not Found")
+
         return file
 
     def run(self):
@@ -1151,67 +1561,91 @@ class Comfort2(mqtt.Client):
         global SAVEDTIME
         global TIMEOUT
         global BROKERCONNECTED
+        
         global ZONEMAPFILE
+        global COUNTERMAPFILE
+        global FLAGMAPFILE
+        global OUTPUTMAPFILE
+        global TIMERMAPFILE
+        global SENSORMAPFILE
+        global RESPONSEMAPFILE
+        global SCSRIOMAPFILE
+
+        global input_properties
+        global counter_properties
+        global flag_properties
+        global output_properties
+        global timer_properties
+        global sensor_properties
+        global response_properties
+        global scsrio_properties
+
         global ZoneCache
         global BypassCache
         global CacheState
 
+        #global zone_to_name
+        #global output_to_name
+
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         signal.signal(signal.SIGQUIT, self.exit_gracefully)
 
-        zonemap = self.add_descriptions(Path("/config/zones.csv"))
+        #zonemap = self.add_descriptions(Path("/config/zones.csv"))
         
-        if zonemap.is_file():
-            file_stats = os.stat(zonemap)
-            if file_stats.st_size > 20480:
-                logger.warning ("Suspicious Zone Mapping File detected. Size is larger than anticipated 20KB. (%s Bytes)", file_stats.st_size) 
-                ZONEMAPFILE = False
-            else:
-                logger.info ("Zone Mapping File detected, %s Bytes", file_stats.st_size) 
+        self.add_descriptions(Path("/root/config/test.cclx"))
+              
+        
+        # if zonemap.is_file():
+        #     file_stats = os.stat(zonemap)
+        #     if file_stats.st_size > 20480:
+        #         logger.warning ("Suspicious Zone Mapping File detected. Size is larger than anticipated 20KB. (%s Bytes)", file_stats.st_size) 
+        #         ZONEMAPFILE = False
+        #     else:
+        #         logger.info ("Zone Mapping File detected, %s Bytes", file_stats.st_size) 
                
-                # Initialize an empty dictionary
-                self.zone_to_name = {}
-                self.output_to_name = {}
+        #         # Initialize an empty dictionary
+        #         self.zone_to_name = {}
+        #         self.output_to_name = {}
 
-                # Open the CSV file
-                with open(zonemap, newline='') as csvfile:
-                    # Create a CSV reader object
-                    reader = csv.DictReader(csvfile)
+        #         # Open the CSV file
+        #         with open(zonemap, newline='') as csvfile:
+        #             # Create a CSV reader object
+        #             reader = csv.DictReader(csvfile)
     
-                    # Iterate over each row in the CSV file
-                    for row in reader:
-                        # Truncate the 'zone' numeric value to 3 characters (0-999) and 'name' to 30 characters. 
+        #             # Iterate over each row in the CSV file
+        #             for row in reader:
+        #                 # Truncate the 'zone' numeric value to 3 characters (0-999) and 'name' to 30 characters. 
 
-                        if self.CheckZoneNumberFormat(row['zone'][:3]):
-                            zone = row['zone'][:3]          # Check Zone Number sanity else blank.
-                            if self.CheckZoneTypeFormat(row['type']):
-                                _type = row['type']              # Check Zone Number sanity else blank.
-                                ZONEMAPFILE = True               # Type is either 'i' or 'o'
-                            else:
-                                zone = ""
-                                logger.error("Invalid Zone Number/Type detected in 'zones.csv' file, file ignored.")
-                                ZONEMAPFILE = False
-                                break    
-                        else: 
-                            zone = ""
-                            logger.error("Invalid Zone Number detected in 'zones.csv' file, file ignored.")
-                            ZONEMAPFILE = False
-                            break
+        #                 if self.CheckZoneNumberFormat(row['zone'][:4]):     # Was 3
+        #                     zone = row['zone'][:4]          # Check Zone Number sanity else blank. Was 3
+        #                     if self.CheckZoneTypeFormat(row['type']):
+        #                         _type = row['type']              # Check Zone Number sanity else blank.
+        #                         ZONEMAPFILE = True               # Type is either 'i' or 'o'
+        #                     else:
+        #                         zone = ""
+        #                         logger.error("Invalid Zone Number/Type detected in 'zones.csv' file, file ignored.")
+        #                         ZONEMAPFILE = False
+        #                         break    
+        #                 else: 
+        #                     zone = ""
+        #                     logger.error("Invalid Zone Number detected in 'zones.csv' file, file ignored.")
+        #                     ZONEMAPFILE = False
+        #                     break
 
-                        if self.CheckZoneNameFormat(row['name'][:30]): 
-                            name = row['name'][:30]         # Check Zone sanity else blank.
-                            ZONEMAPFILE = True              # File available and data read into dictionary 'data'
-                        else: 
-                            name = ""
-                            logger.error("Invalid Zone Name detected in 'zones.csv' file, file ignored.")
-                            ZONEMAPFILE = False             # File available and data read into dictionary 'data'
-                            break
+        #                 if self.CheckZoneNameFormat(row['name'][:30]): 
+        #                     name = row['name'][:30]         # Check Zone sanity else blank.
+        #                     ZONEMAPFILE = True              # File available and data read into dictionary 'data'
+        #                 else: 
+        #                     name = ""
+        #                     logger.error("Invalid Zone Name detected in 'zones.csv' file, file ignored.")
+        #                     ZONEMAPFILE = False             # File available and data read into dictionary 'data'
+        #                     break
 
-                        # Add the truncated value to the dictionary
-                        if _type == 'i':
-                            self.zone_to_name[zone] = name      # Zone/Input Names
-                        else:
-                            self.output_to_name[zone] = name    # Output Names
+        #                 # Add the truncated value to the dictionary
+        #                 if _type == 'i':
+        #                     self.zone_to_name[zone] = name      # Zone/Input Names
+        #                 else:
+        #                     self.output_to_name[zone] = name    # Output Names
 
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         #logging.debug("MQTT Broker Connected: %s", str(self.connected))
@@ -1278,10 +1712,28 @@ class Comfort2(mqtt.Client):
                                 if ipMsg.state < 2 and CacheState:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
                                     #_name = self.zone_to_name.get(str(ipMsg.input))
-                                    _name = self.zone_to_name.get(str(ipMsg.input)) if ZONEMAPFILE else "input" + str(ipMsg.input)
+                                    
+                                    if ipMsg.input <= 128:
+                                        #_name = input_properties[str(ipMsg.input)]['Name'] if ZONEMAPFILE else "Zone" + str(ipMsg.input)
+                                        #_zoneword = input_properties[str(ipMsg.input)]['ZoneWord'] if ZONEMAPFILE else None
+                                        try:
+                                            _name = input_properties[str(ipMsg.input)]['Name'] if ZONEMAPFILE else "Zone" + "{:02d}".format(ipMsg.input)
+                                        except KeyError as e:
+                                            _name = "Zone" + str(ipMsg.input)
+                                        try:
+                                            _zoneword = input_properties[str(ipMsg.input)]['ZoneWord'] if ZONEMAPFILE else ""
+                                        except KeyError as e:
+                                            _zoneword = ""
+                                    else:
+                                        try:
+                                            _name = scsrio_properties[str(ipMsg.input)] if SCSRIOMAPFILE else "ScsRioResp" + str(ipMsg.input)
+                                        except KeyError as e:
+                                            _name = "ScsRioResp" + str(ipMsg.input)
+                                        _zoneword = None
                                     ZoneCache[ipMsg.input] = ipMsg.state           # Update local ZoneCache
                                     MQTT_MSG=json.dumps({"Time": _time, 
                                                          "Name": _name, 
+                                                         "ZoneWord": _zoneword if ipMsg.input <= 128 else None,
                                                          "State": ipMsg.state,
                                                          "Bypass": BypassCache[ipMsg.input] if ipMsg.input <= 128 else None
                                                         })
@@ -1291,8 +1743,10 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "CT":     # and CacheState:
                                 ipMsgCT = ComfortCTCounterActivationReport(line[1:])
                                 _time = datetime.now().replace(microsecond=0).isoformat()
+                                _name = counter_properties[str(ipMsgCT.counter)] if COUNTERMAPFILE else "counter" + str(ipMsgCT.counter)
                                 MQTT_MSG=json.dumps({"Time": _time, 
-                                                     "Value": ipMsgCT.value, 
+                                                     "Name": _name, 
+                                                     "Value": ipMsgCT.value,
                                                      "State": ipMsgCT.state
                                                     })
                                 self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, MQTT_MSG,qos=2,retain=True)
@@ -1307,18 +1761,42 @@ class Comfort2(mqtt.Client):
                                 self.publish(ALARMSENSORTOPIC % ipMsgSQ.counter, ipMsgSQ.state, qos=2, retain=False)
                             elif line[1:3] == "sr":
                                 ipMsgSR = ComfortCTCounterActivationReport(line[1:])
-                                self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, ipMsgSR.state, qos=2, retain=False)
+                                _name = sensor_properties[str(ipMsgSR.counter)] if SENSORMAPFILE else "Sensor" + "{:02d}".format(ipMsgSR.counter)
+                                MQTT_MSG=json.dumps({"Time": _time, 
+                                                     "Name": _name,
+                                                     "Value": ipMsgSR.value
+                                                    })
+                                self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=True)
+                                #self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, ipMsgSR.state, qos=2, retain=False)
                             elif line[1:3] == "TR":
                                 ipMsgTR = ComfortCTCounterActivationReport(line[1:])
-                                self.publish(ALARMTIMERREPORTTOPIC % ipMsgTR.counter, ipMsgTR.state,qos=2,retain=False)
+                                _time = datetime.now().replace(microsecond=0).isoformat()
+                                _name = timer_properties[str(ipMsgTR.counter)] if TIMERMAPFILE else "Timer" + "{:02d}".format(ipMsgTR.counter)
+                                MQTT_MSG=json.dumps({"Time": _time, 
+                                                     "Name": _name,
+                                                     "Value": ipMsgTR.value
+                                                    })
+                                self.publish(ALARMTIMERREPORTTOPIC % ipMsgTR.counter, MQTT_MSG,qos=2,retain=True)
+                                #self.publish(ALARMTIMERREPORTTOPIC % ipMsgTR.counter, ipMsgTR.state,qos=2,retain=False)
                             elif line[1:3] == "Z?":                             # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
-                                    _name = self.zone_to_name.get(str(ipMsgZ.input)) if ZONEMAPFILE else "input" + str(ipMsgZ.input)
+                                    #_name = self.zone_to_name.get(str(ipMsgZ.input)) if ZONEMAPFILE else "input" + str(ipMsgZ.input)
+                                    try:
+                                        _name = input_properties[str(ipMsgZ.input)]['Name'] if ZONEMAPFILE else "Zone" + str(ipMsgZ.input)
+                                    except KeyError as e:
+                                        logging.error ("Zone %s not in CCLX file, ignoring CCLX 'Name' and 'ZoneWord' enrichment", str(e))
+                                        _name = "Zone" + str(ipMsgZ.input)
+                                    try:
+                                        _zoneword = input_properties[str(ipMsgZ.input)]['ZoneWord'] if ZONEMAPFILE else ""
+                                    except KeyError as e:
+                                        _zoneword = ""
+
                                     ZoneCache[ipMsgZ.input] = ipMsgZ.state           # Update local ZoneCache
                                     MQTT_MSG=json.dumps({"Time": _time, 
                                                          "Name": _name, 
+                                                         "ZoneWord": _zoneword,
                                                          "State": ipMsgZ.state,
                                                          "Bypass": BypassCache[ipMsgZ.input]
                                                         })
@@ -1335,12 +1813,18 @@ class Comfort2(mqtt.Client):
                                 zMsg = Comfort_Z_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
-                                    _name = self.zone_to_name.get(str(ipMsgZ.input)) if ZONEMAPFILE else "input" + str(ipMsgZ.input)
+                                    #_name = self.zone_to_name.get(str(ipMsgZ.input)) if ZONEMAPFILE else "input" + str(ipMsgZ.input)
+                                    try:
+                                        _name = scsrio_properties[str(ipMsgZ.input)] if SCSRIOMAPFILE else "ScsRioResp" + str(ipMsgZ.input)
+                                    except KeyError as e:
+                                        logging.error ("SCS/RIO Input %s not in CCLX file, ignoring CCLX enrichment", str(e))
+                                        _name = "ScsRioResp" + str(ipMsgZ.input)
                                     ZoneCache[ipMsgZ.input] = ipMsgZ.state           # Update local ZoneCache
                                     MQTT_MSG=json.dumps({"Time": _time, 
-                                                         "Name": _name, 
+                                                         "Name": _name,
+                                                         "ZoneWord": None,
                                                          "State": ipMsgZ.state,
-                                                         "Bypass": BypassCache[ipMsgZ.input] if ipMsgZ.input <= 128 else None
+                                                         "Bypass": None
                                                         })
                                     self.publish(ALARMINPUTTOPIC % ipMsgZ.input, MQTT_MSG,qos=2,retain=False)
                                     time.sleep(0.01)    # 10mS delay between commands
@@ -1419,8 +1903,16 @@ class Comfort2(mqtt.Client):
 
                                 if ipMsg.state < 2:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
-                                    _name = self.output_to_name.get(str(ipMsg.output)) if ZONEMAPFILE else "output" + str(ipMsg.output)
-                                    #ZoneCache[ipMsg.input] = ipMsg.state           # Update local ZoneCache
+                                    if ipMsg.output <= 128:
+                                        try:
+                                            _name = output_properties[str(ipMsg.output)] if OUTPUTMAPFILE else "Output" + "{:03d}".format(ipMsg.output)
+                                        except KeyError as e:
+                                            _name = "Output" + "{:03d}".format(ipMsg.output)
+                                    else:
+                                        try:
+                                            _name = output_properties[str(ipMsg.output)] if OUTPUTMAPFILE else "ScsRioOutput" + str(ipMsg.output)
+                                        except KeyError as e:
+                                            _name = "ScsRioOutput" + str(ipMsg.output)
                                     MQTT_MSG=json.dumps({"Time": _time, 
                                                          "Name": _name, 
                                                          "State": ipMsg.state
@@ -1433,17 +1925,26 @@ class Comfort2(mqtt.Client):
                                 yMsg = ComfortY_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
-                                    _name = self.output_to_name.get(str(opMsgY.output)) if ZONEMAPFILE else "input" + str(opMsgY.output)
-                                    #ZoneCache[opMsgY.output] = opMsgY.state           # Update local ZoneCache
+                                    try:
+                                        _name = output_properties[str(opMsgY.output)] if OUTPUTMAPFILE else "Output" + "{:03d}".format(opMsgY.output)
+                                    except KeyError as e:
+                                        logging.error ("Output %s not in CCLX file, ignoring CCLX enrichment", str(e))
+                                        _name = "Output" + "{:03d}".format(opMsgY.output)
+                                    #ZoneCache[ipMsgZ.input] = ipMsgZ.state           # Update local ZoneCache
                                     MQTT_MSG=json.dumps({"Time": _time, 
-                                                         "Name": _name, 
+                                                         "Name": _name,
                                                          "State": opMsgY.state
                                                         })
+
+                                    #_time = datetime.now().replace(microsecond=0).isoformat()
+                                    #_name = self.output_to_name.get(str(opMsgY.output)) if OUTPUTMAPFILE else "output" + str(opMsgY.output)
+                                    #ZoneCache[opMsgY.output] = opMsgY.state           # Update local ZoneCache
+                                    #MQTT_MSG=json.dumps({"Time": _time, 
+                                    #                     "Name": _name, 
+                                    #                     "State": opMsgY.state
+                                    #                    })
                                     self.publish(ALARMOUTPUTTOPIC % opMsgY.output, MQTT_MSG,qos=2,retain=False)
                                     time.sleep(0.01)    # 10mS delay between commands
-
-
-
 
                                     #self.publish(ALARMOUTPUTTOPIC % opMsgY.output, opMsgY.state,qos=2,retain=True)
                                     #time.sleep(0.01)    # 10mS delay between commands
@@ -1454,8 +1955,12 @@ class Comfort2(mqtt.Client):
                                 yMsg = Comfort_Y_ReportAllOutputs(line[1:])
                                 for opMsgY in yMsg.outputs:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
-                                    _name = self.output_to_name.get(str(opMsgY.output)) if ZONEMAPFILE else "input" + str(opMsgY.output)
-                                    #ZoneCache[opMsgY.output] = opMsgY.state           # Update local ZoneCache
+                                    try:
+                                        _name = output_properties[str(opMsgY.output)] if OUTPUTMAPFILE else "ScsRioOutput" + str(opMsgY.output)
+                                    except KeyError as e:
+                                        logging.error ("SCS/RIO Output %s not in CCLX file, ignoring CCLX enrichment", str(e))
+                                        _name = "ScsRioOutput" + str(opMsgY.output)
+                                    #_name = self.output_to_name.get(str(opMsgY.output)) if ZONEMAPFILE else "input" + str(opMsgY.output)
                                     MQTT_MSG=json.dumps({"Time": _time, 
                                                          "Name": _name, 
                                                          "State": opMsgY.state
@@ -1474,8 +1979,13 @@ class Comfort2(mqtt.Client):
                                 for cMsgr in cMsg.counters:
 
                                     _time = datetime.now().replace(microsecond=0).isoformat()
+                                    try:
+                                        _name = counter_properties[str(cMsgr.counter)] if COUNTERMAPFILE else "counter" + str(cMsgr.counter)
+                                    except KeyError as e:
+                                        _name = "counter" + str(cMsgr.counter)
                                     MQTT_MSG=json.dumps({"Time": _time, 
-                                                         "Value": cMsgr.value, 
+                                                         "Name": _name,
+                                                         "Value": cMsgr.value,
                                                          "State": cMsgr.state
                                                         })
                                     self.publish(ALARMCOUNTERINPUTRANGE % cMsgr.counter, MQTT_MSG,qos=2,retain=False)
@@ -1489,13 +1999,37 @@ class Comfort2(mqtt.Client):
                             elif line[1:5] == "r?01":
                                 sMsg = Comfort_R_ReportAllSensors(line[1:])
                                 for sMsgr in sMsg.sensors:
-                                    self.publish(ALARMSENSORTOPIC % sMsgr.sensor, sMsgr.value,qos=2,retain=False)           # Was True, test False
+                                    _time = datetime.now().replace(microsecond=0).isoformat()
+                                    try:
+                                        _name = sensor_properties[str(sMsgr.sensor)] if SENSORMAPFILE else "sensor" + str(sMsgr.sensor)
+                                    except KeyError as e:
+                                        logging.error ("Sensor %s not in CCLX file, ignoring CCLX enrichment", str(e))
+                                        _name = "sensor" + str(sMsgr.sensor)
+                                    MQTT_MSG=json.dumps({"Time": _time, 
+                                                         "Name": _name,
+                                                         "Value": sMsgr.value
+                                                        })
+                                    self.publish(ALARMSENSORTOPIC % sMsgr.sensor, MQTT_MSG,qos=2,retain=False)
                                     time.sleep(0.01)    # 10mS delay between commands
+                                    #self.publish(ALARMSENSORTOPIC % sMsgr.sensor, sMsgr.value,qos=2,retain=False)           # Was True, test False
+                                    #time.sleep(0.01)    # 10mS delay between commands
                             elif (line[1:3] == "f?") and (len(line) == 69):
                                 fMsg = Comfortf_ReportAllFlags(line[1:])
                                 for fMsgf in fMsg.flags:
-                                    self.publish(ALARMFLAGTOPIC % fMsgf.flag, fMsgf.state,qos=2,retain=True)
+                                    _time = datetime.now().replace(microsecond=0).isoformat()
+                                    try:
+                                        _name = flag_properties[str(fMsgf.flag)] if FLAGMAPFILE else "flag" + str(fMsgf.flag)
+                                    except KeyError as e:
+                                        logging.error ("Flag %s not in CCLX file, ignoring CCLX enrichment", str(e))
+                                        _name = "flag" + str(fMsgf.flag)
+                                    MQTT_MSG=json.dumps({"Time": _time, 
+                                                         "Name": _name,
+                                                         "State": fMsgf.state
+                                                        })
+                                    self.publish(ALARMFLAGTOPIC % fMsgf.flag, MQTT_MSG,qos=2,retain=False)
                                     time.sleep(0.01)    # 10mS delay between commands
+                                    #self.publish(ALARMFLAGTOPIC % fMsgf.flag, fMsgf.state,qos=2,retain=True)
+                                    #time.sleep(0.01)    # 10mS delay between commands
                             elif (line[1:3] == "b?"):   # and (len(line) == 69):
                                 bMsg = ComfortB_ReportAllBypassZones(line[1:])
                                 if bMsg.value == "-1":
@@ -1509,7 +2043,20 @@ class Comfort2(mqtt.Client):
                                 #    time.sleep(0.01)    # 10mS delay between commands
                             elif line[1:3] == "FL":
                                 flMsg = ComfortFLFlagActivationReport(line[1:])
-                                self.publish(ALARMFLAGTOPIC % flMsg.flag, flMsg.state,qos=2,retain=True)
+                                try:
+                                    _name = flag_properties[str(flMsg.flag)] if FLAGMAPFILE else "Flag" + "{:03d}".format(flMsg.flag)
+                                except KeyError as e:
+                                    _name = "Flag" + "{:03d}".format(flMsg.flag)
+                                MQTT_MSG=json.dumps({"Time": _time, 
+                                                     "Name": _name,
+                                                     "State": flMsg.state
+                                                    })
+                                self.publish(ALARMFLAGTOPIC % flMsg.flag, MQTT_MSG,qos=2,retain=False)
+                                time.sleep(0.01)    # 10mS delay between commands
+
+
+
+                                #self.publish(ALARMFLAGTOPIC % flMsg.flag, flMsg.state,qos=2,retain=True)
 #                            elif line[1:3] == "BY":
 #                                byMsg = ComfortBYBypassActivationReport(line[1:])   
 #                                if byMsg.state == 1:
@@ -1529,25 +2076,42 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "BY" and CacheState:
                                 byMsg = ComfortBYBypassActivationReport(line[1:])   
                                 _time = datetime.now().replace(microsecond=0).isoformat()
-                                #_name = self.zone_to_name.get(str(byMsg.zone))
-                                _name = self.zone_to_name.get(str(byMsg.zone)) if ZONEMAPFILE else "input" + str(byMsg.zone)
+                                #_name = input_properties[str(byMsg.zone)]['Name'] if ZONEMAPFILE else "input" + str(byMsg.zone)
+                                #_zoneword = input_properties[str(byMsg.zone)]['ZoneWord'] if ZONEMAPFILE else None
+
+                                if byMsg.zone <= 128:
+                                    try:
+                                        _name = input_properties[str(byMsg.zone)]['Name'] if ZONEMAPFILE else "Zone" + str(byMsg.zone)
+                                    except KeyError as e:
+                                        _name = "Zone" + str(byMsg.zone)
+                                    try:
+                                        _zoneword = input_properties[str(byMsg.zone)]['ZoneWord'] if ZONEMAPFILE else ""
+                                    except KeyError as e:
+                                        _zoneword = ""
+                                else:
+                                    pass
+                                    #_name = scsrio_properties[str(ipMsg.input)] if SCSRIOMAPFILE else "ScsRioResp" + str(ipMsg.input)
+                                    #_zoneword = None
+
+                                
                                 _state = ZoneCache[byMsg.zone]
                                 BypassCache[byMsg.zone] = byMsg.state if byMsg.zone <= 128 else None
 
                                 if byMsg.state == 1:
-                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
-                                        logging.warning("Zone %s Bypassed (%s)", str(byMsg.zone), self.zone_to_name.get(str(byMsg.zone),'N/A'))
+                                    if ZONEMAPFILE & self.CheckIndexNumberFormat(str(byMsg.zone)):
+                                        logging.warning("Zone %s Bypassed (%s)", str(byMsg.zone), _name)
                                     else: logging.warning("Zone %s Bypassed", str(byMsg.zone))
                                 else:
-                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(byMsg.zone)):
-                                        logging.info("Zone %s Unbypassed (%s)", str(byMsg.zone), self.zone_to_name.get(str(byMsg.zone),'N/A'))
+                                    if ZONEMAPFILE & self.CheckIndexNumberFormat(str(byMsg.zone)):
+                                        logging.info("Zone %s Unbypassed (%s)", str(byMsg.zone), _name)
                                     else: logging.info("Zone %s Unbypassed", str(byMsg.zone))
 
                                 #self.publish(ALARMINPUTBYPASSTOPIC % byMsg.zone, byMsg.state, qos=2, retain=True)
                                 MQTT_MSG=json.dumps({"Time": _time, 
                                                      "Name": _name,
+                                                     "ZoneWord": _zoneword if byMsg.zone <= 128 else None,
                                                      "State": _state, 
-                                                     "Bypass": byMsg.state if byMsg.zone <= 128 else None
+                                                     "Bypass": BypassCache[byMsg.zone] if byMsg.zone <= 128 else None
                                                     })
                                 self.publish(ALARMINPUTTOPIC % byMsg.zone, MQTT_MSG,qos=2,retain=True)
                                 time.sleep(0.01)    # 10mS delay between commands
