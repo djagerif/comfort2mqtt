@@ -1768,7 +1768,7 @@ class Comfort2(mqtt.Client):
                                                     })
                                 self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=True)
                                 #self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, ipMsgSR.state, qos=2, retain=False)
-                            elif line[1:3] == "TR":
+                            elif line[1:3] == "TR" and CacheState:
                                 ipMsgTR = ComfortCTCounterActivationReport(line[1:])
                                 _time = datetime.now().replace(microsecond=0).isoformat()
                                 _name = timer_properties[str(ipMsgTR.counter)] if TIMERMAPFILE else "Timer" + "{:02d}".format(ipMsgTR.counter)
