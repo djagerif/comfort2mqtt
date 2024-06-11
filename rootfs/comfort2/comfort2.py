@@ -1849,12 +1849,12 @@ class Comfort2(mqtt.Client):
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
                                 if aMsg.type == 'LowBattery':
                                     logging.debug("Low Battery %s", aMsg.battery)
-                            elif line[1:3] == "ER":           
+                            elif line[1:3] == "ER" and CacheState:           
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
                                 if not erMsg.zone == 0:
 
-                                    if ZONEMAPFILE & self.CheckZoneNumberFormat(str(erMsg.zone)):
-                                        logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.zone_to_name.get(str(erMsg.zone),'N/A'))
+                                    if ZONEMAPFILE & self.CheckIndexNumberFormat(str(erMsg.zone)):
+                                        logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), self.input_properties[str(erMsg.zone)])
                                     else: 
                                         logging.warning("Zone %s Not Ready", str(erMsg.zone))
 
@@ -1898,7 +1898,7 @@ class Comfort2(mqtt.Client):
                                 else:
                                     self.publish(ALARMDOORBELLTOPIC, 1, qos=2,retain=True)
                                     self.publish(ALARMMESSAGETOPIC, "Door Bell",qos=2,retain=True)
-                            elif line[1:3] == "OP":
+                            elif line[1:3] == "OP" and CacheState:
                                 ipMsg = ComfortOPOutputActivationReport(line[1:])
 
                                 if ipMsg.state < 2:
@@ -2041,7 +2041,7 @@ class Comfort2(mqtt.Client):
                                 #for bMsgb in bMsg.zones:
                                 #    self.publish(ALARMINPUTBYPASSTOPIC % bMsgb.zone, bMsgb.state,qos=2,retain=True)
                                 #    time.sleep(0.01)    # 10mS delay between commands
-                            elif line[1:3] == "FL":
+                            elif line[1:3] == "FL" and CacheState:
                                 flMsg = ComfortFLFlagActivationReport(line[1:])
                                 try:
                                     _name = flag_properties[str(flMsg.flag)] if FLAGMAPFILE else "Flag" + "{:03d}".format(flMsg.flag)
