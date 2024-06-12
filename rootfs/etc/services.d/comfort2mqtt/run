@@ -44,7 +44,6 @@ if [ "${MQTT_PASSWORD}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --broker-password ${MQTT_PASSWORD}"
 fi
 
-# MQTT use TLS
 if [ "${MQTT_USE_TLS}" != "null" ]; then
       COMFORT_ARGS="${COMFORT_ARGS} --broker-encryption ${MQTT_USE_TLS}"
 fi
@@ -59,43 +58,10 @@ fi
 
 if [ "${MQTT_USE_TLS}" == true ]; then
     bashio::log.info "Enabled TLS to encrypt MQTT broker traffic."
-
-    # bashio::log.info "Here #1 ${MQTT_CA_CERT}"
-
-    # # Using TLS, check for certificates directory
-    # if [ "${MQTT_CA_CERT}" != "null" ]; then
-    #     bashio::log.info "Here #2 ${MQTT_CA_CERT}"
-    #     if [ -f "${MQTT_CA_CERT}" ]; then
-    #         bashio::log.info "Here #3 ${MQTT_CA_CERT}"
-    #         bashio::log.info "Using custom certificates in ${MQTT_CA_CERT}"
-             COMFORT_ARGS="${COMFORT_ARGS} --broker-ca ${MQTT_CA_CERT}"
-    #     else
-    #         bashio::log.info "Here #4 ${MQTT_CA_CERT}"
-    #         bashio::log.info "${MQTT_CA_CERT} not found, using Python CA store."
-    #     fi
-    # else
-    #     bashio::log.info "Here #5 ${MQTT_CA_CERT}"
-    #     bashio::log.info "Certificates Directory was not provided, using Python CA store."
-    # fi
-
-    # # Client certificates
-    # if [ "${MQTT_CLIENT_CERT}" == "null" ]; then
-    #     bashio::log.info  "No value was provided for MQTT_CLIENT_CERT, not using "
-    #     bashio::log.info "client certificates for authentication."
-    # elif [ "${MQTT_CLIENT_KEY}" == "null" ]; then
-    #     bashio::log.info  "No value was provided for MQTT_CLIENT_KEY, not using "
-    #     bashio::log.info "client certificates for authentication."
-    # elif [ -e "${MQTT_CLIENT_CERT}" ] && [ -e "${MQTT_CLIENT_KEY}" ]; then
-    #     bashio::log.info "Using client cert: ${MQTT_CLIENT_CERT}"
-    #     bashio::log.info "Using client key: ${MQTT_CLIENT_KEY}"
-          COMFORT_ARGS="${COMFORT_ARGS} --broker-client-cert ${MQTT_CLIENT_CERT} --broker-client-key ${MQTT_CLIENT_KEY}"
-    # else
-    #     bashio::log.info "${MQTT_CLIENT_CERT} and/or ${MQTT_CLIENT_KEY} not found, not using "
-    #     bashio::log.info "client certificates for authentication."
-    # fi
+    #COMFORT_ARGS="${COMFORT_ARGS} --broker-ca ${MQTT_CA_CERT}"
+    #COMFORT_ARGS="${COMFORT_ARGS} --broker-client-cert ${MQTT_CLIENT_CERT} --broker-client-key ${MQTT_CLIENT_KEY}"
 else
     bashio::log.warning "TLS encryption for MQTT broker disabled."
-    #COMFORT_ARGS="${COMFORT_ARGS} --broker-encryption false"
 fi
 
 if [ "${COMFORT_ADDRESS}" != "null" ]; then
