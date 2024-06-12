@@ -98,7 +98,8 @@ comfort2/counter0 - 254 have the following JSON attributes EG.
   "Value": 0,
   "State": 0
 }
-*Note: 'State' 1 for On, 0 for Off. State is set to 1 when Value is non-zero. Used for lighting as this indicates On|Off status while Value indicates brightness
+*Note:  'State' 1 for On, 0 for Off. State is set to 1 when Value is non-zero. Used for lighting 
+        as this indicates On|Off status while Value indicates brightness
 
 ```
 
