@@ -34,52 +34,81 @@ comfort2/alarm/status - Status of the alarm (Idle, Trouble, Alert, Alarm)
 comfort2/alarm/timer - Entry or Exit timer value
 comfort2/alarm/bypass - List of Bypassed zones. 1,3,5,7,9. '-1' indicates no zones bypassed
 comfort2/alarm/LWT - Online or Offline text status
+comfort2/alarm/refresh - Trigger a refresh of all objects. Used when a refresh of all object states are required.
 
 comfort2/doorbell - 0 for off/answered or 1 for on
 
-comfort2/input1 - 1 for open/active, 0 for closed/inactive. The state of the zone input. Can be set if it is a Virtual Input.
-comfort2/input1/bypass - for individual zone bypass status. 1 for bypassed, 0 for unbypassed. Only created on Arming/Disarming.
-...
-comfort2/input128 - Support for up to 128 zones.
-comfort2/input128/bypass - 1 for bypassed, 0 for unbypassed
+comfort2/input1 - 128 (Zone) have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T15:12:42",
+  "Name": "GarageDoor",
+  "ZoneWord": "Garage Door",
+  "State": 0,
+  "Bypass": 0
+}
 
-comfort2/input129 - Support for SCS/RIO inputs from 129 to 248 where applicable
-...
-comfort2/input248
+comfort2/input129 - 248 (SCS/RIO) have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T15:12:44",
+  "Name": "ScsRioResp129",
+  "ZoneWord": null,
+  "State": 0,
+  "Bypass": null
+}
 
-comfort2/timer1 - Numerical value for internal Timers
-...
-comfort2/timer64
+comfort2/timer1 - 64 have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T15:12:43",
+  "Name": "Timer01",
+  "Value": 0
+}
 
-comfort2/output1 - 1 for on, 0 for off
-...
-comfort2/output128 - Support for up to 128 outputs.
+comfort2/output1 - 128 (Zone) have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T15:12:44",
+  "Name": "Output01",
+  "State": 0
+}
 
-comfort2/output129 - Support for SCS/RIO outputs from 129 to 248 where applicable
-...
-comfort2/output248
+comfort2/output129 - 248 (SCS/RIO) have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T15:12:45",
+  "Name": "ScsRioOutput129",
+  "State": 0
+}
 
-comfort2/flag1 - 1 for on, 0 for off
-...
-comfort2/flag254
+comfort2/flag1 - 254 have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T15:12:46",
+  "Name": "Flag01",
+  "State": 0
+}
 
-comfort2/sensor0 - 16-bit sensor value
-...
-comfort2/sensor31
+comfort2/sensor0 - 31 have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T17:16:54",
+  "Name": "Sensor01",
+  "Value": 0
+}
 
-comfort2/counter0 - 16-bit counter value
-comfort2/counter0/state - 1 for On, 0 for Off. When used for lighting this indicates On|Off status while the counter value indicates brightness
-...
-comfort2/counter254
-comfort2/counter254/state
+comfort2/counter0 - 254 have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T15:12:49",
+  "Name": "Counter000",
+  "Value": 0,
+  "State": 0
+}
+*Note: 'State' 1 for On, 0 for Off. State is set to 1 when Value is non-zero. Used for lighting as this indicates On|Off status while Value indicates brightness
+
 ```
 
 The following MQTT topics are subscribed.
 
 ```
 comfort2/alarm/set - sent from Home Assistant, DISARM, ARMED_HOME, ARMED_NIGHT, ARMED_VACATION or ARMED_AWAY
+comfort2/alarm/refresh - sent from Home Assistant, <Key> triggers a complete object refresh
 
-comfort2/input1/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input.
+comfort2/input1/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input
 ...
 comfort2/input248/set
 
@@ -118,61 +147,92 @@ mqtt:
   alarm_control_panel:
     - name: Comfort Alarm
       unique_id: "comfort2_alarm_a46ee0"        # E.G. Use last six digits of UCM/Eth03 MAC address to make it unique
+      code_arm_required: false
+      qos: 2
+      supported_features:
+        - arm_home
+        - arm_away
+        - arm_night
+        # - arm_vacation
+        - arm_custom_bypass
       state_topic: "comfort2/alarm"
       command_topic: "comfort2/alarm/set"
       availability_topic: "comfort2/alarm/online"
-      payload_available: "1"
-      payload_not_available: "0"
+      payload_available: 1
+      payload_not_available: 0
       code: "1234"  # Code can be different from Comfort's. This code is for the Add-on while the Comfort code is to login to Comfort itself.
                     # Note: If the Comfort User Code does not allow Disarm then the Add-on will not be able to Disarm.
       
   sensor:
     - name: Alarm Mode
-      unique_id: 'comfort2_alarm_mode'
+      unique_id: "comfort2_alarm_mode"
       availability_topic: "comfort2/alarm/online"
       state_topic: "comfort2/alarm"
       payload_available: "1"
       payload_not_available: "0"
 
     - name: Alarm Message
-      unique_id: 'comfort2_alarm_message'
+      unique_id: "comfort2_alarm_message"
       state_topic: "comfort2/alarm/message"
       availability_topic: "comfort2/alarm/online"
       payload_available: "1"
       payload_not_available: "0"
 
+    - name: Main Bedroom Temperature
+      unique_id: "comfort2_counter244"
+      state_topic: "comfort2/counter244"
+      availability_topic: "comfort2/alarm/online"
+      value_template: "{{ value_json.Value }}"
+      json_attributes_template: "{{ value_json | tojson }}"
+      json_attributes_topic: "comfort2/counter244"
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: °C
+      payload_available: "1"
+      payload_not_available: "0"
+
   binary_sensor: 
-    - name: Study PIR 
-      unique_id: 'comfort2_input35' 
-      state_topic: "comfort2/input35" 
-      availability_topic: "comfort2/alarm/online" 
-      payload_on: "1" 
-      payload_off: "0" 
-      payload_available: "1" 
-      payload_not_available: "0" 
+    - name: Study PIR
+      unique_id: "comfort2_input35"
+      state_topic: "comfort2/input35"
+      availability_topic: "comfort2/alarm/online"
+      value_template: '{{ value_json.State }}'
+      json_attributes_topic: "comfort2/input35"
+      json_attributes_template: '{{ value_json | tojson }}'
+      payload_on: "1"
+      payload_off: "0"
+      payload_available: "1"
+      payload_not_available: "0"
       device_class: motion
 
   light:
-    - name: Kitchen Light (Dimmable)
-      unique_id: 'comfort2_counter117'
-      state_topic: "comfort2/counter117/state"
+    - name: Kitchen Light
+      unique_id: "comfort2_counter117"
+      state_topic: "comfort2/counter117"
+      state_value_template: '{{ value_json.State }}'
       command_topic: "comfort2/counter117/set"
       availability_topic: "comfort2/alarm/online"
-      payload_on: 1
-      payload_off: 0
-      payload_available: 1
-      payload_not_available: 0
-      brightness_scale: 255
+      json_attributes_topic: "comfort2/counter117"
+      json_attributes_template: '{{ value_json | tojson }}'
+      payload_on: "1"
+      payload_off: "0"
+      payload_available: "1"
+      payload_not_available: "0"
+      brightness_scale: "255"
+      brightness_value_template: '{{ value_json.Value }}'
       brightness_state_topic: "comfort2/counter117"
       brightness_command_topic: "comfort2/counter117/set"
       optimistic: false
       on_command_type: "brightness"
 
-    - name: Study Light (Non Dimmable On|Off)
-      unique_id: 'comfort2_counter201'
+    - name: Study Light
+      unique_id: "comfort2_counter201"
       state_topic: "comfort2/counter201"
+      state_value_template: '{{ value_json.Value }}'
       command_topic: "comfort2/counter201/set"
       availability_topic: "comfort2/alarm/online"
+      json_attributes_topic: "comfort2/counter201"
+      json_attributes_template: '{{ value_json | tojson }}'
       payload_on: 255
       payload_off: 0
       payload_available: 1
@@ -255,7 +315,7 @@ alarm:
 
 ## Home Assistant  - Automation (Optional)
 
-When Home Assistant Restarts (Not Reload), it only restarts Home Assistant itself, all Add-ons remain running which could lead to some entities display an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to restart the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded from `Developer tools` -> `YAML` -> `YAML configuration reloading`.
+When Home Assistant Restarts (Not Reload), it only restarts Home Assistant itself, all Add-ons remain running which could lead to some entities displaying an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to Restart, or better yet, Refresh the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded from `Developer tools` -> `YAML` -> `YAML configuration reloading`.
 
 To automate this you need to enable this hidden entity created by the `Home Assistant Supervisor`.
 
@@ -263,17 +323,16 @@ To automate this you need to enable this hidden entity created by the `Home Assi
 
 ⚠️ This entity does not update in real-time, it takes around 2 minutes to change state.
 
-Next you need to create an Automation that triggers on Home Assistant Restart and on Configruation.yaml file changes as per below.
+Next you need to create an Automation that triggers on Home Assistant Restart and on Configuration.yaml file changes as per below.
 
 To find the addon name for `service: hassio.addon_restart` you can do a `ha addon` query from the commandline interface and look for the `slug:` keyword or, after starting the Add-on, note the `Hostname` from the Add-on `Info` tab.
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/0b30bded-fe82-4c1d-a278-2c2789a4ef1f)
 
 ```
-alias: Restart Comfort to MQTT Add-on
+alias: Refresh Comfort to MQTT Add-on
 description: >-
-  When Home Assistant Config changes or restarts then reload Comfort to MQTT to
-  refresh all entities.
+  When Home Assistant Config changes or restarts then refresh all Comfort to MQTT entities.
 trigger:
   - platform: homeassistant
     event: start
@@ -298,8 +357,22 @@ action:
   - service: hassio.addon_restart
     data:
       addon: 7bef4a80_comfort2mqtt <- Your unique slug_name/Hostname here !!
+    enabled: false <- This action is disabled by default unless you prefer a complete Add-on reload.
+    alias: Request a Reload of Comfort to MQTT Addon
+   - service: mqtt.publish
+    data:
+      payload: 000F8EC8 <- Provide your unique KEY value here. KEY can be found on startup in the log file. 
+      qos: '2'
+      topic: comfort2/alarm/refresh
+    enabled: true
+    alias: Request a Refresh of all MQTT entities without a full Addon reload
 mode: single
 ```
+When Comfort to MQTT starts up it will print the KEY value to be used for Refresh Authentication.
+
+'''
+2024-06-12 17:45:27 INFO     Comfort II Refresh Key: 000F8EC8
+'''
 
 
 ## Hardware and Interface support

@@ -4,23 +4,13 @@ All notable changes to this project will be documented in this file.
 ## [1.1.0] - Unreleased
 
 ## To Do ##
- - Test Client/Server certificates
- - Change Counters (State/Value), Inputs(State/Bypass) and Outputs to JSON format. Incl time, desc, bypass + state. Done.
- - Try port busy error or warning on Comfort. Done
- - Fix IP > 128 to exclude BypassCache. Crash with keyError. Done
- - Add description file for outputs. Use combined file, update file to include type. Done, using CCLX file. Done.
- - Limit BY to <= 128. Done.
- - Add optional descriptions for Flags, Counters, Sensors, Timers. Done.
- - Check QoS on sent 'SET' commands. Done
- - Add JSON format to ALARM. Include Type,Ver,FS,MPU and SN.
- - Add file name to options. Done.
- - Add 'refresh' + 'key' to publish all MQTT values again.
-
+ - Test Client/Server Authentication certificates
+ 
 ### Added
  - Improve MQTT server shutdown on exit.
  - MQTT Broker Encryption.
  - Add user configurable Comfort CCLX file option to be used for enrichment EG. Zone Names or Descriptions.
- 
+ - Add 'refresh' + 'key' to publish all MQTT values without restart.
 
 ### Changed (Breaking)
  - No longer using 'zones.csv' file, replaced by comfigurator CCLX file.
