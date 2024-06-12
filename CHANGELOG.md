@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
  - Check QoS on sent 'SET' commands. Done
  - Add JSON format to ALARM. Include Type,Ver,FS,MPU and SN.
  - Add file name to options. Done.
+ - Add 'refresh' + 'key' to publish all MQTT values again.
 
 ### Added
  - Improve MQTT server shutdown on exit.

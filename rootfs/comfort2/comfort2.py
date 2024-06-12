@@ -42,12 +42,13 @@ import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
 DOMAIN = "comfort2"
+COMFORT_SERIAL = "00000000"          # Default Serial Number.
 
 #rand_hex_str = hex(randint(268435456, 4294967295))
 #mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts, for future development of a possible second instance.
 mqtt_client_id = DOMAIN+"mqtt"
 
-RELOADTOPIC = DOMAIN+"/reload"                          # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'slug' for auth.
+REFRESHTOPIC = DOMAIN+"/alarm/refresh"                   # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
 ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"               # List of Bypassed Zones.
@@ -711,8 +712,26 @@ class ComfortV_SystemTypeReport(object):
 
 class ComfortSN_SerialNumberReport(object):
     def __init__(self, data={}):
-        logger.debug('SN - data: %s', str(data))
-        self.serialnumber = data[2:12]
+
+        if len(data) < 12:
+            self.serialnumber = "00000000"
+            return
+        else:
+            # Future Decoding
+            DD = data[4:6]
+            CC = data[6:8]
+            BB = data[8:10]
+            AA = data[10:12]
+    
+            dec_string = str(int(AA+BB+CC+DD,16)).zfill(8)
+            dec_len = len(str(dec_string))
+            prefix = int(dec_string[0:dec_len-6])
+            #if 0 < prefix <= 26:
+            #    self.serialnumber = str(chr(prefix + 64)) + dec_string[(dec_len-6):dec_len]
+            #else:
+            #    self.serialnumber = "00000000"
+            
+            self.serialnumber = data[4:12]
 
 class ComfortEXEntryExitDelayStarted(object):
     def __init__(self, data={}):
@@ -764,6 +783,8 @@ class Comfort2(mqtt.Client):
 
             # You need to subscribe to your own topics to enable publish messages activating Comfort entities.
             self.subscribe(ALARMCOMMANDTOPIC)
+            self.subscribe(REFRESHTOPIC)
+
             #self.subscribe(ALARMSTATUSTOPIC)
             #self.subscribe(ALARMBYPASSTOPIC)
             #logger.debug('ALARMNUMBEROFOUTPUTS: %s', str(ALARMNUMBEROFOUTPUTS))
@@ -878,8 +899,11 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #Local arm to 00. disarm mode.
                     SAVEDTIME = datetime.now()
 
-        elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/reload"):
-            logger.debug("msgstr: %s",msgstr )
+        elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/refresh"):
+            #logger.debug("msgstr: %s",msgstr )
+            if msgstr == COMFORT_SERIAL:
+                logger.info("Valid Refresh AUTH key detected, initiating MQTT refresh...")
+                self.readcurrentstate()
             
             #output = int(msg.topic.split("/")[1][6:])
             #state = int(msgstr)
@@ -919,7 +943,7 @@ class Comfort2(mqtt.Client):
         elif msg.topic.startswith(DOMAIN+"/counter") and msg.topic.endswith("/set"): # counter set
             counter = int(msg.topic.split("/")[1][7:])
             if not msgstr.isnumeric() and not msgstr == "ON" and not msgstr == "OFF":
-                print("Alphanumeric State detected ('"+str(msgstr)+"'), check MQTT payload configuration for Counter"+str(counter))
+                logger.debug("Alphanumeric State detected ('%s'), check MQTT payload configuration for Counter %s", str(msgstr), str(counter))
             elif msgstr == "ON":
                 state = 255
                 if self.connected:
@@ -1172,7 +1196,7 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get Comfort Serial Number
-            self.comfortsock.sendall("\x03SN00\r".encode())
+            self.comfortsock.sendall("\x03SN01\r".encode())
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get Security Mode
@@ -1607,6 +1631,7 @@ class Comfort2(mqtt.Client):
         global SAVEDTIME
         global TIMEOUT
         global BROKERCONNECTED
+        global COMFORT_SERIAL
         
         global ZONEMAPFILE
         global COUNTERMAPFILE
@@ -1900,13 +1925,10 @@ class Comfort2(mqtt.Client):
                                     logging.warning("Unsupported Comfort System detected (File System %d).", VMsg.filesystem)
                                 else:
                                     logging.info("Comfort II Ultra detected (Firmware %d.%03d)", VMsg.version, VMsg.revision)
-                            elif line[1:3] == "SN":
+                            elif line[1:5] == "SN01":       # Comfort Encoded Serial Number - Used for Refreh Key
                                 SNMsg = ComfortSN_SerialNumberReport(line[1:])
-                                logging.info("Serial Number: %s.", SNMsg.serialnumber)
-                                #if VMsg.filesystem != 34:
-                                #    logging.warning("Unsupported Comfort System detected (File System %d).", VMsg.filesystem)
-                                #else:
-                                #    logging.info("Comfort II Ultra detected (Firmware %d.%03d)", VMsg.version, VMsg.revision)
+                                COMFORT_SERIAL = SNMsg.serialnumber
+                                logging.info("Comfort II Refresh Key: %s", SNMsg.serialnumber)
                             elif line[1:3] == "a?":     # Not Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
                                 if aMsg.type == 'LowBattery':
