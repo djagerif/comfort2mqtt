@@ -26,7 +26,6 @@
 import xml.etree.ElementTree as ET
 import ssl
 from OpenSSL import crypto
-#import csv
 import os
 import json
 from pathlib import Path
@@ -48,6 +47,7 @@ DOMAIN = "comfort2"
 #mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts, for future development of a possible second instance.
 mqtt_client_id = DOMAIN+"mqtt"
 
+RELOADTOPIC = DOMAIN+"/reload"                          # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'slug' for auth.
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
 ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"               # List of Bypassed Zones.
@@ -709,6 +709,11 @@ class ComfortV_SystemTypeReport(object):
         self.version = int(data[4:6],16)
         self.revision = int(data[6:8],16)
 
+class ComfortSN_SerialNumberReport(object):
+    def __init__(self, data={}):
+        logger.debug('SN - data: %s', str(data))
+        self.serialnumber = data[2:12]
+
 class ComfortEXEntryExitDelayStarted(object):
     def __init__(self, data={}):
         self.type = int(data[2:4],16)
@@ -872,6 +877,13 @@ class Comfort2(mqtt.Client):
                 elif msgstr == "DISARM":
                     self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #Local arm to 00. disarm mode.
                     SAVEDTIME = datetime.now()
+
+        elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/reload"):
+            logger.debug("msgstr: %s",msgstr )
+            
+            #output = int(msg.topic.split("/")[1][6:])
+            #state = int(msgstr)
+
         elif msg.topic.startswith(DOMAIN+"/output") and msg.topic.endswith("/set"):
             #logger.debug("msgstr: %s",msgstr )
             output = int(msg.topic.split("/")[1][6:])
@@ -1159,6 +1171,10 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall("\x03V?\r".encode())
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
+            #get Comfort Serial Number
+            self.comfortsock.sendall("\x03SN00\r".encode())
+            SAVEDTIME = datetime.now()
+            time.sleep(0.1)
             #get Security Mode
             self.comfortsock.sendall("\x03M?\r".encode())
             SAVEDTIME = datetime.now()
@@ -1188,7 +1204,7 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #get Alarm Additional Information
-            self.comfortsock.sendall("\x03a?\r".encode())       # a? Status Request
+            self.comfortsock.sendall("\x03a?\r".encode())       # a? Status Request - For Future Use !!!
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
 
@@ -1884,6 +1900,13 @@ class Comfort2(mqtt.Client):
                                     logging.warning("Unsupported Comfort System detected (File System %d).", VMsg.filesystem)
                                 else:
                                     logging.info("Comfort II Ultra detected (Firmware %d.%03d)", VMsg.version, VMsg.revision)
+                            elif line[1:3] == "SN":
+                                SNMsg = ComfortSN_SerialNumberReport(line[1:])
+                                logging.info("Serial Number: %s.", SNMsg.serialnumber)
+                                #if VMsg.filesystem != 34:
+                                #    logging.warning("Unsupported Comfort System detected (File System %d).", VMsg.filesystem)
+                                #else:
+                                #    logging.info("Comfort II Ultra detected (Firmware %d.%03d)", VMsg.version, VMsg.revision)
                             elif line[1:3] == "a?":     # Not Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
                                 if aMsg.type == 'LowBattery':

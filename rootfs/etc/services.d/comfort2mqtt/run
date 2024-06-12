@@ -58,7 +58,7 @@ if [ "${MQTT_CLIENT_KEY}" != "null" ]; then
 fi
 
 if [ "${MQTT_USE_TLS}" == true ]; then
-    bashio::log.info "Using TLS to encrypt MQTT broker traffic."
+    bashio::log.info "Enabled TLS to encrypt MQTT broker traffic."
 
     # bashio::log.info "Here #1 ${MQTT_CA_CERT}"
 
@@ -94,7 +94,7 @@ if [ "${MQTT_USE_TLS}" == true ]; then
     #     bashio::log.info "client certificates for authentication."
     # fi
 else
-    bashio::log.warning "Disabling TLS support for MQTT broker."
+    bashio::log.warning "TLS encryption for MQTT broker disabled."
     #COMFORT_ARGS="${COMFORT_ARGS} --broker-encryption false"
 fi
 
