@@ -369,7 +369,7 @@ action:
     alias: Request a Refresh of all MQTT entities without a full Addon reload
 mode: single
 ```
-When Comfort to MQTT starts up it will print the KEY value to be used for Refresh Authentication.
+⚠️ **Note:** When Comfort to MQTT starts up it will print the KEY value to be used for Refresh Authentication.
 
 `2024-06-12 17:45:27 INFO     Comfort II Refresh Key: 000F8EC8`
 
