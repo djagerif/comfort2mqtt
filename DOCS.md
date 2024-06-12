@@ -131,7 +131,7 @@ comfort2/counter254/set
 
 comfort2/sensor0/set - 16-bit value
 ...
-comfort2/sensor31/set
+comfort2/sensor31/set - 16-bit value
 ```
 
 
@@ -371,9 +371,7 @@ mode: single
 ```
 When Comfort to MQTT starts up it will print the KEY value to be used for Refresh Authentication.
 
-'''
-2024-06-12 17:45:27 INFO     Comfort II Refresh Key: 000F8EC8
-'''
+`2024-06-12 17:45:27 INFO     Comfort II Refresh Key: 000F8EC8`
 
 
 ## Hardware and Interface support
@@ -406,108 +404,100 @@ If your network is segmented using a firewall, or any other device, you must ens
 
 ### Option: `MQTT Broker Address` (Optional)
 
-The `MQTT Broker Address` is the Hostname, or IP address, of the MQTT Broker used by both Home Assistant and the Comfort to MQTT Add-on. By default the hostname is `core-mosquitto`. If another MQTT Broker is used then this needs to reflect the IP address or Hostname of that instance.
+  The `MQTT Broker Address` is the Hostname, or IP address, of the MQTT Broker used by both Home Assistant and the Comfort to MQTT Add-on. By default the hostname is `core-mosquitto`. If another MQTT Broker is used then this needs to reflect the IP address or Hostname of that instance.
 
 ### Option: `MQTT Broker Username`
 
-The Username with Read/Write priveledges in MQTT that will be used for connection authentication. For more information on Users and Rights, please refer to the Home Assistant Mosquitto Add-on documentation or the Mosquitto [Homepage][mosquitto].
+  The Username with Read/Write priveledges in MQTT that will be used for connection authentication. For more information on Users and Rights, please refer to the Home Assistant Mosquitto Add-on documentation or the Mosquitto [Homepage][mosquitto].
 
 ### Option: `MQTT Broker Password`
 
-Password used for the MQTT Broker Username. Used for authenticated MQTT session establishment.
+  Password used for the MQTT Broker Username. Used for authenticated MQTT session establishment.
 
 ### Option: `MQTT Broker Port` (Optional)
 
-The MQTT Broker exposed listener port. This can be any configured port on your MQTT Broker. Please check your MQTT Broker Network configuration on what exposed ports are configured. The default value is `1883`. Take note that Mosquitto Broker port configurations are Docker `exposed` ports. These ports will not reflect in any Mosquitto Broker logs as it uses e.g. 1883 internally for TCP and 1884 for WebSockets.
+  The MQTT Broker exposed listener port. This can be any configured port on your MQTT Broker. Please check your MQTT Broker Network configuration on what exposed ports are configured. The default value is `1883`. Take note that Mosquitto Broker port configurations are Docker `exposed` ports. These ports will not reflect in any Mosquitto Broker logs as it uses e.g. 1883 internally for TCP and 1884 for WebSockets.
 
 ### Option: `MQTT Transport Protocol` (Optional)
 
-The MQTT Transport Protocol between the Add-on and MQTT Broker can either be `TCP` or `WebSockets`. The default is `TCP`.
+  The MQTT Transport Protocol between the Add-on and MQTT Broker can either be `TCP` or `WebSockets`. The default is `TCP`.
+
+### Option: `MQTT Transport Encryption` (Optional)
+
+  Use TLS Encryption for MQTT Transport (Default False).
+
+### Option: `CA Certificate File` (Optional)
+
+  A file containing a CA certificate. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
+  
+### Option: `Require Certificate Authentication` (Optional)
+  
+  If enabled, authentication will be enabled using the mandatory Client Certificate and Client Key file options.
+
+### Option: `Client Certificate File` (Optional)
+
+  A file containing a Client Certificate, including its chain. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
+
+### Option: `Client Private Key File` (Optional)
+
+  A file containing the Client Private key. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
 
 ### Option: `Comfort II Ultra Port` (Optional)
 
-The Comfort II Ultra UCM/Eth03 TCP port used for connectivity. UCM/ETh03 can be changed so please check your Comfort II Ultra configuration and use the port that is configured for access. Note that only one client can connect to any given TCP port. The default is '1002'
+  The Comfort II Ultra UCM/Eth03 TCP port used for connectivity. UCM/ETh03 can be changed so please check your Comfort II Ultra configuration and use the port that is configured for access. Note that only one client can connect to any given TCP port. The default is '1002'
 
 ### Option: `Comfort II Ultra IP address`
 
-The Comfort II Ultra UCM/Eth03 IP address or Hostname used for connectivity.
+  The Comfort II Ultra UCM/Eth03 IP address or Hostname used for connectivity.
 
 ### Option: `Comfort II Ultra User Login ID`
 
-Cytech Comfort II User Login ID with the appropriate rights. Login ID has minimum 4 characters and 6 maximum. For full functionality you need at least Local Arm/Disarm and Remote Arm/Disarm capabilities on Comfort. See the [Comfigurator Programming Guide][progman], `Security Settings` and `Sign-in Codes` sections for more information on user creation and rights.
+  Cytech Comfort II User Login ID with the appropriate rights. Login ID has minimum 4 characters and 6 maximum. For full functionality you need at least Local Arm/Disarm and Remote Arm/Disarm capabilities on Comfort. See the [Comfigurator Programming Guide][progman], `Security Settings` and `Sign-in Codes` sections for more information on user creation and rights.
 
-[progman]: http://www.cytech.biz/download_files.php?item_id=1082
+  [progman]: http://www.cytech.biz/download_files.php?item_id=1082
 
+### Option: `Comfort II Configuration file` (Optional)
+
+  Comfort II Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>` folder.
+
+  To upload a file to the `addon_config` directory you could use something like [Samba share][samba] Add-on or similar allowing filesystem access to seleced directories on Home Assistant.
+
+  [samba]:https://github.com/home-assistant/addons/tree/master/samba
+      
 ### Option: `Global Log Verbosity` (Optional)
 
-This option controls the level of log output by the addon and can be changed to be more or less verbose, which might be useful when you are dealing with an unknown issue. Possible values are:
+  This option controls the level of log output by the addon and can be changed to be more or less verbose, which might be useful when you are dealing with an unknown issue. Possible values are:
 
 - `DEBUG`:   Shows detailed debug information.
 - `ERROR`:   Runtime errors that do not require immediate action.
 - `WARNING`: Exceptional occurrences that are not errors.
 - `INFO`:    Normal, usually, interesting events (`DEFAULT`).
 
-Please note that each level automatically includes log messages from a more severe level, e.g. `DEBUG` also shows `INFO` messages. By default, the `log_level` is set to `INFO`, which is the recommended setting unless you are troubleshooting.
+  Please note that each level automatically includes log messages from a more severe level, e.g. `DEBUG` also shows `INFO` messages. By default, the `log_level` is set to `INFO`, which is the recommended setting unless you are troubleshooting.
 
 ### Option: `Comfort II Ultra Zone Inputs` (Optional)
 
-Set number of Published Comfort Inputs/Zones starting from Zone 1. Published Zones is a single contiguous block from 1 to <Value>. Default 8, Max. 128
+  Set number of Published Comfort Inputs/Zones starting from Zone 1. Published Zones is a single contiguous block from 1 to <Value>. Default 8, Max. 128
 
 ### Option: `Comfort II Ultra Zone Outputs` (Optional)
 
-Set number of Published Comfort Outputs starting from Output 1. Published Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 128
+  Set number of Published Comfort Outputs starting from Output 1. Published Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 128
 
 ### Option: `Comfort II Ultra SCS/RIO Inputs` (Optional)
 
-Set number of Published SCS/RIO Inputs. Published SCS/RIO Inputs is a single contiguous block from 1 to <Value>. Default 0, Max. 120. 
+  Set number of Published SCS/RIO Inputs. Published SCS/RIO Inputs is a single contiguous block from 1 to <Value>. Default 0, Max. 120. 
 
 ### Option: `Comfort II Ultra SCS/RIO Outputs` (Optional)
 
-Set number of Published SCS/RIO Outputs. Published SCS/RIO Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 120. 
+  Set number of Published SCS/RIO Outputs. Published SCS/RIO Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 120. 
 
 ### Option: `Comfort II Ultra Responses` (Optional)
 
-This sets the number of Responses that the Add-on subscribes to. Valid range values are from 0 - 1024. If you subscribe to the first 100 responses and trigger a response number EG. 200, then it will not be sent to Comfort for execution. Only subscribed responses are executed. The Default value is `0`.
+  This sets the number of Responses that the Add-on subscribes to. Valid range values are from 0 - 1024. If you subscribe to the first 100 responses and trigger a response number EG. 200, then it will not be sent to Comfort for execution. Only subscribed responses are executed. The Default value is `0`.
 
 ### Option: `Set Comfort II Ultra Time and Date` (Optional)
 
-Set Comfort II Ultra Time and Date when the Add-on logs in and automatically every day at midnight. The default value is `False`.
-
-
-## Custom Zone Name File (Optional)
-
-a CSV file can be uploaded to the `addon_config` directory with the format as shown below. The first column is the `Zone Number` and the second column the `Zone Name`.
-
-Upload a file called `zones.csv` to the `addon_config` directory and the Zone Names from the file will be used to enrich the logging information. The `zones.csv` file allows for up to 128 zones.
-
-To upload a file to the `addon_config` directory you could use something like [Samba share][samba] Add-on or similar allowing filesystem access to seleced directories on Home Assistant.
-
-[samba]:https://github.com/home-assistant/addons/tree/master/samba
-
-```
-1,FrontDoor
-2,GarageDoor
-3,GaragePIR
-4,UtilityDoor
-5,Long Description for Kitchen Door
-6,Zone6
-7,Zone7
-8,Zone8
-9,Zone9
-10,Zone10
-11,Zone11
-.
-.
-.
-127,Zone127
-128,Zone128
-```
-
-Zone Name lengths are permitted up to 30 characters but restricted to the following characters `[a-zA-Z0-9 _-]`. Names can be enclosed in quotes but is optional. Zone numbers must be numerical and are limited from 1 to 128.
-
-If you upload a file with incorrect `Zone Name` or `Number` information the file will be disregarded and an error message logged in the addon log file. If you upload a valid `zones.csv` file, but have not specified all the zones, only the zones with valid data will be used and the zones without will display the below message in the log file. As an example, on receipt of an `ER08` `Zone Open` message while arming or a Bypass Message when force-armed with an open zone.
-
-2024-04-16 22:41:13 WARNING  Zone 8 Not Ready (**N/A**)
+  Set Comfort II Ultra Time and Date when the Add-on logs in and automatically every day at midnight. The default value is `False`.
 
 
 ## Support
