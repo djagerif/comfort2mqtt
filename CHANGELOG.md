@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ## To Do ##
  - Test Client/Server Authentication certificates
+ - Check Sensor/Zone etc. 'set' commands to be integers only. Alarm can be text.
  
 ### Added
  - Improve MQTT server shutdown on exit.
