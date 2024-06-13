@@ -14,7 +14,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed (Breaking)
  - No longer using 'zones.csv' file, replaced by comfigurator CCLX file.
- - Changed object reporting to JSON format for Zone Inputs, Outputs, Counters, Sensors, Flags and Timers.
+ - Changed object reporting to JSON format for Zone Inputs, Outputs, Counters, Sensors and Flags.
+ - Removed Timers
 
 ### Fixed
 

@@ -1076,20 +1076,20 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
 
-            #Clear all Timer Reports
+            #Clear all Timer Reports - For Future Enhancement, not used at the moment.
 
-            for i in range(1, 65):
-                _time = datetime.now().replace(microsecond=0).isoformat()
-                try:
-                    _name = timer_properties[str(i)] if TIMERMAPFILE else "Timer" + "{:02d}".format(i)
-                except KeyError as e:
-                    _name = "Timer" + "{:02d}".format(i)
-                MQTT_MSG=json.dumps({"Time": _time, 
-                                     "Name": _name,
-                                     "Value": 0
-                                    })
-                self.publish(ALARMTIMERREPORTTOPIC % i, MQTT_MSG,qos=2,retain=False)
-                time.sleep(0.01)
+            # for i in range(1, 65):
+            #     _time = datetime.now().replace(microsecond=0).isoformat()
+            #     try:
+            #         _name = timer_properties[str(i)] if TIMERMAPFILE else "Timer" + "{:02d}".format(i)
+            #     except KeyError as e:
+            #         _name = "Timer" + "{:02d}".format(i)
+            #     MQTT_MSG=json.dumps({"Time": _time, 
+            #                          "Name": _name,
+            #                          "Value": 0
+            #                         })
+            #     self.publish(ALARMTIMERREPORTTOPIC % i, MQTT_MSG,qos=2,retain=False)
+            #     time.sleep(0.01)
 
           #get all counter values
             for i in range(0, int((ALARMNUMBEROFCOUNTERS+1) / 16)):          # Counters 0 to 254 Using 256/16 = 16 iterations
@@ -1303,33 +1303,29 @@ class Comfort2(mqtt.Client):
 
                 #logging.debug ("Number: %s, Name: %s", number, output_properties['Name'])
 
-            for timer in root.iter('Timer'):
-                #TimerName = timer.attrib.get('Name')
-                #logger.debug ("Timer Name: '%s'", TimerName)
-                name = ''
-                number = ''
-                name = timer.attrib.get('Name')
-                number = timer.attrib.get('Number')
+            # for timer in root.iter('Timer'):
+            #     name = ''
+            #     number = ''
+            #     name = timer.attrib.get('Name')
+            #     number = timer.attrib.get('Number')
 
-                if self.CheckIndexNumberFormat(number):
-                    TIMERMAPFILE = True               
-                else:
-                    number = ''
-                    logger.error("Invalid Timer Number detected in '%s'.", file)
-                    TIMERMAPFILE = False
-                    break
-                if self.CheckZoneNameFormat(name): 
-                    TIMERMAPFILE = True              
-                else:
-                    name = ''
-                    logger.error("Invalid Timer Name detected in '%s'.", file)
-                    TIMERMAPFILE = False             
-                    break
+            #     if self.CheckIndexNumberFormat(number):
+            #         TIMERMAPFILE = True               
+            #     else:
+            #         number = ''
+            #         logger.error("Invalid Timer Number detected in '%s'.", file)
+            #         TIMERMAPFILE = False
+            #         break
+            #     if self.CheckZoneNameFormat(name): 
+            #         TIMERMAPFILE = True              
+            #     else:
+            #         name = ''
+            #         logger.error("Invalid Timer Name detected in '%s'.", file)
+            #         TIMERMAPFILE = False             
+            #         break
 
-                # Add the truncated value to the dictionary
-                timer_properties[number] = name
-
-                #logging.debug ("Number: %s, Name: %s", number, timer_properties['Name'])
+            #     # Add the truncated value to the dictionary
+            #     timer_properties[number] = name
 
             for sensor in root.iter('SensorResponse'):
                 #SensorName = sensor.attrib.get('Name')
@@ -1577,15 +1573,15 @@ class Comfort2(mqtt.Client):
                                                     })
                                 self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=True)
 
-                            elif line[1:3] == "TR" and CacheState:
-                                ipMsgTR = ComfortCTCounterActivationReport(line[1:])
-                                _time = datetime.now().replace(microsecond=0).isoformat()
-                                _name = timer_properties[str(ipMsgTR.counter)] if TIMERMAPFILE else "Timer" + "{:02d}".format(ipMsgTR.counter)
-                                MQTT_MSG=json.dumps({"Time": _time, 
-                                                     "Name": _name,
-                                                     "Value": ipMsgTR.value
-                                                    })
-                                self.publish(ALARMTIMERREPORTTOPIC % ipMsgTR.counter, MQTT_MSG,qos=2,retain=True)
+                            # elif line[1:3] == "TR" and CacheState:      # Future enhancement, not used right now.
+                            #     ipMsgTR = ComfortCTCounterActivationReport(line[1:])
+                            #     _time = datetime.now().replace(microsecond=0).isoformat()
+                            #     _name = timer_properties[str(ipMsgTR.counter)] if TIMERMAPFILE else "Timer" + "{:02d}".format(ipMsgTR.counter)
+                            #     MQTT_MSG=json.dumps({"Time": _time, 
+                            #                          "Name": _name,
+                            #                          "Value": ipMsgTR.value
+                            #                         })
+                            #     self.publish(ALARMTIMERREPORTTOPIC % ipMsgTR.counter, MQTT_MSG,qos=2,retain=True)
 
                             elif line[1:3] == "Z?":                             # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
