@@ -874,7 +874,7 @@ class Comfort2(mqtt.Client):
             try:
                 state = int(msgstr)
             except ValueError:
-                logger.debug("Invalid '/set' value. Only Integers allowed.")
+                logger.debug("Invalid '%s/set' value {%s}. Only Integers allowed.", output, msgstr)
                 return
             #state = int(msgstr)
             if self.connected:
