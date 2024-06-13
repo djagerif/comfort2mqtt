@@ -874,7 +874,7 @@ class Comfort2(mqtt.Client):
             try:
                 state = int(msgstr)
             except ValueError:
-                logger.debug("Invalid '%s/set' value {%s}. Only Integers allowed.", output, msgstr)
+                logger.debug("Invalid 'output%s/set' value '%s'. Only Integers allowed.", output, msgstr)
                 return
             #state = int(msgstr)
             if self.connected:
@@ -893,14 +893,24 @@ class Comfort2(mqtt.Client):
                 logger.debug("Activating Response %d",response )
         elif msg.topic.startswith(DOMAIN+"/input") and msg.topic.endswith("/set"):                          # Can only set the State, the Bypass, Name and Time cannot be changed.
             virtualinput = int(msg.topic.split("/")[1][5:])
-            state = int(msgstr)
+            try:
+                state = int(msgstr)
+            except ValueError:
+                logger.debug("Invalid 'input%s/set' value '%s'. Only Integers allowed.", virtualinput, msgstr)
+                return
+            #state = int(msgstr)
             if self.connected:
                 self.comfortsock.sendall(("\x03I!%02X%02X\r" % (virtualinput, state)).encode())
                 SAVEDTIME = datetime.now()
                 #logger.debug("VirtualInput: %s, State: %s",virtualinput,state )
         elif msg.topic.startswith(DOMAIN+"/flag") and msg.topic.endswith("/set"):
             flag = int(msg.topic.split("/")[1][4:])
-            state = int(msgstr)
+            try:
+                state = int(msgstr)
+            except ValueError:
+                logger.debug("Invalid 'flag%s/set' value '%s'. Only Integers allowed.", flag, msgstr)
+                return
+            #state = int(msgstr)
             if self.connected:
                 self.comfortsock.sendall(("\x03F!%02X%02X\r" % (flag, state)).encode()) #was F!
                 SAVEDTIME = datetime.now()
@@ -908,7 +918,7 @@ class Comfort2(mqtt.Client):
         elif msg.topic.startswith(DOMAIN+"/counter") and msg.topic.endswith("/set"): # counter set
             counter = int(msg.topic.split("/")[1][7:])
             if not msgstr.isnumeric() and not msgstr == "ON" and not msgstr == "OFF":
-                logger.debug("Alphanumeric State detected ('%s'), check MQTT payload configuration for Counter %s", str(msgstr), str(counter))
+                logger.debug("Invalid Counter%s Set value detected ('%s'), only 'ON', 'OFF' and Integer values allowed", str(counter), str(msgstr))
             elif msgstr == "ON":
                 state = 255
                 if self.connected:
@@ -927,7 +937,12 @@ class Comfort2(mqtt.Client):
         elif msg.topic.startswith(DOMAIN+"/sensor") and msg.topic.endswith("/set"): # sensor set
             #logger.debug("msg.topic: %s",msg.topic)
             sensor = int(msg.topic.split("/")[1][6:])
-            state = int(msgstr)
+            try:
+                state = int(msgstr)
+            except ValueError:
+                logger.debug("Invalid 'sensor%s/set' value '%s'. Only Integers allowed.", sensor, msgstr)
+                return
+            #state = int(msgstr)
             if self.connected:
                 self.comfortsock.sendall(("\x03s!%02X%s\r" % (sensor, self.DecimalToSigned16(state))).encode()) # sensor needs 16 bit signed number
                 SAVEDTIME = datetime.now()
