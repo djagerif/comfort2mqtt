@@ -56,13 +56,6 @@ comfort2/input129 - 248 (SCS/RIO) have the following JSON attributes EG.
   "Bypass": null
 }
 
-comfort2/timer1 - 64 have the following JSON attributes EG.
-{
-  "Time": "2024-06-12T15:12:43",
-  "Name": "Timer01",
-  "Value": 0
-}
-
 comfort2/output1 - 128 (Zone) have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:44",
