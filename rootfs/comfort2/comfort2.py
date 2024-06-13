@@ -757,49 +757,58 @@ class Comfort2(mqtt.Client):
 
             #self.subscribe(ALARMSTATUSTOPIC)
             #self.subscribe(ALARMBYPASSTOPIC)
-            for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
-                self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
-                time.sleep(0.01)
+            
+            
+            #for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
+            #    self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
+            #    time.sleep(0.01)
+            WILDCARD = DOMAIN+"/"+"+/set"                               # All 'set' topics
+            self.subscribe(WILDCARD)                                    # Was 'comfort2/output%d/set'
+            time.sleep(0.01)
+
+
+
             logger.debug("Subscribed to %d Zone Outputs", ALARMNUMBEROFOUTPUTS)
 
-            for i in ALARMVIRTUALINPUTRANGE: #for virtual inputs #inputs+1 to 128
-                self.subscribe(ALARMINPUTCOMMANDTOPIC % i)
-                time.sleep(0.01)
+            #for i in ALARMVIRTUALINPUTRANGE: #for virtual inputs #inputs+1 to 128
+            #    self.subscribe(ALARMINPUTCOMMANDTOPIC % i)
+            #    time.sleep(0.01)
             logger.debug("Subscribed to %d Zone Inputs", ALARMVIRTUALINPUTRANGE[-1])
 
-            for i in ALARMRIOINPUTRANGE: #for inputs 129 to Max Value
-                self.subscribe(ALARMRIOINPUTCOMMANDTOPIC % i)
-                time.sleep(0.01)
+            #for i in ALARMRIOINPUTRANGE: #for inputs 129 to Max Value
+            #    self.subscribe(ALARMRIOINPUTCOMMANDTOPIC % i)
+            #    time.sleep(0.01)
             if int(COMFORT_RIO_INPUTS) > 0:              
                 logger.debug("Subscribed to %d RIO Inputs", ALARMRIOINPUTRANGE[-1] - 128)
 
-            for i in ALARMRIOOUTPUTRANGE: #for outputs 129 to Max Value
-                self.subscribe(ALARMRIOOUTPUTCOMMANDTOPIC % i)
-                time.sleep(0.01)
+            #for i in ALARMRIOOUTPUTRANGE: #for outputs 129 to Max Value
+            #    self.subscribe(ALARMRIOOUTPUTCOMMANDTOPIC % i)
+            #    time.sleep(0.01)
+                
             if int(COMFORT_RIO_OUTPUTS) > 0:              
                 logger.debug("Subscribed to %d RIO Outputs", ALARMRIOOUTPUTRANGE[-1] - 128)
 
-            for i in range(1, ALARMNUMBEROFFLAGS + 1):
-                if i >= 255:
-                    break
-                self.subscribe(ALARMFLAGCOMMANDTOPIC % i)
-                time.sleep(0.01)
+            #for i in range(1, ALARMNUMBEROFFLAGS + 1):
+            #    if i >= 255:
+            #        break
+            #    self.subscribe(ALARMFLAGCOMMANDTOPIC % i)
+            #    time.sleep(0.01)
             logger.debug("Subscribed to %d Flags", ALARMNUMBEROFFLAGS)
                 
                 ## Sensors ##
-            for i in range(0, ALARMNUMBEROFSENSORS):
-                self.subscribe(ALARMSENSORCOMMANDTOPIC % i)
-                time.sleep(0.01)
+            #for i in range(0, ALARMNUMBEROFSENSORS):
+            #    self.subscribe(ALARMSENSORCOMMANDTOPIC % i)
+            #    time.sleep(0.01)
             logger.debug("Subscribed to %d Sensors", ALARMNUMBEROFSENSORS)
 
-            for i in range(0, ALARMNUMBEROFCOUNTERS + 1):
-                self.subscribe(ALARMCOUNTERCOMMANDTOPIC % i)    # Value or Level
-                time.sleep(0.01)
+            #for i in range(0, ALARMNUMBEROFCOUNTERS + 1):
+            #    self.subscribe(ALARMCOUNTERCOMMANDTOPIC % i)    # Value or Level
+            #    time.sleep(0.01)
             logger.debug("Subscribed to %d Counters", ALARMNUMBEROFCOUNTERS)
 
-            for i in range(1, ALARMNUMBEROFRESPONSES + 1):      # Responses as specified from HA options.
-                self.subscribe(ALARMRESPONSECOMMANDTOPIC % i)
-                time.sleep(0.01)
+            #for i in range(1, ALARMNUMBEROFRESPONSES + 1):      # Responses as specified from HA options.
+            #    self.subscribe(ALARMRESPONSECOMMANDTOPIC % i)
+            #    time.sleep(0.01)
             logger.debug("Subscribed to %d Responses", ALARMNUMBEROFRESPONSES)
 
             if FIRST_LOGIN == True:
