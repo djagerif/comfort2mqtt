@@ -62,7 +62,7 @@ RUN = True
 BYPASSEDZONES = []          # Global list of Bypassed Zones
 BROKERCONNECTED = False
 ZONEMAPFILE = False         # Zone Number to Name CSV file present.
-TIMERMAPFILE = False
+#TIMERMAPFILE = False
 SCSRIOMAPFILE = False
 OUTPUTMAPFILE = False
 COUNTERMAPFILE = False
@@ -277,8 +277,8 @@ ALARMNUMBEROFCOUNTERS = 255                             # Hardcoded to 255
 ALARMCOUNTERINPUTRANGE = DOMAIN+"/counter%d"            #each counter represents a value EG. light level
 ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set"      # set the counter to a value for between 0 (off) to 255 (full on) or any 16-bit value.
 
-ALARMTIMERREPORTTOPIC = DOMAIN+"/timer%d"               #each timer instance.
-ALARMNUMBEROFTIMERS = 64                                # default timer instances. 1 - 64.
+#ALARMTIMERREPORTTOPIC = DOMAIN+"/timer%d"               #each timer instance.
+#ALARMNUMBEROFTIMERS = 64                                # default timer instances. 1 - 64.
 
 logger.info('Completed importing addon configuration options')
 
@@ -1046,8 +1046,8 @@ class Comfort2(mqtt.Client):
 
     def readcurrentstate(self):
         
-        global TIMERMAPFILE
-        global timer_properties
+        #global TIMERMAPFILE
+        #global timer_properties
         
         global SAVEDTIME
         global BypassCache
@@ -1180,7 +1180,7 @@ class Comfort2(mqtt.Client):
         global COUNTERMAPFILE
         global FLAGMAPFILE
         global OUTPUTMAPFILE
-        global TIMERMAPFILE
+        #global TIMERMAPFILE
         global SENSORMAPFILE
         global SCSRIOMAPFILE
 
@@ -1188,7 +1188,7 @@ class Comfort2(mqtt.Client):
         global counter_properties
         global flag_properties
         global output_properties
-        global timer_properties
+        #global timer_properties
         global sensor_properties
         global scsrio_properties
         
@@ -1202,7 +1202,7 @@ class Comfort2(mqtt.Client):
             counter_properties = {}
             flag_properties = {}
             output_properties = {}
-            timer_properties = {}
+            #timer_properties = {}
             sensor_properties = {}
             scsrio_properties = {}
 
@@ -1460,7 +1460,7 @@ class Comfort2(mqtt.Client):
         global COUNTERMAPFILE
         global FLAGMAPFILE
         global OUTPUTMAPFILE
-        global TIMERMAPFILE
+        #global TIMERMAPFILE
         global SENSORMAPFILE
         global SCSRIOMAPFILE
 
@@ -1469,7 +1469,7 @@ class Comfort2(mqtt.Client):
         global counter_properties
         global flag_properties
         global output_properties
-        global timer_properties
+        #global timer_properties
         global sensor_properties
         global scsrio_properties
 
