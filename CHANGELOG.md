@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [1.1.0]
+## [1.1.0] - 2024-06-15
 
 ## To Do ##
  - Test Client/Server Authentication certificates
@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
  - Add 'refresh' + 'key' to publish all MQTT values without restart.
  - Added Integer Check for 'set' commands where required.
  - Added default "ca.crt" to ca certificate option.
+ - Reintroduced random mqtt client-id to prevent duplicates.
 
 ### Changed (Breaking)
  - No longer using 'zones.csv' file, replaced by comfigurator CCLX file.

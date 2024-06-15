@@ -33,21 +33,21 @@ import datetime
 import threading
 import logging
 from datetime import datetime, timedelta
-#from random import randint
+from random import randint
 import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
 DOMAIN = "comfort2"
 COMFORT_SERIAL = "00000000"          # Default Serial Number.
 
-#rand_hex_str = hex(randint(268435456, 4294967295))
-#mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts, for future development of a possible second instance.
-mqtt_client_id = DOMAIN+"mqtt"
+rand_hex_str = hex(randint(268435456, 4294967295))
+mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts.
+#mqtt_client_id = DOMAIN+"mqtt"
 
 REFRESHTOPIC = DOMAIN+"/alarm/refresh"                   # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
-ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"               # List of Bypassed Zones.
+ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"                # List of Bypassed Zones.
 
 ALARMCOMMANDTOPIC = DOMAIN+"/alarm/set"
 ALARMAVAILABLETOPIC = DOMAIN+"/alarm/online"
