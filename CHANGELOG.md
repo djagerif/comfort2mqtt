@@ -5,13 +5,14 @@ All notable changes to this project will be documented in this file.
 
 ## To Do ##
  - Test Client/Server Authentication certificates
- - Check Sensor/Zone etc. 'set' commands to be integers only. Alarm can be text.
  
 ### Added
  - Improve MQTT server shutdown on exit.
  - MQTT Broker Encryption.
  - Add user configurable Comfort CCLX file option to be used for enrichment EG. Zone Names or Descriptions.
  - Add 'refresh' + 'key' to publish all MQTT values without restart.
+ - Added Integer Check for 'set' commands where required.
+ - Added default "ca.crt" to ca certificate option.
 
 ### Changed (Breaking)
  - No longer using 'zones.csv' file, replaced by comfigurator CCLX file.
