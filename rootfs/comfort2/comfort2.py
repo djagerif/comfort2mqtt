@@ -1496,6 +1496,7 @@ class Comfort2(mqtt.Client):
             BROKERCONNECTED = True
             self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
             self.will_set(ALARMLWTTOPIC, payload="Offline", qos=2, retain=True)
+
         self.loop_start()   
 
         try:
@@ -1506,7 +1507,9 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.connect((self.comfort_ip, self.comfort_port))
                     self.comfortsock.settimeout(TIMEOUT.seconds)
                     self.login()
+
                     for line in self.readlines():
+
                         if line[1:] != "cc00":
                             logger.debug(line[1:])  	    # Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
 
