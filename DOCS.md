@@ -34,52 +34,75 @@ comfort2/alarm/status - Status of the alarm (Idle, Trouble, Alert, Alarm)
 comfort2/alarm/timer - Entry or Exit timer value
 comfort2/alarm/bypass - List of Bypassed zones. 1,3,5,7,9. '-1' indicates no zones bypassed
 comfort2/alarm/LWT - Online or Offline text status
+comfort2/alarm/refresh - Trigger a refresh of all objects. Used when a refresh of all object states are required.
 
 comfort2/doorbell - 0 for off/answered or 1 for on
 
-comfort2/input1 - 1 for open/active, 0 for closed/inactive. The state of the zone input. Can be set if it is a Virtual Input.
-comfort2/input1/bypass - for individual zone bypass status. 1 for bypassed, 0 for unbypassed. Only created on Arming/Disarming.
-...
-comfort2/input128 - Support for up to 128 zones.
-comfort2/input128/bypass - 1 for bypassed, 0 for unbypassed
+comfort2/input1 - 128 (Zone) have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T15:12:42",
+  "Name": "GarageDoor",
+  "ZoneWord": "Garage Door",
+  "State": 0,
+  "Bypass": 0
+}
 
-comfort2/input129 - Support for SCS/RIO inputs from 129 to 248 where applicable
-...
-comfort2/input248
+comfort2/input129 - 248 (SCS/RIO) have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T15:12:44",
+  "Name": "ScsRioResp129",
+  "ZoneWord": null,
+  "State": 0,
+  "Bypass": null
+}
 
-comfort2/timer1 - Numerical value for internal Timers
-...
-comfort2/timer64
+comfort2/output1 - 128 (Zone) have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T15:12:44",
+  "Name": "Output01",
+  "State": 0
+}
 
-comfort2/output1 - 1 for on, 0 for off
-...
-comfort2/output128 - Support for up to 128 outputs.
+comfort2/output129 - 248 (SCS/RIO) have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T15:12:45",
+  "Name": "ScsRioOutput129",
+  "State": 0
+}
 
-comfort2/output129 - Support for SCS/RIO outputs from 129 to 248 where applicable
-...
-comfort2/output248
+comfort2/flag1 - 254 have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T15:12:46",
+  "Name": "Flag01",
+  "State": 0
+}
 
-comfort2/flag1 - 1 for on, 0 for off
-...
-comfort2/flag254
+comfort2/sensor0 - 31 have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T17:16:54",
+  "Name": "Sensor01",
+  "Value": 0
+}
 
-comfort2/sensor0 - 16-bit sensor value
-...
-comfort2/sensor31
+comfort2/counter0 - 254 have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T15:12:49",
+  "Name": "Counter000",
+  "Value": 0,
+  "State": 0
+}
+*Note:  'State' 1 for On, 0 for Off. State is set to 1 when Value is non-zero. Used for lighting 
+        as this indicates On|Off status while Value indicates brightness
 
-comfort2/counter0 - 16-bit counter value
-comfort2/counter0/state - 1 for On, 0 for Off. When used for lighting this indicates On|Off status while the counter value indicates brightness
-...
-comfort2/counter254
-comfort2/counter254/state
 ```
 
 The following MQTT topics are subscribed.
 
 ```
 comfort2/alarm/set - sent from Home Assistant, DISARM, ARMED_HOME, ARMED_NIGHT, ARMED_VACATION or ARMED_AWAY
+comfort2/alarm/refresh - sent from Home Assistant, <Key> triggers a complete object refresh
 
-comfort2/input1/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input.
+comfort2/input1/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input
 ...
 comfort2/input248/set
 
@@ -101,7 +124,7 @@ comfort2/counter254/set
 
 comfort2/sensor0/set - 16-bit value
 ...
-comfort2/sensor31/set
+comfort2/sensor31/set - 16-bit value
 ```
 
 
@@ -118,61 +141,92 @@ mqtt:
   alarm_control_panel:
     - name: Comfort Alarm
       unique_id: "comfort2_alarm_a46ee0"        # E.G. Use last six digits of UCM/Eth03 MAC address to make it unique
+      code_arm_required: false
+      qos: 2
+      supported_features:
+        - arm_home
+        - arm_away
+        - arm_night
+        # - arm_vacation
+        - arm_custom_bypass
       state_topic: "comfort2/alarm"
       command_topic: "comfort2/alarm/set"
       availability_topic: "comfort2/alarm/online"
-      payload_available: "1"
-      payload_not_available: "0"
+      payload_available: 1
+      payload_not_available: 0
       code: "1234"  # Code can be different from Comfort's. This code is for the Add-on while the Comfort code is to login to Comfort itself.
                     # Note: If the Comfort User Code does not allow Disarm then the Add-on will not be able to Disarm.
       
   sensor:
     - name: Alarm Mode
-      unique_id: 'comfort2_alarm_mode'
+      unique_id: "comfort2_alarm_mode"
       availability_topic: "comfort2/alarm/online"
       state_topic: "comfort2/alarm"
       payload_available: "1"
       payload_not_available: "0"
 
     - name: Alarm Message
-      unique_id: 'comfort2_alarm_message'
+      unique_id: "comfort2_alarm_message"
       state_topic: "comfort2/alarm/message"
       availability_topic: "comfort2/alarm/online"
       payload_available: "1"
       payload_not_available: "0"
 
+    - name: Main Bedroom Temperature
+      unique_id: "comfort2_counter244"
+      state_topic: "comfort2/counter244"
+      availability_topic: "comfort2/alarm/online"
+      value_template: "{{ value_json.Value }}"
+      json_attributes_template: "{{ value_json | tojson }}"
+      json_attributes_topic: "comfort2/counter244"
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: °C
+      payload_available: "1"
+      payload_not_available: "0"
+
   binary_sensor: 
-    - name: Study PIR 
-      unique_id: 'comfort2_input35' 
-      state_topic: "comfort2/input35" 
-      availability_topic: "comfort2/alarm/online" 
-      payload_on: "1" 
-      payload_off: "0" 
-      payload_available: "1" 
-      payload_not_available: "0" 
+    - name: Study PIR
+      unique_id: "comfort2_input35"
+      state_topic: "comfort2/input35"
+      availability_topic: "comfort2/alarm/online"
+      value_template: '{{ value_json.State }}'
+      json_attributes_topic: "comfort2/input35"
+      json_attributes_template: '{{ value_json | tojson }}'
+      payload_on: "1"
+      payload_off: "0"
+      payload_available: "1"
+      payload_not_available: "0"
       device_class: motion
 
   light:
-    - name: Kitchen Light (Dimmable)
-      unique_id: 'comfort2_counter117'
-      state_topic: "comfort2/counter117/state"
+    - name: Kitchen Light
+      unique_id: "comfort2_counter117"
+      state_topic: "comfort2/counter117"
+      state_value_template: '{{ value_json.State }}'
       command_topic: "comfort2/counter117/set"
       availability_topic: "comfort2/alarm/online"
-      payload_on: 1
-      payload_off: 0
-      payload_available: 1
-      payload_not_available: 0
-      brightness_scale: 255
+      json_attributes_topic: "comfort2/counter117"
+      json_attributes_template: '{{ value_json | tojson }}'
+      payload_on: "1"
+      payload_off: "0"
+      payload_available: "1"
+      payload_not_available: "0"
+      brightness_scale: "255"
+      brightness_value_template: '{{ value_json.Value }}'
       brightness_state_topic: "comfort2/counter117"
       brightness_command_topic: "comfort2/counter117/set"
       optimistic: false
       on_command_type: "brightness"
 
-    - name: Study Light (Non Dimmable On|Off)
-      unique_id: 'comfort2_counter201'
+    - name: Study Light
+      unique_id: "comfort2_counter201"
       state_topic: "comfort2/counter201"
+      state_value_template: '{{ value_json.Value }}'
       command_topic: "comfort2/counter201/set"
       availability_topic: "comfort2/alarm/online"
+      json_attributes_topic: "comfort2/counter201"
+      json_attributes_template: '{{ value_json | tojson }}'
       payload_on: 255
       payload_off: 0
       payload_available: 1
@@ -255,7 +309,7 @@ alarm:
 
 ## Home Assistant  - Automation (Optional)
 
-When Home Assistant Restarts (Not Reload), it only restarts Home Assistant itself, all Add-ons remain running which could lead to some entities display an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to restart the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded from `Developer tools` -> `YAML` -> `YAML configuration reloading`.
+When Home Assistant Restarts (Not Reload), it only restarts Home Assistant itself, all Add-ons remain running which could lead to some entities displaying an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to Restart, or better yet, Refresh the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded from `Developer tools` -> `YAML` -> `YAML configuration reloading`.
 
 To automate this you need to enable this hidden entity created by the `Home Assistant Supervisor`.
 
@@ -263,17 +317,16 @@ To automate this you need to enable this hidden entity created by the `Home Assi
 
 ⚠️ This entity does not update in real-time, it takes around 2 minutes to change state.
 
-Next you need to create an Automation that triggers on Home Assistant Restart and on Configruation.yaml file changes as per below.
+Next you need to create an Automation that triggers on Home Assistant Restart and on Configuration.yaml file changes as per below.
 
 To find the addon name for `service: hassio.addon_restart` you can do a `ha addon` query from the commandline interface and look for the `slug:` keyword or, after starting the Add-on, note the `Hostname` from the Add-on `Info` tab.
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/0b30bded-fe82-4c1d-a278-2c2789a4ef1f)
 
 ```
-alias: Restart Comfort to MQTT Add-on
+alias: Refresh Comfort to MQTT Add-on
 description: >-
-  When Home Assistant Config changes or restarts then reload Comfort to MQTT to
-  refresh all entities.
+  When Home Assistant Config changes or restarts then refresh all Comfort to MQTT entities.
 trigger:
   - platform: homeassistant
     event: start
@@ -298,8 +351,20 @@ action:
   - service: hassio.addon_restart
     data:
       addon: 7bef4a80_comfort2mqtt <- Your unique slug_name/Hostname here !!
+    enabled: false <- This action is disabled by default unless you prefer a complete Add-on reload.
+    alias: Request a Reload of Comfort to MQTT Addon
+   - service: mqtt.publish
+    data:
+      payload: 000F8EC8 <- Provide your unique KEY value here. KEY can be found on startup in the log file. 
+      qos: '2'
+      topic: comfort2/alarm/refresh
+    enabled: true
+    alias: Request a Refresh of all MQTT entities without a full Addon reload
 mode: single
 ```
+⚠️ **Note:** When Comfort to MQTT starts up it will print the KEY value to be used for Refresh Authentication.
+
+`2024-06-12 17:45:27 INFO     Comfort II Refresh Key: 000F8EC8`
 
 
 ## Hardware and Interface support
@@ -332,108 +397,100 @@ If your network is segmented using a firewall, or any other device, you must ens
 
 ### Option: `MQTT Broker Address` (Optional)
 
-The `MQTT Broker Address` is the Hostname, or IP address, of the MQTT Broker used by both Home Assistant and the Comfort to MQTT Add-on. By default the hostname is `core-mosquitto`. If another MQTT Broker is used then this needs to reflect the IP address or Hostname of that instance.
+  The `MQTT Broker Address` is the Hostname, or IP address, of the MQTT Broker used by both Home Assistant and the Comfort to MQTT Add-on. By default the hostname is `core-mosquitto`. If another MQTT Broker is used then this needs to reflect the IP address or Hostname of that instance.
 
 ### Option: `MQTT Broker Username`
 
-The Username with Read/Write priveledges in MQTT that will be used for connection authentication. For more information on Users and Rights, please refer to the Home Assistant Mosquitto Add-on documentation or the Mosquitto [Homepage][mosquitto].
+  The Username with Read/Write priveledges in MQTT that will be used for connection authentication. For more information on Users and Rights, please refer to the Home Assistant Mosquitto Add-on documentation or the Mosquitto [Homepage][mosquitto].
 
 ### Option: `MQTT Broker Password`
 
-Password used for the MQTT Broker Username. Used for authenticated MQTT session establishment.
+  Password used for the MQTT Broker Username. Used for authenticated MQTT session establishment.
 
 ### Option: `MQTT Broker Port` (Optional)
 
-The MQTT Broker exposed listener port. This can be any configured port on your MQTT Broker. Please check your MQTT Broker Network configuration on what exposed ports are configured. The default value is `1883`. Take note that Mosquitto Broker port configurations are Docker `exposed` ports. These ports will not reflect in any Mosquitto Broker logs as it uses e.g. 1883 internally for TCP and 1884 for WebSockets.
+  The MQTT Broker exposed listener port. This can be any configured port on your MQTT Broker. Please check your MQTT Broker Network configuration on what exposed ports are configured. The default value is `1883`. Take note that Mosquitto Broker port configurations are Docker `exposed` ports. These ports will not reflect in any Mosquitto Broker logs as it uses e.g. 1883 internally for TCP and 1884 for WebSockets.
 
 ### Option: `MQTT Transport Protocol` (Optional)
 
-The MQTT Transport Protocol between the Add-on and MQTT Broker can either be `TCP` or `WebSockets`. The default is `TCP`.
+  The MQTT Transport Protocol between the Add-on and MQTT Broker can either be `TCP` or `WebSockets`. The default is `TCP`.
+
+### Option: `MQTT Transport Encryption` (Optional)
+
+  Use TLS Encryption for MQTT Transport (Default False).
+
+### Option: `CA Certificate File` (Optional)
+
+  A file containing a CA certificate. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
+  
+### Option: `Require Certificate Authentication` (Optional)
+  
+  If enabled, authentication will be enabled using the mandatory Client Certificate and Client Key file options.
+
+### Option: `Client Certificate File` (Optional)
+
+  A file containing a Client Certificate, including its chain. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
+
+### Option: `Client Private Key File` (Optional)
+
+  A file containing the Client Private key. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
 
 ### Option: `Comfort II Ultra Port` (Optional)
 
-The Comfort II Ultra UCM/Eth03 TCP port used for connectivity. UCM/ETh03 can be changed so please check your Comfort II Ultra configuration and use the port that is configured for access. Note that only one client can connect to any given TCP port. The default is '1002'
+  The Comfort II Ultra UCM/Eth03 TCP port used for connectivity. UCM/ETh03 can be changed so please check your Comfort II Ultra configuration and use the port that is configured for access. Note that only one client can connect to any given TCP port. The default is '1002'
 
 ### Option: `Comfort II Ultra IP address`
 
-The Comfort II Ultra UCM/Eth03 IP address or Hostname used for connectivity.
+  The Comfort II Ultra UCM/Eth03 IP address or Hostname used for connectivity.
 
 ### Option: `Comfort II Ultra User Login ID`
 
-Cytech Comfort II User Login ID with the appropriate rights. Login ID has minimum 4 characters and 6 maximum. For full functionality you need at least Local Arm/Disarm and Remote Arm/Disarm capabilities on Comfort. See the [Comfigurator Programming Guide][progman], `Security Settings` and `Sign-in Codes` sections for more information on user creation and rights.
+  Cytech Comfort II User Login ID with the appropriate rights. Login ID has minimum 4 characters and 6 maximum. For full functionality you need at least Local Arm/Disarm and Remote Arm/Disarm capabilities on Comfort. See the [Comfigurator Programming Guide][progman], `Security Settings` and `Sign-in Codes` sections for more information on user creation and rights.
 
-[progman]: http://www.cytech.biz/download_files.php?item_id=1082
+  [progman]: http://www.cytech.biz/download_files.php?item_id=1082
 
+### Option: `Comfort II Configuration file` (Optional)
+
+  Comfort II Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>` folder.
+
+  To upload a file to the `addon_config` directory you could use something like [Samba share][samba] Add-on or similar allowing filesystem access to seleced directories on Home Assistant.
+
+  [samba]:https://github.com/home-assistant/addons/tree/master/samba
+      
 ### Option: `Global Log Verbosity` (Optional)
 
-This option controls the level of log output by the addon and can be changed to be more or less verbose, which might be useful when you are dealing with an unknown issue. Possible values are:
+  This option controls the level of log output by the addon and can be changed to be more or less verbose, which might be useful when you are dealing with an unknown issue. Possible values are:
 
 - `DEBUG`:   Shows detailed debug information.
 - `ERROR`:   Runtime errors that do not require immediate action.
 - `WARNING`: Exceptional occurrences that are not errors.
 - `INFO`:    Normal, usually, interesting events (`DEFAULT`).
 
-Please note that each level automatically includes log messages from a more severe level, e.g. `DEBUG` also shows `INFO` messages. By default, the `log_level` is set to `INFO`, which is the recommended setting unless you are troubleshooting.
+  Please note that each level automatically includes log messages from a more severe level, e.g. `DEBUG` also shows `INFO` messages. By default, the `log_level` is set to `INFO`, which is the recommended setting unless you are troubleshooting.
 
 ### Option: `Comfort II Ultra Zone Inputs` (Optional)
 
-Set number of Published Comfort Inputs/Zones starting from Zone 1. Published Zones is a single contiguous block from 1 to <Value>. Default 8, Max. 128
+  Set number of Published Comfort Inputs/Zones starting from Zone 1. Published Zones is a single contiguous block from 1 to <Value>. Default 8, Max. 128
 
 ### Option: `Comfort II Ultra Zone Outputs` (Optional)
 
-Set number of Published Comfort Outputs starting from Output 1. Published Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 128
+  Set number of Published Comfort Outputs starting from Output 1. Published Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 128
 
 ### Option: `Comfort II Ultra SCS/RIO Inputs` (Optional)
 
-Set number of Published SCS/RIO Inputs. Published SCS/RIO Inputs is a single contiguous block from 1 to <Value>. Default 0, Max. 120. 
+  Set number of Published SCS/RIO Inputs. Published SCS/RIO Inputs is a single contiguous block from 1 to <Value>. Default 0, Max. 120. 
 
 ### Option: `Comfort II Ultra SCS/RIO Outputs` (Optional)
 
-Set number of Published SCS/RIO Outputs. Published SCS/RIO Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 120. 
+  Set number of Published SCS/RIO Outputs. Published SCS/RIO Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 120. 
 
 ### Option: `Comfort II Ultra Responses` (Optional)
 
-This sets the number of Responses that the Add-on subscribes to. Valid range values are from 0 - 1024. If you subscribe to the first 100 responses and trigger a response number EG. 200, then it will not be sent to Comfort for execution. Only subscribed responses are executed. The Default value is `0`.
+  This sets the number of Responses that the Add-on subscribes to. Valid range values are from 0 - 1024. If you subscribe to the first 100 responses and trigger a response number EG. 200, then it will not be sent to Comfort for execution. Only subscribed responses are executed. The Default value is `0`.
 
 ### Option: `Set Comfort II Ultra Time and Date` (Optional)
 
-Set Comfort II Ultra Time and Date when the Add-on logs in and automatically every day at midnight. The default value is `False`.
-
-
-## Custom Zone Name File (Optional)
-
-a CSV file can be uploaded to the `addon_config` directory with the format as shown below. The first column is the `Zone Number` and the second column the `Zone Name`.
-
-Upload a file called `zones.csv` to the `addon_config` directory and the Zone Names from the file will be used to enrich the logging information. The `zones.csv` file allows for up to 128 zones.
-
-To upload a file to the `addon_config` directory you could use something like [Samba share][samba] Add-on or similar allowing filesystem access to seleced directories on Home Assistant.
-
-[samba]:https://github.com/home-assistant/addons/tree/master/samba
-
-```
-1,FrontDoor
-2,GarageDoor
-3,GaragePIR
-4,UtilityDoor
-5,Long Description for Kitchen Door
-6,Zone6
-7,Zone7
-8,Zone8
-9,Zone9
-10,Zone10
-11,Zone11
-.
-.
-.
-127,Zone127
-128,Zone128
-```
-
-Zone Name lengths are permitted up to 30 characters but restricted to the following characters `[a-zA-Z0-9 _-]`. Names can be enclosed in quotes but is optional. Zone numbers must be numerical and are limited from 1 to 128.
-
-If you upload a file with incorrect `Zone Name` or `Number` information the file will be disregarded and an error message logged in the addon log file. If you upload a valid `zones.csv` file, but have not specified all the zones, only the zones with valid data will be used and the zones without will display the below message in the log file. As an example, on receipt of an `ER08` `Zone Open` message while arming or a Bypass Message when force-armed with an open zone.
-
-2024-04-16 22:41:13 WARNING  Zone 8 Not Ready (**N/A**)
+  Set Comfort II Ultra Time and Date when the Add-on logs in and automatically every day at midnight. The default value is `False`.
 
 
 ## Support

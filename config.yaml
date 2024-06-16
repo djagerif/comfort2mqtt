@@ -1,6 +1,6 @@
-name: "Comfort to MQTT"
+name: "Comfort to MQTT - Dev"
 description: "Cytech Comfort II Ultra to MQTT bridge"
-version: "1.0.3"
+version: "1.1.0"
 slug: "comfort2mqtt"
 init: false
 startup: application
@@ -25,10 +25,15 @@ options:
   mqtt_password: null
   mqtt_broker_port: 1883
   mqtt_protocol: TCP
-  #mqtt_encryption: false     # For future development !!!
+  mqtt_encryption: false
+  broker_ca: "ca.crt"
+  require_certificate: false
+  broker_client_cert: "client.crt"
+  broker_client_key: "client.key"
   comfort_address: null
   comfort_port: 1002
   comfort_login_id: null
+  comfort_cclx_file: "comfigurator.cclx"
   log_verbosity: INFO
   alarm_inputs: 8
   alarm_outputs: 0
@@ -42,19 +47,20 @@ schema:
   mqtt_password: password
   mqtt_broker_port: int(1024,65535)?
   mqtt_protocol: list(TCP|WebSockets)?
-  #mqtt_encryption: bool?     #  For future development !!!
+  mqtt_encryption: bool?
+  broker_ca: str?
+  require_certificate: bool?
+  broker_client_cert: str?
+  broker_client_key: str?
   comfort_address: str
   comfort_port: int?
   comfort_login_id: password
+  comfort_cclx_file: str?
   log_verbosity: list(DEBUG|INFO|WARNING|ERROR|CRITICAL)?
   alarm_inputs: int(8,128)?
   alarm_outputs: int(0,128)?
   alarm_rio_inputs: int(0,120)?
   alarm_rio_outputs: int(0,120)?
   alarm_responses: int(0,1024)?
-  #broker_ca: str?            #  For future development !!!
-  #broker_client_cert: str?   #  For future development !!!
-  #broker_client_key: str?    # For future development !!!
   comfort_time: bool
 #image: "ghcr.io/djagerif/{arch}-addon-comfort2mqtt"  #  For future docker image release !!!
-  

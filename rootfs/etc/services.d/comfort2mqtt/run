@@ -10,9 +10,11 @@ MQTT_PORT=$(bashio::config 'mqtt_broker_port')
 COMFORT_ADDRESS=$(bashio::config 'comfort_address')
 COMFORT_PORT=$(bashio::config 'comfort_port')
 COMFORT_LOGIN_ID=$(bashio::config 'comfort_login_id')
-#MQTT_CA_CERT_PATH=$(bashio::config 'broker_ca')                #  For future development !!!
-#MQTT_CLIENT_CERT_PATH=$(bashio::config 'broker_client_cert')   #  For future development !!!
-#MQTT_CLIENT_KEY_PATH=$(bashio::config 'broker_client_key')     #  For future development !!!
+COMFORT_CCLX_FILE=$(bashio::config 'comfort_cclx_file')
+MQTT_USE_TLS=$(bashio::config 'mqtt_encryption')
+MQTT_CA_CERT=$(bashio::config 'broker_ca')
+MQTT_CLIENT_CERT=$(bashio::config 'broker_client_cert')
+MQTT_CLIENT_KEY=$(bashio::config 'broker_client_key')
 MQTT_LOG_LEVEL=$(bashio::config 'log_verbosity')
 COMFORT_INPUTS=$(bashio::config 'alarm_inputs')
 COMFORT_OUTPUTS=$(bashio::config 'alarm_outputs')
@@ -40,6 +42,26 @@ fi
 
 if [ "${MQTT_PASSWORD}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --broker-password ${MQTT_PASSWORD}"
+fi
+
+if [ "${MQTT_USE_TLS}" != "null" ]; then
+      COMFORT_ARGS="${COMFORT_ARGS} --broker-encryption ${MQTT_USE_TLS}"
+fi
+
+if [ "${MQTT_CLIENT_CERT}" != "null" ]; then
+      COMFORT_ARGS="${COMFORT_ARGS} --broker-client-cert ${MQTT_CLIENT_CERT}"
+fi
+
+if [ "${MQTT_CLIENT_KEY}" != "null" ]; then
+      COMFORT_ARGS="${COMFORT_ARGS} --broker-client-key ${MQTT_CLIENT_KEY}"
+fi
+
+if [ "${MQTT_USE_TLS}" == true ]; then
+    bashio::log.info "Enabled TLS to encrypt MQTT broker traffic."
+    COMFORT_ARGS="${COMFORT_ARGS} --broker-ca ${MQTT_CA_CERT}"
+    #COMFORT_ARGS="${COMFORT_ARGS} --broker-client-cert ${MQTT_CLIENT_CERT} --broker-client-key ${MQTT_CLIENT_KEY}"
+else
+    bashio::log.warning "TLS encryption for MQTT broker disabled."
 fi
 
 if [ "${COMFORT_ADDRESS}" != "null" ]; then
@@ -80,6 +102,10 @@ fi
 
 if [ "${COMFORT_COUNTERS}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --alarm-counters ${COMFORT_COUNTERS}"
+fi
+
+if [ "${COMFORT_CCLX_FILE}" != "null" ]; then
+    COMFORT_ARGS="${COMFORT_ARGS} --comfort-cclx-file ${COMFORT_CCLX_FILE}"
 fi
 
 if [ "${COMFORT_TIME}" != "null" ]; then

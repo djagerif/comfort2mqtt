@@ -1,6 +1,27 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2024-06-15
+
+## To Do ##
+ - Test Client/Server Authentication certificates
+ 
+### Added
+ - Improve MQTT server shutdown on exit.
+ - MQTT Broker Encryption.
+ - Add user configurable Comfort CCLX file option to be used for enrichment EG. Zone Names or Descriptions.
+ - Add 'refresh' + 'key' to publish all MQTT values without restart.
+ - Added Integer Check for 'set' commands where required.
+ - Added default "ca.crt" to ca certificate option.
+ - Reintroduced random mqtt client-id to prevent duplicates.
+
+### Changed (Breaking)
+ - No longer using 'zones.csv' file, replaced by comfigurator CCLX file.
+ - Changed object reporting to JSON format for Zone Inputs, Outputs, Counters, Sensors and Flags.
+ - Removed Timers
+
+### Fixed
+
 
 ## [1.0.3] - 2024-06-01
 

@@ -31,9 +31,8 @@ The following objects are currently supported:
 * Counters [0-254]
 * Flags [1-254]
 * Sensors [0-31]
-* RIO Outputs [129-248]
 * RIO Inputs [129-248]
-* Timer Reports [1-64]
+* RIO Outputs [129-248]
 * Responses [1-1024]
 
 <div style="text-align:center"> <img src="https://github.com/djagerif/comfort2mqtt/assets/5621764/64abe350-6b37-4b79-8fea-12fa5e89353a" alt="Comfort II Ultra Keypad"/> </div>
