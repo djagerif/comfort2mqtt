@@ -32,7 +32,7 @@ comfort2/alarm/message - Informational messages, e.g. the zone that triggered th
 comfort2/alarm/timer - countdown entry/exit timer in seconds when arming to away mode or entering. updates every second.
 comfort2/alarm/status - Status of the alarm (Idle, Trouble, Alert, Alarm)
 comfort2/alarm/timer - Entry or Exit timer value
-comfort2/alarm/bypass - List of Bypassed zones. 1,3,5,7,9. '-1' indicates no zones bypassed
+comfort2/alarm/bypass - List of Bypassed zones. 1,3,5,7,9. '0' indicates no zones bypassed
 comfort2/alarm/LWT - Online or Offline text status
 comfort2/alarm/refresh - Trigger a refresh of all objects. Used when a refresh of all object states are required.
 
@@ -92,7 +92,7 @@ comfort2/counter0 - 254 have the following JSON attributes EG.
   "State": 0
 }
 *Note:  'State' 1 for On, 0 for Off. State is set to 1 when Value is non-zero. Used for lighting 
-        as this indicates On|Off status while Value indicates brightness
+        as this indicates On|Off status while Value could indicate brightness
 
 ```
 
@@ -156,6 +156,7 @@ mqtt:
       payload_not_available: 0
       code: "1234"  # Code can be different from Comfort's. This code is for the Add-on while the Comfort code is to login to Comfort itself.
                     # Note: If the Comfort User Code does not allow Disarm then the Add-on will not be able to Disarm.
+                    # Secrets can be used EG. "code: !secret comfort_pin
       
   sensor:
     - name: Alarm Mode
@@ -236,11 +237,18 @@ mqtt:
 ```
 Comfort II Ultra supports both Unsigned 8-bit and Signed 16-bit values. However, many integrations like Clipsal C-BUS uses Unsigned 8-bit values and sets Counter values of 0xFF(255) for 'On' and 0x00(0) for the 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `payload_on` and `payload_off` integer values accordingly.
 
-The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable light, both mapped to their respective Comfort Counters. You could also map your Non-Dimmable Lights to Comfort Flags which would operate in a similar manner as Counters except the `payload_on`value will be `1` rather than `255`. With the Light examples above you can also add the `Brightness` secondary info to the Dimmer light icon and it will display as per below.
+The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable light, both mapped to their respective Comfort Counters. You could also map your Non-Dimmable Lights to Comfort Flags which should operate in a similar manner as Counters except the `payload_on`value will be `1` rather than `255`. With the Light examples above you can also add the `Brightness` secondary info to the Dimmer light icon and it will display as per below.
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/1d16931d-1cfd-4f55-83c0-16be5a90e777)
 
 Because `Counters` can be used for many things other than Lights, the `Kitchen Light` in the example follows the [Brightness Without On Commands][ha-mqtt] chapter in the Home Assistant MQTT Light documentation, with a few tweaks.
+
+### Auto-Discovered Objects
+
+When the Add-on is fully configured and running, there will be a new Device with several System Entities auto-discovered as per below. The values for these entities are retrieved from both the Comfort II Ultra system as well as the alarm configuration `CCLX` file. If the `CCLX` file is not present then no object enrichment will be done and default names will be used for entities, especially ZoneWord strings and Object Descriptions as per the `CCLX` file.
+
+![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/18f53bd3-2d7c-40a9-a34d-611ff7bdef30)
+
 
 
 ## Home Assistant - Custom Card `#` (Optional)
@@ -271,7 +279,7 @@ tap_action:
 
 The native `Alarm Control Panel` uses Grey, Orange and Green for Disarmed, Arming/Pending and Armed, Red is used for Triggered. These colours does not correlate with the Comfort II Ultra Alarm States. To change the colours to use Green, Orange and Red, you have to add a seperate `Theme` to your `Alarm Control Panel` card.
 
-1. Create a file called `themes.yaml`, it can actually be named anything.yaml. Copy this file into your Home Assistant `/config/themes` directory. If the directory doesn't exist then create this directory.
+1. Create a file called `themes.yaml`, it can actually be named <anything>.yaml, it doesn't matter. Copy this file into your Home Assistant `/config/themes` directory. If the directory doesn't exist then create the directory.
 
 2. Make sure your `configuration.yaml` file contains an include statement for this file or directory. If you have a directory inclusion then this file will be included automatically. Here is an example of a directory inclusion.
 
@@ -317,9 +325,9 @@ To automate this you need to enable this hidden entity created by the `Home Assi
 
 ⚠️ This entity does not update in real-time, it takes around 2 minutes to change state.
 
-Next you need to create an Automation that triggers on Home Assistant Restart and on Configuration.yaml file changes as per below.
+Next you need to create an Automation that triggers on Home Assistant Restart and on Configuration.yaml file changes for MQTT as per below.
 
-To find the addon name for `service: hassio.addon_restart` you can do a `ha addon` query from the commandline interface and look for the `slug:` keyword or, after starting the Add-on, note the `Hostname` from the Add-on `Info` tab.
+To find your addon name for `service: hassio.addon_restart` you can do a `ha addon` query from the commandline interface and look for the `slug:` keyword or, after starting the Add-on, note the `Hostname` from the Add-on `Info` tab.
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/0b30bded-fe82-4c1d-a278-2c2789a4ef1f)
 
@@ -470,11 +478,11 @@ If your network is segmented using a firewall, or any other device, you must ens
 
 ### Option: `Comfort II Ultra Zone Inputs` (Optional)
 
-  Set number of Published Comfort Inputs/Zones starting from Zone 1. Published Zones is a single contiguous block from 1 to <Value>. Default 8, Max. 128
+  Select number of Published Comfort Inputs/Zones starting from Zone 1. Published Zones is a single contiguous block from 1 to <Value>. Default 8, Max. 128
 
 ### Option: `Comfort II Ultra Zone Outputs` (Optional)
 
-  Set number of Published Comfort Outputs starting from Output 1. Published Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 128
+  Select number of Published Comfort Outputs starting from Output 1. Published Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 128
 
 ### Option: `Comfort II Ultra SCS/RIO Inputs` (Optional)
 

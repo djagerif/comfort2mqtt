@@ -21,8 +21,9 @@ COMFORT_OUTPUTS=$(bashio::config 'alarm_outputs')
 COMFORT_RIO_INPUTS=$(bashio::config 'alarm_rio_inputs')
 COMFORT_RIO_OUTPUTS=$(bashio::config 'alarm_rio_outputs')
 COMFORT_RESPONSES=$(bashio::config 'alarm_responses')
-COMFORT_FLAGS=$(bashio::config 'alarm_flags')
-COMFORT_COUNTERS=$(bashio::config 'alarm_counters')
+#COMFORT_FLAGS=$(bashio::config 'alarm_flags')
+#COMFORT_COUNTERS=$(bashio::config 'alarm_counters')
+#AUTO_DISCOVER=$(bashio::config 'auto_discover')
 COMFORT_TIME=$(bashio::config 'comfort_time')
 
 # Arguments for Comfort2MQTT to run.
@@ -48,6 +49,10 @@ if [ "${MQTT_USE_TLS}" != "null" ]; then
       COMFORT_ARGS="${COMFORT_ARGS} --broker-encryption ${MQTT_USE_TLS}"
 fi
 
+if [ "${MQTT_CA_CERT}" != "null" ]; then
+      COMFORT_ARGS="${COMFORT_ARGS} --broker-ca ${MQTT_CA_CERT}"
+fi
+
 if [ "${MQTT_CLIENT_CERT}" != "null" ]; then
       COMFORT_ARGS="${COMFORT_ARGS} --broker-client-cert ${MQTT_CLIENT_CERT}"
 fi
@@ -57,11 +62,11 @@ if [ "${MQTT_CLIENT_KEY}" != "null" ]; then
 fi
 
 if [ "${MQTT_USE_TLS}" == true ]; then
-    bashio::log.info "Enabled TLS to encrypt MQTT broker traffic."
+    bashio::log.info "TLS encryption option enabled."
     COMFORT_ARGS="${COMFORT_ARGS} --broker-ca ${MQTT_CA_CERT}"
     #COMFORT_ARGS="${COMFORT_ARGS} --broker-client-cert ${MQTT_CLIENT_CERT} --broker-client-key ${MQTT_CLIENT_KEY}"
 else
-    bashio::log.warning "TLS encryption for MQTT broker disabled."
+    bashio::log.warning "TLS encryption option disabled."
 fi
 
 if [ "${COMFORT_ADDRESS}" != "null" ]; then
@@ -96,13 +101,13 @@ if [ "${COMFORT_RESPONSES}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --alarm-responses ${COMFORT_RESPONSES}"
 fi
 
-if [ "${COMFORT_FLAGS}" != "null" ]; then
-    COMFORT_ARGS="${COMFORT_ARGS} --alarm-flags ${COMFORT_FLAGS}"
-fi
+#if [ "${COMFORT_FLAGS}" != "null" ]; then
+#    COMFORT_ARGS="${COMFORT_ARGS} --alarm-flags ${COMFORT_FLAGS}"
+#fi
 
-if [ "${COMFORT_COUNTERS}" != "null" ]; then
-    COMFORT_ARGS="${COMFORT_ARGS} --alarm-counters ${COMFORT_COUNTERS}"
-fi
+#if [ "${COMFORT_COUNTERS}" != "null" ]; then
+#    COMFORT_ARGS="${COMFORT_ARGS} --alarm-counters ${COMFORT_COUNTERS}"
+#fi
 
 if [ "${COMFORT_CCLX_FILE}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --comfort-cclx-file ${COMFORT_CCLX_FILE}"
@@ -113,7 +118,7 @@ if [ "${COMFORT_TIME}" != "null" ]; then
 fi
 
 if [ "${MQTT_LOG_LEVEL}" != "null" ]; then
-      COMFORT_ARGS="$COMFORT_ARGS --verbosity $MQTT_LOG_LEVEL"
+    COMFORT_ARGS="$COMFORT_ARGS --verbosity $MQTT_LOG_LEVEL"
 fi
 
 ## Run Comfort2MQTT program
