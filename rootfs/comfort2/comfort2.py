@@ -1600,6 +1600,7 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "sr" and CacheState:
                                 ipMsgSR = ComfortCTCounterActivationReport(line[1:])
+                                _time = datetime.now().replace(microsecond=0).isoformat()
                                 _name = sensor_properties[str(ipMsgSR.counter)] if SENSORMAPFILE else "Sensor" + "{:02d}".format(ipMsgSR.counter)
                                 MQTT_MSG=json.dumps({"Time": _time, 
                                                      "Name": _name,
