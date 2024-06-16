@@ -53,7 +53,6 @@ ALARMCOMMANDTOPIC = DOMAIN+"/alarm/set"
 ALARMAVAILABLETOPIC = DOMAIN+"/alarm/online"
 ALARMLWTTOPIC = DOMAIN+"/alarm/LWT"
 ALARMMESSAGETOPIC = DOMAIN+"/alarm/message"
-#ALARMEXTMESSAGETOPIC = DOMAIN+"/alarm/ext_message"     # Extended Messages will be available here.  For future development !!!
 ALARMTIMERTOPIC = DOMAIN+"/alarm/timer"
 ALARMDOORBELLTOPIC = DOMAIN+"/doorbell"
 
@@ -62,7 +61,6 @@ RUN = True
 BYPASSEDZONES = []          # Global list of Bypassed Zones
 BROKERCONNECTED = False
 ZONEMAPFILE = False         # Zone Number to Name CSV file present.
-#TIMERMAPFILE = False
 SCSRIOMAPFILE = False
 OUTPUTMAPFILE = False
 COUNTERMAPFILE = False
@@ -222,10 +220,10 @@ MQTT_PASSWORD=option.broker_password
 MQTT_SERVER=option.broker_address
 MQTT_PORT=option.broker_port
 MQTT_PROTOCOL=option.broker_protocol
-MQTT_ENCRYPTION=option.broker_encryption                    #  For future development !!!
-MQTT_CA_CERT=option.broker_ca                          #  For future development !!!
-MQTT_CLIENT_CERT=option.broker_client_cert             #  For future development !!!
-MQTT_CLIENT_KEY=option.broker_client_key               #  For future development !!!
+MQTT_ENCRYPTION=option.broker_encryption    
+MQTT_CA_CERT=option.broker_ca               
+MQTT_CLIENT_CERT=option.broker_client_cert  
+MQTT_CLIENT_KEY=option.broker_client_key    
 COMFORT_ADDRESS=option.comfort_address
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id
@@ -276,9 +274,6 @@ ALARMSENSORCOMMANDTOPIC = DOMAIN+"/sensor%d/set"        #sensor0,sensor1,...sens
 ALARMNUMBEROFCOUNTERS = 255                             # Hardcoded to 255
 ALARMCOUNTERINPUTRANGE = DOMAIN+"/counter%d"            #each counter represents a value EG. light level
 ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set"      # set the counter to a value for between 0 (off) to 255 (full on) or any 16-bit value.
-
-#ALARMTIMERREPORTTOPIC = DOMAIN+"/timer%d"               #each timer instance.
-#ALARMNUMBEROFTIMERS = 64                                # default timer instances. 1 - 64.
 
 logger.info('Completed importing addon configuration options')
 
@@ -687,7 +682,7 @@ class ComfortSN_SerialNumberReport(object):
             self.serialnumber = "00000000"
             return
         else:
-            # Future Decoding if Comfort implements SN reliably.
+            # Future Decoding if Comfort implements SN reliably. Some systems are Invalid or Unsupported.
             DD = data[4:6]
             CC = data[6:8]
             BB = data[8:10]
@@ -755,20 +750,10 @@ class Comfort2(mqtt.Client):
             self.subscribe(ALARMCOMMANDTOPIC)
             self.subscribe(REFRESHTOPIC)
 
-            #self.subscribe(ALARMSTATUSTOPIC)
-            #self.subscribe(ALARMBYPASSTOPIC)
-            
-            
             for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
-                time.sleep(0.01)
+                #time.sleep(0.01)
             
-            #WILDCARD = DOMAIN+"/"+"+/set"                               # All 'set' topics. Bulk or nothing, not what we need.
-            #self.subscribe(WILDCARD)                                    # Was 'comfort2/output%d/set'
-            #time.sleep(0.01)
-
-
-
             logger.debug("Subscribed to %d Zone Outputs", ALARMNUMBEROFOUTPUTS)
 
             for i in ALARMVIRTUALINPUTRANGE: #for virtual inputs #inputs+1 to 128
@@ -876,7 +861,6 @@ class Comfort2(mqtt.Client):
             except ValueError:
                 logger.debug("Invalid 'output%s/set' value '%s'. Only Integers allowed.", output, msgstr)
                 return
-            #state = int(msgstr)
             if self.connected:
                 self.comfortsock.sendall(("\x03O!%02X%02X\r" % (output, state)).encode())
                 SAVEDTIME = datetime.now()
@@ -1046,9 +1030,6 @@ class Comfort2(mqtt.Client):
 
     def readcurrentstate(self):
         
-        #global TIMERMAPFILE
-        #global timer_properties
-        
         global SAVEDTIME
         global BypassCache
         if self.connected == True:
@@ -1180,7 +1161,6 @@ class Comfort2(mqtt.Client):
         global COUNTERMAPFILE
         global FLAGMAPFILE
         global OUTPUTMAPFILE
-        #global TIMERMAPFILE
         global SENSORMAPFILE
         global SCSRIOMAPFILE
 
@@ -1188,7 +1168,6 @@ class Comfort2(mqtt.Client):
         global counter_properties
         global flag_properties
         global output_properties
-        #global timer_properties
         global sensor_properties
         global scsrio_properties
         
@@ -1202,7 +1181,6 @@ class Comfort2(mqtt.Client):
             counter_properties = {}
             flag_properties = {}
             output_properties = {}
-            #timer_properties = {}
             sensor_properties = {}
             scsrio_properties = {}
 
@@ -1333,30 +1311,6 @@ class Comfort2(mqtt.Client):
 
                 #logging.debug ("Number: %s, Name: %s", number, output_properties['Name'])
 
-            # for timer in root.iter('Timer'):
-            #     name = ''
-            #     number = ''
-            #     name = timer.attrib.get('Name')
-            #     number = timer.attrib.get('Number')
-
-            #     if self.CheckIndexNumberFormat(number):
-            #         TIMERMAPFILE = True               
-            #     else:
-            #         number = ''
-            #         logger.error("Invalid Timer Number detected in '%s'.", file)
-            #         TIMERMAPFILE = False
-            #         break
-            #     if self.CheckZoneNameFormat(name): 
-            #         TIMERMAPFILE = True              
-            #     else:
-            #         name = ''
-            #         logger.error("Invalid Timer Name detected in '%s'.", file)
-            #         TIMERMAPFILE = False             
-            #         break
-
-            #     # Add the truncated value to the dictionary
-            #     timer_properties[number] = name
-
             for sensor in root.iter('SensorResponse'):
                 #SensorName = sensor.attrib.get('Name')
                 #logger.debug ("Sensor Name: '%s'", SensorName) 
@@ -1460,7 +1414,6 @@ class Comfort2(mqtt.Client):
         global COUNTERMAPFILE
         global FLAGMAPFILE
         global OUTPUTMAPFILE
-        #global TIMERMAPFILE
         global SENSORMAPFILE
         global SCSRIOMAPFILE
 
@@ -1469,7 +1422,6 @@ class Comfort2(mqtt.Client):
         global counter_properties
         global flag_properties
         global output_properties
-        #global timer_properties
         global sensor_properties
         global scsrio_properties
 
@@ -1553,11 +1505,8 @@ class Comfort2(mqtt.Client):
                                 ipMsg = ComfortIPInputActivationReport(line[1:])
                                 if ipMsg.state < 2 and CacheState:
                                     _time = datetime.now().replace(microsecond=0).isoformat()
-                                    #_name = self.zone_to_name.get(str(ipMsg.input))
                                     
                                     if ipMsg.input <= 128:
-                                        #_name = input_properties[str(ipMsg.input)]['Name'] if ZONEMAPFILE else "Zone" + str(ipMsg.input)
-                                        #_zoneword = input_properties[str(ipMsg.input)]['ZoneWord'] if ZONEMAPFILE else None
                                         try:
                                             _name = input_properties[str(ipMsg.input)]['Name'] if ZONEMAPFILE else "Zone" + "{:02d}".format(ipMsg.input)
                                         except KeyError as e:
@@ -1607,16 +1556,6 @@ class Comfort2(mqtt.Client):
                                                      "Value": ipMsgSR.value
                                                     })
                                 self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=True)
-
-                            # elif line[1:3] == "TR" and CacheState:      # Future enhancement, not used right now.
-                            #     ipMsgTR = ComfortCTCounterActivationReport(line[1:])
-                            #     _time = datetime.now().replace(microsecond=0).isoformat()
-                            #     _name = timer_properties[str(ipMsgTR.counter)] if TIMERMAPFILE else "Timer" + "{:02d}".format(ipMsgTR.counter)
-                            #     MQTT_MSG=json.dumps({"Time": _time, 
-                            #                          "Name": _name,
-                            #                          "Value": ipMsgTR.value
-                            #                         })
-                            #     self.publish(ALARMTIMERREPORTTOPIC % ipMsgTR.counter, MQTT_MSG,qos=2,retain=True)
 
                             elif line[1:3] == "Z?":                             # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
