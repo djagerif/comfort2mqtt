@@ -1,10 +1,37 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [1.1.0] - 2024-06-15
+
+## [1.2.0]
 
 ## To Do ##
  - Test Client/Server Authentication certificates
+   
+### Added
+
+### Changed
+
+### Fixed
+
+
+## [1.1.1] - 2024-06-30
+ 
+### Added
+ - Add Comfort MQTT Device Properties to domain 'comfort2'.
+ - Added MQTT Auto Discovery once Comfort is connected. Only System Sensors created.
+ - Range out-of-bounds checking for Zones, Outputs and Responses. 
+ 
+### Changed
+ - Updated 'SN' decoding.
+ - Update Alarm States when arming. Changed from `Pending` to `Arming` as per documentation.
+ - BypassZones changed from `-1` to `0` when no zones are bypassed. <BREAKING!!>
+ 
+### Fixed
+ - Only report CCLX Zone information missing if object is inside configured object range. Inputs, Outputs etc.
+ - Fix 'broker-ca' filename not imported correctly.
+
+
+## [1.1.0] - 2024-06-15
  
 ### Added
  - Improve MQTT server shutdown on exit.

@@ -1,6 +1,6 @@
 name: "Comfort to MQTT"
 description: "Cytech Comfort II Ultra to MQTT bridge"
-version: "1.1.0"
+version: "1.1.1"
 slug: "comfort2mqtt"
 init: false
 startup: application
@@ -40,6 +40,7 @@ options:
   alarm_rio_inputs: 0
   alarm_rio_outputs: 0
   alarm_responses: 0
+  #auto_discover: false
   comfort_time: false
 schema:
   mqtt_broker_address: str
@@ -57,10 +58,11 @@ schema:
   comfort_login_id: password
   comfort_cclx_file: str?
   log_verbosity: list(DEBUG|INFO|WARNING|ERROR|CRITICAL)?
-  alarm_inputs: int(8,128)?
-  alarm_outputs: int(0,128)?
+  alarm_inputs: list(8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128)?
+  alarm_outputs: list(0|8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128)?
   alarm_rio_inputs: int(0,120)?
   alarm_rio_outputs: int(0,120)?
   alarm_responses: int(0,1024)?
-  comfort_time: bool
+  #auto_discover: bool?
+  comfort_time: bool?
 #image: "ghcr.io/djagerif/{arch}-addon-comfort2mqtt"  #  For future docker image release !!!

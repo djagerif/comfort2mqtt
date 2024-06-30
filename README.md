@@ -22,9 +22,9 @@ This Addon is used to bridge an IP connected Cytech Comfort II Ultra Alarm syste
 
 This is a customised version of the original comfort2mqtt project by `koochyrat`. More information about the original source project is available [here][koochyrat].
 
-This implementation does not do auto configuration. Objects need to be manually configured in Home Assistant.
+This implementation does minimal MQTT auto-discovery. Some `System` entities are created but all other objects need to be manually configured in Home Assistant.
 
-The following objects are currently supported:
+The following objects are supported:
 
 * Zone Inputs [1-128]
 * Zone Outputs [1-128]

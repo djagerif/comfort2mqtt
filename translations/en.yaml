@@ -67,11 +67,11 @@ configuration:
     description: >-
       Global Log Verbosity level (Default INFO).
   alarm_inputs:
-    name: Comfort II Zone Inputs
+    name: Comfort II Zone Inputs (In multiples of 8).
     description: >-
       Cytech Comfort II physical Zone Inputs installed on your system. Range from 8 - 128 (Default is 8).
   alarm_outputs:
-    name: Comfort II Zone Outputs.
+    name: Comfort II Zone Outputs (In multiples of 8).
     description: >-
       Cytech Comfort II physical Zone Outputs installed on your system. Range from 0 - 128 (Default is 0).
   alarm_rio_inputs:
@@ -89,6 +89,6 @@ configuration:
     description: >-
       The number of Cytech Comfort II Responses that can be activated. Range from 0 - 1024 (Default is 0).
   comfort_time:
-    name: Set Comfort II Time and Date
+    name: Set Comfort II Time and Date.
     description: >-
       Set Cytech Comfort II Time and Date on successful logon and once a day at midnight (Default is False).
