@@ -21,9 +21,6 @@ COMFORT_OUTPUTS=$(bashio::config 'alarm_outputs')
 COMFORT_RIO_INPUTS=$(bashio::config 'alarm_rio_inputs')
 COMFORT_RIO_OUTPUTS=$(bashio::config 'alarm_rio_outputs')
 COMFORT_RESPONSES=$(bashio::config 'alarm_responses')
-#COMFORT_FLAGS=$(bashio::config 'alarm_flags')
-#COMFORT_COUNTERS=$(bashio::config 'alarm_counters')
-#AUTO_DISCOVER=$(bashio::config 'auto_discover')
 COMFORT_TIME=$(bashio::config 'comfort_time')
 
 # Arguments for Comfort2MQTT to run.
@@ -100,14 +97,6 @@ fi
 if [ "${COMFORT_RESPONSES}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --alarm-responses ${COMFORT_RESPONSES}"
 fi
-
-#if [ "${COMFORT_FLAGS}" != "null" ]; then
-#    COMFORT_ARGS="${COMFORT_ARGS} --alarm-flags ${COMFORT_FLAGS}"
-#fi
-
-#if [ "${COMFORT_COUNTERS}" != "null" ]; then
-#    COMFORT_ARGS="${COMFORT_ARGS} --alarm-counters ${COMFORT_COUNTERS}"
-#fi
 
 if [ "${COMFORT_CCLX_FILE}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --comfort-cclx-file ${COMFORT_CCLX_FILE}"
