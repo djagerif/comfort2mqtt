@@ -1343,11 +1343,12 @@ class Comfort2(mqtt.Client):
         global RUN
         global SAVEDTIME
         
-        logger.debug("SIGNUM: %s received", str(signum))
+        logger.debug("SIGNUM: %s received, Shutting down.", str(signum))
         
         if self.connected == True:
             self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
             SAVEDTIME = datetime.now()
+            self.connected = False
         if BROKERCONNECTED == True:      # MQTT Connected
             infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
             infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
