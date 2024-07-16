@@ -1301,7 +1301,7 @@ class Comfort2(mqtt.Client):
         time.sleep(0.1)
 
         MQTT_DEVICE = {"name": "Comfort Alarm System (" + UUID + ")",
-                       "identifiers": UID,
+                       "identifiers":[UID],
                        "manufacturer": "Cytech Technologies PTE Limited",
                        "url": "https://www.cytech.biz",
                        "sw_version": device_properties['Version'] if file_exists else None,
