@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 
 ## To Do ##
  - Test Client/Server Authentication certificates
+ - First Start Diagnostics 'UNKNOWN' until refresh.
+ - Look into 'via' MQTT option.
+ - Revisit Comfort with UID as device. Maybe without UID for device.
    
 ### Added
 
