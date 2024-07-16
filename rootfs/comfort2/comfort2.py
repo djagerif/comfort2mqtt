@@ -1161,7 +1161,7 @@ class Comfort2(mqtt.Client):
                              "Reference": device_properties['Reference'] if file_exists else None,
                              "device" : MQTT_DEVICE
                             })
-        self.publish("homeassistant/device/"+DOMAIN+"/config", MQTT_MSG,qos=2,retain=False)
+        self.publish("homeassistant/device/Comfort2MQTT/config", MQTT_MSG,qos=2,retain=False)
         time.sleep(0.1)
 
 
