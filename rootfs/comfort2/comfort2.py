@@ -1145,41 +1145,28 @@ class Comfort2(mqtt.Client):
        
          # (" + UUID + ")",
 
-        MQTT_DEVICE = {"name": "Comfort to MQTT Bridge",
-                       "identifiers":["comfort2mqtt"],
-                       "manufacturer": "Cytech Technologies PTE Limited",
-                       "url": "https://www.cytech.biz",
-                       "sw_version": device_properties['Version'] if file_exists else None,
-                       "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
-                       "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
-                       "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
-                       "icon": "mdi:alarm-panel-outline",
-                       "serial_number": device_properties['SerialNumber'],
-                       "via_device":"comfort2mqtt"
-                    }
+        # MQTT_DEVICE = {"name": "Comfort to MQTT Bridge",
+        #                "identifiers":["comfort2mqtt"],
+        #                "manufacturer": "Cytech Technologies PTE Limited",
+        #                "url": "https://www.cytech.biz",
+        #                "sw_version": device_properties['Version'] if file_exists else None,
+        #                "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
+        #                "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
+        #                "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
+        #                "icon": "mdi:alarm-panel-outline",
+        #                "serial_number": device_properties['SerialNumber'],
+        #                "via_device":"comfort2mqtt"
+        #             }
 
-#   "name": "Bridge Status",
-#   "unique_id": "cbus2-mqtt",
-#   "state_topic": "cbus/bridge/cbus2-mqtt/state",
-#   "device": {
-#     "identifiers": [
-#       "cbus2-mqtt"
-#     ],
-#     "name": "C-Bus ",
-#     "manufacturer": "DamianFlynn.com",
-#     "model": "C-Bus C-Gate MQTT Bridge",
-#     "sw_version": "0.5",
-#     "via_device": "cbus2-mqtt"
-
-        MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
-                             "name": "Bridge Status",
-                             "state_topic": "/comfort2/alarm/LWT",
-                             "unique_id": "comfort2mqtt",
-                             "Reference": device_properties['Reference'] if file_exists else None,
-                             "device" : MQTT_DEVICE
-                            })
-        self.publish("homeassistant/device/comfort2mqtt/config", MQTT_MSG,qos=2,retain=False)
-        time.sleep(0.1)
+        # MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
+        #                      "name": "Bridge Status",
+        #                      "state_topic": "/comfort2/alarm/LWT",
+        #                      "unique_id": "comfort2mqtt",
+        #                      "Reference": device_properties['Reference'] if file_exists else None,
+        #                      "device" : MQTT_DEVICE
+        #                     })
+        # self.publish("homeassistant/device/comfort2mqtt/config", MQTT_MSG,qos=2,retain=False)
+        # time.sleep(0.1)
 
  # (" +  UUID + ")",
         MQTT_DEVICE = { "name": "Comfort Alarm System",
