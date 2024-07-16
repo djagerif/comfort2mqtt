@@ -1174,7 +1174,7 @@ class Comfort2(mqtt.Client):
                     }
 
 
-        discoverytopic = "homeassistant/sensor/"+DOMAIN+"/filesystem/config"
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/filesystem/config"
         MQTT_MSG=json.dumps({"name": "FileSystem",
                              "unique_id": "comfort_filesystem_" + str(device_properties['uid']),
                              "availability_topic": "comfort2/alarm/online",
@@ -1193,7 +1193,7 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
-        discoverytopic = "homeassistant/sensor/"+DOMAIN+"/firmware/config"
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/firmware/config"
         MQTT_MSG=json.dumps({"name": "Firmware",
                              "unique_id": "comfort_firmware_" + str(device_properties['uid']),
                              "availability_topic": "comfort2/alarm/online",
@@ -1212,7 +1212,7 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
-        discoverytopic = "homeassistant/sensor/"+DOMAIN+"/state/config"
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/state/config"
         MQTT_MSG=json.dumps({"name": "State",
                              "unique_id": "comfort_state_" + str(device_properties['uid']),
                              "state_topic": "comfort2/alarm/status",
@@ -1224,7 +1224,7 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
-        discoverytopic = "homeassistant/sensor/"+DOMAIN+"/bypass/config"
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/bypass/config"
         MQTT_MSG=json.dumps({"name": "Bypassed Zones",
                              "unique_id": "comfort_bypass_" + str(device_properties['uid']),
                              "state_topic": "comfort2/alarm/bypass",
@@ -1236,7 +1236,7 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
         
-        discoverytopic = "homeassistant/sensor/"+DOMAIN+"/status/config"
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/status/config"
         MQTT_MSG=json.dumps({"name": "Status",
                              "unique_id": "comfort_status_" + str(device_properties['uid']),
                              "state_topic": "comfort2/alarm/LWT",
@@ -1248,7 +1248,7 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
-        discoverytopic = "homeassistant/sensor/"+DOMAIN+"/customername/config"
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/customername/config"
         MQTT_MSG=json.dumps({"name": "Customer Name",
                              "unique_id": "comfort_customername_" + str(device_properties['uid']),
                              "availability_topic": "comfort2/alarm/online",
@@ -1267,7 +1267,7 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
-        discoverytopic = "homeassistant/sensor/"+DOMAIN+"/reference/config"
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/reference/config"
         MQTT_MSG=json.dumps({"name": "Reference",
                              "unique_id": "comfort_reference_" + str(device_properties['uid']),
                              "availability_topic": "comfort2/alarm/online",
@@ -1286,7 +1286,7 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
         
-        discoverytopic = "homeassistant/sensor/"+DOMAIN+"/serial_number/config"
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/serial_number/config"
         MQTT_MSG=json.dumps({"name": "Serial Number",
                              "unique_id": "comfort_serial_number_" + str(device_properties['uid']),
                              "availability_topic": "comfort2/alarm/online",
@@ -1305,7 +1305,7 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
-        discoverytopic = "homeassistant/button/"+DOMAIN+"/refresh/config"
+        discoverytopic = "homeassistant/button/comfort2mqtt/refresh/config"
         MQTT_MSG=json.dumps({"name": "Refresh",
                              "unique_id": "comfort_refresh_switch_" + str(device_properties['uid']),
                              "availability_topic": "comfort2/alarm/online",
