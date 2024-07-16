@@ -1145,8 +1145,8 @@ class Comfort2(mqtt.Client):
        
          # (" + UUID + ")",
 
-        MQTT_DEVICE = {"name": "Comfort to MQTT Bridge",
-                       "identifiers": "comfort2mqtt",
+        MQTT_DEVICE = {"identifiers": ["comfort2mqtt"],
+                       "name": "Comfort to MQTT Bridge",
                        "manufacturer": "Cytech Technologies PTE Limited",
                        "url": "https://www.cytech.biz",
                        "sw_version": device_properties['Version'] if file_exists else None,
