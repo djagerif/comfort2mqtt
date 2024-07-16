@@ -1145,7 +1145,7 @@ class Comfort2(mqtt.Client):
        
 
         MQTT_DEVICE = {"name": "Comfort Alarm System",  # (" + UUID + ")",
-                       "identifiers":["Comfort2MQTT"],
+                       "identifiers":["comfort2mqtt"],
                        "manufacturer": "Cytech Technologies PTE Limited",
                        "url": "https://www.cytech.biz",
                        "sw_version": device_properties['Version'] if file_exists else None,
@@ -1154,7 +1154,7 @@ class Comfort2(mqtt.Client):
                        "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
                        "icon": "mdi:alarm-panel-outline",
                        "serial_number": device_properties['SerialNumber'],
-                       "via_device":"Comfort2MQTT"
+                       "via_device":"comfort2mqtt"
                     }
 
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
@@ -1166,7 +1166,7 @@ class Comfort2(mqtt.Client):
 
 
         MQTT_DEVICE = { "name": "Comfort Alarm System", # (" +  UUID + ")",
-                        "identifiers":["Comfort2MQTT"],
+                        "identifiers":["comfort2mqtt"],
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
                         "serial_number": device_properties['SerialNumber'],
@@ -1322,7 +1322,7 @@ class Comfort2(mqtt.Client):
         time.sleep(0.1)
 
         MQTT_DEVICE = {"name": "Comfort Alarm System",  # (" + UUID + ")",
-                       "identifiers":["Comfort2MQTT"],  #[UID],
+                       "identifiers":["comfort2mqtt"],  #[UID],
                        "manufacturer": "Cytech Technologies PTE Limited",
                        "url": "https://www.cytech.biz",
                        "sw_version": device_properties['Version'] if file_exists else None,
