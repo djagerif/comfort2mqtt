@@ -1172,6 +1172,7 @@ class Comfort2(mqtt.Client):
 #     "via_device": "cbus2-mqtt"
 
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
+                             "name": "pietie",
                              "unique_id": "comfort2mqtt",
                              "Reference": device_properties['Reference'] if file_exists else None,
                              "device" : MQTT_DEVICE
