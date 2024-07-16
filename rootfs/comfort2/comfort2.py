@@ -1144,7 +1144,7 @@ class Comfort2(mqtt.Client):
         UUID = str(device_properties['uid'])
        
         MQTT_DEVICE = { "name": "Comfort Alarm System (" +  UUID + ")",
-                        "identifiers":UID,
+                        "identifiers":[UID],
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
                         "serial_number": device_properties['SerialNumber'],
@@ -1309,7 +1309,8 @@ class Comfort2(mqtt.Client):
                        "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
                        "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
                        "icon": "mdi:alarm-panel-outline",
-                       "serial_number": device_properties['SerialNumber']    # if file_exists else None
+                       "serial_number": device_properties['SerialNumber'],    # if file_exists else None
+                       "via_device": UID
                     }
 
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
