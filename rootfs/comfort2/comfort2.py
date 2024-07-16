@@ -1143,13 +1143,34 @@ class Comfort2(mqtt.Client):
         UID = ("Comfort2MQTT - " + str(device_properties['uid'])) if file_exists else "Comfort2MQTT - 00000000"
         UUID = str(device_properties['uid'])
        
+
+        MQTT_DEVICE = {"name": "Comfort Alarm System (" + UUID + ")",
+                       "identifiers":[UID],
+                       "manufacturer": "Cytech Technologies PTE Limited",
+                       "url": "https://www.cytech.biz",
+                       "sw_version": device_properties['Version'] if file_exists else None,
+                       "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
+                       "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
+                       "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
+                       "icon": "mdi:alarm-panel-outline",
+                       "serial_number": device_properties['SerialNumber'],
+                       "via_device":UID
+                    }
+
+        MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
+                             "Reference": device_properties['Reference'] if file_exists else None,
+                             "device" : MQTT_DEVICE
+                            })
+        self.publish("homeassistant/device/"+DOMAIN+"/config", MQTT_MSG,qos=2,retain=False)
+        time.sleep(0.1)
+
+
         MQTT_DEVICE = { "name": "Comfort Alarm System (" +  UUID + ")",
                         "identifiers":[UID],
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
                         "serial_number": device_properties['SerialNumber'],
-                        "model":"Comfort II Ultra",
-                        "via_device":UID
+                        "model":"Comfort II Ultra"
                     }
 
 
@@ -1309,8 +1330,7 @@ class Comfort2(mqtt.Client):
                        "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
                        "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
                        "icon": "mdi:alarm-panel-outline",
-                       "serial_number": device_properties['SerialNumber'],    # if file_exists else None
-                       "via_device": UID
+                       "serial_number": device_properties['SerialNumber']    # if file_exists else None
                     }
 
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
@@ -1319,6 +1339,7 @@ class Comfort2(mqtt.Client):
                             })
         self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
         time.sleep(0.1)
+
 
     def setdatetime(self):
         global SAVEDTIME
