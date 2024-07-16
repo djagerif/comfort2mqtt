@@ -1143,8 +1143,10 @@ class Comfort2(mqtt.Client):
         UID = ("Comfort2MQTT - " + str(device_properties['uid'])) if file_exists else "Comfort2MQTT - 00000000"
         UUID = str(device_properties['uid'])
        
+         # (" + UUID + ")",
 
-        MQTT_DEVICE = {"name": "Comfort Alarm System",  # (" + UUID + ")",
+        MQTT_DEVICE = {"name": "Comfort Alarm System",
+                       "unique_id": "comfort2mqtt",
                        "identifiers":["comfort2mqtt"],
                        "manufacturer": "Cytech Technologies PTE Limited",
                        "url": "https://www.cytech.biz",
@@ -1164,8 +1166,8 @@ class Comfort2(mqtt.Client):
         self.publish("homeassistant/device/comfort2mqtt/config", MQTT_MSG,qos=2,retain=False)
         time.sleep(0.1)
 
-
-        MQTT_DEVICE = { "name": "Comfort Alarm System", # (" +  UUID + ")",
+ # (" +  UUID + ")",
+        MQTT_DEVICE = { "name": "Comfort Alarm System",
                         "identifiers":["comfort2mqtt"],
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
@@ -1321,8 +1323,10 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
-        MQTT_DEVICE = {"name": "Comfort Alarm System",  # (" + UUID + ")",
-                       "identifiers":["comfort2mqtt"],  #[UID],
+  # (" + UUID + ")",
+  #[UID],
+        MQTT_DEVICE = {"name": "Comfort Alarm System",
+                       "identifiers":["comfort2mqtt"],
                        "manufacturer": "Cytech Technologies PTE Limited",
                        "url": "https://www.cytech.biz",
                        "sw_version": device_properties['Version'] if file_exists else None,
@@ -1330,7 +1334,7 @@ class Comfort2(mqtt.Client):
                        "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
                        "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
                        "icon": "mdi:alarm-panel-outline",
-                       "serial_number": device_properties['SerialNumber']    # if file_exists else None
+                       "serial_number": device_properties['SerialNumber']
                     }
 
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
