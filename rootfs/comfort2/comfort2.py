@@ -1174,13 +1174,13 @@ class Comfort2(mqtt.Client):
 #                             "Reference": device_properties['Reference'] if file_exists else None,
 
 
-        MQTT_DEVICE = { "name": "Comfort Alarm System",
+        MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
                         "identifiers":["comfort2mqtt"],
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
                         "serial_number": device_properties['SerialNumber'],
                         "model":"Comfort II Ultra",
-                        "via_device": "Mosquitto MQTT Broker"
+                        "via_device": "comfort2mqtt"
                     }
 
 
