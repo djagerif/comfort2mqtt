@@ -1177,7 +1177,8 @@ class Comfort2(mqtt.Client):
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
                         "serial_number": device_properties['SerialNumber'],
-                        "model":"Comfort II Ultra"
+                        "model":"Comfort II Ultra",
+                        "via_device": "comfort2mqtt"
                     }
 
 
@@ -1195,8 +1196,7 @@ class Comfort2(mqtt.Client):
                              "native_value": "int",
                              "icon":"mdi:file-chart",
                              "qos": "2",
-                             "device": MQTT_DEVICE,
-                             "via_device": "comfort2mqtt"
+                             "device": MQTT_DEVICE
                         })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
