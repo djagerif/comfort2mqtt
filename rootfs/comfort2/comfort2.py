@@ -1145,28 +1145,32 @@ class Comfort2(mqtt.Client):
        
          # (" + UUID + ")",
 
-        MQTT_DEVICE = {"identifiers": ["comfort2mqtt"],
-                       "name": "Comfort to MQTT Bridge",
+#                       "url": "https://www.cytech.biz",
+#                       "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
+#                       "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
+#                       "icon": "mdi:alarm-panel-outline",
+#                       "serial_number": device_properties['SerialNumber'],
+
+
+        MQTT_DEVICE = {"name": "Comfort to MQTT Bridge",
+                       "identifiers": ["comfort2mqtt"],
                        "manufacturer": "Cytech Technologies PTE Limited",
-                       "url": "https://www.cytech.biz",
                        "sw_version": device_properties['Version'] if file_exists else None,
-                       "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
-                       "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
                        "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
-                       "icon": "mdi:alarm-panel-outline",
-                       "serial_number": device_properties['SerialNumber'],
                        "via_device": "comfort2mqtt"
                     }
 
-        MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
-                             "name": "Bridge Status",
+        MQTT_MSG=json.dumps({"name": "Bridge Status",
                              "state_topic": "comfort2/alarm/LWT",
                              "unique_id": "comfort2mqtt",
-                             "Reference": device_properties['Reference'] if file_exists else None,
                              "device" : MQTT_DEVICE
                             })
         self.publish("homeassistant/device/comfort2mqtt/config", MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
+
+#                             "CustomerName": device_properties['CustomerName'] if file_exists else None,
+#                             "Reference": device_properties['Reference'] if file_exists else None,
+
 
         # MQTT_DEVICE = { "name": "Comfort Alarm System",
         #                 "identifiers":"comfort2mqtt",
