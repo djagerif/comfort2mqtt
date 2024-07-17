@@ -1165,7 +1165,7 @@ class Comfort2(mqtt.Client):
                              "unique_id": "comfort2mqtt",
                              "device" : MQTT_DEVICE
                             })
-        self.publish("homeassistant/device/comfort2mqtt/test/config", MQTT_MSG, qos=2, retain=False)
+        self.publish("homeassistant/device/comfort2mqtt/config", MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
 #                             "CustomerName": device_properties['CustomerName'] if file_exists else None,
@@ -1181,24 +1181,24 @@ class Comfort2(mqtt.Client):
         #             }
 
 
-        # discoverytopic = "homeassistant/sensor/comfort2mqtt/filesystem/config"
-        # MQTT_MSG=json.dumps({"name": "FileSystem",
-        #                      "unique_id": "comfort_filesystem_" + str(device_properties['uid']),
-        #                      "availability_topic": "comfort2/alarm/online",
-        #                      "payload_available": "1",
-        #                      "payload_not_available": "0",
-        #                      "state_topic": "comfort2",
-        #                      "json_attributes_topic": "comfort2",
-        #                      "value_template": "{{ value_json.device.ComfortFileSystem }}",
-        #                      "json_attributes_template": "{{ value_json | tojson }}",
-        #                      "entity_category": "diagnostic",
-        #                      "native_value": "int",
-        #                      "icon":"mdi:file-chart",
-        #                      "qos": "2",
-        #                      "device": MQTT_DEVICE
-        #                 })
-        # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        # time.sleep(0.1)
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/filesystem/config"
+        MQTT_MSG=json.dumps({"name": "FileSystem",
+                             "unique_id": "comfort_filesystem_" + str(device_properties['uid']),
+                             "availability_topic": "comfort2/alarm/online",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "state_topic": "comfort2",
+                             "json_attributes_topic": "comfort2",
+                             "value_template": "{{ value_json.device.ComfortFileSystem }}",
+                             "json_attributes_template": "{{ value_json | tojson }}",
+                             "entity_category": "diagnostic",
+                             "native_value": "int",
+                             "icon":"mdi:file-chart",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                        })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
 
         # discoverytopic = "homeassistant/sensor/comfort2mqtt/firmware/config"
         # MQTT_MSG=json.dumps({"name": "Firmware",
