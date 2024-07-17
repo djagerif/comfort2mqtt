@@ -1165,7 +1165,7 @@ class Comfort2(mqtt.Client):
                              "unique_id": "comfort2mqtt",
                              "device" : MQTT_DEVICE
                             })
-        self.publish("homeassistant/device/comfort2mqtt/config", MQTT_MSG, qos=2, retain=False)
+        self.publish("homeassistant/device/comfort2mqtt/test/config", MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
 #                             "CustomerName": device_properties['CustomerName'] if file_exists else None,
