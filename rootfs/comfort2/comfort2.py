@@ -1158,7 +1158,7 @@ class Comfort2(mqtt.Client):
                         "sw_version":str(device_properties['Version']),
                         "serial_number": device_properties['SerialNumber'],
                         "model":"Comfort II Ultra",
-                        "via_device": "comfort2mqtt"
+                        "via_device": "Mosquitto MQTT Broker"
                     }
 
 
