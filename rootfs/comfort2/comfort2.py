@@ -1179,6 +1179,7 @@ class Comfort2(mqtt.Client):
                         "sw_version":str(device_properties['Version']),
                         "serial_number": device_properties['SerialNumber'],
                         "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
+                        "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
                         "via_device": "comfort2mqtt"
                     }
 
