@@ -1156,9 +1156,7 @@ class Comfort2(mqtt.Client):
                         "identifiers":["comfort2mqtt"],
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
-                        "serial_number": device_properties['SerialNumber'],
                         "model": "Comfort II Ultra",
-                        "icon": "mdi:alarm-panel-outline",
                         "via_device": "comfort2mqtt"
                     }
 
