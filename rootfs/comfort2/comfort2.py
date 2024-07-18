@@ -1342,25 +1342,25 @@ class Comfort2(mqtt.Client):
 #                       "icon": "mdi:alarm-panel-outline",
 #                       "serial_number": device_properties['SerialNumber'],
 
-        MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
-                        "identifiers":["comfort2mqtt"],
-                        "manufacturer":"Cytech Technologies PTE Limited",
-                        "sw_version":str(device_properties['Version']),
-                        "serial_number": device_properties['SerialNumber'],
-                        "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
-                        "via_device": "comfort2mqtt"
-                    }
+        # MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
+        #                 "identifiers":["comfort2mqtt"],
+        #                 "manufacturer":"Cytech Technologies PTE Limited",
+        #                 "sw_version":str(device_properties['Version']),
+        #                 "serial_number": device_properties['SerialNumber'],
+        #                 "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
+        #                 "via_device": "comfort2mqtt"
+        #             }
 
-        MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
-                             "url": "https://www.cytech.biz",
-                             "Reference": device_properties['Reference'] if file_exists else None,
-                             "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
-                             "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
-                             "icon": "mdi:alarm-panel-outline",
-                             "device" : MQTT_DEVICE
-                            })
-        self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
-        time.sleep(0.1)
+        # MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
+        #                      "url": "https://www.cytech.biz",
+        #                      "Reference": device_properties['Reference'] if file_exists else None,
+        #                      "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
+        #                      "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
+        #                      "icon": "mdi:alarm-panel-outline",
+        #                      "device" : MQTT_DEVICE
+        #                     })
+        # self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
+        # time.sleep(0.1)
 
 
     def setdatetime(self):
