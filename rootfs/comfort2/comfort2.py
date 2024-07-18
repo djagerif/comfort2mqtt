@@ -1216,7 +1216,7 @@ class Comfort2(mqtt.Client):
                              "icon":"mdi:chip",
                              "qos": "2",
                              "device": MQTT_DEVICE
-                            })
+                        })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
@@ -1355,12 +1355,12 @@ class Comfort2(mqtt.Client):
         #                "serial_number": device_properties['SerialNumber']
         #             }
 
-        # MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
-        #                      "Reference": device_properties['Reference'] if file_exists else None,
-        #                      "device" : MQTT_DEVICE
-        #                     })
-        # self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
-        # time.sleep(0.1)
+        MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
+                             "Reference": device_properties['Reference'] if file_exists else None,
+                             "device" : MQTT_DEVICE
+                            })
+        self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
+        time.sleep(0.1)
 
 
     def setdatetime(self):
