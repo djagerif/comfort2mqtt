@@ -1160,17 +1160,22 @@ class Comfort2(mqtt.Client):
                         "model":"Comfort II Ultra",
                         "CustomerName": device_properties['CustomerName'] if file_exists else None,
                         "Reference": device_properties['Reference'] if file_exists else None,
+                        "url": "https://www.cytech.biz",
+                        "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
+                        "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
+                        "icon": "mdi:alarm-panel-outline",
+                        "serial_number": device_properties['SerialNumber'],
                         "via_device": "comfort2mqtt"
                     }
 
 
-        MQTT_MSG=json.dumps({"name": "Bridge Status",
-                             "state_topic": "comfort2/alarm/LWT",
-                             "unique_id": "comfort2mqtt",
-                             "device" : MQTT_DEVICE
-                            })
-        self.publish("homeassistant/device/comfort2mqtt/config", MQTT_MSG, qos=2, retain=False)
-        time.sleep(0.1)
+        # MQTT_MSG=json.dumps({"name": "Bridge Status",
+        #                      "state_topic": "comfort2/alarm/LWT",
+        #                      "unique_id": "comfort2mqtt",
+        #                      "device" : MQTT_DEVICE
+        #                     })
+        # self.publish("homeassistant/device/comfort2mqtt/config", MQTT_MSG, qos=2, retain=False)
+        # time.sleep(0.1)
 
 #                             "CustomerName": device_properties['CustomerName'] if file_exists else None,
 #                             "Reference": device_properties['Reference'] if file_exists else None,
@@ -1192,7 +1197,7 @@ class Comfort2(mqtt.Client):
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": "comfort2",
-                             "json_attributes_topic": "homeassistant/device/comfort2",
+                             "json_attributes_topic": "homeassistant/device/comfort2mqtt/config",
                              "value_template": "{{ value_json.device.ComfortFileSystem }}",
                              "json_attributes_template": "{{ value_json | tojson }}",
                              "entity_category": "diagnostic",
