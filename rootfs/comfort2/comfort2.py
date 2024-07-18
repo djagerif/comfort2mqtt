@@ -1152,23 +1152,23 @@ class Comfort2(mqtt.Client):
 #                       "serial_number": device_properties['SerialNumber'],
 
 
-        MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
-                        "identifiers":["comfort2mqtt"],
-                        "manufacturer":"Cytech Technologies PTE Limited",
-                        "sw_version":str(device_properties['Version']),
-                        "serial_number": device_properties['SerialNumber'],
-                        "model":"Comfort II Ultra",
-                        "via_device": "comfort2mqtt"
-                    }
+        # MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
+        #                 "identifiers":["comfort2mqtt"],
+        #                 "manufacturer":"Cytech Technologies PTE Limited",
+        #                 "sw_version":str(device_properties['Version']),
+        #                 "serial_number": device_properties['SerialNumber'],
+        #                 "model":"Comfort II Ultra",
+        #                 "via_device": "comfort2mqtt"
+        #             }
 
 
-        MQTT_MSG=json.dumps({"name": "Bridge Status",
-                             "state_topic": "comfort2/alarm/LWT",
-                             "unique_id": "comfort2mqtt",
-                             "device" : MQTT_DEVICE
-                            })
-        self.publish("homeassistant/device/comfort2mqtt/config", MQTT_MSG, qos=2, retain=False)
-        time.sleep(0.1)
+        # MQTT_MSG=json.dumps({"name": "Bridge Status",
+        #                      "state_topic": "comfort2/alarm/LWT",
+        #                      "unique_id": "comfort2mqtt",
+        #                      "device" : MQTT_DEVICE
+        #                     })
+        # self.publish("homeassistant/device/comfort2mqtt/config", MQTT_MSG, qos=2, retain=False)
+        # time.sleep(0.1)
 
 #                             "CustomerName": device_properties['CustomerName'] if file_exists else None,
 #                             "Reference": device_properties['Reference'] if file_exists else None,
