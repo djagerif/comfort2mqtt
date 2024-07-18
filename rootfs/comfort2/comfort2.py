@@ -1206,7 +1206,6 @@ class Comfort2(mqtt.Client):
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": "comfort2",
-                             "json_attributes_topic": "comfort2",
                              "value_template": "{{ value_json.ComfortFileSystem }}",
                              "entity_category": "diagnostic",
                              "native_value": "int",
@@ -1214,6 +1213,7 @@ class Comfort2(mqtt.Client):
                              "qos": "2",
                              "device": MQTT_DEVICE
                         })
+        #                              "json_attributes_topic": "comfort2",
         #                              "json_attributes_template": "{{ value_json | tojson }}",
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
