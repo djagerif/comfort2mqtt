@@ -1152,21 +1152,20 @@ class Comfort2(mqtt.Client):
 #                       "serial_number": device_properties['SerialNumber'],
 
 
-        MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
-                        "identifiers":["comfort2mqtt"],
-                        "manufacturer":"Cytech Technologies PTE Limited",
-                        "sw_version":str(device_properties['Version']),
-                        "serial_number": device_properties['SerialNumber'],
-                        "model":"Comfort II Ultra",
-                        "CustomerName": device_properties['CustomerName'] if file_exists else None,
-                        "Reference": device_properties['Reference'] if file_exists else None,
-                        "url": "https://www.cytech.biz",
-                        "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
-                        "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
-                        "icon": "mdi:alarm-panel-outline",
-                        "serial_number": device_properties['SerialNumber'],
-                        "via_device": "comfort2mqtt"
-                    }
+        # MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
+        #                 "identifiers":["comfort2mqtt"],
+        #                 "manufacturer":"Cytech Technologies PTE Limited",
+        #                 "sw_version":str(device_properties['Version']),
+        #                 "serial_number": device_properties['SerialNumber'],
+        #                 "model":"Comfort II Ultra",
+        #                 "CustomerName": device_properties['CustomerName'] if file_exists else None,
+        #                 "Reference": device_properties['Reference'] if file_exists else None,
+        #                 "url": "https://www.cytech.biz",
+        #                 "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
+        #                 "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
+        #                 "icon": "mdi:alarm-panel-outline",
+        #                 "via_device": "comfort2mqtt"
+        #             }
 
 
         # MQTT_MSG=json.dumps({"name": "Bridge Status",
@@ -1181,14 +1180,14 @@ class Comfort2(mqtt.Client):
 #                             "Reference": device_properties['Reference'] if file_exists else None,
 
 
-        # MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
-        #                 "identifiers":["comfort2mqtt"],
-        #                 "manufacturer":"Cytech Technologies PTE Limited",
-        #                 "sw_version":str(device_properties['Version']),
-        #                 "serial_number": device_properties['SerialNumber'],
-        #                 "model":"Comfort II Ultra",
-        #                 "via_device": "comfort2mqtt"
-        #             }
+        MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
+                        "identifiers":["comfort2mqtt"],
+                        "manufacturer":"Cytech Technologies PTE Limited",
+                        "sw_version":str(device_properties['Version']),
+                        "serial_number": device_properties['SerialNumber'],
+                        "model":"Comfort II Ultra",
+                        "via_device": "comfort2mqtt"
+                    }
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/filesystem/config"
         MQTT_MSG=json.dumps({"name": "FileSystem",
