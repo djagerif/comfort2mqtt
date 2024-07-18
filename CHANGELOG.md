@@ -7,10 +7,14 @@ All notable changes to this project will be documented in this file.
 ## To Do ##
  - Test Client/Server Authentication certificates
  - First Start Diagnostics 'UNKNOWN' until refresh.
- - Look into 'via' MQTT option.
+ - Look into 'via' MQTT option. Done.
  - Revisit Comfort with UID as device. Maybe without UID for device.
+ - Remove attributes from Diagnostic entities.
+ - Add Comfort Models fro V?
    
 ### Added
+ - MQTT `Connected via` added to discovered device.
+
 
 ### Changed
 

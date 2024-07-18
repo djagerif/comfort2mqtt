@@ -69,6 +69,23 @@ FLAGMAPFILE = False
 DEVICEMAPFILE = False
 device_properties = {}
 
+# Comfort FileSystem values and Model Numbers
+models = {34: "Comfort II ULTRA",
+          31: "Comfort II Optimum",
+          36: "Logic Engine",
+          37: "EMS",
+          38: "EMS2",
+          40: "UCM/Logic",
+          40: "KNX/Logic",
+          21: "KNX/Modbus",
+          39: "KS",
+          35: "CM9001-EX",
+          30: "Comfort II SPC",
+          18: "Comfort I PRO (Obsolete)",
+          17: "Comfort I ENTRY (Obsolete)",
+          24: "Comfort I ULTRA (Obsolete)"
+        }
+
 ZoneCache = {}              # Zone Cache dictionary.
 BypassCache = {}            # Zone Bypass Cache dictionary.
 CacheState = False          # Initial Cache state. False when not in sync with Bypass Zones (b?). True, when in Sync.
@@ -1191,13 +1208,13 @@ class Comfort2(mqtt.Client):
                              "state_topic": "comfort2",
                              "json_attributes_topic": "comfort2",
                              "value_template": "{{ value_json.ComfortFileSystem }}",
-                             "json_attributes_template": "{{ value_json | tojson }}",
                              "entity_category": "diagnostic",
                              "native_value": "int",
                              "icon":"mdi:file-chart",
                              "qos": "2",
                              "device": MQTT_DEVICE
                         })
+        #                              "json_attributes_template": "{{ value_json | tojson }}",
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
