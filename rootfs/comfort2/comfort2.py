@@ -1179,7 +1179,8 @@ class Comfort2(mqtt.Client):
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
                         "serial_number": device_properties['SerialNumber'],
-                        "model":"Comfort II Ultra"
+                        "model":"Comfort II Ultra",
+                        "via_device": "comfort2mqtt"
                     }
 #                         "via_device": "comfort2mqtt"
 
