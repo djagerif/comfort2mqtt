@@ -1201,133 +1201,133 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
-        # discoverytopic = "homeassistant/sensor/comfort2mqtt/firmware/config"
-        # MQTT_MSG=json.dumps({"name": "Firmware",
-        #                      "unique_id": "comfort_firmware_" + str(device_properties['uid']),
-        #                      "availability_topic": "comfort2/alarm/online",
-        #                      "payload_available": "1",
-        #                      "payload_not_available": "0",
-        #                      "state_topic": "comfort2",
-        #                      "json_attributes_topic": "comfort2",
-        #                      "value_template": "{{ value_json.device.sw_version }}",
-        #                      "json_attributes_template": "{{ value_json | tojson }}",
-        #                      "entity_category": "diagnostic",
-        #                      "native_value": "string",
-        #                      "icon":"mdi:chip",
-        #                      "qos": "2",
-        #                      "device": MQTT_DEVICE
-        #                     })
-        # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        # time.sleep(0.1)
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/firmware/config"
+        MQTT_MSG=json.dumps({"name": "Firmware",
+                             "unique_id": "comfort_firmware_" + str(device_properties['uid']),
+                             "availability_topic": "comfort2/alarm/online",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "state_topic": "comfort2",
+                             "json_attributes_topic": "comfort2",
+                             "value_template": "{{ value_json.device.sw_version }}",
+                             "json_attributes_template": "{{ value_json | tojson }}",
+                             "entity_category": "diagnostic",
+                             "native_value": "string",
+                             "icon":"mdi:chip",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
 
-        # discoverytopic = "homeassistant/sensor/comfort2mqtt/state/config"
-        # MQTT_MSG=json.dumps({"name": "State",
-        #                      "unique_id": "comfort_state_" + str(device_properties['uid']),
-        #                      "state_topic": "comfort2/alarm/status",
-        #                      "icon":"mdi:shield-alert",
-        #                      "qos": "2",
-        #                      "native_value": "string",
-        #                      "device": MQTT_DEVICE
-        #                     })
-        # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        # time.sleep(0.1)
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/state/config"
+        MQTT_MSG=json.dumps({"name": "State",
+                             "unique_id": "comfort_state_" + str(device_properties['uid']),
+                             "state_topic": "comfort2/alarm/status",
+                             "icon":"mdi:shield-alert",
+                             "qos": "2",
+                             "native_value": "string",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
 
-        # discoverytopic = "homeassistant/sensor/comfort2mqtt/bypass/config"
-        # MQTT_MSG=json.dumps({"name": "Bypassed Zones",
-        #                      "unique_id": "comfort_bypass_" + str(device_properties['uid']),
-        #                      "state_topic": "comfort2/alarm/bypass",
-        #                      "icon":"mdi:shield-remove",
-        #                      "qos": "2",
-        #                      "native_value": "string",
-        #                      "device": MQTT_DEVICE
-        #                     })
-        # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        # time.sleep(0.1)
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/bypass/config"
+        MQTT_MSG=json.dumps({"name": "Bypassed Zones",
+                             "unique_id": "comfort_bypass_" + str(device_properties['uid']),
+                             "state_topic": "comfort2/alarm/bypass",
+                             "icon":"mdi:shield-remove",
+                             "qos": "2",
+                             "native_value": "string",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
         
-        # discoverytopic = "homeassistant/sensor/comfort2mqtt/status/config"
-        # MQTT_MSG=json.dumps({"name": "Status",
-        #                      "unique_id": "comfort_status_" + str(device_properties['uid']),
-        #                      "state_topic": "comfort2/alarm/LWT",
-        #                      "icon":"mdi:lan-connect",
-        #                      "qos": "2",
-        #                      "native_value": "string",
-        #                      "device": MQTT_DEVICE
-        #                     })
-        # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        # time.sleep(0.1)
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/status/config"
+        MQTT_MSG=json.dumps({"name": "Status",
+                             "unique_id": "comfort_status_" + str(device_properties['uid']),
+                             "state_topic": "comfort2/alarm/LWT",
+                             "icon":"mdi:lan-connect",
+                             "qos": "2",
+                             "native_value": "string",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
 
-        # discoverytopic = "homeassistant/sensor/comfort2mqtt/customername/config"
-        # MQTT_MSG=json.dumps({"name": "Customer Name",
-        #                      "unique_id": "comfort_customername_" + str(device_properties['uid']),
-        #                      "availability_topic": "comfort2/alarm/online",
-        #                      "payload_available": "1",
-        #                      "payload_not_available": "0",
-        #                      "state_topic": "comfort2",
-        #                      "json_attributes_topic": "comfort2",
-        #                      "value_template": "{{ value_json.CustomerName }}",
-        #                      "json_attributes_template": "{{ value_json | tojson }}",
-        #                      "entity_category": "diagnostic",
-        #                      "native_value": "string",
-        #                      "icon":"mdi:shield-account",
-        #                      "qos": "2",
-        #                      "device": MQTT_DEVICE
-        #                     })
-        # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        # time.sleep(0.1)
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/customername/config"
+        MQTT_MSG=json.dumps({"name": "Customer Name",
+                             "unique_id": "comfort_customername_" + str(device_properties['uid']),
+                             "availability_topic": "comfort2/alarm/online",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "state_topic": "comfort2",
+                             "json_attributes_topic": "comfort2",
+                             "value_template": "{{ value_json.CustomerName }}",
+                             "json_attributes_template": "{{ value_json | tojson }}",
+                             "entity_category": "diagnostic",
+                             "native_value": "string",
+                             "icon":"mdi:shield-account",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
 
-        # discoverytopic = "homeassistant/sensor/comfort2mqtt/reference/config"
-        # MQTT_MSG=json.dumps({"name": "Reference",
-        #                      "unique_id": "comfort_reference_" + str(device_properties['uid']),
-        #                      "availability_topic": "comfort2/alarm/online",
-        #                      "payload_available": "1",
-        #                      "payload_not_available": "0",
-        #                      "state_topic": "comfort2",
-        #                      "json_attributes_topic": "comfort2",
-        #                      "value_template": "{{ value_json.Reference }}",
-        #                      "json_attributes_template": "{{ value_json | tojson }}",
-        #                      "entity_category": "diagnostic",
-        #                      "native_value": "string",
-        #                      "icon":"mdi:home-circle",
-        #                      "qos": "2",
-        #                      "device": MQTT_DEVICE
-        #                     })
-        # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        # time.sleep(0.1)
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/reference/config"
+        MQTT_MSG=json.dumps({"name": "Reference",
+                             "unique_id": "comfort_reference_" + str(device_properties['uid']),
+                             "availability_topic": "comfort2/alarm/online",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "state_topic": "comfort2",
+                             "json_attributes_topic": "comfort2",
+                             "value_template": "{{ value_json.Reference }}",
+                             "json_attributes_template": "{{ value_json | tojson }}",
+                             "entity_category": "diagnostic",
+                             "native_value": "string",
+                             "icon":"mdi:home-circle",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
         
-        # discoverytopic = "homeassistant/sensor/comfort2mqtt/serial_number/config"
-        # MQTT_MSG=json.dumps({"name": "Serial Number",
-        #                      "unique_id": "comfort_serial_number_" + str(device_properties['uid']),
-        #                      "availability_topic": "comfort2/alarm/online",
-        #                      "payload_available": "1",
-        #                      "payload_not_available": "0",
-        #                      "state_topic": "comfort2",
-        #                      "json_attributes_topic": "comfort2",
-        #                      "value_template": "{{ value_json.device.serial_number }}",
-        #                      "json_attributes_template": "{{ value_json | tojson }}",
-        #                      "entity_category": "diagnostic",
-        #                      "native_value": "string",
-        #                      "icon":"mdi:numeric",
-        #                      "qos": "2",
-        #                      "device": MQTT_DEVICE
-        #                     })
-        # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        # time.sleep(0.1)
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/serial_number/config"
+        MQTT_MSG=json.dumps({"name": "Serial Number",
+                             "unique_id": "comfort_serial_number_" + str(device_properties['uid']),
+                             "availability_topic": "comfort2/alarm/online",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "state_topic": "comfort2",
+                             "json_attributes_topic": "comfort2",
+                             "value_template": "{{ value_json.device.serial_number }}",
+                             "json_attributes_template": "{{ value_json | tojson }}",
+                             "entity_category": "diagnostic",
+                             "native_value": "string",
+                             "icon":"mdi:numeric",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
 
-        # discoverytopic = "homeassistant/button/comfort2mqtt/refresh/config"
-        # MQTT_MSG=json.dumps({"name": "Refresh",
-        #                      "unique_id": "comfort_refresh_switch_" + str(device_properties['uid']),
-        #                      "availability_topic": "comfort2/alarm/online",
-        #                      "command_topic": "comfort2/alarm/refresh",
-        #                      "payload_available": "1",
-        #                      "payload_not_available": "0",
-        #                      "payload_press": COMFORT_KEY,
-        #                      "icon":"mdi:shield-refresh",
-        #                      "device_class": "restart",
-        #                      "qos": "2",
-        #                      "device": MQTT_DEVICE
-        #                     })
-        # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        # time.sleep(0.1)
+        discoverytopic = "homeassistant/button/comfort2mqtt/refresh/config"
+        MQTT_MSG=json.dumps({"name": "Refresh",
+                             "unique_id": "comfort_refresh_switch_" + str(device_properties['uid']),
+                             "availability_topic": "comfort2/alarm/online",
+                             "command_topic": "comfort2/alarm/refresh",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "payload_press": COMFORT_KEY,
+                             "icon":"mdi:shield-refresh",
+                             "device_class": "restart",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
 
 
 
