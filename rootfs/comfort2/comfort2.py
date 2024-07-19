@@ -1726,6 +1726,7 @@ class Comfort2(mqtt.Client):
         global ZoneCache
         global BypassCache
         global CacheState
+        global models
 
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         if os.name != 'nt':
