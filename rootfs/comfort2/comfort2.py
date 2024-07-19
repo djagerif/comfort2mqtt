@@ -1188,7 +1188,8 @@ class Comfort2(mqtt.Client):
 #                             "Reference": device_properties['Reference'] if file_exists else None,
 
 #                             "name": "Comfort - 'House de Jager'",
-        if file_exists and len(device_properties['Reference']) > 0:
+
+        if "Reference" in device_properties and len(device_properties['Reference']) > 0:
             _name = "Comfort - " + str(device_properties['Reference'])
         else:
             _name = "Comfort - <Default>"
