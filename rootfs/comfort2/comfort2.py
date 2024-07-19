@@ -75,9 +75,6 @@ models = {34: "Comfort II ULTRA",
           36: "Logic Engine",
           37: "EMS",
           38: "EMS2",
-          40: "UCM/Logic",
-          40: "KNX/Logic",
-          21: "KNX/Modbus",
           39: "KS",
           35: "CM9001-EX",
           30: "Comfort II SPC",
@@ -155,26 +152,26 @@ group = parser.add_argument_group('Comfort System options')
 group.add_argument(
     '--comfort-address',
     required=True,
-    help='IP Address of the Comfort II system in IPV4 format.')
+    help='IP Address of the Comfort system in IPV4 format.')
 
 group.add_argument(
     '--comfort-port',
     type=int, default=1002,
-    help="TCP Port to connect to Comfort II Alarm System. [default: '1002']")
+    help="TCP Port to connect to Comfort system. [default: '1002']")
 
 group.add_argument(
     '--comfort-login-id',
     required=True,
-    help='Comfort II system Login ID.')
+    help='Comfort system Login ID.')
 
 group.add_argument(
     '--comfort-cclx-file',
-    help='Comfort II (CCLX) Configuration filename.')
+    help='Comfort (CCLX) Configuration filename.')
 
 group.add_argument(
     '--comfort-time',
     type=boolean_string, default='false',
-    help="Set Comfort II Date and Time flag, 'True'|'False'. [default: 'False']")
+    help="Set Comfort Date and Time flag, 'True'|'False'. [default: 'False']")
 
 group = parser.add_argument_group('Comfort Alarm options')
 group.add_argument(
@@ -1156,6 +1153,7 @@ class Comfort2(mqtt.Client):
     def UpdateDeviceInfo(self, file_exists = False):
 
         global device_properties
+        global models
   
         UID = ("Comfort2MQTT - " + str(device_properties['uid'])) if file_exists else "Comfort2MQTT - 00000000"
         UUID = str(device_properties['uid'])
@@ -1195,9 +1193,12 @@ class Comfort2(mqtt.Client):
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
                         "serial_number": device_properties['SerialNumber'],
-                        "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
+                        "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
                         "via_device": "comfort2mqtt"
                     }
+
+#                         "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
+
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/filesystem/config"
         MQTT_MSG=json.dumps({"name": "FileSystem",
@@ -1375,7 +1376,7 @@ class Comfort2(mqtt.Client):
                              "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
                              "sw_version":str(device_properties['Version']),
                              "serial_number": device_properties['SerialNumber'],
-                             "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown"
+                             "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
                             })
         #                     "device" : MQTT_DEVICE
 
@@ -1925,10 +1926,12 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "V?":
                                 VMsg = ComfortV_SystemTypeReport(line[1:])
-                                if VMsg.filesystem != 34:
-                                    logging.warning("Unsupported Comfort System detected (File System %d).", VMsg.filesystem)
-                                else:
-                                    logging.info("Comfort II Ultra detected (Firmware %d.%03d)", VMsg.version, VMsg.revision)
+                                #if VMsg.filesystem != 34:
+                                #    logging.warning("Unsupported Comfort System detected (File System %d).", VMsg.filesystem)
+                                #else:
+                                #logging.info("Comfort II Ultra detected (Firmware %d.%03d)", VMsg.version, VMsg.revision)
+                                logging.info("%s detected (Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])], VMsg.version, VMsg.revision)
+                                                 
                                 device_properties['ComfortFileSystem'] = str(VMsg.filesystem)
                                 device_properties['ComfortFirmware'] = str(VMsg.firmware)
                                 device_properties['Version'] = str(VMsg.version) + "." + str(VMsg.revision).zfill(3)
@@ -1938,8 +1941,8 @@ class Comfort2(mqtt.Client):
                                 if COMFORT_SERIAL != SNMsg.serial_number:
                                     pass
                                 COMFORT_KEY = SNMsg.refreshkey
-                                logging.info("Comfort II Refresh Key: %s", COMFORT_KEY)
-                                logging.info("Comfort II Serial Number: %s", COMFORT_SERIAL)
+                                logging.info("Refresh Key: %s", COMFORT_KEY)
+                                logging.info("Serial Number: %s", COMFORT_SERIAL)
                                 device_properties['SerialNumber'] = COMFORT_SERIAL
                                 
                                 self.UpdateDeviceInfo(True)     # Update Device properties.
