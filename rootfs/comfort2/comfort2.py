@@ -1187,8 +1187,12 @@ class Comfort2(mqtt.Client):
 #                             "CustomerName": device_properties['CustomerName'] if file_exists else None,
 #                             "Reference": device_properties['Reference'] if file_exists else None,
 
-
-        MQTT_DEVICE = { "name": "Comfort - 'House de Jager'",
+#                             "name": "Comfort - 'House de Jager'",
+        if file_exists and len(device_properties['Reference']) > 0:
+            _name = "Comfort - " + str(device_properties['Reference'])
+        else:
+            _name = "Comfort - <Default>"
+        MQTT_DEVICE = { "name": _name,
                         "identifiers":["comfort2mqtt"],
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
