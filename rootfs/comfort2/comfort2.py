@@ -1190,9 +1190,9 @@ class Comfort2(mqtt.Client):
 #                             "name": "Comfort - 'House de Jager'",
 
         if "Reference" in device_properties and device_properties['Reference'] is not None:
-            _name = "Comfort - " + str(device_properties['Reference']) if len(device_properties['Reference']) > 0 else "Comfort - <Default>"
+            _name = "Comfort - " + str(device_properties['Reference']) if len(device_properties['Reference']) > 0 else "Comfort <Default>"
         else:
-            _name = "Comfort - <Default>"
+            _name = "Comfort <Default>"
         MQTT_DEVICE = { "name": _name,
                         "identifiers":["comfort2mqtt"],
                         "manufacturer":"Cytech Technologies PTE Limited",
