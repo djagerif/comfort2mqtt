@@ -46,49 +46,49 @@ configuration:
       A file containing the Client Private key. Place this file in the Home
       Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
   comfort_port:
-    name: Comfort II Port
+    name: Comfort TCP Port
     description: >-
-      Cytech Comfort II UCM/Ethernet TCP Port. Range from 1 - 65535 (Default is 1002).
+      Cytech Comfort UCM/Ethernet TCP Port. Range from 1 - 65535 (Default is 1002).
   comfort_address:
-    name: Comfort II IP address
+    name: Comfort IP address
     description: >-
-      Cytech Comfort II IP Address in IPV4 format.
+      Cytech Comfort IP Address in IPV4 format.
   comfort_login_id:
-    name: Comfort II User Login ID
+    name: Comfort User Login ID
     description: >-
-      Cytech Comfort II User Login ID with at least Read-Only access. Login ID has minimum 4 characters and 6 as maximum.
+      Cytech Comfort User Login ID with at least Read-Only access. Login ID has minimum 4 characters and 6 as maximum.
       For full functionality you need Read/Write access as well as Disarm capabilities.
   comfort_cclx_file:
-    name: Comfort II Configuration file
+    name: Comfort Configuration file
     description: >-
-      Comfort II Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc.
+      Comfort Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc.
   log_verbosity:
     name: Global Log Verbosity
     description: >-
       Global Log Verbosity level (Default INFO).
   alarm_inputs:
-    name: Comfort II Zone Inputs (In multiples of 8).
+    name: Comfort Zone Inputs (In multiples of 8).
     description: >-
-      Cytech Comfort II physical Zone Inputs installed on your system. Range from 8 - 128 (Default is 8).
+      Cytech Comfort Zone Inputs installed on your system. Range from 8 - 128 (Default is 8).
   alarm_outputs:
-    name: Comfort II Zone Outputs (In multiples of 8).
+    name: Comfort Zone Outputs (In multiples of 8).
     description: >-
-      Cytech Comfort II physical Zone Outputs installed on your system. Range from 0 - 128 (Default is 0).
+      Cytech Comfort Zone Outputs installed on your system. Range from 0 - 128 (Default is 0).
   alarm_rio_inputs:
-    name: Comfort II SCS/RIO Inputs
+    name: Comfort SCS/RIO Inputs
     description: >-
-      Cytech Comfort II SCS/RIO Inputs installed on your system. Range from 0 - 120 (Default is 0).
+      Cytech Comfort SCS/RIO Inputs installed on your system. Range from 0 - 120 (Default is 0).
       Note: This is the amount of SCS/RIO Inputs EG. one SCS/RIO can have up to 8 Inputs. 
   alarm_rio_outputs:
-    name: Comfort II SCS/RIO Outputs.
+    name: Comfort SCS/RIO Outputs.
     description: >-
-      Cytech Comfort II SCS/RIO Outputs installed on your system. Range from 0 - 120 (Default is 0).
+      Cytech Comfort SCS/RIO Outputs installed on your system. Range from 0 - 120 (Default is 0).
       Note: This is the amount of additional SCS/RIO Outputs EG. one SCS/RIO can have up to 8 Outputs.
   alarm_responses:
-    name: Comfort II Responses
+    name: Comfort Responses
     description: >-
-      The number of Cytech Comfort II Responses that can be activated. Range from 0 - 1024 (Default is 0).
+      The number of Cytech Comfort Responses that can be activated. Range from 0 - 1024 (Default is 0).
   comfort_time:
-    name: Set Comfort II Time and Date.
+    name: Set Comfort Time and Date.
     description: >-
-      Set Cytech Comfort II Time and Date on successful logon and once a day at midnight (Default is False).
+      Set Cytech Comfort Time and Date on successful logon and once a day at midnight (Default is False).

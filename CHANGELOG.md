@@ -10,7 +10,8 @@ All notable changes to this project will be documented in this file.
  - Look into 'via' MQTT option. Done.
  - Revisit Comfort with UID as device. Maybe without UID for device.
  - Remove attributes from Diagnostic entities.
- - Add Comfort Models fro V?
+ - Add Comfort Models from V?
+ - Update Comfort II Ultra static references to Comfort.
    
 ### Added
  - MQTT `Connected via` added to discovered device.
