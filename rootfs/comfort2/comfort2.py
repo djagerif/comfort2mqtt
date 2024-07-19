@@ -1937,7 +1937,7 @@ class Comfort2(mqtt.Client):
                                 device_properties['Version'] = str(VMsg.version) + "." + str(VMsg.revision).zfill(3)
 
                                 logging.info("%s detected (Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])], VMsg.version, VMsg.revision)
-
+                                self.UpdateDeviceInfo(True)     # Update Device properties.
 
                             elif line[1:5] == "SN01":       # Comfort Encoded Serial Number - Used for Refresh Key
                                 SNMsg = ComfortSN_SerialNumberReport(line[1:])

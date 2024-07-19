@@ -7,17 +7,17 @@ All notable changes to this project will be documented in this file.
 ## To Do ##
  - Test Client/Server Authentication certificates
  - First Start Diagnostics 'UNKNOWN' until refresh.
- - Look into 'via' MQTT option. Done.
- - Revisit Comfort with UID as device. Maybe without UID for device.
  - Remove attributes from Diagnostic entities.
- - Add Comfort Models from V?
- - Update Comfort II Ultra static references to Comfort.
-   
+    
 ### Added
  - MQTT `Connected via` added to discovered device.
+ - Added reporting for more Comfort models when detected.
+ - Added MQTT 'Connected via' information.
 
 
 ### Changed
+ - All references to Comfoert II Ultra to Comfort only to be more inclusive of other Comfort system models.
+ - Remove unique identifer for Comfort identification, makes it easier to read/identify.
 
 ### Fixed
 
