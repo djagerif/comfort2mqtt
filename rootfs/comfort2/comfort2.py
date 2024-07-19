@@ -1188,17 +1188,15 @@ class Comfort2(mqtt.Client):
 #                             "Reference": device_properties['Reference'] if file_exists else None,
 
 
-        MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
+        MQTT_DEVICE = { "name": "Comfort - 'House de Jager'",
                         "identifiers":["comfort2mqtt"],
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
                         "serial_number": device_properties['SerialNumber'],
-                        "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
-                        "via_device": "comfort2mqtt"
+                        "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
                     }
-
+#                        "via_device": "comfort2mqtt"
 #                         "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
-
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/filesystem/config"
         MQTT_MSG=json.dumps({"name": "FileSystem",

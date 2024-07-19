@@ -8,15 +8,16 @@ All notable changes to this project will be documented in this file.
  - Test Client/Server Authentication certificates
  - First Start Diagnostics 'UNKNOWN' until refresh.
  - Remove attributes from Diagnostic entities.
+ - Remove MQTT `Connected via` added to discovered device. Should be device only.
+ - Look into ARM CPU and Battery/DC Polling if detected. D?
     
 ### Added
- - MQTT `Connected via` added to discovered device.
  - Added reporting for more Comfort models when detected.
  - Added MQTT 'Connected via' information.
 
 
 ### Changed
- - All references to Comfoert II Ultra to Comfort only to be more inclusive of other Comfort system models.
+ - Update all references of Comfort II Ultra to Comfort to be more inclusive of other Comfort system models.
  - Remove unique identifer for Comfort identification, makes it easier to read/identify.
 
 ### Fixed
