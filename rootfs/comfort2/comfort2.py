@@ -1931,11 +1931,13 @@ class Comfort2(mqtt.Client):
                                 #    logging.warning("Unsupported Comfort System detected (File System %d).", VMsg.filesystem)
                                 #else:
                                 #logging.info("Comfort II Ultra detected (Firmware %d.%03d)", VMsg.version, VMsg.revision)
-                                logging.info("%s detected (Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])], VMsg.version, VMsg.revision)
                                                  
                                 device_properties['ComfortFileSystem'] = str(VMsg.filesystem)
                                 device_properties['ComfortFirmware'] = str(VMsg.firmware)
                                 device_properties['Version'] = str(VMsg.version) + "." + str(VMsg.revision).zfill(3)
+
+                                logging.info("%s detected (Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])], VMsg.version, VMsg.revision)
+
 
                             elif line[1:5] == "SN01":       # Comfort Encoded Serial Number - Used for Refresh Key
                                 SNMsg = ComfortSN_SerialNumberReport(line[1:])
