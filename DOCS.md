@@ -19,7 +19,7 @@ The installation of this add-on is pretty straightforward and no different in co
 
 Even though this is a mostly Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Alpine Linux, other platforms remain untested and it's not clear if it will work or not.
 
-⚠️ This add-on requires initial configuration to connect with Home Assistant and your Comfort II Ultra alarm system.
+⚠️ This add-on requires initial configuration to connect with Home Assistant and your Comfort system e.g. Comfort II Ultra Alarm system.
 
 
 ## MQTT
@@ -235,7 +235,7 @@ mqtt:
       optimistic: false
       on_command_type: "first"
 ```
-Comfort II Ultra supports both Unsigned 8-bit and Signed 16-bit values. However, many integrations like Clipsal C-BUS uses Unsigned 8-bit values and sets Counter values of 0xFF(255) for 'On' and 0x00(0) for the 'Off' state. If you have a Comfort II Ultra integration that is different to the example above then adjust your `payload_on` and `payload_off` integer values accordingly.
+Comfort II ULTRA supports both Unsigned 8-bit and Signed 16-bit values. However, many integrations like Clipsal C-BUS uses Unsigned 8-bit values and sets Counter values of 0xFF(255) for 'On' and 0x00(0) for the 'Off' state. If you have a Comfort II ULTRA integration that is different to the example above then adjust your `payload_on` and `payload_off` integer values accordingly.
 
 The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable light, both mapped to their respective Comfort Counters. You could also map your Non-Dimmable Lights to Comfort Flags which should operate in a similar manner as Counters except the `payload_on`value will be `1` rather than `255`. With the Light examples above you can also add the `Brightness` secondary info to the Dimmer light icon and it will display as per below.
 
@@ -245,7 +245,7 @@ Because `Counters` can be used for many things other than Lights, the `Kitchen L
 
 ### Auto-Discovered Objects
 
-When the Add-on is fully configured and running, there will be a new Device with several System Entities auto-discovered as per below. The values for these entities are retrieved from both the Comfort II Ultra system as well as the alarm configuration `CCLX` file. If the `CCLX` file is not present then no object enrichment will be done and default names will be used for entities, especially ZoneWord strings and Object Descriptions as per the `CCLX` file.
+When the Add-on is fully configured and running, there will be a new Device with several System Entities auto-discovered as per below. The values for these entities are retrieved from both the Comfort system as well as the alarm configuration `CCLX` file. If the `CCLX` file is not present then no object enrichment will be done and default names will be used for entities, especially ZoneWord strings and Object Descriptions as per the `CCLX` file.
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/18f53bd3-2d7c-40a9-a34d-611ff7bdef30)
 
@@ -277,7 +277,7 @@ tap_action:
 
 ## Home Assistant - Alarm State Colours (Optional)
 
-The native `Alarm Control Panel` uses Grey, Orange and Green for Disarmed, Arming/Pending and Armed, Red is used for Triggered. These colours does not correlate with the Comfort II Ultra Alarm States. To change the colours to use Green, Orange and Red, you have to add a seperate `Theme` to your `Alarm Control Panel` card.
+The native `Alarm Control Panel` uses Grey, Orange and Green for Disarmed, Arming/Pending and Armed, Red is used for Triggered. These colours does not correlate with the Comfort II ULTRA Alarm states. To change the colours to use Green, Orange and Red, you have to add a seperate `Theme` to your `Alarm Control Panel` card.
 
 1. Create a file called `themes.yaml`, it can actually be named <anything>.yaml, it doesn't matter. Copy this file into your Home Assistant `/config/themes` directory. If the directory doesn't exist then create the directory.
 
@@ -372,12 +372,12 @@ mode: single
 ```
 ⚠️ **Note:** When Comfort to MQTT starts up it will print the KEY value to be used for Refresh Authentication.
 
-`2024-06-12 17:45:27 INFO     Comfort II Refresh Key: 000F8EC8`
+`2024-06-12 17:45:27 INFO     Refresh Key: 000F8EC8`
 
 
 ## Hardware and Interface support
 
-This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. Comfort II Ultra firmware as tested is `7.201`. If any other Comfort system, model or firmware other than `7.201`, is used then results may be unexpected.
+This Add-on was specifically developed for the Comfort II ULTRA range of Alarm Systems with File System type `34`. Comfort II ULTRA firmware as tested is `7.201`. If any other Comfort system, model or firmware other than `7.201`, is used then results may be unexpected.
 
 The following Cytech Universal Communications Modules (UCM) Ethernet modules are supported:
 
@@ -391,7 +391,7 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 This software _requires_ a fully functional UCM/Ethernet or UCM/Wifi configuration with inactivity timeouts set to default values of 2 minutes. The UCM/Wifi is not recommended due to possible connectivity issues that could arise from switching between different AP's or other possible sources of RF noise. For best performance it is recommended to use the UCM/Eth03 which uses a physical LAN connection. Use a good quality CAT5e or better cable between the UCM/Eth03 and your network device.
 
-If your network is segmented using a firewall, or any other device, you must ensure all applicable ports are allowed between Home Assistant and the Comfort II Ethernet Module (UCM). The default port for the UCM/Eth03 is TCP/1002 which is Port #2 of a UCMEth03.
+If your network is segmented using a firewall, or any other device, you must ensure all applicable ports are allowed between Home Assistant and the Comfort Ethernet Module (UCM). The default port for the UCM/Eth03 is TCP/1002 which is Port #2 of a UCMEth03.
   
 ⚠️ The UCM/WiFi uses port TCP/3000 as the default port. Any port may be used as long as there are no overlaps with existing services on the network.
 
@@ -443,23 +443,23 @@ If your network is segmented using a firewall, or any other device, you must ens
 
   A file containing the Client Private key. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
 
-### Option: `Comfort II Ultra Port` (Optional)
+### Option: `Comfort TCP Port` (Optional)
 
-  The Comfort II Ultra UCM/Eth03 TCP port used for connectivity. UCM/ETh03 can be changed so please check your Comfort II Ultra configuration and use the port that is configured for access. Note that only one client can connect to any given TCP port. The default is '1002'
+  The Comfort UCM/Eth03 TCP port used for connectivity. UCM/ETh03 can be changed so please check your Comfort configuration and use the port that is configured for access. Note that only one client can connect to any given TCP port. The default is '1002'
 
-### Option: `Comfort II Ultra IP address`
+### Option: `Comfort system IP address`
 
-  The Comfort II Ultra UCM/Eth03 IP address or Hostname used for connectivity.
+  The Comfort UCM/Eth03 IP address or Hostname used for connectivity.
 
-### Option: `Comfort II Ultra User Login ID`
+### Option: `Comfort User Login ID`
 
-  Cytech Comfort II User Login ID with the appropriate rights. Login ID has minimum 4 characters and 6 maximum. For full functionality you need at least Local Arm/Disarm and Remote Arm/Disarm capabilities on Comfort. See the [Comfigurator Programming Guide][progman], `Security Settings` and `Sign-in Codes` sections for more information on user creation and rights.
+  Cytech Comfort User Login ID with the appropriate rights. Login ID has minimum 4 characters and 6 maximum. For full functionality you need at least Local Arm/Disarm and Remote Arm/Disarm capabilities on Comfort. See the [Comfigurator Programming Guide][progman], `Security Settings` and `Sign-in Codes` sections for more information on user creation and rights.
 
   [progman]: http://www.cytech.biz/download_files.php?item_id=1082
 
-### Option: `Comfort II Configuration file` (Optional)
+### Option: `Comfort Configuration file` (Optional)
 
-  Comfort II Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>` folder.
+  Comfort Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>` folder.
 
   To upload a file to the `addon_config` directory you could use something like [Samba share][samba] Add-on or similar allowing filesystem access to seleced directories on Home Assistant.
 
@@ -476,29 +476,29 @@ If your network is segmented using a firewall, or any other device, you must ens
 
   Please note that each level automatically includes log messages from a more severe level, e.g. `DEBUG` also shows `INFO` messages. By default, the `log_level` is set to `INFO`, which is the recommended setting unless you are troubleshooting.
 
-### Option: `Comfort II Ultra Zone Inputs` (Optional)
+### Option: `Comfort Zone Inputs` (Optional)
 
   Select number of Published Comfort Inputs/Zones starting from Zone 1. Published Zones is a single contiguous block from 1 to <Value>. Default 8, Max. 128
 
-### Option: `Comfort II Ultra Zone Outputs` (Optional)
+### Option: `Comfort Zone Outputs` (Optional)
 
   Select number of Published Comfort Outputs starting from Output 1. Published Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 128
 
-### Option: `Comfort II Ultra SCS/RIO Inputs` (Optional)
+### Option: `Comfort SCS/RIO Inputs` (Optional)
 
   Set number of Published SCS/RIO Inputs. Published SCS/RIO Inputs is a single contiguous block from 1 to <Value>. Default 0, Max. 120. 
 
-### Option: `Comfort II Ultra SCS/RIO Outputs` (Optional)
+### Option: `Comfort SCS/RIO Outputs` (Optional)
 
   Set number of Published SCS/RIO Outputs. Published SCS/RIO Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 120. 
 
-### Option: `Comfort II Ultra Responses` (Optional)
+### Option: `Comfort Responses` (Optional)
 
   This sets the number of Responses that the Add-on subscribes to. Valid range values are from 0 - 1024. If you subscribe to the first 100 responses and trigger a response number EG. 200, then it will not be sent to Comfort for execution. Only subscribed responses are executed. The Default value is `0`.
 
-### Option: `Set Comfort II Ultra Time and Date` (Optional)
+### Option: `Set Comfort Time and Date` (Optional)
 
-  Set Comfort II Ultra Time and Date when the Add-on logs in and automatically every day at midnight. The default value is `False`.
+  Set Comfort Time and Date when the Add-on logs in and automatically every day at midnight. The default value is `False`.
 
 
 ## Support
