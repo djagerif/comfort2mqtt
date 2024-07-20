@@ -1264,6 +1264,26 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
+
+#            "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/device/config"
+        MQTT_MSG=json.dumps({"name": "System",
+                             "unique_id": "comfort_device_" + str(device_properties['uid']),
+                             "availability_topic": "comfort2/alarm/online",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "state_topic": "comfort2/alarm/LWT",
+                             "json_attributes_topic": "comfort2",
+                             "json_attributes_template": "{{ value_json | tojson }}",
+                             "entity_category": "diagnostic",
+                             "icon":"mdi:alarm-panel-outline",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                        })
+
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
+
         discoverytopic = "homeassistant/sensor/comfort2mqtt/firmware/config"
         MQTT_MSG=json.dumps({"name": "Firmware",
                              "unique_id": "comfort_firmware_" + str(device_properties['uid']),
@@ -1415,8 +1435,6 @@ class Comfort2(mqtt.Client):
                              "hw_version":str(device_properties['ComfortHardwareModel']),
                              "serial_number": device_properties['SerialNumber'],
                              "cpu_type": str(device_properties['CPUType']),
-                             "json_attributes_topic": "comfort2",
-                             "json_attributes_template": "{{ value_json | tojson }}",
                              "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
                             })
         #                     "device" : MQTT_DEVICE
