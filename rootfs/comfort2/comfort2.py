@@ -1979,13 +1979,15 @@ class Comfort2(mqtt.Client):
                                 uMsg = Comfort_U_SystemCPUTypeReport(line[1:])
                                                 
                                 device_properties['CPUType'] = str(uMsg.cputype)
-                                logging.debug("%s CPU detected", str(device_properties['CPUType']))
+                                if str(uMsg.cputype) != "N/A":
+                                    logging.debug("%s Mainboard CPU detected", str(device_properties['CPUType']))
+                                    device_properties['ComfortHardwareModel'] = device_properties['ComfortHardwareModel'] + " (" + str(device_properties['CPUType']) + ")"
 
                             elif line[1:3] == "EL":       # Determine HW model number CM9000/9001 if available.
                                 ELMsg = Comfort_EL_HardwareModelReport(line[1:])
                                                  
                                 device_properties['ComfortHardwareModel'] = str(ELMsg.hardwaremodel)
-                                logging.debug("Hardware Model %s detected", str(device_properties['ComfortHardwareModel']))
+                                logging.debug("Hardware Model %s", str(device_properties['ComfortHardwareModel']))
 
                             elif line[1:5] == "SN01":       # Comfort Encoded Serial Number - Used for Refresh Key
                                 SNMsg = ComfortSN_SerialNumberReport(line[1:])
