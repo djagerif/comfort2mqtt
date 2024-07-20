@@ -1107,6 +1107,14 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall("\x03b?00\r".encode())       # b?00 Bypassed Zones first
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
+            #get HW model
+            self.comfortsock.sendall("\x03EL\r".encode())
+            SAVEDTIME = datetime.now()
+            time.sleep(0.1)
+            #get CPU Type
+            self.comfortsock.sendall("\x03u?01\r".encode())
+            SAVEDTIME = datetime.now()
+            time.sleep(0.1)
             #Used for Unique ID
             self.comfortsock.sendall("\x03UL7FF904\r".encode())
             SAVEDTIME = datetime.now()
@@ -1488,6 +1496,7 @@ class Comfort2(mqtt.Client):
                 UcmRevision = None
                 ComfortFileSystem = None
                 ComfortFirmware = None
+
                 CustomerName = entry.attrib.get('CustomerName')
                 Reference = entry.attrib.get('Reference')
                 UcmVersion = entry.attrib.get('UcmVersion')
