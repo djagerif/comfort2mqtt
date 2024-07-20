@@ -1237,7 +1237,7 @@ class Comfort2(mqtt.Client):
                         "sw_version":str(device_properties['Version']),
                         "hw_version":str(device_properties['ComfortHardwareModel']),
                         "serial_number": device_properties['SerialNumber'],
-                        "model": str(device_properties['ComfortHardwareModel'])
+                        "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
                     }
 #                         "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
 #                        "via_device": "comfort2mqtt"
