@@ -1228,18 +1228,16 @@ class Comfort2(mqtt.Client):
         else:
             _name = "Comfort <Default>"
         
-        model = models[int(device_properties['ComfortFileSystem'])] + "(" + device_properties['ComfortHardwareModel'] + ")" if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+        #model = models[int(device_properties['ComfortFileSystem'])] + " (" + device_properties['ComfortHardwareModel'] + ")" if int(device_properties['ComfortFileSystem']) in models else "Unknown"
         MQTT_DEVICE = { "name": _name,
                         "identifiers":["comfort2mqtt"],
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
-                        "hw_version":"CM-TEST",
+                        "hw_version":str(device_properties['ComfortHardwareModel']),
                         "serial_number": device_properties['SerialNumber'],
-                        "model": model
+                        "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
                     }
 #                         "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
-
-
 #                        "via_device": "comfort2mqtt"
 #                         "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
 
