@@ -1228,14 +1228,16 @@ class Comfort2(mqtt.Client):
         else:
             _name = "Comfort <Default>"
         
-        #model = models[int(device_properties['ComfortFileSystem'])] + " (" + device_properties['ComfortHardwareModel'] + ")" if int(device_properties['ComfortFileSystem']) in models else "Unknown"
-        MQTT_DEVICE = { "name": _name,
+        # model = models[int(device_properties['ComfortFileSystem'])] + " (" + device_properties['ComfortHardwareModel'] + ")" if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+        # "name": _name, - 1
+
+        MQTT_DEVICE = { "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
                         "identifiers":["comfort2mqtt"],
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
                         "hw_version":str(device_properties['ComfortHardwareModel']),
                         "serial_number": device_properties['SerialNumber'],
-                        "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+                        "model": str(device_properties['ComfortHardwareModel'])
                     }
 #                         "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
 #                        "via_device": "comfort2mqtt"
@@ -1408,6 +1410,7 @@ class Comfort2(mqtt.Client):
                              "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
                              "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
                              "sw_version":str(device_properties['Version']),
+                             "hw_version":str(device_properties['ComfortHardwareModel']),
                              "serial_number": device_properties['SerialNumber'],
                              "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
                             })
