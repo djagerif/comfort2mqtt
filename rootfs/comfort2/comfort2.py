@@ -69,6 +69,8 @@ FLAGMAPFILE = False
 DEVICEMAPFILE = False
 device_properties = {}
 
+device_properties['CPUType'] = "N/A"
+
 # Comfort FileSystem values and Model Numbers
 models = {34: "Comfort II ULTRA",
           31: "Comfort II Optimum",
@@ -1412,6 +1414,7 @@ class Comfort2(mqtt.Client):
                              "sw_version":str(device_properties['Version']),
                              "hw_version":str(device_properties['ComfortHardwareModel']),
                              "serial_number": device_properties['SerialNumber'],
+                             "cpu_type": str(device_properties['CPUType']),
                              "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
                             })
         #                     "device" : MQTT_DEVICE
@@ -1510,6 +1513,7 @@ class Comfort2(mqtt.Client):
                 device_properties['Version'] = str(UcmVersion) + "." + str(UcmRevision)
                 device_properties['ComfortFileSystem'] = ComfortFileSystem
                 device_properties['ComfortFirmware'] = ComfortFirmware
+                device_properties['CPUType'] = "N/A"
   
                 DEVICEMAPFILE = True
 
@@ -1981,7 +1985,6 @@ class Comfort2(mqtt.Client):
                                 device_properties['CPUType'] = str(uMsg.cputype)
                                 if str(uMsg.cputype) != "N/A":
                                     logging.debug("%s Mainboard CPU detected", str(device_properties['CPUType']))
-                                    device_properties['ComfortHardwareModel'] = device_properties['ComfortHardwareModel'] + " (" + str(device_properties['CPUType']) + ")"
 
                             elif line[1:3] == "EL":       # Determine HW model number CM9000/9001 if available.
                                 ELMsg = Comfort_EL_HardwareModelReport(line[1:])
