@@ -7,18 +7,19 @@ All notable changes to this project will be documented in this file.
 ## To Do ##
  - Test Client/Server Authentication certificates
  - First Start Diagnostics 'UNKNOWN' until refresh.
- - Remove attributes from Diagnostic entities.
- - Remove MQTT `Connected via` added to discovered device. Should be device only.
- - Look into ARM CPU and Battery/DC Polling if detected. D?
+ - Look into ARM CPU and Battery/DC Polling if detected. D?. Note: u?01 not supported on old CM9000. Check EL command for CM9000 vs CM9001
+   ELx1xxxxxxxxxx (CM9000), ELx0xxxxxxxxxx (CM9001)
+
+
     
 ### Added
  - Added reporting for more Comfort models when detected.
- - Added MQTT 'Connected via' information.
 
 
 ### Changed
  - Update all references of Comfort II Ultra to Comfort to be more inclusive of other Comfort system models.
  - Remove unique identifer for Comfort identification, makes it easier to read/identify.
+ - Remove attributes from Diagnostic entities.
 
 ### Fixed
 

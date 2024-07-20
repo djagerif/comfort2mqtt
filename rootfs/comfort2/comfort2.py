@@ -701,11 +701,37 @@ class ComfortARSystemAlarmReport(object):
 
 class ComfortV_SystemTypeReport(object):
     def __init__(self, data={}):
-        #logger.debug('V? - data: %s', str(data))
         self.filesystem = int(data[8:10],16)    # 34 for Ultra II
         self.version = int(data[4:6],16)        # 7.
         self.revision = int(data[6:8],16)       # .210
         self.firmware = int(data[2:4],16)       # 254
+
+class Comfort_U_SystemCPUTypeReport(object):
+    #u?xxttvvrrSScc
+    def __init__(self, data={}):
+
+        self.cputype = "N/A"
+        if len(data) < 14:
+            self.cputype = "N/A"
+        else:
+            identifier = int(data[12:14],16)
+            if identifier == 1:
+                self.cputype = "ARM"
+            elif identifier == 0:
+                self.cputype = "Toshiba"
+
+class Comfort_EL_HardwareModelReport(object):
+    def __init__(self, data={}):
+
+        self.hardwaremodel = "N/A"
+        if len(data) < 14:
+            self.hardwaremodel = "N/A"
+        else:
+            identifier = int(data[3:4],16)
+            if identifier == 1:
+                self.hardwaremodel = "CM-9000"
+            elif identifier == 0:
+                self.hardwaremodel = "CM-9001"
 
 class ComfortSN_SerialNumberReport(object):
     def __init__(self, data={}):
@@ -1193,13 +1219,19 @@ class Comfort2(mqtt.Client):
             _name = "Comfort - " + str(device_properties['Reference']) if len(device_properties['Reference']) > 0 else "Comfort <Default>"
         else:
             _name = "Comfort <Default>"
+        
+        model = models[int(device_properties['ComfortFileSystem'])] + "(" + device_properties['ComfortHardwareModel'] + ")" if int(device_properties['ComfortFileSystem']) in models else "Unknown"
         MQTT_DEVICE = { "name": _name,
                         "identifiers":["comfort2mqtt"],
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
+                        "hw_version":"CM-TEST",
                         "serial_number": device_properties['SerialNumber'],
-                        "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+                        "model": model
                     }
+#                         "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+
+
 #                        "via_device": "comfort2mqtt"
 #                         "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
 
@@ -1932,6 +1964,18 @@ class Comfort2(mqtt.Client):
                                 device_properties['Version'] = str(VMsg.version) + "." + str(VMsg.revision).zfill(3)
 
                                 logging.info("%s detected (Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown device", VMsg.version, VMsg.revision)
+
+                            elif line[1:5] == "u?01":       # Determine CPU type if available.
+                                uMsg = Comfort_U_SystemCPUTypeReport(line[1:])
+                                                
+                                device_properties['CPUType'] = str(uMsg.cputype)
+                                #logging.info("%s CPU detected", str(device_properties['CPUType']))
+
+                            elif line[1:3] == "EL":       # Determine HW model number CM9000/9001 if available.
+                                ELMsg = Comfort_EL_HardwareModelReport(line[1:])
+                                                 
+                                device_properties['ComfortHardwareModel'] = str(ELMsg.hardwaremodel)
+                                #logging.info("%s HW model detected", str(device_properties['ComfortHardwareModel']))
 
                             elif line[1:5] == "SN01":       # Comfort Encoded Serial Number - Used for Refresh Key
                                 SNMsg = ComfortSN_SerialNumberReport(line[1:])
