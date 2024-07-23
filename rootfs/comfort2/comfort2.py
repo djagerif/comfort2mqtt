@@ -38,7 +38,7 @@ import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
 DOMAIN = "comfort2"
-COMFORT_SERIAL = "00000000"          # Default Serial Number.
+COMFORT_SERIAL = "00000000"       # Default Serial Number.
 COMFORT_KEY = "00000000"          # Default Refresh Key.
 
 rand_hex_str = hex(randint(268435456, 4294967295))
@@ -70,18 +70,24 @@ DEVICEMAPFILE = False
 device_properties = {}
 
 device_properties['CPUType'] = "N/A"
-device_properties['BatteryVoltageMain'] = "N/A"
-device_properties['BatteryVoltageSlave1'] = "N/A"
-device_properties['BatteryVoltageSlave2'] = "N/A"
-device_properties['BatteryVoltageSlave3'] = "N/A"
-device_properties['BatteryVoltageSlave4'] = "N/A"
-device_properties['BatteryVoltageSlave5'] = "N/A"
-device_properties['ChargeVoltageMain'] = "N/A"
-device_properties['ChargeVoltageSlave1'] = "N/A"
-device_properties['ChargeVoltageSlave2'] = "N/A"
-device_properties['ChargeVoltageSlave3'] = "N/A"
-device_properties['ChargeVoltageSlave4'] = "N/A"
-device_properties['ChargeVoltageSlave5'] = "N/A"
+device_properties['Version'] = "N/A"
+device_properties['BatteryVoltageMain'] = "-1"
+device_properties['BatteryVoltageSlave1'] = "-1"
+device_properties['BatteryVoltageSlave2'] = "-1"
+device_properties['BatteryVoltageSlave3'] = "-1"
+device_properties['BatteryVoltageSlave4'] = "-1"
+device_properties['BatteryVoltageSlave5'] = "-1"
+device_properties['ChargeVoltageMain'] = "-1"
+device_properties['ChargeVoltageSlave1'] = "-1"
+device_properties['ChargeVoltageSlave2'] = "-1"
+device_properties['ChargeVoltageSlave3'] = "-1"
+device_properties['ChargeVoltageSlave4'] = "-1"
+device_properties['ChargeVoltageSlave5'] = "-1"
+device_properties['sem_id'] = 0
+device_properties['SerialNumber'] = "00000000"
+device_properties['BatteryStatus'] = "N/A"
+device_properties['ChargerStatus'] = "N/A"
+
 
 # Comfort FileSystem values and Model Numbers
 models = {34: "Comfort II ULTRA",
@@ -721,10 +727,15 @@ class ComfortV_SystemTypeReport(object):
         self.firmware = int(data[2:4],16)       # 254
 
 class Comfort_U_SystemCPUTypeReport(object):
-    #u?xxttvvrrSScc
-    def __init__(self, data={}):
 
+    global device_properties
+    
+    def __init__(self, data={}):
+       
         self.cputype = "N/A"
+
+        # u?21BE07CF000001
+
         if len(data) < 14:
             self.cputype = "N/A"
         else:
@@ -733,6 +744,17 @@ class Comfort_U_SystemCPUTypeReport(object):
                 self.cputype = "ARM"
             elif identifier == 0:
                 self.cputype = "Toshiba"
+
+        sem_id = int(data[2:4],16)          # 0x21 - 25
+        sem_type = int(data[4:6],16)        # Type 190
+
+        if sem_id > 32 and sem_id <= 37 and sem_type == 190:
+            self.sem_id = sem_id - 32
+        elif sem_id > 32 and sem_id <= 37 and sem_type == 255 and int(device_properties['sem_id']) > 0:
+            self.sem_id = int(device_properties['sem_id'])
+        else:
+            self.sem_id = 0
+
 
 class Comfort_EL_HardwareModelReport(object):
     def __init__(self, data={}):
@@ -1166,12 +1188,15 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall("\x03EL\r".encode())
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
-            #get Main Battery State
-            self.comfortsock.sendall("\x03D?0101\r".encode())
-            SAVEDTIME = datetime.now()
-            time.sleep(0.1)
+
+            #get Battery State. Max. Main + 5 Slaves
+            # for i in NumberOfSlaves
+            #     self.comfortsock.sendall("\x03D?0101\r".encode())
+            #     time.sleep(0.1)
+            # SAVEDTIME = datetime.now()
+            
             #get CPU Type
-            self.comfortsock.sendall("\x03u?01\r".encode())
+            self.comfortsock.sendall("\x03u?00\r".encode())         # Get installed module types.
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             #Used for Unique ID
@@ -1182,11 +1207,6 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall("\x03V?\r".encode())
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
-            #Generate Comfort Serial Number
-            self.comfortsock.sendall("\x03SN01\r".encode())
-            SAVEDTIME = datetime.now()
-            time.sleep(0.1)
-            #get Security Mode
             self.comfortsock.sendall("\x03M?\r".encode())
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
@@ -1248,8 +1268,8 @@ class Comfort2(mqtt.Client):
         global device_properties
         global models
   
-        UID = ("Comfort2MQTT - " + str(device_properties['uid'])) if file_exists else "Comfort2MQTT - 00000000"
-        UUID = str(device_properties['uid'])
+        #UID = ("Comfort2MQTT - " + str(device_properties['uid'])) if file_exists else "Comfort2MQTT - 00000000"
+        #UUID = str(device_properties['uid'])
        
          # (" + UUID + ")",
 
@@ -1289,14 +1309,14 @@ class Comfort2(mqtt.Client):
         
         # model = models[int(device_properties['ComfortFileSystem'])] + " (" + device_properties['ComfortHardwareModel'] + ")" if int(device_properties['ComfortFileSystem']) in models else "Unknown"
         # "name": _name, - 1
-
-        MQTT_DEVICE = { "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
+        # "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
+        MQTT_DEVICE = { "name": device_properties['Reference'] if file_exists else "Comfort <Default>",
                         "identifiers":["comfort2mqtt"],
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
                         "hw_version":str(device_properties['ComfortHardwareModel']),
                         "serial_number": device_properties['SerialNumber'],
-                        "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+                        "model": models[int(device_properties['ComfortFileSystem'])] if device_properties['ComfortFileSystem'] in models else "Unknown"
                     }
 #                         "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
 #                        "via_device": "comfort2mqtt"
@@ -1304,7 +1324,7 @@ class Comfort2(mqtt.Client):
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/filesystem/config"
         MQTT_MSG=json.dumps({"name": "FileSystem",
-                             "unique_id": "comfort_filesystem_" + str(device_properties['uid']),
+                             "unique_id": "comfort_filesystem",
                              "availability_topic": "comfort2/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1314,7 +1334,22 @@ class Comfort2(mqtt.Client):
                              "native_value": "int",
                              "icon":"mdi:file-chart",
                              "qos": "2",
-                             "device": MQTT_DEVICE
+                             "device": MQTT_DEVICE,
+                             "services": {
+                                "comfort2mqtt_service": {
+                                    "description": "This is a custom service for the Comfort2MQTT add-on",
+                                    "fields": {
+                                        "field1": {
+                                            "description": "This is the first field",
+                                            "example": "Example value for field1"
+                                            },
+                                        "field2": {
+                                            "description": "This is the second field",
+                                            "example": "Example value for field2"
+                                        }
+                                    }
+                                }
+                             }
                         })
         #                              "json_attributes_topic": "comfort2",
         #                              "json_attributes_template": "{{ value_json | tojson }}",
@@ -1325,7 +1360,7 @@ class Comfort2(mqtt.Client):
 
 
         MQTT_MSG=json.dumps({"name": "Battery Status",
-                             "unique_id": "comfort_battery_status_" + str(device_properties['uid']),
+                             "unique_id": "comfort_battery_status",
                              "availability_topic": "comfort2/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1349,13 +1384,14 @@ class Comfort2(mqtt.Client):
                                 {{ result | tojson }}
                                 ''',
                              "entity_category": "diagnostic",
-                             "icon":"mdi:battery-plus-variant",
                              "unit_of_measurement": "V",
+                             "icon":"mdi:battery-plus-variant",
                              "qos": "2",
                              "device": MQTT_DEVICE
                         })
         #                              "json_attributes_topic": "comfort2",
         #                              "json_attributes_template": "{{ value_json | tojson }}",
+        #                              "unit_of_measurement": "V", 22/7/2024
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
@@ -1363,25 +1399,41 @@ class Comfort2(mqtt.Client):
 #            "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
         discoverytopic = "homeassistant/sensor/comfort2mqtt/device/config"
         MQTT_MSG=json.dumps({"name": "System",
-                             "unique_id": "comfort_device_" + str(device_properties['uid']),
+                             "unique_id": "comfort_device_properties",
                              "availability_topic": "comfort2/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": "comfort2/alarm/LWT",
                              "json_attributes_topic": "comfort2",
-                             "json_attributes_template": "{{ value_json | tojson }}",
+                             "json_attributes_template": '''
+                                {% set data = value_json %}
+                                {% set ns = namespace(dict_items='') %}
+                                {% for key, value in data.items() %}
+                                    {% if not 'Main' in key and not 'Slave' in key %}
+                                        {% if ns.dict_items %}
+                                            {% set ns.dict_items = ns.dict_items + ', "' ~ key ~ '":"' ~ value ~ '"' %}
+                                        {% else %}
+                                            {% set ns.dict_items = '"' ~ key ~ '":"' ~ value ~ '"' %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% set dict_str = '{' ~ ns.dict_items ~ '}' %}
+                                {% set result = dict_str | from_json %}
+                                {{ result | tojson }}
+                                ''',
                              "entity_category": "diagnostic",
                              "icon":"mdi:alarm-panel-outline",
                              "qos": "2",
                              "device": MQTT_DEVICE
                         })
+                            #"json_attributes_template": "{{ value_json | tojson }}",
 
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/firmware/config"
         MQTT_MSG=json.dumps({"name": "Firmware",
-                             "unique_id": "comfort_firmware_" + str(device_properties['uid']),
+                             "unique_id": "comfort_firmware",
                              "availability_topic": "comfort2/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1398,7 +1450,7 @@ class Comfort2(mqtt.Client):
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/state/config"
         MQTT_MSG=json.dumps({"name": "State",
-                             "unique_id": "comfort_state_" + str(device_properties['uid']),
+                             "unique_id": "comfort_state",
                              "state_topic": "comfort2/alarm/status",
                              "icon":"mdi:shield-alert",
                              "qos": "2",
@@ -1410,7 +1462,7 @@ class Comfort2(mqtt.Client):
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/bypass/config"
         MQTT_MSG=json.dumps({"name": "Bypassed Zones",
-                             "unique_id": "comfort_bypass_" + str(device_properties['uid']),
+                             "unique_id": "comfort_bypass_zones",
                              "state_topic": "comfort2/alarm/bypass",
                              "icon":"mdi:shield-remove",
                              "qos": "2",
@@ -1422,7 +1474,7 @@ class Comfort2(mqtt.Client):
         
         discoverytopic = "homeassistant/sensor/comfort2mqtt/status/config"
         MQTT_MSG=json.dumps({"name": "Status",
-                             "unique_id": "comfort_status_" + str(device_properties['uid']),
+                             "unique_id": "comfort_system_status",
                              "state_topic": "comfort2/alarm/LWT",
                              "icon":"mdi:lan-connect",
                              "qos": "2",
@@ -1434,7 +1486,7 @@ class Comfort2(mqtt.Client):
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/customername/config"
         MQTT_MSG=json.dumps({"name": "Customer Name",
-                             "unique_id": "comfort_customername_" + str(device_properties['uid']),
+                             "unique_id": "comfort_customername",
                              "availability_topic": "comfort2/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1451,7 +1503,7 @@ class Comfort2(mqtt.Client):
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/reference/config"
         MQTT_MSG=json.dumps({"name": "Reference",
-                             "unique_id": "comfort_reference_" + str(device_properties['uid']),
+                             "unique_id": "comfort_reference_name",
                              "availability_topic": "comfort2/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1468,7 +1520,7 @@ class Comfort2(mqtt.Client):
         
         discoverytopic = "homeassistant/sensor/comfort2mqtt/serial_number/config"
         MQTT_MSG=json.dumps({"name": "Serial Number",
-                             "unique_id": "comfort_serial_number_" + str(device_properties['uid']),
+                             "unique_id": "comfort_serial_number",
                              "availability_topic": "comfort2/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1485,7 +1537,7 @@ class Comfort2(mqtt.Client):
 
         discoverytopic = "homeassistant/button/comfort2mqtt/refresh/config"
         MQTT_MSG=json.dumps({"name": "Refresh",
-                             "unique_id": "comfort_refresh_switch_" + str(device_properties['uid']),
+                             "unique_id": "comfort_refresh_switch",
                              "availability_topic": "comfort2/alarm/online",
                              "command_topic": "comfort2/alarm/refresh",
                              "payload_available": "1",
@@ -1530,6 +1582,8 @@ class Comfort2(mqtt.Client):
                              "hw_version":str(device_properties['ComfortHardwareModel']),
                              "serial_number": device_properties['SerialNumber'],
                              "cpu_type": str(device_properties['CPUType']),
+                             "BatteryStatus": "",
+                             "ChargerStatus": "",
                              "BatteryMain": str(device_properties['BatteryVoltageMain']),
                              "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
                              "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
@@ -1542,14 +1596,26 @@ class Comfort2(mqtt.Client):
                              "ChargerSlave3": str(device_properties['ChargeVoltageSlave3']),
                              "ChargerSlave4": str(device_properties['ChargeVoltageSlave4']),
                              "ChargerSlave5": str(device_properties['ChargeVoltageSlave5']),
-                             "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+                             "model": models[int(device_properties['ComfortFileSystem'])] if device_properties['ComfortFileSystem'] in models else "Unknown"
                             })
         #                     "device" : MQTT_DEVICE
 
         self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
         time.sleep(0.1)
 
+        def battery_status(*voltages):
+            status = "Ok"
+            for voltage in voltages:
+                if voltage < 12.23:     # 50%
+                    return "Critical"
+                elif voltage < 12.58:    # 75%
+                    status = "Warning"
+            return status
 
+#        Example usage with 8 battery voltages
+#        battery_voltages = [13.0, 12.6, 12.8, 13.5, 14.2]                          # Test
+#        print(battery_status(*battery_voltages))  # Output will be "Critical"      # Test
+    
     # def battery_percentage(self, voltage):
     #     # Calculate percentage from battery voltage - Lead Acid Only.
     #     if voltage >= 12.89:
@@ -1663,7 +1729,7 @@ class Comfort2(mqtt.Client):
   
                 device_properties['CustomerName'] = CustomerName
                 device_properties['Reference'] = Reference
-                device_properties['Version'] = str(UcmVersion) + "." + str(UcmRevision)
+                #device_properties['Version'] = str(UcmVersion) + "." + str(UcmRevision)
                 device_properties['ComfortFileSystem'] = ComfortFileSystem
                 device_properties['ComfortFirmware'] = ComfortFirmware
                 device_properties['CPUType'] = "N/A"
@@ -1966,6 +2032,7 @@ class Comfort2(mqtt.Client):
                         if self.check_string(line):         # Check for "(\x03[a-zA-Z0-9]*)$" in complete line.
                             pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')      # Extract 'legal' characters from line.
                             match = re.search(pattern, line)
+                            SEM_pattern = r"u\?2[1-5]"
 
                             if match:
                                 line = match.group(1)
@@ -2119,6 +2186,9 @@ class Comfort2(mqtt.Client):
                                 SMsg = ComfortS_SecurityModeReport(line[1:])
                                 self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=2,retain=True)
 
+                                logging.debug("device_properties['sem_id']: %s", device_properties['sem_id'])   # Update after last command received
+
+
                             elif line[1:3] == "V?":
                                 VMsg = ComfortV_SystemTypeReport(line[1:])
                                 #if VMsg.filesystem != 34:
@@ -2139,30 +2209,49 @@ class Comfort2(mqtt.Client):
                                 if str(uMsg.cputype) != "N/A":
                                     logging.debug("%s Mainboard CPU detected", str(device_properties['CPUType']))
                                 else:   # Clear out battery voltages
-                                    device_properties['BatteryVoltageMain'] = "N/A"
-                                    device_properties['BatteryVoltageSlave1'] = "N/A"
-                                    device_properties['BatteryVoltageSlave2'] = "N/A"
-                                    device_properties['BatteryVoltageSlave3'] = "N/A"
-                                    device_properties['BatteryVoltageSlave4'] = "N/A"
-                                    device_properties['BatteryVoltageSlave5'] = "N/A"
-                                    device_properties['ChargeVoltageMain'] = "N/A"
-                                    device_properties['ChargeVoltageSlave1'] = "N/A"
-                                    device_properties['ChargeVoltageSlave2'] = "N/A"
-                                    device_properties['ChargeVoltageSlave3'] = "N/A"
-                                    device_properties['ChargeVoltageSlave4'] = "N/A"
-                                    device_properties['ChargeVoltageSlave5'] = "N/A"
+                                    device_properties['BatteryVoltageMain'] = "-1"
+                                    device_properties['BatteryVoltageSlave1'] = "-1"
+                                    device_properties['BatteryVoltageSlave2'] = "-1"
+                                    device_properties['BatteryVoltageSlave3'] = "-1"
+                                    device_properties['BatteryVoltageSlave4'] = "-1"
+                                    device_properties['BatteryVoltageSlave5'] = "-1"
+                                    device_properties['ChargeVoltageMain'] = "-1"
+                                    device_properties['ChargeVoltageSlave1'] = "-1"
+                                    device_properties['ChargeVoltageSlave2'] = "-1"
+                                    device_properties['ChargeVoltageSlave3'] = "-1"
+                                    device_properties['ChargeVoltageSlave4'] = "-1"
+                                    device_properties['ChargeVoltageSlave5'] = "-1"
+                                    device_properties['ChargerStatus'] = "N/A"
+                                    device_properties['BatteryStatus'] = "N/A"
+
+                                self.UpdateDeviceInfo(True)     # Update Device properties.
+
+                            elif re.match(SEM_pattern, line[1:5]):       # Determine Number of Installed SEM's. Check for u?21 - 25
+                                uMsg = Comfort_U_SystemCPUTypeReport(line[1:])
+                                                
+                                device_properties['sem_id'] = str(uMsg.sem_id)  # Saves the highest number installed SEM's. Must be contiguous.
+                                if int(line[3:5],16) == 37:
+                                    logging.debug("%s Installed SEM(s) detected", str(device_properties['sem_id']))
+                                
+                                # Check Slaves Installed.
+                                # Generate BatteryStatus and ChargerStatus from all Slaves + Main
+                                #device_properties['ChargerStatus'] = "N/A"     # Ok, Warning, Critical
+                                #device_properties['BatteryStatus'] = "N/A"
 
                             elif line[1:3] == "EL":       # Determine HW model number CM9000/9001 if available.
                                 ELMsg = Comfort_EL_HardwareModelReport(line[1:])
                                                  
                                 device_properties['ComfortHardwareModel'] = str(ELMsg.hardwaremodel)
                                 logging.debug("Hardware Model %s", str(device_properties['ComfortHardwareModel']))
+                                self.UpdateDeviceInfo(True)     # Update Device properties.
 
                             elif line[1:3] == "D?":       # Get Battery/Charge Voltage. ARM/Toshiba + CM-9001 Only.
 
                                 # Determine Battery/Charge Voltage and Device ID. Save Values in Comfort_D_SystemVoltageReport
                                 DLMsg = Comfort_D_SystemVoltageReport(line[1:])
-                                                 
+                                
+                                self.UpdateDeviceInfo(True)     # Update Device properties.
+                                
                                 #device_properties['BatteryVoltageMain'] = str(DLMsg.voltage)
                                 #logging.debug("Main Battery Voltage: %s V", str(device_properties['BatteryVoltageMain']))
 
