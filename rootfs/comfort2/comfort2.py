@@ -2678,6 +2678,8 @@ def validate_certificate(certificate):
 
 mqttc = Comfort2(callback_api_version = mqtt.CallbackAPIVersion.VERSION2, client_id=mqtt_client_id, protocol=mqtt.MQTTv5, transport=MQTT_PROTOCOL)
 
+logger.debug("SLUG: %s", str(ADDON_SLUG))
+
 certs: str = "/config/certificates"                 # Certificates directory directly off the root.
 if MQTT_ENCRYPTION and not os.path.isdir(certs):    # Display warning if Encryption is enabled but certificates directory is not found.
     logging.debug('"/config/certificates" directory not found.')
