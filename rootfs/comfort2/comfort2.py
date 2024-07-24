@@ -23,6 +23,7 @@ import xml.etree.ElementTree as ET
 import ssl
 from OpenSSL import crypto
 import os
+import requests
 import json
 from pathlib import Path
 import re
@@ -237,9 +238,31 @@ logging.basicConfig(
 
 ### Testing Area ###
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
-ADDON_SLUG = os.getenv('HASSIO_ADDON_SLUG')
 logger.debug("TOKEN: %s", str(TOKEN))
-logger.debug("SLUG: %s", str(ADDON_SLUG))
+
+# Define the Supervisor API URL and headers
+supervisor_url = 'http://supervisor'
+addon_info_url = f'{supervisor_url}/addons/self/info'
+
+# Set up headers for authentication
+headers = {
+    'Authorization': f'Bearer {TOKEN}',
+    'Content-Type': 'application/json'
+}
+
+# Make the API request
+response = requests.get(addon_info_url, headers=headers)
+
+# Check if the request was successful
+if response.status_code == 200:
+    addon_info = response.json()
+    ADDON_SLUG = addon_info['data']['slug']
+    logger.debug("SLUG: %s", str(ADDON_SLUG))
+else:
+    logger.debug("Failed to get Addon Info: %s, %s", response.status_code, response.text)
+
+
+
 #
 uri = "ws://supervisor/core/websocket"
 #
