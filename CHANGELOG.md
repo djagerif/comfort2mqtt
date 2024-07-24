@@ -12,11 +12,13 @@ All notable changes to this project will be documented in this file.
  - Clear Battery values when CPU is set to <default/PIC>, Set to '-1'. Run Update. Should not be an issue as value does not change dynamically.
  - Add a Battery Status function.
  - Cleanup if no CCLX file is availabel EG. Device Name.
+ - Dynamically get 'SLUG' information. Update DOCS
 
     
 ### Added
  - Added reporting for more Comfort models when detected.
  - Check for new ARM or Toshiba Mainboard CPU.
+ 
 
 ### Changed
  - Update all references of Comfort II Ultra to Comfort to be more inclusive of other Comfort system models.
