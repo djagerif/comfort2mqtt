@@ -38,7 +38,7 @@ import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
 DOMAIN = "comfort2"
-ADDON_SLUG = os.getenv('HASSIO_ADDON_SLUG')
+#ADDON_SLUG = os.getenv('HASSIO_ADDON_SLUG')
 COMFORT_SERIAL = "00000000"       # Default Serial Number.
 COMFORT_KEY = "00000000"          # Default Refresh Key.
 
@@ -237,6 +237,9 @@ logging.basicConfig(
 
 ### Testing Area ###
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
+ADDON_SLUG = os.getenv('HASSIO_ADDON_SLUG')
+logger.debug("TOKEN: %s", str(TOKEN))
+logger.debug("SLUG: %s", str(ADDON_SLUG))
 #
 uri = "ws://supervisor/core/websocket"
 #
@@ -2677,8 +2680,6 @@ def validate_certificate(certificate):
         return 1    # Expired certificate
 
 mqttc = Comfort2(callback_api_version = mqtt.CallbackAPIVersion.VERSION2, client_id=mqtt_client_id, protocol=mqtt.MQTTv5, transport=MQTT_PROTOCOL)
-
-logger.debug("SLUG: %s", str(ADDON_SLUG))
 
 certs: str = "/config/certificates"                 # Certificates directory directly off the root.
 if MQTT_ENCRYPTION and not os.path.isdir(certs):    # Display warning if Encryption is enabled but certificates directory is not found.
