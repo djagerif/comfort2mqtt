@@ -236,12 +236,11 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-### Testing Area ###
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
-logger.debug("TOKEN: %s", str(TOKEN))
 
 # Define the Supervisor API URL and headers
-supervisor_url = 'http://supervisor'
+#supervisor_url = 'http://supervisor'
+supervisor_url = 'http://192.168.0.175'
 addon_info_url = f'{supervisor_url}/addons/self/info'
 
 # Set up headers for authentication
@@ -253,30 +252,20 @@ headers = {
 # Make the API request
 response = requests.get(addon_info_url, headers=headers)
 
-# Check if the request was successful
 if response.status_code == 200:
     addon_info = response.json()
     ADDON_SLUG = addon_info['data']['slug']
-    logger.debug("SLUG: %s", str(ADDON_SLUG))
 else:
     logger.debug("Failed to get Addon Info: %s, %s", response.status_code, response.text)
-
-
+    ADDON_SLUG = 'comfort2mqtt'     # Just ta text value so that Addon doesn't fail. Configuration_URL will not work if this happens.
 
 #
-uri = "ws://supervisor/core/websocket"
+#uri = "ws://supervisor/core/websocket"
 #
-auth_message = json.dumps({
-    "type": "auth",
-    "access_token": TOKEN
-})
-
-headers = {
-    "Authorization": "Bearer {}".format(TOKEN),
-    "content-type": "application/json",
-}
-
-### End Testing Area ###
+#auth_message = json.dumps({
+#    "type": "auth",
+#    "access_token": TOKEN
+#})
 
 logger.info('Importing the add-on configuration options')
 
@@ -921,6 +910,7 @@ class Comfort2(mqtt.Client):
             self.subscribe(ALARMCOMMANDTOPIC)
             self.subscribe(REFRESHTOPIC)
             self.subscribe(DOMAIN)
+            self.subscribe("homeassistant/status")      # Track Status changes for Home Assistant
 
             for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
@@ -1028,6 +1018,19 @@ class Comfort2(mqtt.Client):
                     if config_filename:
                         self.add_descriptions(Path("/config/" + config_filename))
                 self.readcurrentstate()
+        
+        elif msg.topic.startswith("homeassistant") and msg.topic.endswith("/status"):
+            if msgstr == "online":
+                logger.info("Home Assistant Status: %s", msgstr)
+                if COMFORT_CCLX_FILE != None:
+                    config_filename = self.sanitize_filename(COMFORT_CCLX_FILE,'cclx')
+                    if config_filename:
+                        self.add_descriptions(Path("/config/" + config_filename))
+                self.readcurrentstate()
+
+            elif msgstr == "offline":
+                logger.info("Home Assistant Status: %s", msgstr)
+
         elif msg.topic.startswith(DOMAIN+"/output") and msg.topic.endswith("/set"):
             output = int(msg.topic.split("/")[1][6:])
             try:
@@ -1306,7 +1309,8 @@ class Comfort2(mqtt.Client):
 #                       "icon": "mdi:alarm-panel-outline",
 #                       "serial_number": device_properties['SerialNumber'],
 
-        MQTT_DEVICE = { "name": device_properties['Reference'] if file_exists else "Comfort <Default>",
+#                       "name": device_properties['Reference'] if file_exists else "Comfort <Default>",     # 24/7/2024
+        MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
                         "identifiers":["comfort2mqtt"],
                         "manufacturer":"Cytech Technologies PTE Limited",
                         "sw_version":str(device_properties['Version']),
@@ -1369,10 +1373,10 @@ class Comfort2(mqtt.Client):
 
 #                             "name": "Comfort - 'House de Jager'",
 
-        if "Reference" in device_properties and device_properties['Reference'] is not None:
-            _name = "Comfort - " + str(device_properties['Reference']) if len(device_properties['Reference']) > 0 else "Comfort <Default>"
-        else:
-            _name = "Comfort <Default>"
+        #if "Reference" in device_properties and device_properties['Reference'] is not None:
+        #    _name = "Comfort - " + str(device_properties['Reference']) if len(device_properties['Reference']) > 0 else "Comfort <Default>"
+        #else:
+        #    _name = "Comfort <Default>"
         
         # model = models[int(device_properties['ComfortFileSystem'])] + " (" + device_properties['ComfortHardwareModel'] + ")" if int(device_properties['ComfortFileSystem']) in models else "Unknown"
         # "name": _name, - 1
