@@ -38,6 +38,7 @@ import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
 DOMAIN = "comfort2"
+ADDON_SLUG = os.getenv('HASSIO_ADDON_SLUG')
 COMFORT_SERIAL = "00000000"       # Default Serial Number.
 COMFORT_KEY = "00000000"          # Default Refresh Key.
 
@@ -1268,8 +1269,6 @@ class Comfort2(mqtt.Client):
         global device_properties
         global models
   
-        logging.info("Inside DeviceUpdate")
-
         #UID = ("Comfort2MQTT - " + str(device_properties['uid'])) if file_exists else "Comfort2MQTT - 00000000"
         #UUID = str(device_properties['uid'])
        
@@ -1287,7 +1286,7 @@ class Comfort2(mqtt.Client):
                         "sw_version":str(device_properties['Version']),
                         "hw_version":str(device_properties['ComfortHardwareModel']),
                         "serial_number": device_properties['SerialNumber'],
-                        "configuration_url": "homeassistant://hassio/addon/b52674f1_comfort2mqtt/info",
+                        "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
                         "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
                     }
         
@@ -2276,9 +2275,6 @@ class Comfort2(mqtt.Client):
                                 SMsg = ComfortS_SecurityModeReport(line[1:])
                                 self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=2,retain=True)
 
-                                logging.debug("device_properties['sem_id']: %s", device_properties['sem_id'])   # Update after last command received
-
-
                             elif line[1:3] == "V?":
                                 VMsg = ComfortV_SystemTypeReport(line[1:])
                                 #if VMsg.filesystem != 34:
@@ -2357,9 +2353,7 @@ class Comfort2(mqtt.Client):
                                 logging.info("Serial Number: %s", COMFORT_SERIAL)
                                 device_properties['SerialNumber'] = COMFORT_SERIAL
                                 
-                                logging.info("Sending to DeviceUpdate")
                                 self.UpdateDeviceInfo(True)     # Update Device properties.
-                                logging.info("Return from DeviceUpdate")
 
                             elif line[1:3] == "a?":     # Not Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
