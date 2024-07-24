@@ -40,7 +40,6 @@ options:
   alarm_rio_inputs: 0
   alarm_rio_outputs: 0
   alarm_responses: 0
-  #auto_discover: false
   comfort_time: false
 schema:
   mqtt_broker_address: str
@@ -63,6 +62,5 @@ schema:
   alarm_rio_inputs: int(0,120)?
   alarm_rio_outputs: int(0,120)?
   alarm_responses: int(0,1024)?
-  #auto_discover: bool?
   comfort_time: bool?
 #image: "ghcr.io/djagerif/{arch}-addon-comfort2mqtt"  #  For future docker image release !!!

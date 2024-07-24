@@ -239,8 +239,8 @@ logging.basicConfig(
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
 
 # Define the Supervisor API URL and headers
-#supervisor_url = 'http://supervisor'
-supervisor_url = 'http://192.168.0.175'
+supervisor_url = 'http://supervisor'
+#supervisor_url = 'http://192.168.0.175'
 addon_info_url = f'{supervisor_url}/addons/self/info'
 
 # Set up headers for authentication
