@@ -1171,6 +1171,12 @@ class Comfort2(mqtt.Client):
                 # timeout exception is setup
                 if err == 'timed out':
                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                    if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ATM' or str(device_properties['CPUType']) == 'Toshiba':
+                        self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
+                        time.sleep(0.1)
+                        self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
+                    else:
+                        self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                     SAVEDTIME = datetime.now()
                     time.sleep(0.1)
                     continue
@@ -1735,45 +1741,22 @@ class Comfort2(mqtt.Client):
         # self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
         # time.sleep(0.1)
 
-        def battery_status(*voltages):
-            status = "Ok"
-            for voltage in voltages:
-                if voltage < 12.23:     # 50%
-                    return "Critical"
-                elif voltage < 12.58:    # 75%
-                    status = "Warning"
-            return status
+    def battery_status(*voltages):  # Tuple of all voltages
+        for voltage in voltages:
+            if voltage > 14.4:      # Critical Overcharge
+                return "Critical"
+            if voltage > 14.2:      # Overcharge
+                return "Warning"
+            if voltage < 12.23:     # 50% Discharged
+                return "Critical"
+            elif voltage < 12.58:   # 75% Discharged
+                return "Warning"
+        return "Ok"
 
 #        Example usage with 8 battery voltages
-#        battery_voltages = [13.0, 12.6, 12.8, 13.5, 14.2]                          # Test
-#        print(battery_status(*battery_voltages))  # Output will be "Critical"      # Test
+#           battery_voltages = [13.0, 12.1, 12.8, 13.5, 14.2]                          # Test
+#           print(battery_status(*battery_voltages))  # Output will be "Critical"      # Test
     
-    # def battery_percentage(self, voltage):
-    #     # Calculate percentage from battery voltage - Lead Acid Only.
-    #     if voltage >= 12.89:
-    #         return 100
-    #     elif voltage >= 12.78:
-    #         return 90
-    #     elif voltage >= 12.65:
-    #         return 80
-    #     elif voltage >= 12.51:
-    #         return 70
-    #     elif voltage >= 12.41:
-    #         return 60
-    #     elif voltage >= 12.23:
-    #         return 50
-    #     elif voltage >= 12.11:
-    #         return 40
-    #     elif voltage >= 11.96:
-    #         return 30
-    #     elif voltage >= 11.81:
-    #         return 20
-    #     elif voltage >= 11.70:
-    #         return 10
-    #     else:
-    #         return 0
-
-
     def setdatetime(self):
         global SAVEDTIME
         if self.connected == True:  #set current date and time if COMFORT_TIME Flag is set to True
@@ -2375,7 +2358,7 @@ class Comfort2(mqtt.Client):
                                 device_properties['ComfortHardwareModel'] = str(ELMsg.hardwaremodel)
 
                                 logging.debug("Hardware Model %s", str(device_properties['ComfortHardwareModel']))
-                                self.UpdateDeviceInfo(True)     # Update Device properties.
+                                #self.UpdateDeviceInfo(True)     # Update Device properties. Issue with no CCLX file and ComfortFileSyste, = Null.
 
                             elif line[1:3] == "D?":       # Get Battery/Charge Voltage. ARM/Toshiba + CM-9001 Only.
 
@@ -2396,7 +2379,7 @@ class Comfort2(mqtt.Client):
                                 logging.info("Serial Number: %s", COMFORT_SERIAL)
                                 device_properties['SerialNumber'] = COMFORT_SERIAL
                                 
-                                self.UpdateDeviceInfo(True)     # Update Device properties.
+                                #self.UpdateDeviceInfo(True)     # Update Device properties.
 
                             elif line[1:3] == "a?":     # Not Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])

@@ -10,6 +10,9 @@ All notable changes to this project will be documented in this file.
  - Clear Battery values when CPU is set to <default/PIC>, Set to '-1'. Run Update. Should not be an issue as value does not change dynamically.
  - Add a Battery Status function. Ok, Warning, Critical.
  - Cleanup if no CCLX file is availabel EG. Device Name.
+ - No CCLX file cause Sensor values to be 'Unknown' at startup.
+ - Create D?0001/0002 Decoding + Status message.
+ - On CM-9001/ARM replace 'cc00' with D?0001 and D?0002 Keepalives.
  
     
 ### Added
