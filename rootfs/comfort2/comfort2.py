@@ -79,12 +79,16 @@ device_properties['BatteryVoltageSlave2'] = "-1"
 device_properties['BatteryVoltageSlave3'] = "-1"
 device_properties['BatteryVoltageSlave4'] = "-1"
 device_properties['BatteryVoltageSlave5'] = "-1"
+device_properties['BatteryVoltageSlave6'] = "-1"
+device_properties['BatteryVoltageSlave7'] = "-1"
 device_properties['ChargeVoltageMain'] = "-1"
 device_properties['ChargeVoltageSlave1'] = "-1"
 device_properties['ChargeVoltageSlave2'] = "-1"
 device_properties['ChargeVoltageSlave3'] = "-1"
 device_properties['ChargeVoltageSlave4'] = "-1"
 device_properties['ChargeVoltageSlave5'] = "-1"
+device_properties['ChargeVoltageSlave6'] = "-1"
+device_properties['ChargeVoltageSlave7'] = "-1"
 device_properties['sem_id'] = 0
 device_properties['SerialNumber'] = "00000000"
 device_properties['BatteryStatus'] = "N/A"
@@ -1161,7 +1165,7 @@ class Comfort2(mqtt.Client):
         global FIRST_LOGIN
         global SAVEDTIME
         global device_properties
-        
+
         buffer = ''
         data = True
         while data:
@@ -2339,12 +2343,16 @@ class Comfort2(mqtt.Client):
                                     device_properties['BatteryVoltageSlave3'] = "-1"
                                     device_properties['BatteryVoltageSlave4'] = "-1"
                                     device_properties['BatteryVoltageSlave5'] = "-1"
+                                    device_properties['BatteryVoltageSlave6'] = "-1"
+                                    device_properties['BatteryVoltageSlave7'] = "-1"
                                     device_properties['ChargeVoltageMain'] = "-1"
                                     device_properties['ChargeVoltageSlave1'] = "-1"
                                     device_properties['ChargeVoltageSlave2'] = "-1"
                                     device_properties['ChargeVoltageSlave3'] = "-1"
                                     device_properties['ChargeVoltageSlave4'] = "-1"
                                     device_properties['ChargeVoltageSlave5'] = "-1"
+                                    device_properties['ChargeVoltageSlave6'] = "-1"
+                                    device_properties['ChargeVoltageSlave7'] = "-1"
                                     device_properties['ChargerStatus'] = "N/A"
                                     device_properties['BatteryStatus'] = "N/A"
 
