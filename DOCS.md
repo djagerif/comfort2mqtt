@@ -334,18 +334,15 @@ To find your addon name for `service: hassio.addon_restart` you can do a `ha add
 ```
 alias: Refresh Comfort to MQTT Add-on
 description: >-
-  When Home Assistant Config changes or restarts then refresh all Comfort to MQTT entities.
+  When Home Assistant Config changes or restarts then reload Comfort to MQTT to
+  refresh all entities.
 trigger:
-  - platform: homeassistant
-    event: start
-    enabled: true
-    alias: When Home Assistant is Restarted
-  - platform: event
+  - alias: When Reload 'ALL YAML CONFIGURATION' from Developer Tools
+    platform: event
     event_type: call_service
     event_data:
       domain: mqtt
       service: reload
-    alias: When MQTT, or ALL, is reloaded from Developer Tools
 condition:
   - condition: state
     entity_id: binary_sensor.comfort_to_mqtt_running
@@ -354,25 +351,19 @@ action:
   - service: notify.persistent_notification
     metadata: {}
     data:
-      message: Home Assistant Restarted or MQTT Configuration Reloaded
-      title: Comfort to MQTT Restart
-  - service: hassio.addon_restart
+      message: Home Assistant Addon Refresh Requested
+      title: Comfort to MQTT Addon
+  - alias: Request a Refresh of all MQTT entities without a full Addon reload
+    service: mqtt.publish
     data:
-      addon: 7bef4a80_comfort2mqtt <- Your unique slug_name/Hostname here !!
-    enabled: false <- This action is disabled by default unless you prefer a complete Add-on reload.
-    alias: Request a Reload of Comfort to MQTT Addon
-   - service: mqtt.publish
-    data:
-      payload: 000F8EC8 <- Provide your unique KEY value here. KEY can be found on startup in the log file. 
+      payload: 000F8EC8 <- Provide your unique KEY value here. "Comfort II Refresh Key:" can be found on startup in the log file. 
       qos: '2'
       topic: comfort2/alarm/refresh
-    enabled: true
-    alias: Request a Refresh of all MQTT entities without a full Addon reload
 mode: single
 ```
-⚠️ **Note:** When Comfort to MQTT starts up it will print the KEY value to be used for Refresh Authentication.
+⚠️ **Note:** When Comfort to MQTT starts up it will print the KEY value to be used for Refresh function authentication. Incorrect key values will be ignored.
 
-`2024-06-12 17:45:27 INFO     Refresh Key: 000F8EC8`
+`2024-06-12 17:45:27 INFO     Comfort II Refresh Key: 000F8EC8`
 
 
 ## Hardware and Interface support

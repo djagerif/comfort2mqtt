@@ -6,7 +6,6 @@ All notable changes to this project will be documented in this file.
 
 ## To Do ##
  - Test Client/Server Authentication certificates
- - First Start Diagnostics 'UNKNOWN' until refresh.
  - Look into ARM CPU and Battery/DC Polling if detected. D?. Note: u?01 not supported on old CM-9000. CM-9001 + ARM/Toshiba for D? to work.
  - Clear Battery values when CPU is set to <default/PIC>, Set to '-1'. Run Update. Should not be an issue as value does not change dynamically.
  - Add a Battery Status function. Ok, Warning, Critical.
@@ -25,6 +24,7 @@ All notable changes to this project will be documented in this file.
  - Remove attributes from Diagnostic entities.
 
 ### Fixed
+ - Initial startup Diagnostics values 'Unknown'. Data is now correctly populated on startup.
 
 
 ## [1.1.1] - 2024-06-30
