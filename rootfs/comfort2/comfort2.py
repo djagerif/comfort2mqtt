@@ -1160,6 +1160,8 @@ class Comfort2(mqtt.Client):
 
         global FIRST_LOGIN
         global SAVEDTIME
+        global device_properties
+        
         buffer = ''
         data = True
         while data:
