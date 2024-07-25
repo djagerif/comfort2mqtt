@@ -1170,7 +1170,7 @@ class Comfort2(mqtt.Client):
                 # this next if/else is a bit redundant, but illustrates how the
                 # timeout exception is setup
                 if err == 'timed out':
-                    self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                    #self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                     if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ATM' or str(device_properties['CPUType']) == 'Toshiba'):
                         self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                         time.sleep(0.1)
@@ -2140,9 +2140,17 @@ class Comfort2(mqtt.Client):
                             logger.debug(line[1:])  	    # Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
 
                             if datetime.now() > SAVEDTIME + TIMEOUT:            #
-                                self.comfortsock.sendall("\x03cc00\r".encode()) # Keepalive check when data comes in.
+                                #self.comfortsock.sendall("\x03cc00\r".encode()) # Keepalive check when data comes in.
+                                if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ATM' or str(device_properties['CPUType']) == 'Toshiba'):
+                                    self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
+                                    time.sleep(0.1)
+                                    self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
+                                else:
+                                    self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                                 SAVEDTIME = datetime.now()                      # Update SavedTime variable
                                 time.sleep(0.1)
+
+                                
 
                         if self.check_string(line):         # Check for "(\x03[a-zA-Z0-9]*)$" in complete line.
                             pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')      # Extract 'legal' characters from line.
@@ -2638,7 +2646,13 @@ class Comfort2(mqtt.Client):
                             else:
                                 if datetime.now() > (SAVEDTIME + TIMEOUT):  # If no command sent in 2 minutes then send keepalive.
                                     #logger.debug("Sending Keepalives")
-                                    self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                                    if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ATM' or str(device_properties['CPUType']) == 'Toshiba'):
+                                        self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
+                                        time.sleep(0.1)
+                                        self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
+                                    else:
+                                        self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                                        #self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                                     SAVEDTIME = datetime.now()
                                     time.sleep(0.1)
                         else:
