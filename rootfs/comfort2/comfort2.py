@@ -1171,7 +1171,7 @@ class Comfort2(mqtt.Client):
                 # timeout exception is setup
                 if err == 'timed out':
                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
-                    if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ATM' or str(device_properties['CPUType']) == 'Toshiba':
+                    if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ATM' or str(device_properties['CPUType']) == 'Toshiba'):
                         self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                         time.sleep(0.1)
                         self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
