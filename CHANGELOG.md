@@ -8,16 +8,15 @@ All notable changes to this project will be documented in this file.
  - Test Client/Server Authentication certificates
  - First Start Diagnostics 'UNKNOWN' until refresh.
  - Look into ARM CPU and Battery/DC Polling if detected. D?. Note: u?01 not supported on old CM-9000. CM-9001 + ARM/Toshiba for D? to work.
- - Filter Battery Attributes to only display for installed Slaves. Alway display Main + ARM/CM-9001
  - Clear Battery values when CPU is set to <default/PIC>, Set to '-1'. Run Update. Should not be an issue as value does not change dynamically.
- - Add a Battery Status function.
+ - Add a Battery Status function. Ok, Warning, Critical.
  - Cleanup if no CCLX file is availabel EG. Device Name.
- - Dynamically get 'SLUG' information. Update DOCS
-
+ 
     
 ### Added
  - Added reporting for more Comfort models when detected.
  - Check for new ARM or Toshiba Mainboard CPU.
+ 
  
 
 ### Changed

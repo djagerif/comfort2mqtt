@@ -1223,6 +1223,10 @@ class Comfort2(mqtt.Client):
             #     time.sleep(0.1)
             # SAVEDTIME = datetime.now()
             
+            #get Mainboard Serial Number
+            self.comfortsock.sendall("\x03SN01\r".encode())
+            SAVEDTIME = datetime.now()
+            time.sleep(0.1)
             #get CPU Type
             self.comfortsock.sendall("\x03u?00\r".encode())         # Get installed module types.
             SAVEDTIME = datetime.now()
