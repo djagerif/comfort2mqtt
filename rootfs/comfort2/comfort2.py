@@ -39,7 +39,7 @@ import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
 DOMAIN = "comfort2"
-#ADDON_SLUG = os.getenv('HASSIO_ADDON_SLUG')
+ADDON_SLUG = ''
 COMFORT_SERIAL = "00000000"       # Default Serial Number.
 COMFORT_KEY = "00000000"          # Default Refresh Key.
 
@@ -238,26 +238,24 @@ logging.basicConfig(
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
 
-# Define the Supervisor API URL and headers
-supervisor_url = 'http://supervisor'
-#supervisor_url = 'http://192.168.0.175'
+supervisor_url = 'http://supervisor'                  
 addon_info_url = f'{supervisor_url}/addons/self/info'
 
-# Set up headers for authentication
 headers = {
     'Authorization': f'Bearer {TOKEN}',
     'Content-Type': 'application/json'
 }
 
-# Make the API request
-response = requests.get(addon_info_url, headers=headers)
-
-if response.status_code == 200:
-    addon_info = response.json()
-    ADDON_SLUG = addon_info['data']['slug']
+try:
+    response = requests.get(addon_info_url, headers=headers)
+except:
+    logger.error("Failed to connect to Home Assistant Supervisor")
 else:
-    logger.debug("Failed to get Addon Info: %s, %s", response.status_code, response.text)
-    ADDON_SLUG = 'comfort2mqtt'     # Just ta text value so that Addon doesn't fail. Configuration_URL will not work if this happens.
+    if response.status_code == 200:
+        addon_info = response.json()
+        ADDON_SLUG = addon_info['data']['slug']
+    else:
+        logger.error("Failed to get Addon Info: Error Code %s, %s", response.status_code, response.reason)
 
 #
 #uri = "ws://supervisor/core/websocket"
@@ -1310,15 +1308,26 @@ class Comfort2(mqtt.Client):
 #                       "serial_number": device_properties['SerialNumber'],
 
 #                       "name": device_properties['Reference'] if file_exists else "Comfort <Default>",     # 24/7/2024
-        MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
-                        "identifiers":["comfort2mqtt"],
-                        "manufacturer":"Cytech Technologies PTE Limited",
-                        "sw_version":str(device_properties['Version']),
-                        "hw_version":str(device_properties['ComfortHardwareModel']),
-                        "serial_number": device_properties['SerialNumber'],
-                        "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
-                        "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
-                    }
+        
+        if ADDON_SLUG.strip() == "":
+            MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
+                            "identifiers":["comfort2mqtt"],
+                            "manufacturer":"Cytech Technologies PTE Limited",
+                            "sw_version":str(device_properties['Version']),
+                            "hw_version":str(device_properties['ComfortHardwareModel']),
+                            "serial_number": device_properties['SerialNumber'],
+                            "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+                        }
+        else:
+            MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
+                            "identifiers":["comfort2mqtt"],
+                            "manufacturer":"Cytech Technologies PTE Limited",
+                            "sw_version":str(device_properties['Version']),
+                            "hw_version":str(device_properties['ComfortHardwareModel']),
+                            "serial_number": device_properties['SerialNumber'],
+                            "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
+                            "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+                        }
         
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
                              "url": "https://www.cytech.biz",
