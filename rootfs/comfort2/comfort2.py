@@ -889,7 +889,7 @@ class Comfort_D_SystemVoltageReport(object):
                     return
 
         if query_type == 1:
-            logger.debug("%s", BatteryVoltageList.values())
+            #logger.debug("%s", BatteryVoltageList.values())
             self.BatteryStatus = self.Battery_Status(BatteryVoltageList.values())
             device_properties['BatteryStatus'] = self.BatteryStatus
         elif query_type == 2:

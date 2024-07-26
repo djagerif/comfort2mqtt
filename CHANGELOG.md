@@ -11,13 +11,13 @@ All notable changes to this project will be documented in this file.
  - Add a Battery Status function. Ok, Warning, Critical.
  - Cleanup if no CCLX file is availabel EG. Device Name.
  - No CCLX file cause Sensor values to be 'Unknown' at startup.
- - Create D?0001/0002 Decoding + Status message.
  - On CM-9001/ARM replace 'cc00' with D?0001 and D?0002 Keepalives.
  
     
 ### Added
  - Added reporting for more Comfort models when detected.
  - Check for new ARM or Toshiba Mainboard CPU.
+ - Battery/Charge Status and Voltage reports.
  
  
 
