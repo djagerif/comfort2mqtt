@@ -89,6 +89,7 @@ device_properties['ChargeVoltageSlave4'] = "-1"
 device_properties['ChargeVoltageSlave5'] = "-1"
 device_properties['ChargeVoltageSlave6'] = "-1"
 device_properties['ChargeVoltageSlave7'] = "-1"
+device_properties['ComfortHardwareModel'] = "CM-9000"
 device_properties['sem_id'] = 0
 device_properties['SerialNumber'] = "00000000"
 device_properties['BatteryStatus'] = "N/A"
@@ -1177,7 +1178,7 @@ class Comfort2(mqtt.Client):
                 # timeout exception is setup
                 if err == 'timed out':
                     #self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
-                    if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ATM' or str(device_properties['CPUType']) == 'Toshiba'):
+                    if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                         self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                         time.sleep(0.1)
                         self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
@@ -1224,6 +1225,17 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall("\x03b?00\r".encode())       # b?00 Bypassed Zones first
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
+            
+            #get CPU Type
+            self.comfortsock.sendall("\x03u?00\r".encode())         # Get installed module types.
+            SAVEDTIME = datetime.now()
+            time.sleep(0.1)
+            
+            #get Comfort type
+            self.comfortsock.sendall("\x03V?\r".encode())
+            SAVEDTIME = datetime.now()
+            time.sleep(0.1)
+            
             #get HW model
             self.comfortsock.sendall("\x03EL\r".encode())
             SAVEDTIME = datetime.now()
@@ -1239,18 +1251,12 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall("\x03SN01\r".encode())
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
-            #get CPU Type
-            self.comfortsock.sendall("\x03u?00\r".encode())         # Get installed module types.
-            SAVEDTIME = datetime.now()
-            time.sleep(0.1)
+            
             #Used for Unique ID
             self.comfortsock.sendall("\x03UL7FF904\r".encode())
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
-            #get Comfort type
-            self.comfortsock.sendall("\x03V?\r".encode())
-            SAVEDTIME = datetime.now()
-            time.sleep(0.1)
+      
             self.comfortsock.sendall("\x03M?\r".encode())
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
@@ -1481,7 +1487,7 @@ class Comfort2(mqtt.Client):
                                 {{ result | tojson }}
                                 ''',
                              "entity_category": "diagnostic",
-                             "icon":"mdi:battery-heart",
+                             "icon":"mdi:battery-check",
                              "qos": "2",
                              "device": MQTT_DEVICE
                         })
@@ -2142,12 +2148,12 @@ class Comfort2(mqtt.Client):
 
                     for line in self.readlines():
 
-                        if line[1:] != "cc00":
+                        if line[1:] != "cc00" or line[1:] != "D?00":
                             logger.debug(line[1:])  	    # Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
 
                             if datetime.now() > SAVEDTIME + TIMEOUT:            #
                                 #self.comfortsock.sendall("\x03cc00\r".encode()) # Keepalive check when data comes in.
-                                if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ATM' or str(device_properties['CPUType']) == 'Toshiba'):
+                                if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                                     self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                                     time.sleep(0.1)
                                     self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
@@ -2376,7 +2382,7 @@ class Comfort2(mqtt.Client):
                                 device_properties['ComfortHardwareModel'] = str(ELMsg.hardwaremodel)
 
                                 logging.debug("Hardware Model %s", str(device_properties['ComfortHardwareModel']))
-                                #self.UpdateDeviceInfo(True)     # Update Device properties. Issue with no CCLX file and ComfortFileSyste, = Null.
+                                self.UpdateDeviceInfo(True)     # Update Device properties. Issue with no CCLX file and ComfortFileSyste, = Null.
 
                             elif line[1:3] == "D?":       # Get Battery/Charge Voltage. ARM/Toshiba + CM-9001 Only.
 
@@ -2397,7 +2403,7 @@ class Comfort2(mqtt.Client):
                                 logging.info("Serial Number: %s", COMFORT_SERIAL)
                                 device_properties['SerialNumber'] = COMFORT_SERIAL
                                 
-                                #self.UpdateDeviceInfo(True)     # Update Device properties.
+                                self.UpdateDeviceInfo(True)     # Update Device properties.
 
                             elif line[1:3] == "a?":     # Not Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
@@ -2656,7 +2662,7 @@ class Comfort2(mqtt.Client):
                             else:
                                 if datetime.now() > (SAVEDTIME + TIMEOUT):  # If no command sent in 2 minutes then send keepalive.
                                     #logger.debug("Sending Keepalives")
-                                    if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ATM' or str(device_properties['CPUType']) == 'Toshiba'):
+                                    if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                                         self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                                         time.sleep(0.1)
                                         self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
