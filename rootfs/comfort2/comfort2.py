@@ -2432,7 +2432,7 @@ class Comfort2(mqtt.Client):
                                                 
                                 device_properties['CPUType'] = str(uMsg.cputype)
                                 if str(uMsg.cputype) != "N/A":
-                                    logging.debug("%s Mainboard CPU detected", str(device_properties['CPUType']))
+                                    logging.debug("%s Mainboard CPU detected, Battery Monitoring Enabled.", str(device_properties['CPUType']))
                                 else:   # Clear out battery voltages
                                     device_properties['BatteryVoltageMain'] = "-1"
                                     device_properties['BatteryVoltageSlave1'] = "-1"
