@@ -110,6 +110,66 @@ models = {34: "Comfort II ULTRA",
           24: "Comfort I ULTRA (Obsolete)"
         }
 
+BatterySlaveIDs = {1:"BatteryVoltageMain",
+          33:"BatteryVoltageSlave1",
+          34:"BatteryVoltageSlave2",
+          35:"BatteryVoltageSlave3",
+          36:"BatteryVoltageSlave4",
+          37:"BatteryVoltageSlave5",
+          38:"BatteryVoltageSlave6",
+          39:"BatteryVoltageSlave7"
+}
+ChargerSlaveIDs = {1:"ChargeVoltageMain",
+          33:"ChargeVoltageSlave1",
+          34:"ChargeVoltageSlave2",
+          35:"ChargeVoltageSlave3",
+          36:"ChargeVoltageSlave4",
+          37:"ChargeVoltageSlave5",
+          38:"ChargeVoltageSlave6",
+          39:"ChargeVoltageSlave7"
+
+}
+
+BatteryVoltageNameList = {0:"BatteryVoltageMain",
+                      1:"BatteryVoltageSlave1",
+                      2:"BatteryVoltageSlave2",
+                      3:"BatteryVoltageSlave3",
+                      4:"BatteryVoltageSlave4",
+                      5:"BatteryVoltageSlave5",
+                      6:"BatteryVoltageSlave6",
+                      7:"BatteryVoltageSlave7"
+}
+
+ChargerVoltageNameList = {0:"ChargeVoltageMain",
+                      1:"ChargeVoltageSlave1",
+                      2:"ChargeVoltageSlave2",
+                      3:"ChargeVoltageSlave3",
+                      4:"ChargeVoltageSlave4",
+                      5:"ChargeVoltageSlave5",
+                      6:"ChargeVoltageSlave6",
+                      7:"ChargeVoltageSlave7"
+}
+
+BatteryVoltageList = {0:"-1",
+                      1:"-1",
+                      2:"-1",
+                      3:"-1",
+                      4:"-1",
+                      5:"-1",
+                      6:"-1",
+                      7:"-1"
+}
+
+ChargerVoltageList = {0:"-1",
+                      1:"-1",
+                      2:"-1",
+                      3:"-1",
+                      4:"-1",
+                      5:"-1",
+                      6:"-1",
+                      7:"-1"
+}
+
 ZoneCache = {}              # Zone Cache dictionary.
 BypassCache = {}            # Zone Bypass Cache dictionary.
 CacheState = False          # Initial Cache state. False when not in sync with Bypass Zones (b?). True, when in Sync.
@@ -790,44 +850,66 @@ class Comfort_EL_HardwareModelReport(object):
 
 class Comfort_D_SystemVoltageReport(object):
     def __init__(self, data={}):
-        
+
         global device_properties
+        global BatteryVoltageNameList
+        global ChargerVoltageNameList
+        global BatteryVoltageList
+        global ChargerVoltageList
+        global BatterySlaveIDs
+        global ChargerSlaveIDs
 
-        # device_properties['BatteryVoltageMain'] = str(DLMsg.voltage)
-        # 01 for Battery Voltage, 02 for DC Voltage Power supply
-        #
-        # UCM D?2101C0 SEM 1 Battery Voltage = 192/256 * 15.5V = 11.6V
-        id = data[2:4]
-        query_type = data[4:6]
-        value = int(data[6:8],16)
-        self.voltage = round(((value/255)*15.5),2)
+        # D?2201C0 - Single Instance
 
-        if query_type == '01':
-            if id == '01':
-                device_properties['BatteryVoltageMain'] = self.voltage = round(((value/255)*15.5),2)
-            elif id == '21':
-                device_properties['BatteryVoltageSlave1'] = self.voltage = round(((value/255)*15.5),2)
-            elif id == '22':
-                device_properties['BatteryVoltageSlave2'] = self.voltage = round(((value/255)*15.5),2)
-            elif id == '23':
-                device_properties['BatteryVoltageSlave3'] = self.voltage = round(((value/255)*15.5),2)
-            elif id == '24':
-                device_properties['BatteryVoltageSlave4'] = self.voltage = round(((value/255)*15.5),2)
-            elif id == '25':
-                device_properties['BatteryVoltageSlave5'] = self.voltage = round(((value/255)*15.5),2)
-        elif query_type == '02':
-            if id == '01':
-                device_properties['ChargeVoltageMain'] = self.voltage = round(((value/255)*15.5),2)
-            elif id == '21':
-                device_properties['ChargeVoltageSlave1'] = self.voltage = round(((value/255)*15.5),2)
-            elif id == '22':
-                device_properties['ChargeVoltageSlave2'] = self.voltage = round(((value/255)*15.5),2)
-            elif id == '23':
-                device_properties['ChargeVoltageSlave3'] = self.voltage = round(((value/255)*15.5),2)
-            elif id == '24':
-                device_properties['ChargeVoltageSlave4'] = self.voltage = round(((value/255)*15.5),2)
-            elif id == '25':
-                device_properties['ChargeVoltageSlave5'] = self.voltage = round(((value/255)*15.5),2)
+        query_type = int(data[4:6],16)
+        id = int(data[2:4],16)
+
+        for x in range(6, len(data), 2):
+            value = int(data[x:x+2],16)
+            voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'     
+            if query_type == 1:
+                if id == 0:
+                    device_properties[BatteryVoltageNameList[(x-6)/2]] = voltage
+                    BatteryVoltageList[(x-6)/2] = voltage
+                elif (id == 1 or id > 32) and id <= 39:
+                    device_properties[BatterySlaveIDs[id]] = voltage
+                    id = (id - 32) if id > 1 else 0
+                    BatteryVoltageList[id] = voltage
+                else:
+                    return
+            elif query_type == 2:
+                if id == 0:
+                    device_properties[ChargerVoltageNameList[(x-6)/2]] = voltage
+                    ChargerVoltageList[(x-6)/2] = voltage
+                elif (id == 1 or id > 32) and id <= 39:
+                    device_properties[ChargerSlaveIDs[id]] = voltage
+                    id = (id - 32) if id > 1 else 0
+                    ChargerVoltageList[id] = voltage
+                else:
+                    return
+
+        if query_type == 1:
+            logger.debug("%s", BatteryVoltageList.values())
+            self.BatteryStatus = self.Battery_Status(BatteryVoltageList.values())
+            device_properties['BatteryStatus'] = self.BatteryStatus
+        elif query_type == 2:
+            #logger.debug("%s", ChargerVoltageList.values())
+            self.ChargerStatus = self.Battery_Status(ChargerVoltageList.values())
+            device_properties['ChargerStatus'] = self.ChargerStatus
+
+    def Battery_Status(self, voltages):  # Tuple of all voltages
+        for voltage in voltages:
+            if float(voltage) == -1:
+                continue
+            if float(voltage) > 14.4:      # Critical Overcharge
+                return "Critical"
+            if float(voltage) > 14.2:      # Overcharge
+                return "Warning"
+            if float(voltage) < 12.23:     # 50% Discharged/Crital Charge or No Charge
+                return "Critical"
+            if float(voltage) < 12.58:   # 75% Discharged/Low Charge
+                return "Warning"
+        return "Ok"
 
 class ComfortSN_SerialNumberReport(object):
     def __init__(self, data={}):
@@ -1227,7 +1309,12 @@ class Comfort2(mqtt.Client):
             time.sleep(0.1)
             
             #get CPU Type
-            self.comfortsock.sendall("\x03u?00\r".encode())         # Get installed module types.
+            self.comfortsock.sendall("\x03u?01\r".encode())         # Get CPU type for Main board.
+            SAVEDTIME = datetime.now()
+            time.sleep(0.1)
+
+            #get CPU Type
+            self.comfortsock.sendall("\x03u?00\r".encode())         # Get CPU type for remaining boards.
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             
@@ -1360,20 +1447,24 @@ class Comfort2(mqtt.Client):
                              "hw_version":str(device_properties['ComfortHardwareModel']),
                              "serial_number": device_properties['SerialNumber'],
                              "cpu_type": str(device_properties['CPUType']),
-                             "BatteryStatus": "",
-                             "ChargerStatus": "",
+                             "BatteryStatus": str(device_properties['BatteryStatus']),
+                             "ChargerStatus": str(device_properties['ChargerStatus']),
                              "BatteryMain": str(device_properties['BatteryVoltageMain']),
                              "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
                              "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
                              "BatterySlave3": str(device_properties['BatteryVoltageSlave3']),
                              "BatterySlave4": str(device_properties['BatteryVoltageSlave4']),
                              "BatterySlave5": str(device_properties['BatteryVoltageSlave5']),
+                             "BatterySlave6": str(device_properties['BatteryVoltageSlave6']),
+                             "BatterySlave7": str(device_properties['BatteryVoltageSlave7']),
                              "ChargerMain": str(device_properties['ChargeVoltageMain']),
                              "ChargerSlave1": str(device_properties['ChargeVoltageSlave1']),
                              "ChargerSlave2": str(device_properties['ChargeVoltageSlave2']),
                              "ChargerSlave3": str(device_properties['ChargeVoltageSlave3']),
                              "ChargerSlave4": str(device_properties['ChargeVoltageSlave4']),
                              "ChargerSlave5": str(device_properties['ChargeVoltageSlave5']),
+                             "ChargerSlave6": str(device_properties['ChargeVoltageSlave6']),
+                             "ChargerSlave7": str(device_properties['ChargeVoltageSlave7']),
                              "InstalledSlaves": int(device_properties['sem_id']),
                              "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
                             })
@@ -1467,7 +1558,7 @@ class Comfort2(mqtt.Client):
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": "comfort2",
-                             "value_template": "{{ value_json.BatteryMain }}",
+                             "value_template": "{{ value_json.BatteryStatus }}",
                              "json_attributes_topic": "comfort2",
                              "json_attributes_template": '''
                                 {% set data = value_json %}
@@ -1501,7 +1592,7 @@ class Comfort2(mqtt.Client):
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": "comfort2",
-                             "value_template": "{{ value_json.ChargerMain }}",
+                             "value_template": "{{ value_json.ChargerStatus }}",
                              "json_attributes_topic": "comfort2",
                              "json_attributes_template": '''
                                 {% set data = value_json %}
@@ -1753,15 +1844,15 @@ class Comfort2(mqtt.Client):
         # self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
         # time.sleep(0.1)
 
-    def battery_status(*voltages):  # Tuple of all voltages
+    def BatteryStatus(*voltages):  # Tuple of all voltages
         for voltage in voltages:
             if voltage > 14.4:      # Critical Overcharge
                 return "Critical"
             if voltage > 14.2:      # Overcharge
                 return "Warning"
-            if voltage < 12.23:     # 50% Discharged
+            if voltage < 12.23:     # 50% Discharged/Crital Charge or No Charge
                 return "Critical"
-            elif voltage < 12.58:   # 75% Discharged
+            elif voltage < 12.58:   # 75% Discharged/Low Charge
                 return "Warning"
         return "Ok"
 
@@ -2148,7 +2239,7 @@ class Comfort2(mqtt.Client):
 
                     for line in self.readlines():
 
-                        if line[1:] != "cc00" or line[1:] != "D?00":
+                        if line[1:] != "cc00" and not line[1:].startswith("D?00"):
                             logger.debug(line[1:])  	    # Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
 
                             if datetime.now() > SAVEDTIME + TIMEOUT:            #
