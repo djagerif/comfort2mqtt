@@ -38,7 +38,7 @@ from random import randint
 import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
-DOMAIN = "comfort2"
+DOMAIN = "comfort2mqtt"
 ADDON_SLUG = ''
 COMFORT_SERIAL = "00000000"       # Default Serial Number.
 COMFORT_KEY = "00000000"          # Default Refresh Key.
@@ -46,7 +46,7 @@ COMFORT_KEY = "00000000"          # Default Refresh Key.
 rand_hex_str = hex(randint(268435456, 4294967295))
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts.
 
-REFRESHTOPIC = DOMAIN+"/alarm/refresh"                   # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
+REFRESHTOPIC = "homeassistant/button/refresh"                   # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
 ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"                # List of Bypassed Zones.
@@ -89,7 +89,7 @@ device_properties['ChargeVoltageSlave4'] = "-1"
 device_properties['ChargeVoltageSlave5'] = "-1"
 device_properties['ChargeVoltageSlave6'] = "-1"
 device_properties['ChargeVoltageSlave7'] = "-1"
-device_properties['ComfortHardwareModel'] = "CM-9000"
+device_properties['ComfortHardwareModel'] = "CM9000-ULT"
 device_properties['sem_id'] = 0
 device_properties['SerialNumber'] = "00000000"
 device_properties['BatteryStatus'] = "N/A"
@@ -303,7 +303,7 @@ logging.basicConfig(
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
 
-supervisor_url = 'http://supervisor'                  
+supervisor_url = 'http://supervisor'
 addon_info_url = f'{supervisor_url}/addons/self/info'
 
 headers = {
@@ -319,6 +319,7 @@ else:
     if response.status_code == 200:
         addon_info = response.json()
         ADDON_SLUG = addon_info['data']['slug']
+        ADDON_VERSION = addon_info['data']['version']
     else:
         logger.error("Failed to get Addon Info: Error Code %s, %s", response.status_code, response.reason)
 
@@ -844,9 +845,19 @@ class Comfort_EL_HardwareModelReport(object):
         else:
             identifier = int(data[3:4],16)
             if identifier == 1:
-                self.hardwaremodel = "CM-9000"
+                if int(device_properties['ComfortFileSystem']) == 34:
+                    self.hardwaremodel = "CM9000-ULT"
+                elif int(device_properties['ComfortFileSystem']) == 31:
+                    self.hardwaremodel = "CM9000-OPT"
+                else:
+                    self.hardwaremodel = models[int(device_properties['ComfortFileSystem'])]
             elif identifier == 0:
-                self.hardwaremodel = "CM-9001"
+                if int(device_properties['ComfortFileSystem']) == 34:
+                    self.hardwaremodel = "CM9001-ULT"
+                elif int(device_properties['ComfortFileSystem']) == 31:
+                    self.hardwaremodel = "CM9001-OPT"
+                else:
+                    self.hardwaremodel = models[int(device_properties['ComfortFileSystem'])]
 
 class Comfort_D_SystemVoltageReport(object):
     def __init__(self, data={}):
@@ -1417,25 +1428,26 @@ class Comfort2(mqtt.Client):
 #                       "serial_number": device_properties['SerialNumber'],
 
 #                       "name": device_properties['Reference'] if file_exists else "Comfort <Default>",     # 24/7/2024
-        
+
+#                            "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+#                            "hw_version":str(device_properties['ComfortHardwareModel']),
+#                            "serial_number": device_properties['SerialNumber'],
+#                            "sw_version":str(device_properties['Version']),
+
         if ADDON_SLUG.strip() == "":
-            MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
-                            "identifiers":["comfort2mqtt"],
-                            "manufacturer":"Cytech Technologies PTE Limited",
-                            "sw_version":str(device_properties['Version']),
-                            "hw_version":str(device_properties['ComfortHardwareModel']),
-                            "serial_number": device_properties['SerialNumber'],
-                            "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+            MQTT_DEVICE = { "name": "Cytech Intelligent Automation",
+                            "identifiers": ["comfort2mqtt"],
+                            "manufacturer": "Ingo de Jager",
+                            "sw_version": "N/A",
+                            "model": "Comfort MQTT Bridge"
                         }
         else:
-            MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
-                            "identifiers":["comfort2mqtt"],
-                            "manufacturer":"Cytech Technologies PTE Limited",
-                            "sw_version":str(device_properties['Version']),
-                            "hw_version":str(device_properties['ComfortHardwareModel']),
-                            "serial_number": device_properties['SerialNumber'],
+            MQTT_DEVICE = { "name": "Cytech Intelligent Automation",
+                            "identifiers": ["comfort2mqtt"],
+                            "manufacturer": "Ingo de Jager",
+                            "sw_version": ADDON_VERSION,
                             "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
-                            "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+                            "model": "Comfort MQTT Bridge"
                         }
         
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
@@ -1475,7 +1487,7 @@ class Comfort2(mqtt.Client):
 
         # MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
         #                 "identifiers":["comfort2mqtt"],
-        #                 "manufacturer":"Cytech Technologies PTE Limited",
+        #                 "manufacturer":"Cytech Technology Pte Limited",
         #                 "sw_version":str(device_properties['Version']),
         #                 "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
         #                 "via_device": "comfort2mqtt"
@@ -1505,7 +1517,7 @@ class Comfort2(mqtt.Client):
         # "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
         # MQTT_DEVICE = { "name": device_properties['Reference'] if file_exists else "Comfort <Default>",
         #                 "identifiers":["comfort2mqtt"],
-        #                 "manufacturer":"Cytech Technologies PTE Limited",
+        #                 "manufacturer":"Cytech Technology Pte Limited",
         #                 "sw_version":str(device_properties['Version']),
         #                 "hw_version":str(device_properties['ComfortHardwareModel']),
         #                 "serial_number": device_properties['SerialNumber'],
@@ -1518,7 +1530,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/filesystem/config"
         MQTT_MSG=json.dumps({"name": "FileSystem",
                              "unique_id": "comfort_filesystem",
-                             "availability_topic": "comfort2/alarm/online",
+                             "availability_topic": DOMAIN + "/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": "comfort2",
@@ -1554,7 +1566,7 @@ class Comfort2(mqtt.Client):
 
         MQTT_MSG=json.dumps({"name": "Battery Status",
                              "unique_id": "comfort_battery_status",
-                             "availability_topic": "comfort2/alarm/online",
+                             "availability_topic": DOMAIN + "/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": "comfort2",
@@ -1588,7 +1600,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/charger/config"
         MQTT_MSG=json.dumps({"name": "Charger Status",
                              "unique_id": "comfort_charger_status",
-                             "availability_topic": "comfort2/alarm/online",
+                             "availability_topic": DOMAIN + "/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": "comfort2",
@@ -1657,7 +1669,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/firmware/config"
         MQTT_MSG=json.dumps({"name": "Firmware",
                              "unique_id": "comfort_firmware",
-                             "availability_topic": "comfort2/alarm/online",
+                             "availability_topic": DOMAIN + "/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": "comfort2",
@@ -1674,7 +1686,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/state/config"
         MQTT_MSG=json.dumps({"name": "State",
                              "unique_id": "comfort_state",
-                             "state_topic": "comfort2/alarm/status",
+                             "state_topic": DOMAIN + "/alarm/status",
                              "icon":"mdi:shield-alert",
                              "qos": "2",
                              "native_value": "string",
@@ -1686,7 +1698,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/bypass/config"
         MQTT_MSG=json.dumps({"name": "Bypassed Zones",
                              "unique_id": "comfort_bypass_zones",
-                             "state_topic": "comfort2/alarm/bypass",
+                             "state_topic": DOMAIN + "/alarm/bypass",
                              "icon":"mdi:shield-remove",
                              "qos": "2",
                              "native_value": "string",
@@ -1698,7 +1710,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/status/config"
         MQTT_MSG=json.dumps({"name": "Status",
                              "unique_id": "comfort_system_status",
-                             "state_topic": "comfort2/alarm/LWT",
+                             "state_topic": DOMAIN + "/alarm/LWT",
                              "json_attributes_topic": "comfort2",
                              "json_attributes_template": '''
                                 {% set data = value_json %}
@@ -1727,10 +1739,10 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/customername/config"
         MQTT_MSG=json.dumps({"name": "Customer Name",
                              "unique_id": "comfort_customername",
-                             "availability_topic": "comfort2/alarm/online",
+                             "availability_topic": DOMAIN + "/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
-                             "state_topic": "comfort2",
+                             "state_topic": DOMAIN,
                              "value_template": "{{ value_json.CustomerName }}",
                              "entity_category": "diagnostic",
                              "native_value": "string",
@@ -1744,10 +1756,10 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/reference/config"
         MQTT_MSG=json.dumps({"name": "Reference",
                              "unique_id": "comfort_reference_name",
-                             "availability_topic": "comfort2/alarm/online",
+                             "availability_topic": DOMAIN + "/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
-                             "state_topic": "comfort2",
+                             "state_topic": DOMAIN,
                              "value_template": "{{ value_json.Reference }}",
                              "entity_category": "diagnostic",
                              "native_value": "string",
@@ -1761,10 +1773,10 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/serial_number/config"
         MQTT_MSG=json.dumps({"name": "Serial Number",
                              "unique_id": "comfort_serial_number",
-                             "availability_topic": "comfort2/alarm/online",
+                             "availability_topic": DOMAIN + "/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
-                             "state_topic": "comfort2",
+                             "state_topic": DOMAIN,
                              "value_template": "{{ value_json.serial_number }}",
                              "entity_category": "diagnostic",
                              "native_value": "string",
@@ -1778,8 +1790,8 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/button/comfort2mqtt/refresh/config"
         MQTT_MSG=json.dumps({"name": "Refresh",
                              "unique_id": "comfort_refresh_switch",
-                             "availability_topic": "comfort2/alarm/online",
-                             "command_topic": "comfort2/alarm/refresh",
+                             "availability_topic": DOMAIN + "/alarm/online",
+                             "command_topic": DOMAIN + "/alarm/refresh",
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "payload_press": COMFORT_KEY,
@@ -1806,7 +1818,7 @@ class Comfort2(mqtt.Client):
 
         # MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
         #                 "identifiers":["comfort2mqtt"],
-        #                 "manufacturer":"Cytech Technologies PTE Limited",
+        #                 "manufacturer":"Cytech Technology Pte Limited",
         #                 "sw_version":str(device_properties['Version']),
         #                 "serial_number": device_properties['SerialNumber'],
         #                 "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
