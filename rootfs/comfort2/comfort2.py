@@ -46,22 +46,29 @@ COMFORT_KEY = "00000000"          # Default Refresh Key.
 rand_hex_str = hex(randint(268435456, 4294967295))
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts.
 
-REFRESHTOPIC = "homeassistant/button/refresh"                   # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
+REFRESHTOPIC = "homeassistant/button/refresh"           # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
-ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"                # List of Bypassed Zones.
+ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"               # List of Bypassed Zones.
+ALARMCONNECTEDTOPIC = DOMAIN+"/alarm/connected"
 
 ALARMCOMMANDTOPIC = DOMAIN+"/alarm/set"
 ALARMAVAILABLETOPIC = DOMAIN+"/alarm/online"
 ALARMLWTTOPIC = DOMAIN+"/alarm/LWT"
 ALARMMESSAGETOPIC = DOMAIN+"/alarm/message"
 ALARMTIMERTOPIC = DOMAIN+"/alarm/timer"
-ALARMDOORBELLTOPIC = DOMAIN+"/doorbell"
+ALARMDOORBELLTOPIC = DOMAIN+"/alarm/doorbell"
+
+# BRIDGECONNECTEDTOPIC = DOMAIN+"/bridge/connected"
+# BRIDGESTATE = DOMAIN+"/bridge/state"
+# BRIDGEDEVICES = DOMAIN+"/bridge/devices"
+# BRIDGEINFO = DOMAIN+"/bridge/info"
 
 FIRST_LOGIN = False         # Don't scan Comfort until MQTT connection is made.
 RUN = True
 BYPASSEDZONES = []          # Global list of Bypassed Zones
-BROKERCONNECTED = False
+BROKERCONNECTED = False     # MQTT Status
+COMFORTCONNECTED = False    # Comfort Status
 ZONEMAPFILE = False         # Zone Number to Name CSV file present.
 SCSRIOMAPFILE = False
 OUTPUTMAPFILE = False
@@ -320,6 +327,10 @@ else:
         addon_info = response.json()
         ADDON_SLUG = addon_info['data']['slug']
         ADDON_VERSION = addon_info['data']['version']
+
+        print (addon_info)
+
+
     else:
         logger.error("Failed to get Addon Info: Error Code %s, %s", response.status_code, response.reason)
 
@@ -351,22 +362,22 @@ COMFORT_INPUTS=int(option.alarm_inputs)
 COMFORT_OUTPUTS=int(option.alarm_outputs)
 COMFORT_RESPONSES=int(option.alarm_responses)
 COMFORT_TIME=str(option.comfort_time)
-COMFORT_RIO_INPUTS=str(option.alarm_rio_inputs)
-COMFORT_RIO_OUTPUTS=str(option.alarm_rio_outputs)
+COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs)
+COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
 
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 if COMFORT_INPUTS < 8:
     COMFORT_INPUTS = 8
-if COMFORT_INPUTS > 128:
+if COMFORT_INPUTS > 128:                                # 128 is max. setting for possible future expansion. 96 currently supported by Cytech.
     COMFORT_INPUTS = 128
-ALARMVIRTUALINPUTRANGE = range(1,int(COMFORT_INPUTS)+1) #set this according to your system. Starts at 1 -> {value}
+ALARMVIRTUALINPUTRANGE = range(1,int(COMFORT_INPUTS)+1) #set according to your system config. Starts at 1 -> {value}
 ALARMINPUTCOMMANDTOPIC = DOMAIN+"/input%d/set"          #input1,input2,... input128 for virtual inputs
 
-ALARMRIOINPUTTOPIC = DOMAIN+"/input%d"                  #input129,input130,... input248 for every input. Physical SCS/RIO Inputs (Default 0), Max 120  
+ALARMRIOINPUTTOPIC = DOMAIN+"/input%d"                  #input129,input130,... input248 for every input. Physical SCS/RIO Inputs (Default 0), Max 120, starting at 129.  
 if int(COMFORT_RIO_INPUTS) < 0:
-    COMFORT_RIO_INPUTS = "0"
+    COMFORT_RIO_INPUTS = 0
 if int(COMFORT_RIO_INPUTS) > 120:
-    COMFORT_RIO_INPUTS = "120"
+    COMFORT_RIO_INPUTS = 120
 ALARMRIOINPUTRANGE = range(129,129+int(COMFORT_RIO_INPUTS))   #set this according to your system. Starts at 129 -> 248 (Max.)
 ALARMRIOINPUTCOMMANDTOPIC = DOMAIN+"/input%d/set"       #input129,input130,... input248 for SCS/RIO inputs. Cannot set as Virtual Input.
 
@@ -380,9 +391,9 @@ ALARMOUTPUTCOMMANDTOPIC = DOMAIN+"/output%d/set"        #output1/set,output2/set
 
 ALARMRIOOUTPUTTOPIC = DOMAIN+"/output%d"                #output129,output130,... for every SCS/RIO output
 if int(COMFORT_RIO_OUTPUTS) < 0:
-    COMFORT_RIO_OUTPUTS = "0"
+    COMFORT_RIO_OUTPUTS = 0
 if int(COMFORT_RIO_OUTPUTS) > 120:
-    COMFORT_RIO_OUTPUTS = "120"
+    COMFORT_RIO_OUTPUTS = 120
 ALARMRIOOUTPUTRANGE = range(129,129+int(COMFORT_RIO_OUTPUTS))    #set this according to your system. Physical SCS/RIO Outputs (Default 0), Max 120
 ALARMRIOOUTPUTCOMMANDTOPIC = DOMAIN+"/output%d/set"     #output129,output130,... output248 for SCS/RIO outputs.
 
@@ -747,16 +758,6 @@ class ComfortAMSystemAlarmReport(object):
         elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
         else: self.message = "Unknown("+str(self.alarm)+")"
 
-#UCM a?AASS[XXYYBBzzRRTTGG]
-#XX is Trouble bits
-#Bit 0 = AC Failure
-#Bit 1 = Low Battery
-#Bit 2 = Zone Trouble
-#Bit 3 = RS485 Comms Fail
-#Bit 4 = Tamper
-#Bit 5 = Phone Trouble
-#Bit 6 = GSM trouble
-#Bit 7 = Unused
 class Comfort_A_SecurityInformationReport(object):      #  For future development !!!
     #a?000000000000000000
     def __init__(self, data={}):
@@ -814,8 +815,6 @@ class Comfort_U_SystemCPUTypeReport(object):
        
         self.cputype = "N/A"
 
-        # u?21BE07CF000001
-
         if len(data) < 14:
             self.cputype = "N/A"
         else:
@@ -870,7 +869,7 @@ class Comfort_D_SystemVoltageReport(object):
         global BatterySlaveIDs
         global ChargerSlaveIDs
 
-        # D?2201C0 - Single Instance
+        # <D?2201C0 - Single Instance. Also incorporating suggested enhancement D?0001 and D?0002 but not yet implemented. <D?0001aabbccddeeff[gghh]
 
         query_type = int(data[4:6],16)
         id = int(data[2:4],16)
@@ -908,21 +907,21 @@ class Comfort_D_SystemVoltageReport(object):
             self.ChargerStatus = self.Battery_Status(ChargerVoltageList.values())
             device_properties['ChargerStatus'] = self.ChargerStatus
 
-    def Battery_Status(self, voltages):  # Tuple of all voltages
+    def Battery_Status(self, voltages):  # Tuple of all voltages. Still to be debugged !!!!!!!!!!!!! Status sometimes incorrect !!!!!!!!!
         for voltage in voltages:
             if float(voltage) == -1:
                 continue
-            if float(voltage) > 14.4:      # Critical Overcharge
+            if float(voltage) > 14.4:       # Critical Overcharge(Value to be determined still)
                 return "Critical"
-            if float(voltage) > 14.2:      # Overcharge
+            if float(voltage) > 14.2:       # Overcharge(Value to be determined still)
                 return "Warning"
-            if float(voltage) < 12.23:     # 50% Discharged/Crital Charge or No Charge
+            if float(voltage) < 12.23:      # 50% Discharged/Critical Low Charge or No Charge
                 return "Critical"
-            if float(voltage) < 12.58:   # 75% Discharged/Low Charge
+            if float(voltage) < 12.58:      # 75% Discharged/Low Charge
                 return "Warning"
         return "Ok"
 
-class ComfortSN_SerialNumberReport(object):
+class ComfortSN_SerialNumberReport(object):     # Possible Comfort SN decode issue. Sometimes Comforts reports 'Illegal' serial number.
     def __init__(self, data={}):
 
         #logging.debug("len(data): %s, %s", data, len(data))
@@ -938,8 +937,6 @@ class ComfortSN_SerialNumberReport(object):
             AA = data[10:12]
     
             dec_string = str(int(AA+BB+CC+DD,16)).zfill(8)
-            #logging.debug("AABBCCDD: %s", str(AA+BB+CC+DD))
-            #logging.debug("AABBCCDD: %s", dec_string)
             dec_len = len(str(dec_string))
             prefix = int(dec_string[0:dec_len-6])
             if 0 < prefix <= 26:
@@ -1006,7 +1003,7 @@ class Comfort2(mqtt.Client):
             self.subscribe(ALARMCOMMANDTOPIC)
             self.subscribe(REFRESHTOPIC)
             self.subscribe(DOMAIN)
-            self.subscribe("homeassistant/status")      # Track Status changes for Home Assistant
+            self.subscribe("homeassistant/status")      # Track Status changes for Home Assistant via MQTT Broker.
 
             for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
@@ -1021,13 +1018,13 @@ class Comfort2(mqtt.Client):
             for i in ALARMRIOINPUTRANGE: #for inputs 129 to Max Value
                 self.subscribe(ALARMRIOINPUTCOMMANDTOPIC % i)
 
-            if int(COMFORT_RIO_INPUTS) > 0:              
+            if COMFORT_RIO_INPUTS > 0:              
                 logger.debug("Subscribed to %d RIO Inputs", ALARMRIOINPUTRANGE[-1] - 128)
 
             for i in ALARMRIOOUTPUTRANGE: #for outputs 129 to Max Value
                 self.subscribe(ALARMRIOOUTPUTCOMMANDTOPIC % i)
                 
-            if int(COMFORT_RIO_OUTPUTS) > 0:              
+            if COMFORT_RIO_OUTPUTS > 0:              
                 logger.debug("Subscribed to %d RIO Outputs", ALARMRIOOUTPUTRANGE[-1] - 128)
             else:
                 logger.debug("Subscribed to 0 RIO Outputs")
@@ -1259,6 +1256,7 @@ class Comfort2(mqtt.Client):
         global FIRST_LOGIN
         global SAVEDTIME
         global device_properties
+        global COMFORTCONNECTED
 
         buffer = ''
         data = True
@@ -1292,6 +1290,9 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.sendall("\x03LI\r".encode()) # Try and gracefully logout if possible.
                     SAVEDTIME = datetime.now()
                     FIRST_LOGIN = True
+                    COMFORTCONNECTED = False
+                    if BROKERCONNECTED:
+                        self.publish(ALARMCONNECTEDTOPIC, "1" if COMFORTCONNECTED else "0", qos=2, retain=False)
                 else:
                     # got a message do something :)
                     buffer += data
@@ -1303,7 +1304,11 @@ class Comfort2(mqtt.Client):
 
     def login(self):
         global SAVEDTIME
+        global COMFORTCONNECTED
         self.comfortsock.sendall(("\x03LI"+self.comfort_pincode+"\r").encode())
+        COMFORTCONNECTED = True
+        if BROKERCONNECTED:
+            self.publish(ALARMCONNECTEDTOPIC, 1, qos=2, retain=True)
         SAVEDTIME = datetime.now()
 
     def readcurrentstate(self):
@@ -1415,6 +1420,7 @@ class Comfort2(mqtt.Client):
 
         global device_properties
         global models
+        global COMFORTCONNECTED
   
         #UID = ("Comfort2MQTT - " + str(device_properties['uid'])) if file_exists else "Comfort2MQTT - 00000000"
         #UUID = str(device_properties['uid'])
@@ -1435,10 +1441,11 @@ class Comfort2(mqtt.Client):
 #                            "sw_version":str(device_properties['Version']),
 
         if ADDON_SLUG.strip() == "":
+            ADDON_VERSION = "N/A"
             MQTT_DEVICE = { "name": "Cytech Intelligent Automation",
                             "identifiers": ["comfort2mqtt"],
                             "manufacturer": "Ingo de Jager",
-                            "sw_version": "N/A",
+                            "sw_version": ADDON_VERSION,
                             "model": "Comfort MQTT Bridge"
                         }
         else:
@@ -1603,7 +1610,7 @@ class Comfort2(mqtt.Client):
                              "availability_topic": DOMAIN + "/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
-                             "state_topic": "comfort2",
+                             "state_topic": DOMAIN,
                              "value_template": "{{ value_json.ChargerStatus }}",
                              "json_attributes_topic": "comfort2",
                              "json_attributes_template": '''
@@ -1707,11 +1714,12 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
         
+        
         discoverytopic = "homeassistant/sensor/comfort2mqtt/status/config"
-        MQTT_MSG=json.dumps({"name": "Status",
-                             "unique_id": "comfort_system_status",
-                             "state_topic": DOMAIN + "/alarm/LWT",
-                             "json_attributes_topic": "comfort2",
+        MQTT_MSG=json.dumps({"name": "Bridge Status",
+                             "unique_id": "comfort_bridge_status",
+                             "state_topic": "homeassistant/status",
+                             "json_attributes_topic": DOMAIN,
                              "json_attributes_template": '''
                                 {% set data = value_json %}
                                 {% set ns = namespace(dict_items='') %}
@@ -1728,9 +1736,10 @@ class Comfort2(mqtt.Client):
                                 {% set result = dict_str | from_json %}
                                 {{ result | tojson }}
                                 ''',
-                             "icon":"mdi:alarm-panel-outline",
                              "qos": "2",
-                             "native_value": "string",
+                             "device_class": "connectivity",
+                             "payload_on": "online",
+                             "payload_off": "offline",
                              "device": MQTT_DEVICE
                             })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
@@ -1796,18 +1805,36 @@ class Comfort2(mqtt.Client):
                              "payload_not_available": "0",
                              "payload_press": COMFORT_KEY,
                              "icon":"mdi:shield-refresh",
-                             "device_class": "restart",
                              "qos": "2",
+                             "origin": {
+                                "name": DOMAIN,
+                                "sw": ADDON_VERSION,
+                                },
                              "device": MQTT_DEVICE
                             })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
 
-
-
-  # (" + UUID + ")",
-  #[UID],
+#                             "ComfortConnectionState": "1" if COMFORTCONNECTED else "0",
+# "value_template": "{{ value_json.ComfortConnectionState }}",
+        discoverytopic = "homeassistant/binary_sensor/comfort2mqtt/comfort_connection_state/config"
+        MQTT_MSG=json.dumps({"name": "Comfort Status",
+                             "unique_id": "comfort_lan_connection_state",
+                             "state_topic": ALARMCONNECTEDTOPIC,
+                             "device_class": "connectivity",
+                             "entity_category": "diagnostic",
+                             "payload_off": "0",
+                             "payload_on": "1",
+                             "qos": "2",
+                             "origin": {
+                                "name": DOMAIN,
+                                "sw": ADDON_VERSION,
+                                },
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
 
   
 #                       "url": "https://www.cytech.biz",
@@ -1904,6 +1931,7 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             self.connected = False
         if BROKERCONNECTED == True:      # MQTT Connected
+            infot = self.publish(ALARMCONNECTEDTOPIC, 0,qos=2,retain=True)
             infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
             infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
             infot.wait_for_publish()
@@ -2194,6 +2222,7 @@ class Comfort2(mqtt.Client):
         global SAVEDTIME
         global TIMEOUT
         global BROKERCONNECTED
+        global COMFORTCONNECTED
         global COMFORT_SERIAL
         global COMFORT_KEY
         
@@ -2251,6 +2280,9 @@ class Comfort2(mqtt.Client):
 
                     for line in self.readlines():
 
+                        COMFORTCONNECTED = True
+                        self.publish(ALARMCONNECTEDTOPIC, 1,qos=2,retain=True)
+
                         if line[1:] != "cc00" and not line[1:].startswith("D?00"):
                             logger.debug(line[1:])  	    # Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
 
@@ -2285,9 +2317,31 @@ class Comfort2(mqtt.Client):
                                     else:
                                         logger.info("Waiting for MQTT Broker to come Online...")
 
+                                    MQTT_MSG=json.dumps({"date_code": "20200927",
+                                                         "definition": {
+                                                             "description": "Test device",
+                                                             "model": "ZBMINI",
+                                                             "vendor": "SONOFF"
+                                                             },
+                                                         "friendly_name": "Study Switch",
+                                                         "manufacturer": "SONOFF",
+                                                         "model_id": "01MINIZB",
+                                                         "via_device": DOMAIN
+                                                        })
+
                                     self.connected = True  
-                                    self.publish(ALARMCOMMANDTOPIC, "comm test",qos=2,retain=True)
-                                    self.publish(REFRESHTOPIC, "",qos=2,retain=True)               # Clear Refresh Key
+                                    self.publish(ALARMCOMMANDTOPIC, "comm test", qos=2,retain=True)
+                                    time.sleep(0.01)
+                                    self.publish(REFRESHTOPIC, "", qos=2,retain=True)               # Clear Refresh Key
+                                    time.sleep(0.01)
+                                    self.publish(BRIDGECONNECTEDTOPIC, "test", qos=2,retain=True) 
+                                    time.sleep(0.01)
+                                    self.publish(BRIDGESTATE, "test", qos=2,retain=True) 
+                                    time.sleep(0.01)
+                                    self.publish(BRIDGEDEVICES, MQTT_MSG, qos=2,retain=True) 
+                                    time.sleep(0.01)
+                                    self.publish(BRIDGEINFO, "test", qos=2,retain=True) 
+                                    time.sleep(0.01)
                                     self.setdatetime()      # Set Date/Time if Option is enabled
 
                                     if FIRST_LOGIN == True:
@@ -2779,10 +2833,38 @@ class Comfort2(mqtt.Client):
 
                 except socket.error as v:
                     logger.error('Comfort Socket Error %s', str(v))
+                    COMFORTCONNECTED = False
                 logger.error('Lost connection to Comfort, reconnecting...')
                 if BROKERCONNECTED == True:      # MQTT Connected ??
                     self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
                     self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
+                    #self.UpdateDeviceInfo()
+                    discoverytopic = "homeassistant/binary_sensor/comfort2mqtt/comfort_connection_state/config"
+                    ADDON_VERSION = "N/A"
+                    MQTT_DEVICE = { "name": "Cytech Intelligent Automation",
+                            "identifiers": ["comfort2mqtt"],
+                            "manufacturer": "Ingo de Jager",
+                            "sw_version": ADDON_VERSION,
+                            "model": "Comfort MQTT Bridge"
+                        }
+            
+                    MQTT_MSG=json.dumps({"name": "Comfort Status",
+                             "unique_id": "comfort_lan_connection_state",
+                             "state_topic": DOMAIN,
+                             "value_template": "1" if COMFORTCONNECTED else "0",
+                             "device_class": "connectivity",
+                             "entity_category": "diagnostic",
+                             "payload_off": "0",
+                             "payload_on": "1",
+                             "qos": "2",
+                             "origin": {
+                                "name": DOMAIN,
+                                "sw": ADDON_VERSION,
+                                },
+                             "device": MQTT_DEVICE
+                            })
+                    self.publish(ALARMCONNECTEDTOPIC, "1" if COMFORTCONNECTED else "0", qos=2, retain=False)
+                    
                 time.sleep(RETRY.seconds)
         except KeyboardInterrupt as e:
             logger.debug("SIGINT (Ctrl-C) Intercepted")
