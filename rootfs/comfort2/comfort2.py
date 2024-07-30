@@ -1444,6 +1444,8 @@ class Comfort2(mqtt.Client):
         global device_properties
         global models
         global COMFORTCONNECTED
+        global ADDON_VERSION
+        global ADDON_SLUG
   
         #UID = ("Comfort2MQTT - " + str(device_properties['uid'])) if file_exists else "Comfort2MQTT - 00000000"
         #UUID = str(device_properties['uid'])
