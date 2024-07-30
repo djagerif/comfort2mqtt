@@ -492,7 +492,7 @@ The original source for this project was done by [koocyrat][koochyrat]. This pro
 
 ## Disclaimer
 
-Not being a fulltime programmer, but rather just a tinkerer, I try and keep things working but changes to Comfort firmware and features might not always work with this Add-on. I will try and update this Add-on as time and skill allows. A full disclaimer of warranty is included in the Apache licence terms and conditions for use below.
+Not being a fulltime programmer, but rather just a tinkerer, I try and keep things working but changes to Comfort firmware and features might not always work with this Add-on. I will try and update this Add-on as time and skill allow. A full disclaimer of warranty is included in the Apache licence terms and conditions for use below.
 
 
 ## License
