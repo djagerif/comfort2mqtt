@@ -102,6 +102,7 @@ device_properties['sem_id'] = 0
 device_properties['SerialNumber'] = "00000000"
 device_properties['BatteryStatus'] = "N/A"
 device_properties['ChargerStatus'] = "N/A"
+device_properties['BridgeConnected'] = 0
 
 
 # Comfort FileSystem values and Model Numbers
@@ -989,12 +990,14 @@ class Comfort2(mqtt.Client):
         global RUN
         global BROKERCONNECTED
         global FIRST_LOGIN
+        global device_properties
 
         FIRST_LOGIN = True      # Set to True to start refresh on_connect
         
         if rc == 'Success':
 
             BROKERCONNECTED = True
+            device_properties['BridgeConnected'] = 1
 
             #logger.info('MQTT Broker %s (%s)', mqtt_strings[rc], str(rc))
             logger.info('MQTT Broker Connection %s', str(rc))
@@ -1058,17 +1061,20 @@ class Comfort2(mqtt.Client):
         else:
             logger.error('MQTT Broker Connection Failed (%s)', str(rc))
             BROKERCONNECTED = False
+            device_properties['BridgeConnected'] = 0
 
     def on_disconnect(self, client, userdata, flags, reasonCode, properties):  #client, userdata, flags, reason_code, properties
 
         global FIRST_LOGIN
         global BROKERCONNECTED
+        global device_properties
 
         if reasonCode == 0:
             logger.info('MQTT Broker Disconnect Successfull (%s)', str(reasonCode))
         else:
             #logger.error('MQTT Broker %s', str(rc))
             BROKERCONNECTED = False
+            device_properties['BridgeConnected'] = 0
             logger.error('MQTT Broker Connection Failed (%s). Check Network or MQTT Broker connection settings', str(reasonCode))
             FIRST_LOGIN = True
 
@@ -1295,6 +1301,7 @@ class Comfort2(mqtt.Client):
                     COMFORTCONNECTED = False
                     if BROKERCONNECTED:
                         self.publish(ALARMCONNECTEDTOPIC, "1" if COMFORTCONNECTED else "0", qos=2, retain=False)
+                        device_properties['BridgeConnected'] = 1
                 else:
                     # got a message do something :)
                     buffer += data
@@ -1511,6 +1518,7 @@ class Comfort2(mqtt.Client):
                              "ChargerSlave7": str(device_properties['ChargeVoltageSlave7']),
                              "InstalledSlaves": int(device_properties['sem_id']),
                              "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
+                             "BridgeConnected": str(device_properties['BridgeConnected']),
                              "device": MQTT_DEVICE
                             })
         self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
@@ -1594,25 +1602,40 @@ class Comfort2(mqtt.Client):
         # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         # time.sleep(0.1)
 
+
         discoverytopic = "homeassistant/binary_sensor/" + DOMAIN + "/status/config"
         MQTT_MSG=json.dumps({"name": "Bridge Status",
                              "unique_id": DOMAIN+"_status",
                              "object_id": DOMAIN+"_status",
-                             "state_topic": "homeassistant/status",
+                             "state_topic": DOMAIN,
+                             "value_template": "{{ value_json.BridgeConnected }}",
                              "qos": "2",
                              "device_class": "connectivity",
-                             "payload_on": "online",
-                             "payload_off": "offline",
+                             "payload_on": "1",
+                             "payload_off": "0",
                              "device": MQTT_DEVICE
                             })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
+        availability =  [
+            {
+                "topic": DOMAIN,
+                "payload_available": "1",
+                "payload_not_available": "0",
+                "value_template": "{{ value_json.BridgeConnected }}"
+            },
+            {
+                "topic": DOMAIN+"/alarm/online",
+                "payload_available": "1",
+                "payload_not_available": "0"
+            }]
         discoverytopic = "homeassistant/button/comfort2mqtt/refresh/config"
         MQTT_MSG=json.dumps({"name": "Refresh",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability": availability,
+                             "availability_mode": "all",
                              "command_topic": DOMAIN + "/alarm/refresh",
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1679,22 +1702,7 @@ class Comfort2(mqtt.Client):
                              "native_value": "int",
                              "icon":"mdi:file-chart",
                              "qos": "2",
-                             "device": MQTT_DEVICE,
-                             "services": {
-                                "comfort2mqtt_service": {
-                                    "description": "This is a custom service for the Comfort2MQTT add-on",
-                                    "fields": {
-                                        "field1": {
-                                            "description": "This is the first field",
-                                            "example": "Example value for field1"
-                                            },
-                                        "field2": {
-                                            "description": "This is the second field",
-                                            "example": "Example value for field2"
-                                        }
-                                    }
-                                }
-                             }
+                             "device": MQTT_DEVICE
                         })
         #                              "json_attributes_topic": "comfort2",
         #                              "json_attributes_template": "{{ value_json | tojson }}",
@@ -1946,6 +1954,7 @@ class Comfort2(mqtt.Client):
         
         global RUN
         global SAVEDTIME
+        global device_properties
         
         logger.debug("SIGNUM: %s received, Shutting down.", str(signum))
         
@@ -2287,6 +2296,7 @@ class Comfort2(mqtt.Client):
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         if self.connected == True:
             BROKERCONNECTED = True
+            device_properties['BridgeConnected'] = 1
             self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
             self.will_set(ALARMLWTTOPIC, payload="Offline", qos=2, retain=True)
 
