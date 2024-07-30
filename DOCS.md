@@ -241,7 +241,7 @@ When the Add-on is fully configured and running, there will be two new MQTT Devi
 
 ## Home Assistant - Custom Card `#` (Optional)
 
-The native `Alarm Control Panel` card does not include a `#` key for confirmation, you need to create a seperate custom button card that can simulate the `#` key. One option is to install the Custom Button Card and then call 'arm_bypass' which is configured to send a `#` key code instead of actually arming into `Custom bypass` mode. The other option is to design your own card that incorporates this key. Below is the easiest option to follow.
+The native `Alarm Control Panel` card does not include a `#` key for confirmation, you need to create a seperate custom button card that can simulate the `#` key. One option is to install the Custom Button Card and then call 'arm_bypass' which is configured to send a `#` key code instead of arming into `Custom bypass` mode. The other option is to design your own card that incorporates this key. Below is the easiest option to follow.
 
 1. Download the `Custom Button Card` from https://github.com/custom-cards/button-card and intall it according to whichever method you prefer. Refer to the repository documentation for installation and configuration instructions for either manual or HACS installation.
 
