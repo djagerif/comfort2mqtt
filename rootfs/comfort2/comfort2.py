@@ -40,6 +40,7 @@ from argparse import ArgumentParser
 
 DOMAIN = "comfort2mqtt"
 ADDON_SLUG = ''
+ADDON_VERSION = "N/A"
 COMFORT_SERIAL = "00000000"       # Default Serial Number.
 COMFORT_KEY = "00000000"          # Default Refresh Key.
 
@@ -1466,7 +1467,6 @@ class Comfort2(mqtt.Client):
 #                            "sw_version":str(device_properties['Version']),
 
         if ADDON_SLUG.strip() == "":
-            ADDON_VERSION = "N/A"
             MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
