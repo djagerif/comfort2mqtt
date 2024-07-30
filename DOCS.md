@@ -322,8 +322,7 @@ To find your Add-on name for `service: hassio._restart` you can do a `ha ` query
 ```
 alias: Refresh Comfort to MQTT Add-on
 description: >-
-  When Home Assistant Config changes or restarts then reload Comfort to MQTT to
-  refresh all entities.
+  When Home Assistant MQTT Configuration changes then refresh Comfort to MQTT entities.
 trigger:
   - alias: When Reload 'ALL YAML CONFIGURATION' from Developer Tools
     platform: event
@@ -339,14 +338,14 @@ action:
   - service: notify.persistent_notification
     metadata: {}
     data:
-      message: Home Assistant Add-on Refresh Requested
+      message: Home Assistant Add-on Refresh requested
       title: Comfort to MQTT Add-on
   - alias: Request a Refresh of all MQTT entities without a full Add-on reload
     service: mqtt.publish
     data:
-      payload: 000F8EC8 <- Provide your unique KEY value here. "Refresh Key:" can be found on startup in the Add-on log file. 
-      qos: '2'
       topic: comfort2mqtt/alarm/refresh
+      payload: 000F8EC8 <- Provide your unique KEY value here. "Refresh Key:" can be found on startup in the Add-on log file. 
+      qos: "2"
 mode: single
 ```
 ⚠️ **Note:** When Comfort to MQTT starts up it will print the KEY value to be used for Refresh function authentication. Incorrect key values will be ignored.
@@ -370,7 +369,7 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 This software _requires_ a fully functional Comfort Ethernet or Wifi configuration with inactivity timeout set to the default value of 2 minutes. The UCM/Wifi is not recommended due to possible connectivity issues that could arise from switching between different AP's or other possible sources of RF noise. For best performance it is recommended to use either the UCM/Eth03 or the onboard Eth03 Plug-in module on the newer CM9001 Comfort Ultra models. Use a good quality CAT5e or better cable between Comfort and your network device.
 
-If your network is segmented using a firewall, or any other similar device, you must ensure all applicable ports are allowed between Home Assistant and the Comfort. The default port for the UCM/Eth03 is TCP/1002 which is Port #2 of a UCMEth03.
+If your network is segmented using a firewall, or any other similar device, you must ensure all applicable ports are allowed between Home Assistant and Comfort. The default port for the UCM/Eth03 is TCP/1002 which is Port #2 of a UCMEth03.
   
 ⚠️ The UCM/WiFi uses port TCP/3000 as the default port. Any port may be used as long as there are no overlaps with existing services on the network.
 
@@ -493,7 +492,7 @@ The original source for this project was done by [koocyrat][koochyrat]. This pro
 
 ## Disclaimer
 
-Not being a fulltime programmer, but rather just a tinkerer, I try and keep things working but changes to Comfort firmware and features might not always work with this Add-on. I will try and update this Add-on as time and skill allows.
+Not being a fulltime programmer, but rather just a tinkerer, I try and keep things working but changes to Comfort firmware and features might not always work with this Add-on. I will try and update this Add-on as time and skill allows. A full disclaimer of warranty is included in the Apache licence terms and conditions for use below.
 
 
 ## License
