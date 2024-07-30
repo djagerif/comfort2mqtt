@@ -16,7 +16,7 @@ For more information about Cytech Comfort systems, please see the [Cytech Techno
 [cytech]: http://www.cytech.biz/index.html
 
 ## About
-This Addon is used to bridge an IP connected Cytech Comfort II ULTRA Alarm system to MQTT for use in Home Assistant. Other Comfort systems are also supported but has not been tested.
+This Addon is used to bridge an IP connected Cytech Comfort II ULTRA Alarm system to MQTT for use in Home Assistant. Other Comfort systems are partially supported but has not been tested.
 
 ⚠️ This software is neither certified nor endorsed by Cytech Technology Pte Ltd.
 
@@ -26,8 +26,8 @@ This implementation does minimal MQTT auto-discovery. Some `System` entities are
 
 The following objects are supported:
 
-* Zone Inputs [1-128*] (96 Zones on Comfort II hardware)
-* Zone Outputs [1-128*] (96 Zones on Comfort II hardware)
+* Zone Inputs [1-96]
+* Zone Outputs [1-96]
 * Counters [0-254]
 * Flags [1-254]
 * Sensors [0-31]
