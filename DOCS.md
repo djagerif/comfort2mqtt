@@ -27,18 +27,17 @@ Even though this is a mostly Python implementation, it's currently only tested o
 The following MQTT topics are published:
 ```
 comfort2mqtt/alarm - current MQTT alarm state (disarmed, pending, armed_home, armed_away, armed_night, arm_vacation, triggered)
-comfort2mqtt/alarm/online - 1 for online, 0 for offline
-comfort2mqtt/alarm/message - Informational messages, e.g. the zone that triggered the alarm
+comfort2mqtt/alarm/online - '1' for online, '0' for offline
+comfort2mqtt/alarm/message - Informational messages, e.g. the zone that triggered an alarm
 comfort2mqtt/alarm/timer - countdown entry/exit timer in seconds when arming to away mode or entering. updates every second.
 comfort2mqtt/alarm/status - Status of the alarm (Idle, Trouble, Alert, Alarm)
-comfort2mqtt/alarm/timer - Entry or Exit timer value
-comfort2mqtt/alarm/bypass - List of Bypassed zones. 1,3,5,7,9. '0' indicates no zones bypassed
+comfort2mqtt/alarm/bypass - List of Bypassed zones. EG. 1,3,5,7,9. '0' indicates no zones bypassed
 comfort2mqtt/alarm/LWT - Online or Offline text status
 comfort2mqtt/alarm/refresh - Trigger a refresh of all objects. Used when a refresh of all object states are required.
+comfort2mqtt/alarm/connected - Status of LAN Connection to Comfort. '1' when logged in.
+comfort2mqtt/alarm/doorbell - '0' for off/answered or '1' for on
 
-comfort2mqtt/doorbell - 0 for off/answered or 1 for on
-
-comfort2mqtt/input1 - 128 (Zone) have the following JSON attributes EG.
+comfort2mqtt/input<1 to 96> (Zone Input) have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:42",
   "Name": "GarageDoor",
@@ -47,7 +46,7 @@ comfort2mqtt/input1 - 128 (Zone) have the following JSON attributes EG.
   "Bypass": 0
 }
 
-comfort2mqtt/input129 - 248 (SCS/RIO) have the following JSON attributes EG.
+comfort2mqtt/input<129 to 248> (SCS/RIO Input) have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:44",
   "Name": "ScsRioResp129",
@@ -56,35 +55,35 @@ comfort2mqtt/input129 - 248 (SCS/RIO) have the following JSON attributes EG.
   "Bypass": null
 }
 
-comfort2mqtt/output1 - 128 (Zone) have the following JSON attributes EG.
+comfort2mqtt/output<1 to 96> (Zone Output) have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:44",
   "Name": "Output01",
   "State": 0
 }
 
-comfort2mqtt/output129 - 248 (SCS/RIO) have the following JSON attributes EG.
+comfort2mqtt/output<129 to 248> (SCS/RIO Output) have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:45",
   "Name": "ScsRioOutput129",
   "State": 0
 }
 
-comfort2mqtt/flag1 - 254 have the following JSON attributes EG.
+comfort2mqtt/flag<1 to 254> have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:46",
   "Name": "Flag01",
   "State": 0
 }
 
-comfort2mqtt/sensor0 - 31 have the following JSON attributes EG.
+comfort2mqtt/sensor<0 to 31> have the following JSON attributes EG.
 {
   "Time": "2024-06-12T17:16:54",
   "Name": "Sensor01",
   "Value": 0
 }
 
-comfort2mqtt/counter0 - 254 have the following JSON attributes EG.
+comfort2mqtt/counter<0 to 254> have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:49",
   "Name": "Counter000",
@@ -102,29 +101,19 @@ The following MQTT topics are subscribed.
 comfort2mqtt/alarm/set - sent from Home Assistant, DISARM, ARMED_HOME, ARMED_NIGHT, ARMED_VACATION or ARMED_AWAY
 comfort2mqtt/alarm/refresh - sent from Home Assistant, <Key> triggers a complete object refresh
 
-comfort2mqtt/input1/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input
-...
-comfort2mqtt/input248/set
+comfort2mqtt/input<1 to 96>/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input
+comfort2mqtt/input<129 to 248>/set
 
-comfort2mqtt/output1/set - 1 for on, 0 for off. activates the output
-...
-comfort2mqtt/output248/set
+comfort2mqtt/output<1 to 96>/set - 1 for on, 0 for off. activates the output
+comfort2mqtt/output<129 to 248>/set
 
-comfort2mqtt/response1/set - value is ignored. Comfort response is activated as programmed in Comfigurator
-...
-comfort2mqtt/response1024/set
+comfort2mqtt/response<1 to 1024>/set - value is ignored. Comfort response is activated as programmed in Comfigurator
 
-comfort2mqtt/flag1/set - 1 for on, 0 for off
-...
-comfort2mqtt/flag254/set
+comfort2mqtt/flag<1 to 254>/set - 1 for on, 0 for off
 
-comfort2mqtt/counter0/set - 16-bit value
-...
-comfort2mqtt/counter254/set
+comfort2mqtt/counter<0 to 254>/set - 16-bit value
 
-comfort2mqtt/sensor0/set - 16-bit value
-...
-comfort2mqtt/sensor31/set - 16-bit value
+comfort2mqtt/sensor<0 to 31>/set - 16-bit value
 ```
 
 
@@ -132,7 +121,7 @@ comfort2mqtt/sensor31/set - 16-bit value
 
 Manual Sensor creation is required in your `configuration.yaml` file before this Add-on can start. 
 
-![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) It must be noted that Comfort requires the `#` key during arming to acknowledge and bypass any open zones. Because the `Home Assistant Alarm Control Panel` does not have a`#` key, the `CUSTOM BYPASS` key is utilised for that purpose and send the appropriate `#` keycode (KD1A) to Comfort.
+![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) It must be noted that Comfort requires the `#` key during arming to acknowledge and bypass any open zones. Because the `Home Assistant Alarm Control Panel` does not have a native `#` key, the `CUSTOM BYPASS` key is utilised for that purpose and send the appropriate `#` keycode (`KD1A`) to Comfort.
 
 Sample object configurations are shown below.
 
@@ -235,17 +224,17 @@ mqtt:
       optimistic: false
       on_command_type: "first"
 ```
-Comfort II ULTRA supports both Unsigned 8-bit and Signed 16-bit values. However, many integrations like Clipsal C-BUS uses Unsigned 8-bit values and sets Counter values of 0xFF(255) for 'On' and 0x00(0) for the 'Off' state. If you have a Comfort II ULTRA integration that is different to the example above then adjust your `payload_on` and `payload_off` integer values accordingly.
+Comfort II ULTRA supports both Unsigned 8-bit and Signed 16-bit values. However, many integrations like Clipsal C-BUS, by Schneider Electric, uses Unsigned 8-bit values and sets Counter values of 0xFF(255) for 'On' and 0x00(0) for 'Off' states and any other value inbetween when required for example dimming. If you have a Comfort II ULTRA integration that is different to the example mentioned then you need to adjust your `payload_on` and `payload_off` integer values accordingly.
 
 The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable light, both mapped to their respective Comfort Counters. You could also map your Non-Dimmable Lights to Comfort Flags which should operate in a similar manner as Counters except the `payload_on`value will be `1` rather than `255`. With the Light examples above you can also add the `Brightness` secondary info to the Dimmer light icon and it will display as per below.
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/1d16931d-1cfd-4f55-83c0-16be5a90e777)
 
-Because `Counters` can be used for many things other than Lights, the `Kitchen Light` in the example follows the [Brightness Without On Commands][ha-mqtt] chapter in the Home Assistant MQTT Light documentation, with a few tweaks.
+Because `Counters` can be used for other uses other than Lights, the `Kitchen Light` in the example follows the [Brightness Without On Commands][ha-mqtt] chapter in the Home Assistant MQTT Light documentation, with a few small tweaks.
 
 ### Auto-Discovered Objects
 
-When the Add-on is fully configured and running, there will be a new Device with several System Entities auto-discovered as per below. The values for these entities are retrieved from both the Comfort system as well as the alarm configuration `CCLX` file. If the `CCLX` file is not present then no object enrichment will be done and default names will be used for entities, especially ZoneWord strings and Object Descriptions as per the `CCLX` file.
+When the Add-on is fully configured and running, there will be two new MQTT Devices with several System Entities auto-discovered as per below. The values for these entities are retrieved from both the Comfort system as well as the alarm configuration `CCLX` file. If the `CCLX` file is not present then no object enrichment will be done and default names will be used for entities, especially ZoneWord strings and Object Descriptions as per the `CCLX` file.
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/18f53bd3-2d7c-40a9-a34d-611ff7bdef30)
 

@@ -44,6 +44,9 @@ ADDON_VERSION = "N/A"
 COMFORT_SERIAL = "00000000"       # Default Serial Number.
 COMFORT_KEY = "00000000"          # Default Refresh Key.
 
+MAX_ZONES = 96                  # Configurable for future expansion
+MAX_OUTPUTS = 96                # Configurable for future expansion
+
 rand_hex_str = hex(randint(268435456, 4294967295))
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts.
 
@@ -119,6 +122,7 @@ models = {34: "Comfort II ULTRA",
           24: "Comfort I ULTRA (Obsolete)"
         }
 
+# Includes possible future expansion to 7 Slaves.
 BatterySlaveIDs = {1:"BatteryVoltageMain",
           33:"BatteryVoltageSlave1",
           34:"BatteryVoltageSlave2",
@@ -148,7 +152,6 @@ BatteryVoltageNameList = {0:"BatteryVoltageMain",
                       6:"BatteryVoltageSlave6",
                       7:"BatteryVoltageSlave7"
 }
-
 ChargerVoltageNameList = {0:"ChargeVoltageMain",
                       1:"ChargeVoltageSlave1",
                       2:"ChargeVoltageSlave2",
@@ -168,7 +171,6 @@ BatteryVoltageList = {0:"-1",
                       6:"-1",
                       7:"-1"
 }
-
 ChargerVoltageList = {0:"-1",
                       1:"-1",
                       2:"-1",
@@ -273,12 +275,12 @@ group = parser.add_argument_group('Comfort Alarm options')
 group.add_argument(
     '--alarm-inputs',
     type=int, default=8,
-    help="Number of physical Zone Inputs, values from 8 - 128 in increments of 8. [default: '8']")
+    help="Number of physical Zone Inputs, values from 8 - " + MAX_ZONES + " in increments of 8. [default: '8']")
 
 group.add_argument(
     '--alarm-outputs',
     type=int, default=0,
-    help="Number of physical Zone Outputs, values from 0 - 128 in increments of 8. [default: '0']")
+    help="Number of physical Zone Outputs, values from 0 - " + MAX_OUTPUTS + " in increments of 8. [default: '0']")
 
 group.add_argument(
     '--alarm-responses',
@@ -366,8 +368,8 @@ COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 if COMFORT_INPUTS < 8:
     COMFORT_INPUTS = 8
-if COMFORT_INPUTS > 128:                                # 128 is max. setting for possible future expansion. 96 currently supported by Cytech.
-    COMFORT_INPUTS = 128
+if COMFORT_INPUTS > MAX_ZONES:                                # 128 is max. setting for possible future expansion. 96 currently supported by Cytech.
+    COMFORT_INPUTS = MAX_ZONES
 ALARMVIRTUALINPUTRANGE = range(1,int(COMFORT_INPUTS)+1) #set according to your system config. Starts at 1 -> {value}
 ALARMINPUTCOMMANDTOPIC = DOMAIN+"/input%d/set"          #input1,input2,... input128 for virtual inputs
 
@@ -382,8 +384,8 @@ ALARMRIOINPUTCOMMANDTOPIC = DOMAIN+"/input%d/set"       #input129,input130,... i
 ALARMOUTPUTTOPIC = DOMAIN+"/output%d"                   #output1,output2,... for every output
 if COMFORT_OUTPUTS < 0:
     COMFORT_OUTPUTS = 0
-if COMFORT_OUTPUTS > 128:
-    COMFORT_OUTPUTS = 128
+if COMFORT_OUTPUTS > MAX_OUTPUTS:
+    COMFORT_OUTPUTS = MAX_OUTPUTS
 ALARMNUMBEROFOUTPUTS = COMFORT_OUTPUTS                  #set this according to your system. Physical Outputs (Default 0), Max 96
 ALARMOUTPUTCOMMANDTOPIC = DOMAIN+"/output%d/set"        #output1/set,output2/set,... for every output
 
