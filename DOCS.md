@@ -344,14 +344,14 @@ action:
   - alias: Request a Refresh of all MQTT entities without a full Add-on reload
     service: mqtt.publish
     data:
-      payload: 000F8EC8 <- Provide your unique KEY value here. "Comfort II Refresh Key:" can be found on startup in the log file. 
+      payload: 000F8EC8 <- Provide your unique KEY value here. "Refresh Key:" can be found on startup in the Add-on log file. 
       qos: '2'
       topic: comfort2mqtt/alarm/refresh
 mode: single
 ```
 ⚠️ **Note:** When Comfort to MQTT starts up it will print the KEY value to be used for Refresh function authentication. Incorrect key values will be ignored.
 
-`2024-06-12 17:45:27 INFO     Comfort II Refresh Key: 000F8EC8`
+`2024-06-12 17:45:27 INFO     Refresh Key: 000F8EC8`
 
 
 ## Hardware and Interface support
@@ -366,11 +366,11 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 * [UCM/Wifi01] - Not Recommended (WiFi) - Firmware 7.176
 
-* [UCM/Eth03] - Recommended (LAN) - Firmware 7.176
+* [UCM/Eth03 or Eth03 Mainboard Plug-in] - Recommended (LAN) - Firmware 7.176
 
-This software _requires_ a fully functional UCM/Ethernet or UCM/Wifi configuration with inactivity timeouts set to default values of 2 minutes. The UCM/Wifi is not recommended due to possible connectivity issues that could arise from switching between different AP's or other possible sources of RF noise. For best performance it is recommended to use the UCM/Eth03 which uses a physical LAN connection. Use a good quality CAT5e or better cable between the UCM/Eth03 and your network device.
+This software _requires_ a fully functional Comfort Ethernet or Wifi configuration with inactivity timeout set to the default value of 2 minutes. The UCM/Wifi is not recommended due to possible connectivity issues that could arise from switching between different AP's or other possible sources of RF noise. For best performance it is recommended to use either the UCM/Eth03 or the onboard Eth03 Plug-in module on the newer CM9001 Comfort Ultra models. Use a good quality CAT5e or better cable between Comfort and your network device.
 
-If your network is segmented using a firewall, or any other device, you must ensure all applicable ports are allowed between Home Assistant and the Comfort Ethernet Module (UCM). The default port for the UCM/Eth03 is TCP/1002 which is Port #2 of a UCMEth03.
+If your network is segmented using a firewall, or any other similar device, you must ensure all applicable ports are allowed between Home Assistant and the Comfort. The default port for the UCM/Eth03 is TCP/1002 which is Port #2 of a UCMEth03.
   
 ⚠️ The UCM/WiFi uses port TCP/3000 as the default port. Any port may be used as long as there are no overlaps with existing services on the network.
 
