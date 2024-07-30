@@ -224,7 +224,7 @@ mqtt:
       optimistic: false
       on_command_type: "first"
 ```
-Comfort II ULTRA supports both Unsigned 8-bit and Signed 16-bit values. However, many integrations like Clipsal C-BUS, by Schneider Electric, uses Unsigned 8-bit values and sets Counter values of 0xFF(255) for 'On' and 0x00(0) for 'Off' states and any other value inbetween when required for example dimming. If you have a Comfort II ULTRA integration that is different to the example mentioned then you need to adjust your `payload_on` and `payload_off` integer values accordingly.
+Comfort II ULTRA supports both Unsigned 8-bit and Signed 16-bit values. However, many integrations like Clipsal C-BUS, by Schneider Electric, uses Unsigned 8-bit values and sets Counter values of 0xFF(255) for 'On' and 0x00(0) for 'Off' states and any other value in between when required for example dimming. If you have a Comfort II ULTRA integration that is different to the example mentioned then you need to adjust your `payload_on` and `payload_off` integer values accordingly.
 
 The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable light, both mapped to their respective Comfort Counters. You could also map your Non-Dimmable Lights to Comfort Flags which should operate in a similar manner as Counters except the `payload_on`value will be `1` rather than `255`. With the Light examples above you can also add the `Brightness` secondary info to the Dimmer light icon and it will display as per below.
 
@@ -241,9 +241,9 @@ When the Add-on is fully configured and running, there will be two new MQTT Devi
 
 ## Home Assistant - Custom Card `#` (Optional)
 
-The native `Alarm Control Panel` card does not include a `#` key for confirmation, you need to create a seperate custom button card that can simulate the `#` key. One option is to install the Custom Button Card and then call 'arm_bypass' which is configured to send a `#` key code instead of arming into `Custom bypass` mode. The other option is to design your own card that incorporates this key. Below is the easiest option to follow.
+The native `Alarm Control Panel` card does not include a `#` key for confirmation, you need to create a separate custom button card that can simulate the `#` key. One option is to install the Custom Button Card and then call 'arm_bypass' which is configured to send a `#` key code instead of arming into `Custom bypass` mode. The other option is to design your own card that incorporates this key. Below is the easiest option to follow.
 
-1. Download the `Custom Button Card` from https://github.com/custom-cards/button-card and intall it according to whichever method you prefer. Refer to the repository documentation for installation and configuration instructions for either manual or HACS installation.
+1. Download the `Custom Button Card` from https://github.com/custom-cards/button-card and install it according to whichever method you prefer. Refer to the repository documentation for installation and configuration instructions for either manual or HACS installation.
 
 2. Once installed, edit your dashboard and create new button using your newly installed custom button card. Below is a sample of the configuration that is required to make this button send a `#` key code to Comfort. Change the entity name to the one in your system.
 
@@ -265,7 +265,7 @@ tap_action:
 
 ## Home Assistant - Alarm State Colours (Optional)
 
-The native `Alarm Control Panel` uses Grey, Orange and Green for Disarmed, Arming/Pending and Armed, Red is used for Triggered. These colours does not correlate with the Comfort II ULTRA Alarm states. To change the colours to use Green, Orange and Red, you have to add a seperate `Theme` to your `Alarm Control Panel` card.
+The native `Alarm Control Panel` uses Grey, Orange and Green for Disarmed, Arming/Pending and Armed, Red is used for Triggered. These colours does not correlate with the Comfort II ULTRA Alarm states. To change the colours to use Green, Orange and Red, you have to add a separate `Theme` to your `Alarm Control Panel` card.
 
 1. Create a file called `themes.yaml`, it can actually be named anything.yaml, it doesn't matter. Copy this file into your Home Assistant `/config/themes` directory. If the directory doesn't exist then create the directory.
 
@@ -276,7 +276,7 @@ frontend:
   themes: !include_dir_merge_named themes
 ```
 
-3. The contents of the themes.yaml file should look like the below. This is just a sample and might contain more than what is reguired, it is borrowed, with thanks, from the HA community around the topic of custom colours.
+3. The contents of the themes.yaml file should look like the below. This is just a sample and might contain more than what is required, it is borrowed, with thanks, from the HA community around the topic of custom colours.
 
 ```
 alarm:
@@ -303,17 +303,17 @@ alarm:
 3. Lastly, edit your `Alarm Control Panel` card and assign the new `alarm` theme to it. This will change the Alarm State colours to reflect what Comfort uses.
 
 
-## Home Assistant  - Automation (Optional)
+## Home Assistant - Automation (Optional)
 
 When Home Assistant Restarts (Not Reload), it only restarts Home Assistant itself, all Add-on's remain running which could lead to some entities displaying an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to Restart, or better yet, Refresh the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded from `Developer tools` -> `YAML` -> `YAML configuration reloading`.
 
-To automate this you need to enable this hidden entity created by the `Home Assistant Supervisor`.
+To automate this, you need to enable this hidden entity created by the `Home Assistant Supervisor`.
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/cedfc20a-3b38-405a-affe-e575c31057a0)
 
 ⚠️ This entity does not update in real-time, it takes around 2 minutes to change state.
 
-Next you need to create an Automation that triggers on Home Assistant Restart and on Configuration.yaml file changes for MQTT entries as per below.
+Next you need to create an Automation that triggers on MQTT entry changes in the configuration.yaml file as per below.
 
 To find your Add-on name for `service: hassio._restart` you can do a `ha ` query from the commandline interface and look for the `slug:` keyword or, after starting the Add-on, note the `Hostname` from the Add-on `Info` tab.
 
@@ -457,11 +457,11 @@ If your network is segmented using a firewall, or any other similar device, you 
 
 ### Option: `Comfort Zone Inputs` (Optional)
 
-  Select number of Published Comfort Inputs/Zones starting from Zone 1. Published Zones is a single contiguous block from 1 to <Value>. Default 8, Max. 128
+  Select number of Published Comfort Inputs/Zones starting from Zone 1. Published Zones is a single contiguous block from 1 to <Value>. Default 8, Max. 96
 
 ### Option: `Comfort Zone Outputs` (Optional)
 
-  Select number of Published Comfort Outputs starting from Output 1. Published Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 128
+  Select number of Published Comfort Outputs starting from Output 1. Published Outputs is a single contiguous block from 1 to <Value>. Default 0, Max. 96
 
 ### Option: `Comfort SCS/RIO Inputs` (Optional)
 
@@ -490,6 +490,10 @@ Got questions?
 ## Authors & Contributors
 
 The original source for this project was done by [koocyrat][koochyrat]. This project is a modified, and slightly extended version, of the same source project and adapted to a native Home Assistant Add-on. Among several posts, various Comfort forum members also had good suggestions which, in part, contributed to this project as inspiration.
+
+## Disclaimer
+
+Not being a fulltime programmer, but rather just a tinkerer, I try and keep things working but changes to Comfort firmware and features might not always work with this Add-on. I will try and update this Add-on as time and skill allows.
 
 
 ## License
