@@ -17,7 +17,7 @@ The installation of this add-on is pretty straightforward and no different in co
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/181c6e31-8210-4fb1-9e30-f69a3a416e20)
 
 
-Even though this is a mostly Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Alpine Linux, other platforms remain untested and it's not clear if it will work or not.
+Even though this is a mostly Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Alpine Linux with other platforms remaining untested and it's unclear if it will work or not.
 
 ⚠️ This add-on requires initial configuration to connect with Home Assistant and your Comfort system e.g. Comfort II ULTRA Alarm system.
 
@@ -26,19 +26,19 @@ Even though this is a mostly Python implementation, it's currently only tested o
 
 The following MQTT topics are published:
 ```
-comfort2/alarm - current MQTT alarm state (disarmed, pending, armed_home, armed_away, armed_night, arm_vacation, triggered)
-comfort2/alarm/online - 1 for online, 0 for offline
-comfort2/alarm/message - Informational messages, e.g. the zone that triggered the alarm
-comfort2/alarm/timer - countdown entry/exit timer in seconds when arming to away mode or entering. updates every second.
-comfort2/alarm/status - Status of the alarm (Idle, Trouble, Alert, Alarm)
-comfort2/alarm/timer - Entry or Exit timer value
-comfort2/alarm/bypass - List of Bypassed zones. 1,3,5,7,9. '0' indicates no zones bypassed
-comfort2/alarm/LWT - Online or Offline text status
-comfort2/alarm/refresh - Trigger a refresh of all objects. Used when a refresh of all object states are required.
+comfort2mqtt/alarm - current MQTT alarm state (disarmed, pending, armed_home, armed_away, armed_night, arm_vacation, triggered)
+comfort2mqtt/alarm/online - 1 for online, 0 for offline
+comfort2mqtt/alarm/message - Informational messages, e.g. the zone that triggered the alarm
+comfort2mqtt/alarm/timer - countdown entry/exit timer in seconds when arming to away mode or entering. updates every second.
+comfort2mqtt/alarm/status - Status of the alarm (Idle, Trouble, Alert, Alarm)
+comfort2mqtt/alarm/timer - Entry or Exit timer value
+comfort2mqtt/alarm/bypass - List of Bypassed zones. 1,3,5,7,9. '0' indicates no zones bypassed
+comfort2mqtt/alarm/LWT - Online or Offline text status
+comfort2mqtt/alarm/refresh - Trigger a refresh of all objects. Used when a refresh of all object states are required.
 
-comfort2/doorbell - 0 for off/answered or 1 for on
+comfort2mqtt/doorbell - 0 for off/answered or 1 for on
 
-comfort2/input1 - 128 (Zone) have the following JSON attributes EG.
+comfort2mqtt/input1 - 128 (Zone) have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:42",
   "Name": "GarageDoor",
@@ -47,7 +47,7 @@ comfort2/input1 - 128 (Zone) have the following JSON attributes EG.
   "Bypass": 0
 }
 
-comfort2/input129 - 248 (SCS/RIO) have the following JSON attributes EG.
+comfort2mqtt/input129 - 248 (SCS/RIO) have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:44",
   "Name": "ScsRioResp129",
@@ -56,35 +56,35 @@ comfort2/input129 - 248 (SCS/RIO) have the following JSON attributes EG.
   "Bypass": null
 }
 
-comfort2/output1 - 128 (Zone) have the following JSON attributes EG.
+comfort2mqtt/output1 - 128 (Zone) have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:44",
   "Name": "Output01",
   "State": 0
 }
 
-comfort2/output129 - 248 (SCS/RIO) have the following JSON attributes EG.
+comfort2mqtt/output129 - 248 (SCS/RIO) have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:45",
   "Name": "ScsRioOutput129",
   "State": 0
 }
 
-comfort2/flag1 - 254 have the following JSON attributes EG.
+comfort2mqtt/flag1 - 254 have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:46",
   "Name": "Flag01",
   "State": 0
 }
 
-comfort2/sensor0 - 31 have the following JSON attributes EG.
+comfort2mqtt/sensor0 - 31 have the following JSON attributes EG.
 {
   "Time": "2024-06-12T17:16:54",
   "Name": "Sensor01",
   "Value": 0
 }
 
-comfort2/counter0 - 254 have the following JSON attributes EG.
+comfort2mqtt/counter0 - 254 have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:49",
   "Name": "Counter000",
@@ -99,32 +99,32 @@ comfort2/counter0 - 254 have the following JSON attributes EG.
 The following MQTT topics are subscribed.
 
 ```
-comfort2/alarm/set - sent from Home Assistant, DISARM, ARMED_HOME, ARMED_NIGHT, ARMED_VACATION or ARMED_AWAY
-comfort2/alarm/refresh - sent from Home Assistant, <Key> triggers a complete object refresh
+comfort2mqtt/alarm/set - sent from Home Assistant, DISARM, ARMED_HOME, ARMED_NIGHT, ARMED_VACATION or ARMED_AWAY
+comfort2mqtt/alarm/refresh - sent from Home Assistant, <Key> triggers a complete object refresh
 
-comfort2/input1/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input
+comfort2mqtt/input1/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input
 ...
-comfort2/input248/set
+comfort2mqtt/input248/set
 
-comfort2/output1/set - 1 for on, 0 for off. activates the output
+comfort2mqtt/output1/set - 1 for on, 0 for off. activates the output
 ...
-comfort2/output248/set
+comfort2mqtt/output248/set
 
-comfort2/response1/set - value is ignored. Comfort response is activated as programmed in Comfigurator
+comfort2mqtt/response1/set - value is ignored. Comfort response is activated as programmed in Comfigurator
 ...
-comfort2/response1024/set
+comfort2mqtt/response1024/set
 
-comfort2/flag1/set - 1 for on, 0 for off
+comfort2mqtt/flag1/set - 1 for on, 0 for off
 ...
-comfort2/flag254/set
+comfort2mqtt/flag254/set
 
-comfort2/counter0/set - 16-bit value
+comfort2mqtt/counter0/set - 16-bit value
 ...
-comfort2/counter254/set
+comfort2mqtt/counter254/set
 
-comfort2/sensor0/set - 16-bit value
+comfort2mqtt/sensor0/set - 16-bit value
 ...
-comfort2/sensor31/set - 16-bit value
+comfort2mqtt/sensor31/set - 16-bit value
 ```
 
 
@@ -149,9 +149,9 @@ mqtt:
         - arm_night
         # - arm_vacation
         - arm_custom_bypass
-      state_topic: "comfort2/alarm"
-      command_topic: "comfort2/alarm/set"
-      availability_topic: "comfort2/alarm/online"
+      state_topic: "comfort2mqtt/alarm"
+      command_topic: "comfort2mqtt/alarm/set"
+      availability_topic: "comfort2mqtt/alarm/online"
       payload_available: 1
       payload_not_available: 0
       code: "1234"  # Code can be different from Comfort's. This code is for the Add-on while the Comfort code is to login to Comfort itself.
@@ -161,25 +161,25 @@ mqtt:
   sensor:
     - name: Alarm Mode
       unique_id: "comfort2_alarm_mode"
-      availability_topic: "comfort2/alarm/online"
-      state_topic: "comfort2/alarm"
+      availability_topic: "comfort2mqtt/alarm/online"
+      state_topic: "comfort2mqtt/alarm"
       payload_available: "1"
       payload_not_available: "0"
 
     - name: Alarm Message
       unique_id: "comfort2_alarm_message"
-      state_topic: "comfort2/alarm/message"
-      availability_topic: "comfort2/alarm/online"
+      state_topic: "comfort2mqtt/alarm/message"
+      availability_topic: "comfort2mqtt/alarm/online"
       payload_available: "1"
       payload_not_available: "0"
 
     - name: Main Bedroom Temperature
       unique_id: "comfort2_counter244"
-      state_topic: "comfort2/counter244"
-      availability_topic: "comfort2/alarm/online"
+      state_topic: "comfort2mqtt/counter244"
+      availability_topic: "comfort2mqtt/alarm/online"
       value_template: "{{ value_json.Value }}"
       json_attributes_template: "{{ value_json | tojson }}"
-      json_attributes_topic: "comfort2/counter244"
+      json_attributes_topic: "comfort2mqtt/counter244"
       device_class: temperature
       state_class: measurement
       unit_of_measurement: °C
@@ -189,10 +189,10 @@ mqtt:
   binary_sensor: 
     - name: Study PIR
       unique_id: "comfort2_input35"
-      state_topic: "comfort2/input35"
-      availability_topic: "comfort2/alarm/online"
+      state_topic: "comfort2mqtt/input35"
+      availability_topic: "comfort2mqtt/alarm/online"
       value_template: '{{ value_json.State }}'
-      json_attributes_topic: "comfort2/input35"
+      json_attributes_topic: "comfort2mqtt/input35"
       json_attributes_template: '{{ value_json | tojson }}'
       payload_on: "1"
       payload_off: "0"
@@ -203,11 +203,11 @@ mqtt:
   light:
     - name: Kitchen Light
       unique_id: "comfort2_counter117"
-      state_topic: "comfort2/counter117"
+      state_topic: "comfort2mqtt/counter117"
       state_value_template: '{{ value_json.State }}'
-      command_topic: "comfort2/counter117/set"
-      availability_topic: "comfort2/alarm/online"
-      json_attributes_topic: "comfort2/counter117"
+      command_topic: "comfort2mqtt/counter117/set"
+      availability_topic: "comfort2mqtt/alarm/online"
+      json_attributes_topic: "comfort2mqtt/counter117"
       json_attributes_template: '{{ value_json | tojson }}'
       payload_on: "1"
       payload_off: "0"
@@ -215,18 +215,18 @@ mqtt:
       payload_not_available: "0"
       brightness_scale: "255"
       brightness_value_template: '{{ value_json.Value }}'
-      brightness_state_topic: "comfort2/counter117"
-      brightness_command_topic: "comfort2/counter117/set"
+      brightness_state_topic: "comfort2mqtt/counter117"
+      brightness_command_topic: "comfort2mqtt/counter117/set"
       optimistic: false
       on_command_type: "brightness"
 
     - name: Study Light
       unique_id: "comfort2_counter201"
-      state_topic: "comfort2/counter201"
+      state_topic: "comfort2mqtt/counter201"
       state_value_template: '{{ value_json.Value }}'
-      command_topic: "comfort2/counter201/set"
-      availability_topic: "comfort2/alarm/online"
-      json_attributes_topic: "comfort2/counter201"
+      command_topic: "comfort2mqtt/counter201/set"
+      availability_topic: "comfort2mqtt/alarm/online"
+      json_attributes_topic: "comfort2mqtt/counter201"
       json_attributes_template: '{{ value_json | tojson }}'
       payload_on: 255
       payload_off: 0
@@ -358,7 +358,7 @@ action:
     data:
       payload: 000F8EC8 <- Provide your unique KEY value here. "Comfort II Refresh Key:" can be found on startup in the log file. 
       qos: '2'
-      topic: comfort2/alarm/refresh
+      topic: comfort2mqtt/alarm/refresh
 mode: single
 ```
 ⚠️ **Note:** When Comfort to MQTT starts up it will print the KEY value to be used for Refresh function authentication. Incorrect key values will be ignored.
