@@ -1478,7 +1478,7 @@ class Comfort2(mqtt.Client):
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
-                            None if True else '"configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",'
+                            "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
                             "model": "Comfort MQTT Bridge"
                         }
         
