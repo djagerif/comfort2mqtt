@@ -1617,7 +1617,7 @@ class Comfort2(mqtt.Client):
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "payload_press": COMFORT_KEY,
-                             "icon":"mdi:shield-refresh",
+                             "icon":"mdi:refresh",
                              "qos": "2",
                              "device": MQTT_DEVICE
                             })
