@@ -19,7 +19,7 @@ The installation of this add-on is pretty straightforward and no different in co
 
 Even though this is a mostly Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Alpine Linux with other platforms remaining untested and it's unclear if it will work or not.
 
-⚠️ This add-on requires initial configuration to connect with Home Assistant and your Comfort system e.g. Comfort II ULTRA Alarm system.
+⚠️ This Add-on requires initial configuration to connect with Home Assistant and your Comfort system e.g. Comfort II ULTRA Alarm system.
 
 
 ## MQTT
@@ -260,7 +260,7 @@ tap_action:
     entity_id: alarm_control_panel.comfort_alarm
 ```
 
-![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) The `Comfort to MQTT` Add-on changes the behaviour of the `Custom bypass` function and uses it to send the `#` key instead. Please unselect the `Custom bypass` option when creating the `Alarm Control Panel` card.
+![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) The `Comfort to MQTT` Add-on changes the behaviour of the `Custom bypass` arm function and uses it to send the `#` key code instead. Please unselect the `Custom bypass` option when creating the `Alarm Control Panel` card.
 
 
 ## Home Assistant - Alarm State Colours (Optional)
@@ -305,7 +305,7 @@ alarm:
 
 ## Home Assistant  - Automation (Optional)
 
-When Home Assistant Restarts (Not Reload), it only restarts Home Assistant itself, all Add-ons remain running which could lead to some entities displaying an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to Restart, or better yet, Refresh the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded from `Developer tools` -> `YAML` -> `YAML configuration reloading`.
+When Home Assistant Restarts (Not Reload), it only restarts Home Assistant itself, all Add-on's remain running which could lead to some entities displaying an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to Restart, or better yet, Refresh the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded from `Developer tools` -> `YAML` -> `YAML configuration reloading`.
 
 To automate this you need to enable this hidden entity created by the `Home Assistant Supervisor`.
 
@@ -315,7 +315,7 @@ To automate this you need to enable this hidden entity created by the `Home Assi
 
 Next you need to create an Automation that triggers on Home Assistant Restart and on Configuration.yaml file changes for MQTT as per below.
 
-To find your addon name for `service: hassio.addon_restart` you can do a `ha addon` query from the commandline interface and look for the `slug:` keyword or, after starting the Add-on, note the `Hostname` from the Add-on `Info` tab.
+To find your Add-on name for `service: hassio._restart` you can do a `ha ` query from the commandline interface and look for the `slug:` keyword or, after starting the Add-on, note the `Hostname` from the Add-on `Info` tab.
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/0b30bded-fe82-4c1d-a278-2c2789a4ef1f)
 
@@ -339,9 +339,9 @@ action:
   - service: notify.persistent_notification
     metadata: {}
     data:
-      message: Home Assistant Addon Refresh Requested
-      title: Comfort to MQTT Addon
-  - alias: Request a Refresh of all MQTT entities without a full Addon reload
+      message: Home Assistant Add-on Refresh Requested
+      title: Comfort to MQTT Add-on
+  - alias: Request a Refresh of all MQTT entities without a full Add-on reload
     service: mqtt.publish
     data:
       payload: 000F8EC8 <- Provide your unique KEY value here. "Comfort II Refresh Key:" can be found on startup in the log file. 
@@ -408,7 +408,7 @@ If your network is segmented using a firewall, or any other device, you must ens
 
 ### Option: `CA Certificate File` (Optional)
 
-  A file containing a CA certificate. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
+  A file containing a CA certificate. Place this file in the Home Assistant `_configs/<comfort2mqtt slug>/certificates` folder.
   
 ### Option: `Require Certificate Authentication` (Optional)
   
@@ -416,11 +416,11 @@ If your network is segmented using a firewall, or any other device, you must ens
 
 ### Option: `Client Certificate File` (Optional)
 
-  A file containing a Client Certificate, including its chain. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
+  A file containing a Client Certificate, including its chain. Place this file in the Home Assistant `_configs/<comfort2mqtt slug>/certificates` folder.
 
 ### Option: `Client Private Key File` (Optional)
 
-  A file containing the Client Private key. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
+  A file containing the Client Private key. Place this file in the Home Assistant `_configs/<comfort2mqtt slug>/certificates` folder.
 
 ### Option: `Comfort TCP Port` (Optional)
 
@@ -438,15 +438,15 @@ If your network is segmented using a firewall, or any other device, you must ens
 
 ### Option: `Comfort Configuration file` (Optional)
 
-  Comfort Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc. Place this file in the Home Assistant `addon_config/<comfort2mqtt slug>` folder.
+  Comfort Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc. Place this file in the Home Assistant `_configs/<comfort2mqtt slug>` folder.
 
-  To upload a file to the `addon_config` directory you could use something like [Samba share][samba] Add-on or similar allowing filesystem access to seleced directories on Home Assistant.
+  To upload a file to the `_configs` directory you could use something like [Samba share][samba] Add-on or similar allowing filesystem access to seleced directories on Home Assistant.
 
   [samba]:https://github.com/home-assistant/addons/tree/master/samba
       
 ### Option: `Global Log Verbosity` (Optional)
 
-  This option controls the level of log output by the addon and can be changed to be more or less verbose, which might be useful when you are dealing with an unknown issue. Possible values are:
+  This option controls the level of log output by the Add-on and can be changed to be more or less verbose, which might be useful when you are dealing with an unknown issue. Possible values are:
 
 - `DEBUG`:   Shows detailed debug information.
 - `ERROR`:   Runtime errors that do not require immediate action.
