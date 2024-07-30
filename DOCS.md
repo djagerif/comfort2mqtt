@@ -236,8 +236,7 @@ Because `Counters` can be used for other uses other than Lights, the `Kitchen Li
 
 When the Add-on is fully configured and running, there will be two new MQTT Devices with several System Entities auto-discovered as per below. The values for these entities are retrieved from both the Comfort system as well as the alarm configuration `CCLX` file. If the `CCLX` file is not present then no object enrichment will be done and default names will be used for entities, especially ZoneWord strings and Object Descriptions as per the `CCLX` file.
 
-![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/18f53bd3-2d7c-40a9-a34d-611ff7bdef30)
-
+![image](https://github.com/user-attachments/assets/faeaa08b-c8f6-43db-a946-46ee9762b35b)
 
 
 ## Home Assistant - Custom Card `#` (Optional)
