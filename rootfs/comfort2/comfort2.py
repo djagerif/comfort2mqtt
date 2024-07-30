@@ -1513,8 +1513,6 @@ class Comfort2(mqtt.Client):
                              "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
                              "device": MQTT_DEVICE
                             })
-        #                              "device" : MQTT_DEVICE
-
         self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
         time.sleep(0.1)
 
@@ -1596,18 +1594,6 @@ class Comfort2(mqtt.Client):
         # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         # time.sleep(0.1)
 
-        discoverytopic = "homeassistant/sensor/comfort2mqtt/state/config"
-        MQTT_MSG=json.dumps({"name": "State",
-                             "unique_id": "comfort_state",
-                             "state_topic": DOMAIN + "/alarm/status",
-                             "icon":"mdi:shield-alert",
-                             "qos": "2",
-                             "native_value": "string",
-                             "device": MQTT_DEVICE
-                            })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        time.sleep(0.1)
-
         discoverytopic = "homeassistant/binary_sensor/" + DOMAIN + "/status/config"
         MQTT_MSG=json.dumps({"name": "Bridge Status",
                              "unique_id": DOMAIN+"_status",
@@ -1649,6 +1635,19 @@ class Comfort2(mqtt.Client):
                             "via_device": "comfort2mqtt_bridge"
                         }
         
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_state/config"
+        MQTT_MSG=json.dumps({"name": "State",
+                             "unique_id": discoverytopic.split('/')[3],
+                             "object_id": discoverytopic.split('/')[3],
+                             "state_topic": DOMAIN + "/alarm/status",
+                             "icon":"mdi:shield-alert",
+                             "qos": "2",
+                             "native_value": "string",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
+
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_firmware/config"
         MQTT_MSG=json.dumps({"name": "Firmware",
                              "unique_id": discoverytopic.split('/')[3],
