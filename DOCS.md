@@ -267,7 +267,7 @@ tap_action:
 
 The native `Alarm Control Panel` uses Grey, Orange and Green for Disarmed, Arming/Pending and Armed, Red is used for Triggered. These colours does not correlate with the Comfort II ULTRA Alarm states. To change the colours to use Green, Orange and Red, you have to add a seperate `Theme` to your `Alarm Control Panel` card.
 
-1. Create a file called `themes.yaml`, it can actually be named <anything>.yaml, it doesn't matter. Copy this file into your Home Assistant `/config/themes` directory. If the directory doesn't exist then create the directory.
+1. Create a file called `themes.yaml`, it can actually be named anything.yaml, it doesn't matter. Copy this file into your Home Assistant `/config/themes` directory. If the directory doesn't exist then create the directory.
 
 2. Make sure your `configuration.yaml` file contains an include statement for this file or directory. If you have a directory inclusion then this file will be included automatically. Here is an example of a directory inclusion.
 
@@ -313,7 +313,7 @@ To automate this you need to enable this hidden entity created by the `Home Assi
 
 ⚠️ This entity does not update in real-time, it takes around 2 minutes to change state.
 
-Next you need to create an Automation that triggers on Home Assistant Restart and on Configuration.yaml file changes for MQTT as per below.
+Next you need to create an Automation that triggers on Home Assistant Restart and on Configuration.yaml file changes for MQTT entries as per below.
 
 To find your Add-on name for `service: hassio._restart` you can do a `ha ` query from the commandline interface and look for the `slug:` keyword or, after starting the Add-on, note the `Hostname` from the Add-on `Info` tab.
 
