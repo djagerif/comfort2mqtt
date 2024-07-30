@@ -327,10 +327,6 @@ else:
         addon_info = response.json()
         ADDON_SLUG = addon_info['data']['slug']
         ADDON_VERSION = addon_info['data']['version']
-
-        print (addon_info)
-
-
     else:
         logger.error("Failed to get Addon Info: Error Code %s, %s", response.status_code, response.reason)
 
@@ -870,6 +866,7 @@ class Comfort_D_SystemVoltageReport(object):
         global ChargerSlaveIDs
 
         # <D?2201C0 - Single Instance. Also incorporating suggested enhancement D?0001 and D?0002 but not yet implemented. <D?0001aabbccddeeff[gghh]
+        # D?0001C0C1C2C3FFFF (Main + 3 Slaves).
 
         query_type = int(data[4:6],16)
         id = int(data[2:4],16)
@@ -907,19 +904,23 @@ class Comfort_D_SystemVoltageReport(object):
             self.ChargerStatus = self.Battery_Status(ChargerVoltageList.values())
             device_properties['ChargerStatus'] = self.ChargerStatus
 
-    def Battery_Status(self, voltages):  # Tuple of all voltages. Still to be debugged !!!!!!!!!!!!! Status sometimes incorrect !!!!!!!!!
+    def Battery_Status(self, voltages):  # Tuple of all voltages.
+        state = ["Ok","Warning","Critical"]
+        index = []
         for voltage in voltages:
             if float(voltage) == -1:
-                continue
-            if float(voltage) > 14.4:       # Critical Overcharge(Value to be determined still)
-                return "Critical"
-            if float(voltage) > 14.2:       # Overcharge(Value to be determined still)
-                return "Warning"
-            if float(voltage) < 12.23:      # 50% Discharged/Critical Low Charge or No Charge
-                return "Critical"
-            if float(voltage) < 12.58:      # 75% Discharged/Low Charge
-                return "Warning"
-        return "Ok"
+                index.append(0)
+            elif float(voltage) > 14.4:       # Critical Overcharge(Value to be determined still)
+                index.append(2)
+            elif float(voltage) > 14.2:       # Overcharge(Value to be determined still)
+                index.append(1)
+            elif float(voltage) < 12.23:      # 50% Discharged/Critical Low Charge or No Charge
+                index.append(2)
+            elif float(voltage) < 12.58:      # 75% Discharged/Low Charge
+                index.append(1)
+            else:
+                index.append(0)
+        return state[max(index)]
 
 class ComfortSN_SerialNumberReport(object):     # Possible Comfort SN decode issue. Sometimes Comforts reports 'Illegal' serial number.
     def __init__(self, data={}):
@@ -1269,7 +1270,7 @@ class Comfort2(mqtt.Client):
                 # timeout exception is setup
                 if err == 'timed out':
                     #self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
-                    if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
+                    if str(device_properties['ComfortHardwareModel']) == 'CM9001-ULT' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                         self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                         time.sleep(0.1)
                         self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
@@ -1316,8 +1317,10 @@ class Comfort2(mqtt.Client):
         global SAVEDTIME
         global BypassCache
         global DEVICEMAPFILE
-
+        
         if self.connected == True:
+
+            device_properties['CPUType'] = 'N/A'                    # Reset CPU type to default
 
             #get Bypassed Zones
             self.comfortsock.sendall("\x03b?00\r".encode())       # b?00 Bypassed Zones first
@@ -1416,6 +1419,26 @@ class Comfort2(mqtt.Client):
             self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)       # Emptry string removes topic.
             time.sleep(0.1)
 
+            #if device_properties['CPUType'] == 'N/A':
+            device_properties['BatteryVoltageMain'] = "-1"
+            device_properties['BatteryVoltageSlave1'] = "-1"
+            device_properties['BatteryVoltageSlave2'] = "-1"
+            device_properties['BatteryVoltageSlave3'] = "-1"
+            device_properties['BatteryVoltageSlave4'] = "-1"
+            device_properties['BatteryVoltageSlave5'] = "-1"
+            device_properties['BatteryVoltageSlave6'] = "-1"
+            device_properties['BatteryVoltageSlave7'] = "-1"
+            device_properties['ChargeVoltageMain'] = "-1"
+            device_properties['ChargeVoltageSlave1'] = "-1"
+            device_properties['ChargeVoltageSlave2'] = "-1"
+            device_properties['ChargeVoltageSlave3'] = "-1"
+            device_properties['ChargeVoltageSlave4'] = "-1"
+            device_properties['ChargeVoltageSlave5'] = "-1"
+            device_properties['ChargeVoltageSlave6'] = "-1"
+            device_properties['ChargeVoltageSlave7'] = "-1"
+            device_properties['ChargerStatus'] = "N/A"
+            device_properties['BatteryStatus'] = "N/A"
+
     def UpdateDeviceInfo(self, file_exists = False):
 
         global device_properties
@@ -1442,18 +1465,18 @@ class Comfort2(mqtt.Client):
 
         if ADDON_SLUG.strip() == "":
             ADDON_VERSION = "N/A"
-            MQTT_DEVICE = { "name": "Cytech Intelligent Automation",
-                            "identifiers": ["comfort2mqtt"],
+            MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
+                            "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
                             "model": "Comfort MQTT Bridge"
                         }
         else:
-            MQTT_DEVICE = { "name": "Cytech Intelligent Automation",
-                            "identifiers": ["comfort2mqtt"],
+            MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
+                            "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
-                            "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
+                            None if True else '"configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",'
                             "model": "Comfort MQTT Bridge"
                         }
         
@@ -1485,7 +1508,8 @@ class Comfort2(mqtt.Client):
                              "ChargerSlave6": str(device_properties['ChargeVoltageSlave6']),
                              "ChargerSlave7": str(device_properties['ChargeVoltageSlave7']),
                              "InstalledSlaves": int(device_properties['sem_id']),
-                             "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+                             "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
+                             "device": MQTT_DEVICE
                             })
         #                              "device" : MQTT_DEVICE
 
@@ -1494,7 +1518,7 @@ class Comfort2(mqtt.Client):
 
         # MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
         #                 "identifiers":["comfort2mqtt"],
-        #                 "manufacturer":"Cytech Technology Pte Limited",
+        #                 "manufacturer":"Cytech Technology Pte Ltd.",
         #                 "sw_version":str(device_properties['Version']),
         #                 "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
         #                 "via_device": "comfort2mqtt"
@@ -1524,7 +1548,7 @@ class Comfort2(mqtt.Client):
         # "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
         # MQTT_DEVICE = { "name": device_properties['Reference'] if file_exists else "Comfort <Default>",
         #                 "identifiers":["comfort2mqtt"],
-        #                 "manufacturer":"Cytech Technology Pte Limited",
+        #                 "manufacturer":"Cytech Technology Pte Ltd.",
         #                 "sw_version":str(device_properties['Version']),
         #                 "hw_version":str(device_properties['ComfortHardwareModel']),
         #                 "serial_number": device_properties['SerialNumber'],
@@ -1534,109 +1558,6 @@ class Comfort2(mqtt.Client):
 #                        "via_device": "comfort2mqtt"
 #                         "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
 
-        discoverytopic = "homeassistant/sensor/comfort2mqtt/filesystem/config"
-        MQTT_MSG=json.dumps({"name": "FileSystem",
-                             "unique_id": "comfort_filesystem",
-                             "availability_topic": DOMAIN + "/alarm/online",
-                             "payload_available": "1",
-                             "payload_not_available": "0",
-                             "state_topic": "comfort2",
-                             "value_template": "{{ value_json.ComfortFileSystem }}",
-                             "entity_category": "diagnostic",
-                             "native_value": "int",
-                             "icon":"mdi:file-chart",
-                             "qos": "2",
-                             "device": MQTT_DEVICE,
-                             "services": {
-                                "comfort2mqtt_service": {
-                                    "description": "This is a custom service for the Comfort2MQTT add-on",
-                                    "fields": {
-                                        "field1": {
-                                            "description": "This is the first field",
-                                            "example": "Example value for field1"
-                                            },
-                                        "field2": {
-                                            "description": "This is the second field",
-                                            "example": "Example value for field2"
-                                        }
-                                    }
-                                }
-                             }
-                        })
-        #                              "json_attributes_topic": "comfort2",
-        #                              "json_attributes_template": "{{ value_json | tojson }}",
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        time.sleep(0.1)
-
-        discoverytopic = "homeassistant/sensor/comfort2mqtt/battery/config"
-
-
-        MQTT_MSG=json.dumps({"name": "Battery Status",
-                             "unique_id": "comfort_battery_status",
-                             "availability_topic": DOMAIN + "/alarm/online",
-                             "payload_available": "1",
-                             "payload_not_available": "0",
-                             "state_topic": "comfort2",
-                             "value_template": "{{ value_json.BatteryStatus }}",
-                             "json_attributes_topic": "comfort2",
-                             "json_attributes_template": '''
-                                {% set data = value_json %}
-                                {% set slaves = data['InstalledSlaves'] %}
-                                {% set ns = namespace(dict_items='') %}
-                                {% for key, value in data.items() %}
-                                    {% if 'BatteryMain' in key or ('BatterySlave' in key and key[-1:] | int <= slaves) %}
-                                        {% if ns.dict_items %}
-                                            {% set ns.dict_items = ns.dict_items + ', "' ~ key ~ '":"' ~ value ~ '"' %}
-                                        {% else %}
-                                            {% set ns.dict_items = '"' ~ key ~ '":"' ~ value ~ '"' %}
-                                        {% endif %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% set dict_str = '{' ~ ns.dict_items ~ '}' %}
-                                {% set result = dict_str | from_json %}
-                                {{ result | tojson }}
-                                ''',
-                             "entity_category": "diagnostic",
-                             "icon":"mdi:battery-check",
-                             "qos": "2",
-                             "device": MQTT_DEVICE
-                        })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        time.sleep(0.1)
-
-        discoverytopic = "homeassistant/sensor/comfort2mqtt/charger/config"
-        MQTT_MSG=json.dumps({"name": "Charger Status",
-                             "unique_id": "comfort_charger_status",
-                             "availability_topic": DOMAIN + "/alarm/online",
-                             "payload_available": "1",
-                             "payload_not_available": "0",
-                             "state_topic": DOMAIN,
-                             "value_template": "{{ value_json.ChargerStatus }}",
-                             "json_attributes_topic": "comfort2",
-                             "json_attributes_template": '''
-                                {% set data = value_json %}
-                                {% set slaves = data['InstalledSlaves'] %}
-                                {% set ns = namespace(dict_items='') %}
-                                {% for key, value in data.items() %}
-                                    {% if 'ChargerMain' in key or ('ChargerSlave' in key and key[-1:] | int <= slaves) %}
-                                        {% if ns.dict_items %}
-                                            {% set ns.dict_items = ns.dict_items + ', "' ~ key ~ '":"' ~ value ~ '"' %}
-                                        {% else %}
-                                            {% set ns.dict_items = '"' ~ key ~ '":"' ~ value ~ '"' %}
-                                        {% endif %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% set dict_str = '{' ~ ns.dict_items ~ '}' %}
-                                {% set result = dict_str | from_json %}
-                                {{ result | tojson }}
-                                ''',
-                             "entity_category": "diagnostic",
-                             "icon":"mdi:battery-charging",
-                             "qos": "2",
-                             "device": MQTT_DEVICE
-                        })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        time.sleep(0.1)
 
 #            "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
         # discoverytopic = "homeassistant/sensor/comfort2mqtt/device/config"
@@ -1673,23 +1594,6 @@ class Comfort2(mqtt.Client):
         # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         # time.sleep(0.1)
 
-        discoverytopic = "homeassistant/sensor/comfort2mqtt/firmware/config"
-        MQTT_MSG=json.dumps({"name": "Firmware",
-                             "unique_id": "comfort_firmware",
-                             "availability_topic": DOMAIN + "/alarm/online",
-                             "payload_available": "1",
-                             "payload_not_available": "0",
-                             "state_topic": "comfort2",
-                             "value_template": "{{ value_json.sw_version }}",
-                             "entity_category": "diagnostic",
-                             "native_value": "string",
-                             "icon":"mdi:chip",
-                             "qos": "2",
-                             "device": MQTT_DEVICE
-                        })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        time.sleep(0.1)
-
         discoverytopic = "homeassistant/sensor/comfort2mqtt/state/config"
         MQTT_MSG=json.dumps({"name": "State",
                              "unique_id": "comfort_state",
@@ -1702,29 +1606,116 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
-        discoverytopic = "homeassistant/sensor/comfort2mqtt/bypass/config"
-        MQTT_MSG=json.dumps({"name": "Bypassed Zones",
-                             "unique_id": "comfort_bypass_zones",
-                             "state_topic": DOMAIN + "/alarm/bypass",
-                             "icon":"mdi:shield-remove",
+        discoverytopic = "homeassistant/binary_sensor/" + DOMAIN + "/status/config"
+        MQTT_MSG=json.dumps({"name": "Bridge Status",
+                             "unique_id": DOMAIN+"_status",
+                             "object_id": DOMAIN+"_status",
+                             "state_topic": "homeassistant/status",
                              "qos": "2",
-                             "native_value": "string",
+                             "device_class": "connectivity",
+                             "payload_on": "online",
+                             "payload_off": "offline",
                              "device": MQTT_DEVICE
                             })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
+
+        discoverytopic = "homeassistant/button/comfort2mqtt/refresh/config"
+        MQTT_MSG=json.dumps({"name": "Refresh",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "availability_topic": DOMAIN + "/alarm/online",
+                             "command_topic": DOMAIN + "/alarm/refresh",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "payload_press": COMFORT_KEY,
+                             "icon":"mdi:shield-refresh",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
+
         
+        MQTT_DEVICE = { "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
+                            "identifiers": ["comfort_device"],
+                            "manufacturer":"Cytech Technology Pte Ltd.",
+                            "hw_version":str(device_properties['ComfortHardwareModel']),
+                            "serial_number": device_properties['SerialNumber'],
+                            "sw_version":str(device_properties['Version']),
+                            "model": device_properties['ComfortHardwareModel'],
+                            "via_device": "comfort2mqtt_bridge"
+                        }
         
-        discoverytopic = "homeassistant/sensor/comfort2mqtt/status/config"
-        MQTT_MSG=json.dumps({"name": "Bridge Status",
-                             "unique_id": "comfort_bridge_status",
-                             "state_topic": "homeassistant/status",
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_firmware/config"
+        MQTT_MSG=json.dumps({"name": "Firmware",
+                             "unique_id": discoverytopic.split('/')[3],
+                             "object_id": discoverytopic.split('/')[3],
+                             "availability_topic": DOMAIN + "/alarm/online",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "state_topic": DOMAIN,
+                             "value_template": "{{ value_json.sw_version }}",
+                             "entity_category": "diagnostic",
+                             "native_value": "string",
+                             "icon":"mdi:chip",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                        })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
+
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_filesystem/config"
+        MQTT_MSG=json.dumps({"name": "FileSystem",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "availability_topic": DOMAIN + "/alarm/online",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "state_topic": DOMAIN,
+                             "value_template": "{{ value_json.ComfortFileSystem }}",
+                             "entity_category": "diagnostic",
+                             "native_value": "int",
+                             "icon":"mdi:file-chart",
+                             "qos": "2",
+                             "device": MQTT_DEVICE,
+                             "services": {
+                                "comfort2mqtt_service": {
+                                    "description": "This is a custom service for the Comfort2MQTT add-on",
+                                    "fields": {
+                                        "field1": {
+                                            "description": "This is the first field",
+                                            "example": "Example value for field1"
+                                            },
+                                        "field2": {
+                                            "description": "This is the second field",
+                                            "example": "Example value for field2"
+                                        }
+                                    }
+                                }
+                             }
+                        })
+        #                              "json_attributes_topic": "comfort2",
+        #                              "json_attributes_template": "{{ value_json | tojson }}",
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
+
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/battery_status/config"
+        MQTT_MSG=json.dumps({"name": "Battery Status",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "availability_topic": DOMAIN + "/alarm/online",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "state_topic": DOMAIN,
+                             "value_template": "{{ value_json.BatteryStatus }}",
                              "json_attributes_topic": DOMAIN,
                              "json_attributes_template": '''
                                 {% set data = value_json %}
+                                {% set slaves = data['InstalledSlaves'] %}
                                 {% set ns = namespace(dict_items='') %}
                                 {% for key, value in data.items() %}
-                                    {% if not 'Main' in key and not 'Slave' in key %}
+                                    {% if 'BatteryMain' in key or ('BatterySlave' in key and key[-1:] | int <= slaves) %}
                                         {% if ns.dict_items %}
                                             {% set ns.dict_items = ns.dict_items + ', "' ~ key ~ '":"' ~ value ~ '"' %}
                                         {% else %}
@@ -1736,18 +1727,69 @@ class Comfort2(mqtt.Client):
                                 {% set result = dict_str | from_json %}
                                 {{ result | tojson }}
                                 ''',
+                             "entity_category": "diagnostic",
+                             "icon":"mdi:battery-check",
                              "qos": "2",
-                             "device_class": "connectivity",
-                             "payload_on": "online",
-                             "payload_off": "offline",
+                             "device": MQTT_DEVICE
+                        })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
+
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/charger_status/config"
+        MQTT_MSG=json.dumps({"name": "Charger Status",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "availability_topic": DOMAIN + "/alarm/online",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "state_topic": DOMAIN,
+                             "value_template": "{{ value_json.ChargerStatus }}",
+                             "json_attributes_topic": DOMAIN,
+                             "json_attributes_template": '''
+                                {% set data = value_json %}
+                                {% set slaves = data['InstalledSlaves'] %}
+                                {% set ns = namespace(dict_items='') %}
+                                {% for key, value in data.items() %}
+                                    {% if 'ChargerMain' in key or ('ChargerSlave' in key and key[-1:] | int <= slaves) %}
+                                        {% if ns.dict_items %}
+                                            {% set ns.dict_items = ns.dict_items + ', "' ~ key ~ '":"' ~ value ~ '"' %}
+                                        {% else %}
+                                            {% set ns.dict_items = '"' ~ key ~ '":"' ~ value ~ '"' %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% set dict_str = '{' ~ ns.dict_items ~ '}' %}
+                                {% set result = dict_str | from_json %}
+                                {{ result | tojson }}
+                                ''',
+                             "entity_category": "diagnostic",
+                             "icon":"mdi:battery-charging",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                        })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
+
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_bypass_zones/config"
+        MQTT_MSG=json.dumps({"name": "Bypassed Zones",
+                             "unique_id": discoverytopic.split('/')[3],
+                             "object_id": discoverytopic.split('/')[3],
+                             "state_topic": DOMAIN + "/alarm/bypass",
+                             "availability_topic": DOMAIN + "/alarm/online",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "icon":"mdi:shield-remove",
+                             "qos": "2",
+                             "native_value": "string",
                              "device": MQTT_DEVICE
                             })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
-
-        discoverytopic = "homeassistant/sensor/comfort2mqtt/customername/config"
+        
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_customername/config"
         MQTT_MSG=json.dumps({"name": "Customer Name",
-                             "unique_id": "comfort_customername",
+                             "unique_id": discoverytopic.split('/')[3],
+                             "object_id": discoverytopic.split('/')[3],
                              "availability_topic": DOMAIN + "/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1762,9 +1804,10 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
-        discoverytopic = "homeassistant/sensor/comfort2mqtt/reference/config"
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_reference/config"
         MQTT_MSG=json.dumps({"name": "Reference",
-                             "unique_id": "comfort_reference_name",
+                             "unique_id": discoverytopic.split('/')[3],
+                             "object_id": discoverytopic.split('/')[3],
                              "availability_topic": DOMAIN + "/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1779,9 +1822,10 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
         
-        discoverytopic = "homeassistant/sensor/comfort2mqtt/serial_number/config"
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_serial_number/config"
         MQTT_MSG=json.dumps({"name": "Serial Number",
-                             "unique_id": "comfort_serial_number",
+                             "unique_id": discoverytopic.split('/')[3],
+                             "object_id": discoverytopic.split('/')[3],
                              "availability_topic": DOMAIN + "/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1796,41 +1840,19 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
-        discoverytopic = "homeassistant/button/comfort2mqtt/refresh/config"
-        MQTT_MSG=json.dumps({"name": "Refresh",
-                             "unique_id": "comfort_refresh_switch",
-                             "availability_topic": DOMAIN + "/alarm/online",
-                             "command_topic": DOMAIN + "/alarm/refresh",
-                             "payload_available": "1",
-                             "payload_not_available": "0",
-                             "payload_press": COMFORT_KEY,
-                             "icon":"mdi:shield-refresh",
-                             "qos": "2",
-                             "origin": {
-                                "name": DOMAIN,
-                                "sw": ADDON_VERSION,
-                                },
-                             "device": MQTT_DEVICE
-                            })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        time.sleep(0.1)
-
 
 #                             "ComfortConnectionState": "1" if COMFORTCONNECTED else "0",
 # "value_template": "{{ value_json.ComfortConnectionState }}",
         discoverytopic = "homeassistant/binary_sensor/comfort2mqtt/comfort_connection_state/config"
-        MQTT_MSG=json.dumps({"name": "Comfort Status",
-                             "unique_id": "comfort_lan_connection_state",
+        MQTT_MSG=json.dumps({"name": "Connection Status",
+                             "object_id": discoverytopic.split('/')[3],
+                             "unique_id": discoverytopic.split('/')[3],
                              "state_topic": ALARMCONNECTEDTOPIC,
                              "device_class": "connectivity",
                              "entity_category": "diagnostic",
                              "payload_off": "0",
                              "payload_on": "1",
                              "qos": "2",
-                             "origin": {
-                                "name": DOMAIN,
-                                "sw": ADDON_VERSION,
-                                },
                              "device": MQTT_DEVICE
                             })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
@@ -1845,7 +1867,7 @@ class Comfort2(mqtt.Client):
 
         # MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
         #                 "identifiers":["comfort2mqtt"],
-        #                 "manufacturer":"Cytech Technology Pte Limited",
+        #                 "manufacturer":"Cytech Technology Pte Ltd.",
         #                 "sw_version":str(device_properties['Version']),
         #                 "serial_number": device_properties['SerialNumber'],
         #                 "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
@@ -2288,7 +2310,7 @@ class Comfort2(mqtt.Client):
 
                             if datetime.now() > SAVEDTIME + TIMEOUT:            #
                                 #self.comfortsock.sendall("\x03cc00\r".encode()) # Keepalive check when data comes in.
-                                if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
+                                if str(device_properties['ComfortHardwareModel']) == 'CM9001-ULT' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                                     self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                                     time.sleep(0.1)
                                     self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
@@ -2302,7 +2324,7 @@ class Comfort2(mqtt.Client):
                         if self.check_string(line):         # Check for "(\x03[a-zA-Z0-9]*)$" in complete line.
                             pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')      # Extract 'legal' characters from line.
                             match = re.search(pattern, line)
-                            SEM_pattern = r"u\?2[1-5]"
+                            SEM_pattern = r"u\?2[1-7]"                          # Up to 7 Slaves supported.
 
                             if match:
                                 line = match.group(1)
@@ -2334,14 +2356,14 @@ class Comfort2(mqtt.Client):
                                     time.sleep(0.01)
                                     self.publish(REFRESHTOPIC, "", qos=2,retain=True)               # Clear Refresh Key
                                     time.sleep(0.01)
-                                    self.publish(BRIDGECONNECTEDTOPIC, "test", qos=2,retain=True) 
-                                    time.sleep(0.01)
-                                    self.publish(BRIDGESTATE, "test", qos=2,retain=True) 
-                                    time.sleep(0.01)
-                                    self.publish(BRIDGEDEVICES, MQTT_MSG, qos=2,retain=True) 
-                                    time.sleep(0.01)
-                                    self.publish(BRIDGEINFO, "test", qos=2,retain=True) 
-                                    time.sleep(0.01)
+                                    #self.publish(BRIDGECONNECTEDTOPIC, "test", qos=2,retain=True) 
+                                    #time.sleep(0.01)
+                                    #self.publish(BRIDGESTATE, "test", qos=2,retain=True) 
+                                    #time.sleep(0.01)
+                                    #self.publish(BRIDGEDEVICES, MQTT_MSG, qos=2,retain=True) 
+                                    #time.sleep(0.01)
+                                    #self.publish(BRIDGEINFO, "test", qos=2,retain=True) 
+                                    #time.sleep(0.01)
                                     self.setdatetime()      # Set Date/Time if Option is enabled
 
                                     if FIRST_LOGIN == True:
@@ -2524,7 +2546,7 @@ class Comfort2(mqtt.Client):
                             elif re.match(SEM_pattern, line[1:5]):       # Determine Number of Installed SEM's. Check for u?21 - 25
                                 uMsg = Comfort_U_SystemCPUTypeReport(line[1:])
                                                 
-                                device_properties['sem_id'] = str(uMsg.sem_id)  # Saves the highest number installed SEM's. Must be contiguous.
+                                device_properties['sem_id'] = str(uMsg.sem_id)  # Saves the highest number installed SEM's. Must be contiguous. Only support 5
                                 if int(line[3:5],16) == 37:
                                     logging.debug("%s Installed SEM(s) detected", str(device_properties['sem_id']))
                                 
@@ -2819,7 +2841,7 @@ class Comfort2(mqtt.Client):
                             else:
                                 if datetime.now() > (SAVEDTIME + TIMEOUT):  # If no command sent in 2 minutes then send keepalive.
                                     #logger.debug("Sending Keepalives")
-                                    if str(device_properties['ComfortHardwareModel']) == 'CM-9001' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
+                                    if str(device_properties['ComfortHardwareModel']) == 'CM9001-ULT' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                                         self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                                         time.sleep(0.1)
                                         self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive

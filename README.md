@@ -26,8 +26,8 @@ This implementation does minimal MQTT auto-discovery. Some `System` entities are
 
 The following objects are supported:
 
-* Zone Inputs [1-128]
-* Zone Outputs [1-128]
+* Zone Inputs [1-128*] (96 Zones on Comfort II hardware)
+* Zone Outputs [1-128*] (96 Zones on Comfort II hardware)
 * Counters [0-254]
 * Flags [1-254]
 * Sensors [0-31]
@@ -35,8 +35,8 @@ The following objects are supported:
 * RIO Outputs [129-248]
 * Responses [1-1024]
 
-<div style="text-align:center"> <img src="https://github.com/djagerif/comfort2mqtt/assets/5621764/64abe350-6b37-4b79-8fea-12fa5e89353a" alt="Comfort II Ultra Keypad"/> </div>
+<div style="text-align:center"> <img src="https://github.com/djagerif/comfort2mqtt/assets/5621764/64abe350-6b37-4b79-8fea-12fa5e89353a" alt="Comfort II ULTRA Keypad"/> </div>
 
-⚠️ This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. As tested firmware is `7.201`.
+⚠️ This Add-on was specifically developed for the Comfort II ULTRA range of Alarm Systems with File System type `34`. As tested firmware is `7.201` on model CM9000-ULT.
 
 Copyright 2024 Ingo de Jager. Licensed under Apache-2.0. For more details see the `LICENCE` file.
