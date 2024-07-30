@@ -47,7 +47,7 @@ COMFORT_KEY = "00000000"          # Default Refresh Key.
 rand_hex_str = hex(randint(268435456, 4294967295))
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts.
 
-REFRESHTOPIC = "homeassistant/button/refresh"           # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
+REFRESHTOPIC = DOMAIN+"/alarm/refresh"                  # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
 ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"               # List of Bypassed Zones.
@@ -1604,7 +1604,7 @@ class Comfort2(mqtt.Client):
 
 
         discoverytopic = "homeassistant/binary_sensor/" + DOMAIN + "/status/config"
-        MQTT_MSG=json.dumps({"name": "Bridge Status",
+        MQTT_MSG=json.dumps({"name": "Bridge MQTT Status",
                              "unique_id": DOMAIN+"_status",
                              "object_id": DOMAIN+"_status",
                              "state_topic": DOMAIN,
@@ -1853,7 +1853,7 @@ class Comfort2(mqtt.Client):
 #                             "ComfortConnectionState": "1" if COMFORTCONNECTED else "0",
 # "value_template": "{{ value_json.ComfortConnectionState }}",
         discoverytopic = "homeassistant/binary_sensor/comfort2mqtt/comfort_connection_state/config"
-        MQTT_MSG=json.dumps({"name": "Connection Status",
+        MQTT_MSG=json.dumps({"name": "LAN Status",
                              "object_id": discoverytopic.split('/')[3],
                              "unique_id": discoverytopic.split('/')[3],
                              "state_topic": ALARMCONNECTEDTOPIC,
@@ -2349,18 +2349,6 @@ class Comfort2(mqtt.Client):
                                         time.sleep(1)
                                     else:
                                         logger.info("Waiting for MQTT Broker to come Online...")
-
-                                    MQTT_MSG=json.dumps({"date_code": "20200927",
-                                                         "definition": {
-                                                             "description": "Test device",
-                                                             "model": "ZBMINI",
-                                                             "vendor": "SONOFF"
-                                                             },
-                                                         "friendly_name": "Study Switch",
-                                                         "manufacturer": "SONOFF",
-                                                         "model_id": "01MINIZB",
-                                                         "via_device": DOMAIN
-                                                        })
 
                                     self.connected = True  
                                     self.publish(ALARMCOMMANDTOPIC, "comm test", qos=2,retain=True)
