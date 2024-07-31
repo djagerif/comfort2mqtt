@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file.
  - Update all references of Comfort II Ultra to Comfort to be more inclusive of other Comfort system models.
  - Remove unique identifer for Comfort identification, makes it easier to read/identify.
  - Remove attributes from Diagnostic entities.
- - Split Comfort to MQTT Bridge and Comfort II ULTRA devices under MQTT.
+ - Split Comfort to MQTT Bridge and Comfort II ULTRA device under MQTT.
 
 ### Fixed
  - Initial startup Diagnostics values 'Unknown'. Data is now correctly populated on startup.
