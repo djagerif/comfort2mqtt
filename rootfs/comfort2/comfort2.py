@@ -51,6 +51,8 @@ rand_hex_str = hex(randint(268435456, 4294967295))
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts.
 
 REFRESHTOPIC = DOMAIN+"/alarm/refresh"                  # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
+BATTERYREFRESHTOPIC = DOMAIN+"/alarm/battery_update"    # Used to request Battery and Charger updates. To be used by HA Automation for periodic polling.
+
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
 ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"               # List of Bypassed Zones.
@@ -1010,6 +1012,7 @@ class Comfort2(mqtt.Client):
             # You need to subscribe to your own topics to enable publish messages activating Comfort entities.
             self.subscribe(ALARMCOMMANDTOPIC)
             self.subscribe(REFRESHTOPIC)
+            self.subscribe(BATTERYREFRESHTOPIC)
             self.subscribe(DOMAIN)
             self.subscribe("homeassistant/status")      # Track Status changes for Home Assistant via MQTT Broker.
 
@@ -1123,6 +1126,17 @@ class Comfort2(mqtt.Client):
                         self.add_descriptions(Path("/config/" + config_filename))
                 self.readcurrentstate()
         
+        elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/battery_update"):
+            if msgstr == "1":
+                if str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba':
+                    logger.debug("[Unsupported] Battery Update query received.")
+                    self.comfortsock.sendall("\x03D?0001\r".encode()) # Battery Status Update
+                    time.sleep(0.1)
+                    self.comfortsock.sendall("\x03D?0002\r".encode()) # Charger Status Update
+                    time.sleep(0.1)
+                else:
+                    logger.error("[Unsupported] Battery Update query not supported on non-ARM CPU's.")
+
         elif msg.topic.startswith("homeassistant") and msg.topic.endswith("/status"):
             if msgstr == "online":
                 logger.info("Home Assistant Status: %s", msgstr)
@@ -1649,8 +1663,24 @@ class Comfort2(mqtt.Client):
                             })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
-
         
+        discoverytopic = "homeassistant/button/comfort2mqtt/battery_update/config"
+        MQTT_MSG=json.dumps({"name": "Battery Update",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "availability": availability,
+                             "availability_mode": "all",
+                             "command_topic": DOMAIN + "/alarm/battery_update",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "payload_press": "1",
+                             "icon":"mdi:battery-sync-outline",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
+
         MQTT_DEVICE = { "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
                             "identifiers": ["comfort_device"],
                             "manufacturer":"Cytech Technology Pte Ltd.",
@@ -2358,6 +2388,7 @@ class Comfort2(mqtt.Client):
                                     time.sleep(0.01)
                                     self.publish(REFRESHTOPIC, "", qos=2,retain=True)               # Clear Refresh Key
                                     time.sleep(0.01)
+
                                     #self.publish(BRIDGECONNECTEDTOPIC, "test", qos=2,retain=True) 
                                     #time.sleep(0.01)
                                     #self.publish(BRIDGESTATE, "test", qos=2,retain=True) 
