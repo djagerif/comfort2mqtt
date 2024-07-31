@@ -431,7 +431,7 @@ If your network is segmented using a firewall, or any other similar device, you 
 
 ### Option: `Comfort User Login ID`
 
-  Cytech Comfort User Login ID with the appropriate rights. Login ID has minimum 4 characters and 6 maximum. For full functionality you need at least Local Arm/Disarm and Remote Arm/Disarm capabilities on Comfort. See the [Comfigurator Programming Guide][progman], `Security Settings` and `Sign-in Codes` sections for more information on user creation and rights.
+  Cytech Comfort User Login ID with the appropriate rights. Login ID has minimum 4 and a maximum of 6 characters. For full functionality you need at least Local Arm/Disarm and Remote Arm/Disarm capabilities on Comfort. See the [Comfigurator Programming Guide][progman], `Security Settings` and `Sign-in Codes` sections for more information on user creation and rights.
 
   [progman]: http://www.cytech.biz/download_files.php?item_id=1082
 
@@ -439,7 +439,7 @@ If your network is segmented using a firewall, or any other similar device, you 
 
   Comfort Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc. Place this file in the Home Assistant `_configs/<comfort2mqtt slug>` folder.
 
-  To upload a file to the `_configs` directory you could use something like [Samba share][samba] Add-on or similar allowing filesystem access to seleced directories on Home Assistant.
+  To upload a file to the `_configs` directory you could use something like [Samba share][samba] Add-on or similar allowing filesystem access to selected directories on Home Assistant.
 
   [samba]:https://github.com/home-assistant/addons/tree/master/samba
       
