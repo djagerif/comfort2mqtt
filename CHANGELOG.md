@@ -6,24 +6,18 @@ All notable changes to this project will be documented in this file.
 
 ## To Do ##
  - Test Client/Server Authentication certificates
- - Clear Battery values when CPU is set to <default/PIC>, Set to '-1'. Run Update. Should not be an issue as value does not change dynamically.
- - Cleanup if no CCLX file is availabel EG. Device Name.
- - No CCLX file cause Sensor values to be 'Unknown' at startup.
- - Add a Battery Status function. Ok, Warning, Critical. Testing... 
- - Battery/Charge Status and Voltage reports. Testing with CM9000 and 5 slaves...
-    
+     
 ### Added
  - Added reporting for more Comfort models when detected.
  - Check for new ARM or Toshiba Mainboard CPU. When ARM/Toshiba detected, use D?00 as keepalives.
    Note: D?00 command is still in BETA, might not go into Production.
-
-
- 
+ - Add a Battery Status function. Critical[<12.23, >14.4], Warning[<12.58, >14.2], Ok[>=12.58, <=14.2].
 
 ### Changed
  - Update all references of Comfort II Ultra to Comfort to be more inclusive of other Comfort system models.
  - Remove unique identifer for Comfort identification, makes it easier to read/identify.
  - Remove attributes from Diagnostic entities.
+ - Split Comfort to MQTT Bridge and Comfort II ULTRA devices under MQTT.
 
 ### Fixed
  - Initial startup Diagnostics values 'Unknown'. Data is now correctly populated on startup.
