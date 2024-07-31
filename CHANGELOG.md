@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file.
 ### Added
  - Added reporting for more Comfort models when detected.
  - Check for new ARM or Toshiba Mainboard CPU. When ARM/Toshiba detected, use D?00 as keepalives.
-   Note: D?00 command is still in BETA, might not go into Production.
+   Note: D?00 command is only suggested as a feature request to Cytech and might not go into Production.
  - Add a Battery Status function. Critical[<12.23, >14.4], Warning[<12.58, >14.2], Ok[>=12.58, <=14.2].
 
 ### Changed
