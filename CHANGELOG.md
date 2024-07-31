@@ -6,20 +6,18 @@ All notable changes to this project will be documented in this file.
 
 ## To Do ##
  - Test Client/Server Authentication certificates
- - Look into ARM CPU and Battery/DC Polling if detected. D?. Note: u?01 not supported on old CM-9000. CM-9001 + ARM/Toshiba for D? to work.
  - Clear Battery values when CPU is set to <default/PIC>, Set to '-1'. Run Update. Should not be an issue as value does not change dynamically.
- - Add a Battery Status function. Ok, Warning, Critical.
  - Cleanup if no CCLX file is availabel EG. Device Name.
  - No CCLX file cause Sensor values to be 'Unknown' at startup.
- - Check if D?0001 command is supported, update KeepAlives as required. If not use 'cc00'.
- 
+ - Add a Battery Status function. Ok, Warning, Critical. Testing... 
+ - Battery/Charge Status and Voltage reports. Testing with CM9000 and 5 slaves...
     
 ### Added
  - Added reporting for more Comfort models when detected.
  - Check for new ARM or Toshiba Mainboard CPU. When ARM/Toshiba detected, use D?00 as keepalives.
    Note: D?00 command is still in BETA, might not go into Production.
- - Battery/Charge Status and Voltage reports.
- 
+
+
  
 
 ### Changed

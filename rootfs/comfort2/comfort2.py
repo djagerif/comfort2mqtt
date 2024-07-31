@@ -188,6 +188,7 @@ CacheState = False          # Initial Cache state. False when not in sync with B
 logger = logging.getLogger(__name__)
 
 def boolean_string(s):
+
     if s.lower() == 'true':
         return True
     elif s.lower() == 'false':
@@ -275,12 +276,12 @@ group = parser.add_argument_group('Comfort Alarm options')
 group.add_argument(
     '--alarm-inputs',
     type=int, default=8,
-    help="Number of physical Zone Inputs, values from 8 - " + MAX_ZONES + " in increments of 8. [default: '8']")
+    help="Number of physical Zone Inputs, values from 8 - " + str(MAX_ZONES) + " in increments of 8. [default: '8']")
 
 group.add_argument(
     '--alarm-outputs',
     type=int, default=0,
-    help="Number of physical Zone Outputs, values from 0 - " + MAX_OUTPUTS + " in increments of 8. [default: '0']")
+    help="Number of physical Zone Outputs, values from 0 - " + str(MAX_OUTPUTS) + " in increments of 8. [default: '0']")
 
 group.add_argument(
     '--alarm-responses',
