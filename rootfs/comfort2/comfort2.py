@@ -1472,7 +1472,7 @@ class Comfort2(mqtt.Client):
         global ADDON_VERSION
         global ADDON_SLUG
         global file_exists
-        
+
         file_exists = _file
   
         #UID = ("Comfort2MQTT - " + str(device_properties['uid'])) if file_exists else "Comfort2MQTT - 00000000"
@@ -1649,7 +1649,8 @@ class Comfort2(mqtt.Client):
                 "topic": DOMAIN+"/alarm/online",
                 "payload_available": "1",
                 "payload_not_available": "0"
-            }]
+            }
+            ]
         discoverytopic = "homeassistant/button/comfort2mqtt/refresh/config"
         MQTT_MSG=json.dumps({"name": "Refresh",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
@@ -1681,8 +1682,9 @@ class Comfort2(mqtt.Client):
                              "qos": "2",
                              "device": MQTT_DEVICE
                             })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        time.sleep(0.1)
+        if device_properties['CPUType'] != "N/A":
+            self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+            time.sleep(0.1)
 
         MQTT_DEVICE = { "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
                             "identifiers": ["comfort_device"],
@@ -1780,8 +1782,9 @@ class Comfort2(mqtt.Client):
                              "qos": "2",
                              "device": MQTT_DEVICE
                         })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        time.sleep(0.1)
+        if device_properties['CPUType'] != "N/A":
+            self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+            time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/charger_status/config"
         MQTT_MSG=json.dumps({"name": "Charger Status",
@@ -1815,8 +1818,9 @@ class Comfort2(mqtt.Client):
                              "qos": "2",
                              "device": MQTT_DEVICE
                         })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        time.sleep(0.1)
+        if device_properties['CPUType'] != "N/A":
+            self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+            time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_bypass_zones/config"
         MQTT_MSG=json.dumps({"name": "Bypassed Zones",

@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
  - Test Client/Server Authentication certificates
  - Create Battery Update MQTT topic similar to Refresh. Replies with Battery status D?0001aabbccddeff and D?0002aabbccddeeff - Not currently supported by Comfort
    Note: comfort2mqtt/alarm/battery/update. Set to '1' to send D?0001 & D?0002 commands to Comfort.
- - Fix status when Addon not running, shows incorrect data -> Online.
+ - Check Serial Number still not populated on first run.
      
 ### Added
  - Added reporting for more Comfort models when detected.
