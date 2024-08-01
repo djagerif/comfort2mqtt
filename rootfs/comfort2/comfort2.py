@@ -1999,9 +1999,60 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             self.connected = False
         if BROKERCONNECTED == True:      # MQTT Connected
+            device_properties['BridgeConnected'] = 0
             infot = self.publish(ALARMCONNECTEDTOPIC, 0,qos=2,retain=True)
             infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
             infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
+
+            if ADDON_SLUG.strip() == "":
+                MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
+                            "identifiers": ["comfort2mqtt_bridge"],
+                            "manufacturer": "Ingo de Jager",
+                            "sw_version": ADDON_VERSION,
+                            "model": "Comfort MQTT Bridge"
+                        }
+            else:
+                MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
+                            "identifiers": ["comfort2mqtt_bridge"],
+                            "manufacturer": "Ingo de Jager",
+                            "sw_version": ADDON_VERSION,
+                            "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
+                            "model": "Comfort MQTT Bridge"
+                        }
+        
+                MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
+                             "url": "https://www.cytech.biz",
+                             "Reference": device_properties['Reference'] if file_exists else None,
+                             "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
+                             "ComfortFirmwareType": device_properties['ComfortFirmwareType'] if file_exists else None,
+                             "sw_version":str(device_properties['Version']),
+                             "hw_version":str(device_properties['ComfortHardwareModel']),
+                             "serial_number": device_properties['SerialNumber'],
+                             "cpu_type": str(device_properties['CPUType']),
+                             "BatteryStatus": str(device_properties['BatteryStatus']),
+                             "ChargerStatus": str(device_properties['ChargerStatus']),
+                             "BatteryMain": str(device_properties['BatteryVoltageMain']),
+                             "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
+                             "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
+                             "BatterySlave3": str(device_properties['BatteryVoltageSlave3']),
+                             "BatterySlave4": str(device_properties['BatteryVoltageSlave4']),
+                             "BatterySlave5": str(device_properties['BatteryVoltageSlave5']),
+                             "BatterySlave6": str(device_properties['BatteryVoltageSlave6']),
+                             "BatterySlave7": str(device_properties['BatteryVoltageSlave7']),
+                             "ChargerMain": str(device_properties['ChargeVoltageMain']),
+                             "ChargerSlave1": str(device_properties['ChargeVoltageSlave1']),
+                             "ChargerSlave2": str(device_properties['ChargeVoltageSlave2']),
+                             "ChargerSlave3": str(device_properties['ChargeVoltageSlave3']),
+                             "ChargerSlave4": str(device_properties['ChargeVoltageSlave4']),
+                             "ChargerSlave5": str(device_properties['ChargeVoltageSlave5']),
+                             "ChargerSlave6": str(device_properties['ChargeVoltageSlave6']),
+                             "ChargerSlave7": str(device_properties['ChargeVoltageSlave7']),
+                             "InstalledSlaves": int(device_properties['sem_id']),
+                             "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
+                             "BridgeConnected": str(device_properties['BridgeConnected']),
+                             "device": MQTT_DEVICE
+                            })
+            infot = self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
             infot.wait_for_publish()
         RUN = False
         exit(0)
