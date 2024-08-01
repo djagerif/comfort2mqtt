@@ -1464,13 +1464,16 @@ class Comfort2(mqtt.Client):
             device_properties['ChargerStatus'] = "N/A"
             device_properties['BatteryStatus'] = "N/A"
 
-    def UpdateDeviceInfo(self, file_exists = False):
+    def UpdateDeviceInfo(self, _file = False):
 
         global device_properties
         global models
         global COMFORTCONNECTED
         global ADDON_VERSION
         global ADDON_SLUG
+        global file_exists
+        
+        file_exists = _file
   
         #UID = ("Comfort2MQTT - " + str(device_properties['uid'])) if file_exists else "Comfort2MQTT - 00000000"
         #UUID = str(device_properties['uid'])
@@ -1991,6 +1994,7 @@ class Comfort2(mqtt.Client):
         global RUN
         global SAVEDTIME
         global device_properties
+        global file_exists
         
         logger.debug("SIGNUM: %s received, Shutting down.", str(signum))
         
@@ -2020,7 +2024,7 @@ class Comfort2(mqtt.Client):
                             "model": "Comfort MQTT Bridge"
                         }
         
-                MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
+            MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
                              "url": "https://www.cytech.biz",
                              "Reference": device_properties['Reference'] if file_exists else None,
                              "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
@@ -2947,38 +2951,15 @@ class Comfort2(mqtt.Client):
                 if BROKERCONNECTED == True:      # MQTT Connected ??
                     self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
                     self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
-                    #self.UpdateDeviceInfo()
-                    discoverytopic = "homeassistant/binary_sensor/comfort2mqtt/comfort_connection_state/config"
-                    ADDON_VERSION = "N/A"
-                    MQTT_DEVICE = { "name": "Cytech Intelligent Automation",
-                            "identifiers": ["comfort2mqtt"],
-                            "manufacturer": "Ingo de Jager",
-                            "sw_version": ADDON_VERSION,
-                            "model": "Comfort MQTT Bridge"
-                        }
-            
-                    MQTT_MSG=json.dumps({"name": "Comfort Status",
-                             "unique_id": "comfort_lan_connection_state",
-                             "state_topic": DOMAIN,
-                             "value_template": "1" if COMFORTCONNECTED else "0",
-                             "device_class": "connectivity",
-                             "entity_category": "diagnostic",
-                             "payload_off": "0",
-                             "payload_on": "1",
-                             "qos": "2",
-                             "origin": {
-                                "name": DOMAIN,
-                                "sw": ADDON_VERSION,
-                                },
-                             "device": MQTT_DEVICE
-                            })
                     self.publish(ALARMCONNECTEDTOPIC, "1" if COMFORTCONNECTED else "0", qos=2, retain=False)
                     
                 time.sleep(RETRY.seconds)
         except KeyboardInterrupt as e:
             logger.debug("SIGINT (Ctrl-C) Intercepted")
             logger.info('Shutting down.')
+            self.exit_gracefully(1,1)
             if self.connected == True:
+                device_properties['BridgeConnected'] = 0
                 self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
             RUN = False
             self.loop_stop
