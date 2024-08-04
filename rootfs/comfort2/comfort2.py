@@ -1378,16 +1378,16 @@ class Comfort2(mqtt.Client):
             #     time.sleep(0.1)
             # SAVEDTIME = datetime.now()
             
+            #Used for Unique ID
+            self.comfortsock.sendall("\x03UL7FF904\r".encode())
+            SAVEDTIME = datetime.now()
+            time.sleep(0.1)
+            
             #get Mainboard Serial Number
             self.comfortsock.sendall("\x03SN01\r".encode())
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             
-            #Used for Unique ID
-            self.comfortsock.sendall("\x03UL7FF904\r".encode())
-            SAVEDTIME = datetime.now()
-            time.sleep(0.1)
-      
             self.comfortsock.sendall("\x03M?\r".encode())
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
