@@ -28,7 +28,7 @@ import json
 from pathlib import Path
 import re
 import signal
-import ipaddress
+#import ipaddress
 import socket
 import time
 import datetime
@@ -357,28 +357,31 @@ MQTT_CA_CERT=option.broker_ca
 MQTT_CLIENT_CERT=option.broker_client_cert  
 MQTT_CLIENT_KEY=option.broker_client_key    
 
-def is_ipv4_address(address):
-    try:
-        ipaddress.ip_address(address)
-        return True
-    except ValueError:
-        return False
+# def is_ipv4_address(address):
+#     try:
+#         ipaddress.ip_address(address)
+#         return True
+#     except ValueError:
+#         return False
 
-def resolve_to_ip(fqdn):
-    try:
-        return socket.gethostbyname(fqdn)
-    except socket.gaierror:
-        return None
+# def resolve_to_ip(fqdn):
+#     try:
+#         return socket.gethostbyname(fqdn)
+#     except socket.gaierror:
+#         return None
 
-def get_ip_address(input_value):
-    if is_ipv4_address(input_value):
-        return input_value
-    else:
-        return resolve_to_ip(input_value)
+# def get_ip_address(input_value):
+#     if is_ipv4_address(input_value):
+#         return input_value
+#     else:
+#         return resolve_to_ip(input_value)
     
 # Check to see if it's a Hostname.domain or IPv4 address. Resolve Hostname to IP.
-COMFORT_ADDRESS=get_ip_address(option.comfort_address)
-MQTT_SERVER=get_ip_address(option.broker_address)
+#COMFORT_ADDRESS=get_ip_address(option.comfort_address)
+#MQTT_SERVER=get_ip_address(option.broker_address)
+
+COMFORT_ADDRESS=option.comfort_address
+MQTT_SERVER=option.broker_address
 
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id
@@ -1379,21 +1382,25 @@ class Comfort2(mqtt.Client):
             #get CPU Type
             self.comfortsock.sendall("\x03u?01\r".encode())         # Get CPU type for Main board.
             SAVEDTIME = datetime.now()
+            logger.debug('Send u?01')
             time.sleep(0.1)
 
             #get CPU Type
             self.comfortsock.sendall("\x03u?00\r".encode())         # Get CPU type for remaining boards.
             SAVEDTIME = datetime.now()
+            logger.debug('Send u?00')
             time.sleep(0.1)
             
             #get Comfort type
             self.comfortsock.sendall("\x03V?\r".encode())
             SAVEDTIME = datetime.now()
+            logger.debug('Send V?')
             time.sleep(0.1)
             
             #get HW model
             self.comfortsock.sendall("\x03EL\r".encode())
             SAVEDTIME = datetime.now()
+            logger.debug('Send EL')
             time.sleep(0.1)
 
             #get Battery State. Max. Main + 5 Slaves
@@ -1405,51 +1412,63 @@ class Comfort2(mqtt.Client):
             #Used for Unique ID
             self.comfortsock.sendall("\x03UL7FF904\r".encode())
             SAVEDTIME = datetime.now()
+            logger.debug('Send UL7FF904')
             time.sleep(0.1)
             
             #get Mainboard Serial Number
             self.comfortsock.sendall("\x03SN01\r".encode())
             SAVEDTIME = datetime.now()
+            logger.debug('Send SN01')
             time.sleep(0.1)
             
             self.comfortsock.sendall("\x03M?\r".encode())
             SAVEDTIME = datetime.now()
+            logger.debug('Send M?')
             time.sleep(0.1)
             #get all zone input states
             self.comfortsock.sendall("\x03Z?\r".encode())       # Comfort Zones/Inputs
             SAVEDTIME = datetime.now()
+            logger.debug('Send Z?')
             time.sleep(0.1)
             #get all SCS/RIO input states
             self.comfortsock.sendall("\x03z?\r".encode())       # Comfort SCS/RIO Inputs
             SAVEDTIME = datetime.now()
+            logger.debug('Send z?')
             time.sleep(0.1)
             #get all output states
             self.comfortsock.sendall("\x03Y?\r".encode())
             SAVEDTIME = datetime.now()
+            logger.debug('Send Y?')
             time.sleep(0.1)
             #get all RIO output states
             self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all SCS/RIO Outputs
             SAVEDTIME = datetime.now()
+            logger.debug('Send y?')
             time.sleep(0.1)
             #get all flag states
             self.comfortsock.sendall("\x03f?00\r".encode())
             SAVEDTIME = datetime.now()
+            logger.debug('Send f?00')
             time.sleep(0.1)
             #get Alarm Status Information
             self.comfortsock.sendall("\x03S?\r".encode())       # S? Status Request
             SAVEDTIME = datetime.now()
+            logger.debug('Send S?')
             time.sleep(0.1)
             #get Alarm Additional Information
             self.comfortsock.sendall("\x03a?\r".encode())       # a? Status Request - For Future Use !!!
             SAVEDTIME = datetime.now()
+            logger.debug('Send a?')
             time.sleep(0.1)
 
             #get all sensor values. 0 - 31
             self.comfortsock.sendall("\x03r?010010\r".encode())
             SAVEDTIME = datetime.now()
+            logger.debug('Send r?01')
             time.sleep(0.1)
             self.comfortsock.sendall("\x03r?011010\r".encode())
             SAVEDTIME = datetime.now()
+            logger.debug('Send r?01')
             time.sleep(0.1)
 
             #get all counter values
@@ -1461,6 +1480,7 @@ class Comfort2(mqtt.Client):
                 SAVEDTIME = datetime.now()
                 time.sleep(0.1)
             
+            logger.debug('Send r?00')
             self.publish(ALARMAVAILABLETOPIC, 1,qos=2,retain=True)
             time.sleep(0.1)
             self.publish(ALARMLWTTOPIC, 'Online',qos=2,retain=True)
