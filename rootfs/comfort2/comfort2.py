@@ -1323,7 +1323,7 @@ class Comfort2(mqtt.Client):
                         time.sleep(0.1)
                         self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
                     else:
-                        self.comfortsock.sendall("\x03D?000A\r".encode()) #echo command for keepalive
+                        self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                     SAVEDTIME = datetime.now()
                     time.sleep(0.1)
                     continue
@@ -2444,7 +2444,7 @@ class Comfort2(mqtt.Client):
                                     time.sleep(0.1)
                                     self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
                                 else:
-                                    self.comfortsock.sendall("\x03D?000A\r".encode()) #echo command for keepalive
+                                    self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                                 SAVEDTIME = datetime.now()                      # Update SavedTime variable
                                 time.sleep(0.1)
 
@@ -2964,7 +2964,7 @@ class Comfort2(mqtt.Client):
                                         time.sleep(0.1)
                                         self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
                                     else:
-                                        self.comfortsock.sendall("\x03D?000A\r".encode()) #echo command for keepalive. cc00
+                                        self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive. cc00
                                     SAVEDTIME = datetime.now()
                                     time.sleep(0.1)
                         else:
