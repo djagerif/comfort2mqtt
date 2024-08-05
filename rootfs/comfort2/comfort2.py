@@ -75,7 +75,7 @@ RUN = True
 BYPASSEDZONES = []          # Global list of Bypassed Zones
 BROKERCONNECTED = False     # MQTT Status
 COMFORTCONNECTED = False    # Comfort Status
-ZONEMAPFILE = False         # Zone Number to Name CSV file present.
+ZONEMAPFILE = False         # CCLX file present or not.
 SCSRIOMAPFILE = False
 OUTPUTMAPFILE = False
 COUNTERMAPFILE = False
@@ -875,6 +875,8 @@ class Comfort_D_SystemVoltageReport(object):
         # <D?2201C0 - Single Instance. Also incorporating suggested enhancement D?0001 and D?0002 but not yet implemented. <D?0001aabbccddeeff[gghh]
         # D?0001C0C1C2C3FFFF (Main + 3 Slaves).
 
+        if len(data) < 6:
+            return
         query_type = int(data[4:6],16)
         id = int(data[2:4],16)
 
@@ -1293,13 +1295,12 @@ class Comfort2(mqtt.Client):
                 # this next if/else is a bit redundant, but illustrates how the
                 # timeout exception is setup
                 if err == 'timed out':
-                    #self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                     if str(device_properties['ComfortHardwareModel']) == 'CM9001-ULT' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                         self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                         time.sleep(0.1)
                         self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
                     else:
-                        self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                        self.comfortsock.sendall("\x03D?000A\r".encode()) #echo command for keepalive
                     SAVEDTIME = datetime.now()
                     time.sleep(0.1)
                     continue
@@ -2415,13 +2416,12 @@ class Comfort2(mqtt.Client):
                             logger.debug(line[1:])  	    # Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
 
                             if datetime.now() > SAVEDTIME + TIMEOUT:            #
-                                #self.comfortsock.sendall("\x03cc00\r".encode()) # Keepalive check when data comes in.
                                 if str(device_properties['ComfortHardwareModel']) == 'CM9001-ULT' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                                     self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                                     time.sleep(0.1)
                                     self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
                                 else:
-                                    self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                                    self.comfortsock.sendall("\x03D?000A\r".encode()) #echo command for keepalive
                                 SAVEDTIME = datetime.now()                      # Update SavedTime variable
                                 time.sleep(0.1)
 
@@ -2941,8 +2941,7 @@ class Comfort2(mqtt.Client):
                                         time.sleep(0.1)
                                         self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
                                     else:
-                                        self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
-                                        #self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                                        self.comfortsock.sendall("\x03D?000A\r".encode()) #echo command for keepalive. cc00
                                     SAVEDTIME = datetime.now()
                                     time.sleep(0.1)
                         else:

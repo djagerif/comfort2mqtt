@@ -8,8 +8,7 @@ All notable changes to this project will be documented in this file.
  - Test Client/Server Authentication certificates
  - Create Battery Update MQTT topic similar to Refresh. Replies with Battery status D?0001aabbccddeff and D?0002aabbccddeeff - Not currently supported by Comfort
    Note: comfort2mqtt/alarm/battery/update. Set to '1' to send D?0001 & D?0002 commands to Comfort.
- - Check Serial Number still not populated on first run.
- - Debug Comfort Disconnect then Addon Stop shows Bridge 'Connected'. Should be Disconnected. #2006.
+ - Debug Comfort Disconnect then Addon Stop shows Bridge 'Connected'. Should be Disconnected. #2006. Only happens while debugging via VS Code.
      
 ### Added
  - Added reporting for more Comfort models when detected.
