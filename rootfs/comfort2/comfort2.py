@@ -28,6 +28,7 @@ import json
 from pathlib import Path
 import re
 import signal
+import ipaddress
 import socket
 import time
 import datetime
@@ -356,7 +357,29 @@ MQTT_ENCRYPTION=option.broker_encryption
 MQTT_CA_CERT=option.broker_ca               
 MQTT_CLIENT_CERT=option.broker_client_cert  
 MQTT_CLIENT_KEY=option.broker_client_key    
-COMFORT_ADDRESS=option.comfort_address
+
+def is_ipv4_address(address):
+    try:
+        ipaddress.ip_address(address)
+        return True
+    except ValueError:
+        return False
+
+def resolve_to_ip(fqdn):
+    try:
+        return socket.gethostbyname(fqdn)
+    except socket.gaierror:
+        return None
+
+def get_ip_address(input_value):
+    if is_ipv4_address(input_value):
+        return input_value
+    else:
+        return resolve_to_ip(input_value)
+    
+# Check to see if it's a Hostname.domain or IPv4 address. Resolve Hostname to IP.
+COMFORT_ADDRESS=get_ip_address(option.comfort_address)
+
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id
 COMFORT_CCLX_FILE=option.comfort_cclx_file
@@ -3009,6 +3032,7 @@ def validate_certificate(certificate):
         return 0    # Valid certificate
     else:
         return 1    # Expired certificate
+
 
 mqttc = Comfort2(callback_api_version = mqtt.CallbackAPIVersion.VERSION2, client_id=mqtt_client_id, protocol=mqtt.MQTTv5, transport=MQTT_PROTOCOL)
 
