@@ -350,7 +350,6 @@ logger.info('Importing the add-on configuration options')
 
 MQTT_USER=option.broker_username
 MQTT_PASSWORD=option.broker_password
-MQTT_SERVER=option.broker_address
 MQTT_PORT=option.broker_port
 MQTT_PROTOCOL=option.broker_protocol
 MQTT_ENCRYPTION=option.broker_encryption    
@@ -379,6 +378,7 @@ def get_ip_address(input_value):
     
 # Check to see if it's a Hostname.domain or IPv4 address. Resolve Hostname to IP.
 COMFORT_ADDRESS=get_ip_address(option.comfort_address)
+MQTT_SERVER=get_ip_address(option.broker_address)
 
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id

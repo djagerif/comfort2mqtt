@@ -52,7 +52,7 @@ configuration:
   comfort_address:
     name: Comfort IP address
     description: >-
-      Cytech Comfort IP Address in IPV4 format.
+      Cytech Comfort IP Address in IPV4 format or DNS resolvable host FQDN.
   comfort_login_id:
     name: Comfort User Login ID
     description: >-
