@@ -2451,12 +2451,15 @@ class Comfort2(mqtt.Client):
                                 
 
                         if self.check_string(line):         # Check for "(\x03[a-zA-Z0-9]*)$" in complete line.
-                            pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')      # Extract 'legal' characters from line.
+                            #pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')      # Extract 'legal' characters from line.
+                            pattern = re.compile(r'(^\x03[a-zA-Z0-9!?]*)$')       # Fix to look from start of string.
                             match = re.search(pattern, line)
                             SEM_pattern = r"u\?2[1-7]"                          # Up to 7 Slaves supported.
 
                             if match:
                                 line = match.group(1)
+                            else:
+                                continue
 
                             if line[1:3] == "LU":
                                 luMsg = ComfortLUUserLoggedIn(line[1:])
@@ -2474,14 +2477,6 @@ class Comfort2(mqtt.Client):
                                     self.publish(REFRESHTOPIC, "", qos=2,retain=True)               # Clear Refresh Key
                                     time.sleep(0.01)
 
-                                    #self.publish(BRIDGECONNECTEDTOPIC, "test", qos=2,retain=True) 
-                                    #time.sleep(0.01)
-                                    #self.publish(BRIDGESTATE, "test", qos=2,retain=True) 
-                                    #time.sleep(0.01)
-                                    #self.publish(BRIDGEDEVICES, MQTT_MSG, qos=2,retain=True) 
-                                    #time.sleep(0.01)
-                                    #self.publish(BRIDGEINFO, "test", qos=2,retain=True) 
-                                    #time.sleep(0.01)
                                     self.setdatetime()      # Set Date/Time if Option is enabled
 
                                     if FIRST_LOGIN == True:
