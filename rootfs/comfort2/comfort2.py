@@ -28,7 +28,7 @@ import json
 from pathlib import Path
 import re
 import signal
-#import ipaddress
+import ipaddress
 import socket
 import time
 import datetime
@@ -318,6 +318,7 @@ logging.basicConfig(
 )
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
+hostname = socket.gethostname()
 
 supervisor_url = 'http://supervisor'
 addon_info_url = f'{supervisor_url}/addons/self/info'
@@ -339,7 +340,6 @@ else:
     else:
         logger.error("Failed to get Addon Info: Error Code %s, %s", response.status_code, response.reason)
 
-logging.debug(addon_info)
 #
 #uri = "ws://supervisor/core/websocket"
 #
@@ -359,31 +359,31 @@ MQTT_CA_CERT=option.broker_ca
 MQTT_CLIENT_CERT=option.broker_client_cert  
 MQTT_CLIENT_KEY=option.broker_client_key    
 
-# def is_ipv4_address(address):
-#     try:
-#         ipaddress.ip_address(address)
-#         return True
-#     except ValueError:
-#         return False
+def is_ipv4_address(address):
+    try:
+        ipaddress.ip_address(address)
+        return True
+    except ValueError:
+        return False
 
-# def resolve_to_ip(fqdn):
-#     try:
-#         return socket.gethostbyname(fqdn)
-#     except socket.gaierror:
-#         return None
+def resolve_to_ip(fqdn):
+    try:
+        return socket.gethostbyname(fqdn)
+    except socket.gaierror:
+        return None
 
-# def get_ip_address(input_value):
-#     if is_ipv4_address(input_value):
-#         return input_value
-#     else:
-#         return resolve_to_ip(input_value)
+def get_ip_address(input_value):
+    if is_ipv4_address(input_value):
+        return input_value
+    else:
+        return resolve_to_ip(input_value)
     
 # Check to see if it's a Hostname.domain or IPv4 address. Resolve Hostname to IP.
-#COMFORT_ADDRESS=get_ip_address(option.comfort_address)
-#MQTT_SERVER=get_ip_address(option.broker_address)
+COMFORT_ADDRESS=get_ip_address(option.comfort_address)
+MQTT_SERVER=get_ip_address(option.broker_address)
 
-COMFORT_ADDRESS=option.comfort_address
-MQTT_SERVER=option.broker_address
+#COMFORT_ADDRESS=option.comfort_address
+#MQTT_SERVER=option.broker_address
 
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id
@@ -1508,6 +1508,7 @@ class Comfort2(mqtt.Client):
         global ADDON_VERSION
         global ADDON_SLUG
         global file_exists
+        global hostname
 
         file_exists = _file
   
@@ -1541,7 +1542,7 @@ class Comfort2(mqtt.Client):
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
-                            "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
+                            "configuration_url": hostname + "://hassio/addon/" + ADDON_SLUG + "/info",
                             "model": "Comfort MQTT Bridge"
                         }
         
