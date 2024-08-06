@@ -318,7 +318,6 @@ logging.basicConfig(
 )
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
-hostname = os.getenv('HOST_HOSTNAME')
 
 supervisor_url = 'http://supervisor'
 addon_info_url = f'{supervisor_url}/addons/self/info'
@@ -1508,7 +1507,6 @@ class Comfort2(mqtt.Client):
         global ADDON_VERSION
         global ADDON_SLUG
         global file_exists
-        global hostname
 
         file_exists = _file
   
@@ -1542,7 +1540,7 @@ class Comfort2(mqtt.Client):
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
-                            "configuration_url": hostname + "://hassio/addon/" + ADDON_SLUG + "/info",
+                            "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
                             "model": "Comfort MQTT Bridge"
                         }
         
