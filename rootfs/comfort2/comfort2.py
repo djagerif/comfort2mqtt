@@ -1545,7 +1545,7 @@ class Comfort2(mqtt.Client):
                         }
         
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
-                             "url": "https://www.cytech.biz",
+                             "support_url": "https://www.cytech.biz",
                              "Reference": device_properties['Reference'] if file_exists else None,
                              "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
                              "ComfortFirmwareType": device_properties['ComfortFirmwareType'] if file_exists else None,
@@ -2064,7 +2064,7 @@ class Comfort2(mqtt.Client):
                         }
         
             MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
-                             "url": "https://www.cytech.biz",
+                             "support_url": "https://www.cytech.biz",
                              "Reference": device_properties['Reference'] if file_exists else None,
                              "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
                              "ComfortFirmwareType": device_properties['ComfortFirmwareType'] if file_exists else None,
