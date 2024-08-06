@@ -339,6 +339,7 @@ else:
     else:
         logger.error("Failed to get Addon Info: Error Code %s, %s", response.status_code, response.reason)
 
+logging.debug(addon_info)
 #
 #uri = "ws://supervisor/core/websocket"
 #
