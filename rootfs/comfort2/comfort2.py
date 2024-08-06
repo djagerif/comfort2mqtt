@@ -47,6 +47,7 @@ COMFORT_KEY = "00000000"          # Default Refresh Key.
 
 MAX_ZONES = 96                  # Configurable for future expansion
 MAX_OUTPUTS = 96                # Configurable for future expansion
+BATTERYKEEPALIVES = False       # Set to True if Cytech ever implement D?0001/D?0002 battery query commands. This will change Keepalives to monitor batteries also.
 
 rand_hex_str = hex(randint(268435456, 4294967295))
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts.
@@ -867,10 +868,17 @@ class Comfort_U_SystemCPUTypeReport(object):
 class Comfort_EL_HardwareModelReport(object):
     def __init__(self, data={}):
 
+        global device_properties
+
         self.hardwaremodel = "N/A"
         if len(data) < 14:
             self.hardwaremodel = "N/A"
         else:
+            for i in range(4,len(data),2):
+                if data[i:i+2] == 'FF':
+                    device_properties['sem_id'] = int(i/2-2)
+                    logging.debug("%s Installed SEM(s) detected", str(device_properties['sem_id']))
+                    break
             identifier = int(data[3:4],16)
             if identifier == 1:
                 if int(device_properties['ComfortFileSystem']) == 34:
@@ -897,9 +905,6 @@ class Comfort_D_SystemVoltageReport(object):
         global ChargerVoltageList
         global BatterySlaveIDs
         global ChargerSlaveIDs
-
-        # <D?2201C0 - Single Instance. Also incorporating suggested enhancement D?0001 and D?0002 but not yet implemented. <D?0001aabbccddeeff[gghh]
-        # D?0001C0C1C2C3FFFF (Main + 3 Slaves).
 
         if len(data) < 6:
             return
@@ -1155,6 +1160,12 @@ class Comfort2(mqtt.Client):
                 self.readcurrentstate()
         
         elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/battery_update"):
+
+            # Still to be completed. Devices contains Main + SEM Id's in Hex stringformat.
+            Devices = ['01']        # Mainboard
+            for device in range(0, int(device_properties['sem_id'])):
+                Devices.append(str(device+21))
+
             if msgstr == "1":
                 if str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba':
                     logger.debug("[Unsupported] Battery Update query received.")
@@ -1321,7 +1332,7 @@ class Comfort2(mqtt.Client):
                 # this next if/else is a bit redundant, but illustrates how the
                 # timeout exception is setup
                 if err == 'timed out':
-                    if str(device_properties['ComfortHardwareModel']) == 'CM9001-ULT' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
+                    if BATTERYKEEPALIVES and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                         self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                         time.sleep(0.1)
                         self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
@@ -1360,7 +1371,7 @@ class Comfort2(mqtt.Client):
         global COMFORTCONNECTED
         self.comfortsock.sendall(("\x03LI"+self.comfort_pincode+"\r").encode())
         COMFORTCONNECTED = True
-        if BROKERCONNECTED:
+        if BROKERCONNECTED:         # Check to see if Broker is connected. Is not always at this point in the startup.
             self.publish(ALARMCONNECTEDTOPIC, 1, qos=2, retain=True)
         SAVEDTIME = datetime.now()
 
@@ -1382,93 +1393,66 @@ class Comfort2(mqtt.Client):
             #get CPU Type
             self.comfortsock.sendall("\x03u?01\r".encode())         # Get CPU type for Main board.
             SAVEDTIME = datetime.now()
-            logger.debug('Send u?01')
             time.sleep(0.1)
 
-            #get CPU Type
-            self.comfortsock.sendall("\x03u?00\r".encode())         # Get CPU type for remaining boards.
-            SAVEDTIME = datetime.now()
-            logger.debug('Send u?00')
-            time.sleep(0.1)
-            
             #get Comfort type
             self.comfortsock.sendall("\x03V?\r".encode())
             SAVEDTIME = datetime.now()
-            logger.debug('Send V?')
             time.sleep(0.1)
             
-            #get HW model
+            # #get HW model
             self.comfortsock.sendall("\x03EL\r".encode())
             SAVEDTIME = datetime.now()
-            logger.debug('Send EL')
             time.sleep(0.1)
 
-            #get Battery State. Max. Main + 5 Slaves
-            # for i in NumberOfSlaves
-            #     self.comfortsock.sendall("\x03D?0101\r".encode())
-            #     time.sleep(0.1)
-            # SAVEDTIME = datetime.now()
-            
             #Used for Unique ID
             self.comfortsock.sendall("\x03UL7FF904\r".encode())
             SAVEDTIME = datetime.now()
-            logger.debug('Send UL7FF904')
             time.sleep(0.1)
             
             #get Mainboard Serial Number
             self.comfortsock.sendall("\x03SN01\r".encode())
             SAVEDTIME = datetime.now()
-            logger.debug('Send SN01')
             time.sleep(0.1)
             
             self.comfortsock.sendall("\x03M?\r".encode())
             SAVEDTIME = datetime.now()
-            logger.debug('Send M?')
             time.sleep(0.1)
-            #get all zone input states
+            # #get all zone input states
             self.comfortsock.sendall("\x03Z?\r".encode())       # Comfort Zones/Inputs
             SAVEDTIME = datetime.now()
-            logger.debug('Send Z?')
             time.sleep(0.1)
             #get all SCS/RIO input states
             self.comfortsock.sendall("\x03z?\r".encode())       # Comfort SCS/RIO Inputs
             SAVEDTIME = datetime.now()
-            logger.debug('Send z?')
             time.sleep(0.1)
             #get all output states
             self.comfortsock.sendall("\x03Y?\r".encode())
             SAVEDTIME = datetime.now()
-            logger.debug('Send Y?')
             time.sleep(0.1)
             #get all RIO output states
             self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all SCS/RIO Outputs
             SAVEDTIME = datetime.now()
-            logger.debug('Send y?')
             time.sleep(0.1)
             #get all flag states
             self.comfortsock.sendall("\x03f?00\r".encode())
             SAVEDTIME = datetime.now()
-            logger.debug('Send f?00')
             time.sleep(0.1)
             #get Alarm Status Information
             self.comfortsock.sendall("\x03S?\r".encode())       # S? Status Request
             SAVEDTIME = datetime.now()
-            logger.debug('Send S?')
             time.sleep(0.1)
             #get Alarm Additional Information
             self.comfortsock.sendall("\x03a?\r".encode())       # a? Status Request - For Future Use !!!
             SAVEDTIME = datetime.now()
-            logger.debug('Send a?')
             time.sleep(0.1)
 
             #get all sensor values. 0 - 31
             self.comfortsock.sendall("\x03r?010010\r".encode())
             SAVEDTIME = datetime.now()
-            logger.debug('Send r?01')
             time.sleep(0.1)
             self.comfortsock.sendall("\x03r?011010\r".encode())
             SAVEDTIME = datetime.now()
-            logger.debug('Send r?01')
             time.sleep(0.1)
 
             #get all counter values
@@ -1480,7 +1464,11 @@ class Comfort2(mqtt.Client):
                 SAVEDTIME = datetime.now()
                 time.sleep(0.1)
             
-            logger.debug('Send r?00')
+            #get CPU Type
+            self.comfortsock.sendall("\x03u?00\r".encode())         # Get CPU type for remaining boards.
+            SAVEDTIME = datetime.now()
+            time.sleep(0.1)
+
             self.publish(ALARMAVAILABLETOPIC, 1,qos=2,retain=True)
             time.sleep(0.1)
             self.publish(ALARMLWTTOPIC, 'Online',qos=2,retain=True)
@@ -1507,6 +1495,9 @@ class Comfort2(mqtt.Client):
             device_properties['ChargeVoltageSlave7'] = "-1"
             device_properties['ChargerStatus'] = "N/A"
             device_properties['BatteryStatus'] = "N/A"
+
+            if BROKERCONNECTED and COMFORTCONNECTED:
+                self.publish(ALARMCONNECTEDTOPIC, 1,qos=2,retain=True)
 
     def UpdateDeviceInfo(self, _file = False):
 
@@ -2450,16 +2441,25 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.settimeout(TIMEOUT.seconds)
                     self.login()
 
+                    #COMFORTCONNECTED = True
+                    #self.publish(ALARMCONNECTEDTOPIC, 1,qos=2,retain=True)
+                    
                     for line in self.readlines():
 
-                        COMFORTCONNECTED = True
-                        self.publish(ALARMCONNECTEDTOPIC, 1,qos=2,retain=True)
+                        #if self.check_string(line[1:]) and (line[1:] != "cc00" and not line[1:].startswith("D?00")):
+
+                        pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')      # Extract 'legal' characters from line.
+                        match = re.search(pattern, line)
+                        if match:
+                            line = match.group(1)
+                        else:
+                            continue
 
                         if line[1:] != "cc00" and not line[1:].startswith("D?00"):
                             logger.debug(line[1:])  	    # Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
 
                             if datetime.now() > SAVEDTIME + TIMEOUT:            #
-                                if str(device_properties['ComfortHardwareModel']) == 'CM9001-ULT' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
+                                if BATTERYKEEPALIVES and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                                     self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                                     time.sleep(0.1)
                                     self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
@@ -2468,11 +2468,8 @@ class Comfort2(mqtt.Client):
                                 SAVEDTIME = datetime.now()                      # Update SavedTime variable
                                 time.sleep(0.1)
 
-                                
-
                         if self.check_string(line):         # Check for "(\x03[a-zA-Z0-9]*)$" in complete line.
-                            #pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')      # Extract 'legal' characters from line.
-                            pattern = re.compile(r'(^\x03[a-zA-Z0-9!?]*)$')       # Fix to look from start of string.
+                            pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')      # Extract 'legal' characters from line.
                             match = re.search(pattern, line)
                             SEM_pattern = r"u\?2[1-7]"                          # Up to 7 Slaves supported.
 
@@ -2680,15 +2677,15 @@ class Comfort2(mqtt.Client):
                                 uMsg = Comfort_U_SystemCPUTypeReport(line[1:])
                                                 
                                 device_properties['sem_id'] = str(uMsg.sem_id)  # Saves the highest number installed SEM's. Must be contiguous. Only support 5
-                                if int(line[3:5],16) == 37:
-                                    logging.debug("%s Installed SEM(s) detected", str(device_properties['sem_id']))
+                                #if int(line[3:5],16) == 37:
+                                #    logging.debug("%s Installed SEM(s) detected", str(device_properties['sem_id']))
                                 
                                 # Check Slaves Installed.
                                 # Generate BatteryStatus and ChargerStatus from all Slaves + Main
                                 #device_properties['ChargerStatus'] = "N/A"     # Ok, Warning, Critical
                                 #device_properties['BatteryStatus'] = "N/A"
 
-                            elif line[1:3] == "EL":       # Determine HW model number CM9000/9001 if available.
+                            elif line[1:3] == "EL":       # Determine HW model number CM9000/9001 if available and number of Slave confirmation.
                                 ELMsg = Comfort_EL_HardwareModelReport(line[1:])
                                                  
                                 device_properties['ComfortHardwareModel'] = str(ELMsg.hardwaremodel)
@@ -2974,7 +2971,7 @@ class Comfort2(mqtt.Client):
                             else:
                                 if datetime.now() > (SAVEDTIME + TIMEOUT):  # If no command sent in 2 minutes then send keepalive.
                                     #logger.debug("Sending Keepalives")
-                                    if str(device_properties['ComfortHardwareModel']) == 'CM9001-ULT' and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
+                                    if BATTERYKEEPALIVES and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                                         self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                                         time.sleep(0.1)
                                         self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive

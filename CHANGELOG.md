@@ -9,13 +9,15 @@ All notable changes to this project will be documented in this file.
  - Create Battery Update MQTT topic similar to Refresh. Replies with Battery status D?0001aabbccddeff and D?0002aabbccddeeff - Not currently supported by Comfort
    Note: comfort2mqtt/alarm/battery/update. Set to '1' to send D?0001 & D?0002 commands to Comfort.
  - Debug Comfort Disconnect then Addon Stop shows Bridge 'Connected'. Should be Disconnected. #2006. Only happens while debugging via VS Code.
-     
+ - Add MQTT Battery/Charger query with parameter of 1,21-27 for Main + Slaves
+
+
 ### Added
  - Added reporting for more Comfort models when detected.
- - Check for new ARM or Toshiba Mainboard CPU. When ARM/Toshiba detected, use D?00 as keepalives.
+ - For Future Comfort Enhancement: Check for new ARM or Toshiba Mainboard CPU. When ARM/Toshiba detected, use D?00 as keepalives.
    Note: D?00 command is only suggested as a feature request to Cytech and might not go into Production.
  - Add a Battery Status function. Critical[<12.23, >14.4], Warning[<12.58, >14.2], Ok[>=12.58, <=14.2].
-
+ 
 ### Changed
  - Update all references of Comfort II Ultra to Comfort to be more inclusive of other Comfort system models.
  - Remove unique identifer for Comfort identification, makes it easier to read/identify.
