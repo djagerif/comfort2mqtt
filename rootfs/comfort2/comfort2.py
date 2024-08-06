@@ -318,7 +318,7 @@ logging.basicConfig(
 )
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
-hostname = socket.gethostname()
+hostname = os.getenv('HOST_HOSTNAME')
 
 supervisor_url = 'http://supervisor'
 addon_info_url = f'{supervisor_url}/addons/self/info'
