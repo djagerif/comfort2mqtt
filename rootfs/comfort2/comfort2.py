@@ -1464,10 +1464,10 @@ class Comfort2(mqtt.Client):
                 SAVEDTIME = datetime.now()
                 time.sleep(0.1)
             
-            #get CPU Type
-            self.comfortsock.sendall("\x03u?00\r".encode())         # Get CPU type for remaining boards.
-            SAVEDTIME = datetime.now()
-            time.sleep(0.1)
+            # #get CPU Type
+            # self.comfortsock.sendall("\x03u?00\r".encode())         # Get CPU type for remaining boards.
+            # SAVEDTIME = datetime.now()
+            # time.sleep(0.1)
 
             self.publish(ALARMAVAILABLETOPIC, 1,qos=2,retain=True)
             time.sleep(0.1)

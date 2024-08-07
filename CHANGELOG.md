@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file.
    Note: comfort2mqtt/alarm/battery/update. Set to '1' to send D?0001 & D?0002 commands to Comfort.
  - Debug Comfort Disconnect then Addon Stop shows Bridge 'Connected'. Should be Disconnected. #2006. Only happens while debugging via VS Code.
  - Add MQTT Battery/Charger query with parameter of 1,21-27 for Main + Slaves
-
+ - Check if u?00 is really required. Can determine Slaves from EL command.
 
 ### Added
  - Added reporting for more Comfort models when detected.
