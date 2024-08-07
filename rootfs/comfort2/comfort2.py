@@ -854,15 +854,15 @@ class Comfort_U_SystemCPUTypeReport(object):
             elif identifier == 0:
                 self.cputype = "Toshiba"
 
-        sem_id = int(data[2:4],16)          # 0x21 - 25
-        sem_type = int(data[4:6],16)        # Type 190
+        #sem_id = int(data[2:4],16)          # 0x21 - 25
+        #sem_type = int(data[4:6],16)        # Type 190
 
-        if sem_id > 32 and sem_id <= 37 and sem_type == 190:
-            self.sem_id = sem_id - 32
-        elif sem_id > 32 and sem_id <= 37 and sem_type == 255 and int(device_properties['sem_id']) > 0:
-            self.sem_id = int(device_properties['sem_id'])
-        else:
-            self.sem_id = 0
+        #if sem_id > 32 and sem_id <= 37 and sem_type == 190:
+        #    self.sem_id = sem_id - 32
+        #elif sem_id > 32 and sem_id <= 37 and sem_type == 255 and int(device_properties['sem_id']) > 0:
+        #    self.sem_id = int(device_properties['sem_id'])
+        #else:
+        #    self.sem_id = 0
 
 
 class Comfort_EL_HardwareModelReport(object):
@@ -2673,10 +2673,10 @@ class Comfort2(mqtt.Client):
 
                                 self.UpdateDeviceInfo(True)     # Update Device properties.
 
-                            elif re.match(SEM_pattern, line[1:5]):       # Determine Number of Installed SEM's. Check for u?21 - 25
-                                uMsg = Comfort_U_SystemCPUTypeReport(line[1:])
+                            # elif re.match(SEM_pattern, line[1:5]):       # Determine Number of Installed SEM's. Check for u?21 - 25
+                            #    uMsg = Comfort_U_SystemCPUTypeReport(line[1:])
                                                 
-                                device_properties['sem_id'] = str(uMsg.sem_id)  # Saves the highest number installed SEM's. Must be contiguous. Only support 5
+                            #    device_properties['sem_id'] = str(uMsg.sem_id)  # Saves the highest number installed SEM's. Must be contiguous. Only support 5
                                 #if int(line[3:5],16) == 37:
                                 #    logging.debug("%s Installed SEM(s) detected", str(device_properties['sem_id']))
                                 
