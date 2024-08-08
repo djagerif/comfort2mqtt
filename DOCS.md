@@ -365,8 +365,8 @@ The latest Comfort ARM powered boards have the ability to report on individual B
 
 When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery voltage and the second for the Charger voltage expressed as an 8-bit value with a 15.5V Maximum voltage. The formula for voltage calculation, using the example below, is:
 
-'Battery Voltage = 196/255 * 15.5V = 11.9V'
-'Charger Voltage = 199/255 * 15.5V = 12.1V'
+>Battery Voltage = 196/255 * 15.5V = 11.9V
+>Charger Voltage = 199/255 * 15.5V = 12.1V
 
 ```
 2024-08-08 19:07:37 DEBUG    D?0101C4
