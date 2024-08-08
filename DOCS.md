@@ -359,16 +359,14 @@ mode: single
 
 The latest Comfort ARM powered boards have the ability to report on individual Battery and DC Charger voltages. Below is an automation you can use to query Comfort every minute for these values. You can safely extend the interval to 15 minutes or more as voltages don't usually change abruptly in a mostly-floating voltage device operation.
 
-Note: If you try this on a non-ARM powered mainboard then a warning message will be displayed in the Addon log as shown below.
+**Note:** If you try this on a non-ARM powered mainboard then a warning message will be displayed in the Addon log as shown below.
 
-```
-2024-08-08 19:05:22 WARNING  Unsupported Battery Update query received.
-```
+`2024-08-08 19:05:22 WARNING  Unsupported Battery Update query received.`
 
 When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery voltage and the second for the Charger voltage expressed as an 8-bit value with a 15.5V Maximum voltage. The formula for voltage calculation, using the example below, is:
 
-Battery Voltage = 196/255 * 15.5V = 11.9V
-Charger Voltage = 199/255 * 15.5V = 12.1V
+'Battery Voltage = 196/255 * 15.5V = 11.9V'
+'Charger Voltage = 199/255 * 15.5V = 12.1V'
 
 ```
 2024-08-08 19:07:37 DEBUG    D?0101C4
