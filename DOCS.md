@@ -100,6 +100,8 @@ The following MQTT topics are subscribed.
 ```
 comfort2mqtt/alarm/set - sent from Home Assistant, DISARM, ARMED_HOME, ARMED_NIGHT, ARMED_VACATION or ARMED_AWAY
 comfort2mqtt/alarm/refresh - sent from Home Assistant, <Key> triggers a complete object refresh
+comfort2mqtt/alarm/battery_update - sent from Home Assistant, <id> triggers a battery update query 'D?id01 and D?id02
+                                    id's 1,33-37 are supported for Main and Slaves when ARM CPU is detected.
 
 comfort2mqtt/input<1 to 96>/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input
 comfort2mqtt/input<129 to 248>/set
@@ -303,7 +305,7 @@ alarm:
 3. Lastly, edit your `Alarm Control Panel` card and assign the new `alarm` theme to it. This will change the Alarm State colours to reflect what Comfort uses.
 
 
-## Home Assistant - Automation (Optional)
+## Home Assistant - 'Refresh' Automation (Optional)
 
 When Home Assistant Restarts (Not Reload), it only restarts Home Assistant itself, all Add-on's remain running which could lead to some entities displaying an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to Restart, or better yet, Refresh the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded from `Developer tools` -> `YAML` -> `YAML configuration reloading`.
 
@@ -351,6 +353,51 @@ mode: single
 ⚠️ **Note:** When Comfort to MQTT starts up it will print the KEY value to be used for Refresh function authentication. Incorrect key values will be ignored.
 
 `2024-06-12 17:45:27 INFO     Refresh Key: 000F8EC8`
+
+
+## Home Assistant - 'Battery Update' Automation (Optional)
+
+The latest Comfort ARM powered boards have the ability to report on individual Battery and DC Charger voltages. Below is an automation you can use to query Comfort every minute for these values. You can safely extend the interval to 15 minutes or more as voltages don't usually change abruptly in a mostly-floating voltage device operation.
+
+Note: If you try this on a non-ARM powered mainboard then a warning message will be displayed in the Addon log as shown below.
+
+2024-08-08 19:05:22 WARNING  Unsupported Battery Update query received.
+
+When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery voltage and the second for the Charger voltage expressed as an 8-bit value with a 15.5V Maximum voltage. The formula for voltage calculation, using the example below, is:
+
+Battery Voltage = 196/255 * 15.5V = 11.9V
+Charger Voltage = 199/255 * 15.5V = 12.1V
+
+2024-08-08 19:07:37 DEBUG    D?0101C4
+2024-08-08 19:07:39 DEBUG    D?0102C7
+
+Take note of the `condition` block below, this is your Comfort II ULTRA device and is used as a check to make sure the LAN connection to Comfort is in a Connected state.
+
+![
+  
+](image-3.png)
+
+```
+alias: Comfort Battery Update Query (Mainboard)
+description: Query an ARM powered Comfort Mainboard battery and charger voltages.
+trigger:
+  - platform: time_pattern
+    seconds: "0"
+    enabled: true
+condition:
+  - type: is_connected
+    condition: device
+    device_id: 2c67370b6618f7cb8059cb278f23e613
+    entity_id: c69f4645a0654166aac672f675c0aafa
+    domain: binary_sensor
+action:
+  - data:
+      qos: "2"
+      topic: comfort2mqtt/alarm/battery_update
+      payload: "1"
+    action: mqtt.publish
+mode: single
+```
 
 
 ## Hardware and Interface support
