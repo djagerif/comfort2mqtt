@@ -373,9 +373,7 @@ Charger Voltage = 199/255 * 15.5V = 12.1V
 
 Take note of the `condition` block below, this is your Comfort II ULTRA device and is used as a check to make sure the LAN connection to Comfort is in a Connected state.
 
-![
-  
-](image-3.png)
+![image](https://github.com/user-attachments/assets/c387efcc-89a0-4af2-9c66-0ea36a8e5e72)
 
 ```
 alias: Comfort Battery Update Query (Mainboard)
