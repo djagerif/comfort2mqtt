@@ -9,13 +9,13 @@ All notable changes to this project will be documented in this file.
  - Create Battery Update MQTT topic similar to Refresh. Replies with Battery status D?0001aabbccddeff and D?0002aabbccddeeff - Not currently supported by Comfort
    Note: comfort2mqtt/alarm/battery/update. Set to '1' to send D?0001 & D?0002 commands to Comfort.
  - Debug Comfort Disconnect then Addon Stop shows Bridge 'Connected'. Should be Disconnected. #2006. Only happens while debugging via VS Code.
- - Add MQTT Battery/Charger query with parameter of 1,21-27 for Main + Slaves
- - Check if u?00 is really required. Can determine Slaves from EL command.
-
+ - Add MQTT Battery/Charger query with parameter of 1,21-25[7] for Main + Slaves
+ - HA Restart does not correctly update Addon status. Stays Unknown. Possible MQTT not online yet.
+ 
 ### Added
  - Added reporting for more Comfort models when detected.
- - For Future Comfort Enhancement: Check for new ARM or Toshiba Mainboard CPU. When ARM/Toshiba detected, use D?00 as keepalives.
-   Note: D?00 command is only suggested as a feature request to Cytech and might not go into Production.
+ - For Future Comfort Enhancement: Check for new ARM or Toshiba Mainboard CPU. When ARM/Toshiba detected, use D?00xx as keepalives.
+   Note: D?00xx command is only suggested as a feature request to Cytech and might not go into Production.
  - Add a Battery Status function. Critical[<12.23, >14.4], Warning[<12.58, >14.2], Ok[>=12.58, <=14.2].
  
 ### Changed
@@ -23,9 +23,11 @@ All notable changes to this project will be documented in this file.
  - Remove unique identifer for Comfort identification, makes it easier to read/identify.
  - Remove attributes from Diagnostic entities.
  - Split Comfort to MQTT Bridge and Comfort II ULTRA device under MQTT.
+ - Removed u?00 from polling as this seems to create issues with subsequent commands.
+ - Domain changed from 'comfort2' to 'comfort2mqtt'.
 
 ### Fixed
- - Initial startup Diagnostics values 'Unknown'. Data is now correctly populated on startup.
+ - Initial startup Diagnostic values 'Unknown'. Data is now correctly populated on startup.
 
 
 ## [1.1.1] - 2024-06-30

@@ -1670,7 +1670,7 @@ class Comfort2(mqtt.Client):
                              "payload_off": "0",
                              "device": MQTT_DEVICE
                             })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
         time.sleep(0.1)
 
         availability =  [
