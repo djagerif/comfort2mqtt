@@ -1161,20 +1161,21 @@ class Comfort2(mqtt.Client):
         
         elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/battery_update"):
 
-            # Still to be completed. Devices contains Main + SEM Id's in Hex stringformat.
-            Devices = ['01']        # Mainboard
+            Devices = ['1']        # Mainboard + Installed Slaves EG. ['1','33','34','35']
             for device in range(0, int(device_properties['sem_id'])):
-                Devices.append(str(device+21))
+                Devices.append(str(device + 33))    # First Slave at address 33 DEC.
 
-            if msgstr == "1":
-                if str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba':
-                    logger.debug("[Unsupported] Battery Update query received.")
-                    self.comfortsock.sendall("\x03D?0001\r".encode()) # Battery Status Update
-                    time.sleep(0.1)
-                    self.comfortsock.sendall("\x03D?0002\r".encode()) # Charger Status Update
-                    time.sleep(0.1)
-                else:
-                    logger.error("[Unsupported] Battery Update query not supported on non-ARM CPU's.")
+            if msgstr in Devices and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
+                ID = str(f"{int(msgstr):02X}")
+                Command = "\x03D?" + ID + "01\r"
+                self.comfortsock.sendall(Command.encode()) # Battery Status Update
+                time.sleep(0.1)
+                Command = "\x03D?" + ID + "02\r"
+                self.comfortsock.sendall(Command.encode()) # Charger Status Update
+                time.sleep(0.1)
+                SAVEDTIME = datetime.now()
+            else:
+                logger.warning("Unsupported Battery Update query received.")
 
         elif msg.topic.startswith("homeassistant") and msg.topic.endswith("/status"):
             if msgstr == "online":
