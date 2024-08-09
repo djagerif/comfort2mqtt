@@ -1357,7 +1357,7 @@ class Comfort2(mqtt.Client):
                     COMFORTCONNECTED = False
                     if BROKERCONNECTED:
                         self.publish(ALARMCONNECTEDTOPIC, "1" if COMFORTCONNECTED else "0", qos=2, retain=False)
-                        device_properties['BridgeConnected'] = 1
+                        device_properties['BridgeConnected'] = 0
                 else:
                     # got a message do something :)
                     buffer += data
