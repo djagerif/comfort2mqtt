@@ -2096,9 +2096,7 @@ class Comfort2(mqtt.Client):
                              "BridgeConnected": str(device_properties['BridgeConnected']),
                              "device": MQTT_DEVICE
                             })
-            logging.debug("Here !!!")
             infot = self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
-            logging.debug("Here too !!!")
             infot.wait_for_publish()
         RUN = False
         exit(0)
