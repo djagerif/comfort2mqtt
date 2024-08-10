@@ -267,7 +267,7 @@ tap_action:
 
 ## Home Assistant - Alarm State Colours (Optional)
 
-The native `Alarm Control Panel` uses Grey, Orange and Green for Disarmed, Arming/Pending and Armed, Red is used for Triggered. These colours does not correlate with the Comfort II ULTRA Alarm states. To change the colours to use Green, Orange and Red, you have to add a separate `Theme` to your `Alarm Control Panel` card.
+The native `Alarm Control Panel` uses Grey, Orange and Green for Disarmed, Arming/Pending and Armed, Red is used for Triggered. These colours do not correlate with the Comfort II ULTRA Alarm states. To change the colours to use Green, Orange and Red, you have to add a separate `Theme` to your `Alarm Control Panel` card.
 
 1. Create a file called `themes.yaml`, it can actually be named anything.yaml, it doesn't matter. Copy this file into your Home Assistant `/config/themes` directory. If the directory doesn't exist then create the directory.
 
