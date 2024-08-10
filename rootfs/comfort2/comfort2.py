@@ -1769,8 +1769,8 @@ class Comfort2(mqtt.Client):
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_filesystem/config"
         MQTT_MSG=json.dumps({"name": "FileSystem",
-                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "unique_id": discoverytopic.split('/')[3],
+                             "object_id": discoverytopic.split('/')[3],
                              "availability_topic": DOMAIN + "/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
