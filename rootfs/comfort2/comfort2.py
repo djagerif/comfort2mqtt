@@ -1345,7 +1345,8 @@ class Comfort2(mqtt.Client):
                 else:
                     logger.error ("readlines() error %s", e)
             except socket.error as e:
-                logger.debug("Something else happened %s", e)
+                logger.debug("Unknown Comfort connection error %s", e)
+                COMFORTCONNECTED = False
                 FIRST_LOGIN = True
                 raise
             else:
@@ -2443,12 +2444,7 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.settimeout(TIMEOUT.seconds)
                     self.login()
 
-                    #COMFORTCONNECTED = True
-                    #self.publish(ALARMCONNECTEDTOPIC, 1,qos=2,retain=True)
-                    
                     for line in self.readlines():
-
-                        #if self.check_string(line[1:]) and (line[1:] != "cc00" and not line[1:].startswith("D?00")):
 
                         pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')      # Extract 'legal' characters from line.
                         match = re.search(pattern, line)
@@ -2458,22 +2454,21 @@ class Comfort2(mqtt.Client):
                             continue
 
                         if line[1:] != "cc00" and not line[1:].startswith("D?00"):
-                            logger.debug(line[1:])  	    # Print all responses only in DEBUG mode. Print all received Comfort commands except keepalives.
+                            logger.debug(line[1:])  	    # Print all responses in DEBUG mode only. Print all received Comfort commands except keepalives.
 
                             if datetime.now() > SAVEDTIME + TIMEOUT:            #
                                 if BATTERYKEEPALIVES and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
-                                    self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
+                                    self.comfortsock.sendall("\x03D?0001\r".encode()) #Possible future echo command for keepalive
                                     time.sleep(0.1)
-                                    self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
+                                    self.comfortsock.sendall("\x03D?0002\r".encode()) #Possible future echo command for keepalive
                                 else:
                                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
-                                SAVEDTIME = datetime.now()                      # Update SavedTime variable
+                                SAVEDTIME = datetime.now()
                                 time.sleep(0.1)
 
-                        if self.check_string(line):         # Check for "(\x03[a-zA-Z0-9]*)$" in complete line.
+                        if self.check_string(line):         # Check for "(\x03[a-zA-Z0-9]*)$" in complete line. Might be redundant as same check done above.
                             pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')      # Extract 'legal' characters from line.
                             match = re.search(pattern, line)
-                            SEM_pattern = r"u\?2[1-7]"                          # Up to 7 Slaves supported.
 
                             if match:
                                 line = match.group(1)
@@ -2504,6 +2499,11 @@ class Comfort2(mqtt.Client):
                                 else:
                                     logger.debug("Disconnect (LU00) Received from Comfort.")
                                     FIRST_LOGIN = True
+                                    COMFORTCONNECTED = False
+                                    if BROKERCONNECTED == True:      # MQTT Connected ??
+                                        self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
+                                        self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
+                                        self.publish(ALARMCONNECTEDTOPIC, "0", qos=2, retain=False)
                                     break
 
                             elif line[1:5] == "PS00":       # Set Date/Time once a day on receipt of PS command. Usually midnight or any time the system is armed.
