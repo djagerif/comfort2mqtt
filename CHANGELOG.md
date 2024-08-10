@@ -1,11 +1,3 @@
-# Change Log
-All notable changes to this project will be documented in this file.
-
-
-## To Do ##
- - Test Client/Server Authentication certificates
-
-
 ## [1.2.0] - 2024-08-10
 
 ### Added
