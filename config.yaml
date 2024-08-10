@@ -1,6 +1,6 @@
-name: "Comfort to MQTT"
-description: "Cytech Comfort II Ultra to MQTT bridge"
-version: "1.1.1"
+name: "Comfort to MQTT - Dev"
+description: "Cytech Comfort to MQTT bridge"
+version: "1.2.0"
 slug: "comfort2mqtt"
 init: false
 startup: application
@@ -57,8 +57,8 @@ schema:
   comfort_login_id: password
   comfort_cclx_file: str?
   log_verbosity: list(DEBUG|INFO|WARNING|ERROR|CRITICAL)?
-  alarm_inputs: list(8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128)?
-  alarm_outputs: list(0|8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128)?
+  alarm_inputs: list(8|16|24|32|40|48|56|64|72|80|88|96)?
+  alarm_outputs: list(0|8|16|24|32|40|48|56|64|72|80|88|96)?
   alarm_rio_inputs: int(0,120)?
   alarm_rio_outputs: int(0,120)?
   alarm_responses: int(0,1024)?

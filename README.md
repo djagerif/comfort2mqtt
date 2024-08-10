@@ -1,5 +1,5 @@
 # Home Assistant Add-on: Comfort to MQTT
-Cytech Comfort II Ultra Alarm System to MQTT bridge for Home Assistant.
+Cytech Comfort to MQTT bridge for Home Assistant.
 
 ![Supports aarch64 Architecture][aarch64-shield] ![Supports amd64 Architecture][amd64-shield] ![Supports armhf Architecture][armhf-shield] ![Supports armv7 Architecture][armv7-shield] ![Supports i386 Architecture][i386-shield]
 
@@ -10,24 +10,24 @@ Cytech Comfort II Ultra Alarm System to MQTT bridge for Home Assistant.
 [armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
 
-For more information about Cytech Comfort II Ultra alarm systems, please see the [Cytech Technologies Pte Ltd.][cytech] website.
+For more information about Cytech Comfort systems, please see the [Cytech Technology Pte Ltd.][cytech] website.
 
 [koochyrat]: https://github.com/koochyrat/comfort2
 [cytech]: http://www.cytech.biz/index.html
 
 ## About
-This Addon is used to bridge an IP connected Cytech Comfort II Ultra Alarm system to MQTT for use in Home Assistant.
+This Addon is used to bridge an IP connected Cytech Comfort II ULTRA Alarm system to MQTT for use in Home Assistant. Other Comfort systems are partially supported but has not been tested.
 
 ⚠️ This software is neither certified nor endorsed by Cytech Technology Pte Ltd.
 
 This is a customised version of the original comfort2mqtt project by `koochyrat`. More information about the original source project is available [here][koochyrat].
 
-This implementation does minimal MQTT auto-discovery. Some `System` entities are created but all other objects need to be manually configured in Home Assistant.
+This implementation does minimal MQTT auto-discovery. Some `System` entities are created but all other objects need to be manually configured in Home Assistant as required.
 
 The following objects are supported:
 
-* Zone Inputs [1-128]
-* Zone Outputs [1-128]
+* Zone Inputs [1-96]
+* Zone Outputs [1-96]
 * Counters [0-254]
 * Flags [1-254]
 * Sensors [0-31]
@@ -35,8 +35,8 @@ The following objects are supported:
 * RIO Outputs [129-248]
 * Responses [1-1024]
 
-<div style="text-align:center"> <img src="https://github.com/djagerif/comfort2mqtt/assets/5621764/64abe350-6b37-4b79-8fea-12fa5e89353a" alt="Comfort II Ultra Keypad"/> </div>
+<div style="text-align:center"> <img src="https://github.com/djagerif/comfort2mqtt/assets/5621764/64abe350-6b37-4b79-8fea-12fa5e89353a" alt="Comfort II ULTRA Keypad"/> </div>
 
-⚠️ This Add-on was specifically developed for the Comfort II Ultra range of Alarm Systems with File System type `34`. As tested firmware is `7.201`.
+⚠️ This Add-on was specifically developed for the Comfort II ULTRA Alarm System with File System type `34`. As tested firmware is `7.201` on model CM9000-ULT.
 
 Copyright 2024 Ingo de Jager. Licensed under Apache-2.0. For more details see the `LICENCE` file.
