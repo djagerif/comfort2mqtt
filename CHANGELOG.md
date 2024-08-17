@@ -1,3 +1,12 @@
+## [1.3.0] - New RC test release
+
+### Added
+ 
+### Changed
+ 
+### Fixed
+ 
+ 
 ## [1.2.1] - 2024-08-17
 
 ### Added
