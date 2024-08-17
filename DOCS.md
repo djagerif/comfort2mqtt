@@ -36,6 +36,7 @@ comfort2mqtt/alarm/LWT - Online or Offline text status
 comfort2mqtt/alarm/refresh - Trigger a refresh of all objects. Used when a refresh of all object states are required.
 comfort2mqtt/alarm/connected - Status of LAN Connection to Comfort. '1' when logged in.
 comfort2mqtt/alarm/doorbell - '0' for off/answered or '1' for on
+comfort2mqtt/alarm/mode - Integer values for current Alarm Mode. 0 - 4 (Off, Away, Night, Day, Vacation), See Comfort M? or MD documentation. 
 
 comfort2mqtt/input<1 to 96> (Zone Input) have the following JSON attributes EG.
 {
