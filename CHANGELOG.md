@@ -10,6 +10,10 @@ All notable changes to this project will be documented in this file.
 
 ### Added
  - Add Alarm Mode integer values 0 - 4. See MD or M? Comfort documentation.
+    1 = Away Mode
+    2 = Night Mode
+    3 = Day Mode
+    4 = Vacation Mode
  
 ### Changed
  - Update UniqueID for Comfort Filesystem. (Breaking)
