@@ -4,9 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## To Do ##
  - Test Client/Server Authentication certificates
+ - Comfort MQTT attributes go 'missing' over time. Investigate.
+ - Add Alarm State as Auto Discover sensor. Disarmed, Stay, Away, Night etc.
 
 ## [1.3.0] - New Beta Test version
 
+### Added
+ 
+### Changed
+ - Update UniqueID for Comfort Filesystem. (Breaking)
+ 
+### Fixed
+ 
 
 
 ## [1.2.0] - 2024-08-10

@@ -1578,7 +1578,7 @@ class Comfort2(mqtt.Client):
                              "BridgeConnected": str(device_properties['BridgeConnected']),
                              "device": MQTT_DEVICE
                             })
-        self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
+        self.publish(DOMAIN, MQTT_MSG,qos=2,retain=True)
         time.sleep(0.1)
 
         # MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
