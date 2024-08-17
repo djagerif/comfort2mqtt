@@ -1,5 +1,20 @@
-## [1.2.0] - 2024-08-10
+## [1.2.1] - 2024-08-17
 
+### Added
+ - Add Alarm Mode integer values 0 - 4. See MD or M? Comfort documentation.
+    1 = Away Mode
+    2 = Night Mode
+    3 = Day Mode
+    4 = Vacation Mode
+ 
+### Changed
+ - Update UniqueID for Comfort Filesystem. (Breaking)
+ 
+### Fixed
+ - Enable Comfort MQTT main attributes Retain flag.
+
+
+## [1.2.0] - 2024-08-10
 
 ### Added
  - Added reporting for more Comfort models when detected.
