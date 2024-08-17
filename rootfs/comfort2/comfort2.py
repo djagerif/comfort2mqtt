@@ -1875,20 +1875,19 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
         
-        # discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_mode/config"
-        # MQTT_MSG=json.dumps({"name": "Mode",
-        #                      "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-        #                      "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-        #                      "availability_topic": DOMAIN + "/alarm/online",
-        #                      "payload_available": "1",
-        #                      "payload_not_available": "0",
-        #                      "state_topic": DOMAIN,
-        #                      "value_template": "{{ value_json.Mode }}",
-        #                      "icon":"mdi:battery-charging",
-        #                      "device": MQTT_DEVICE
-        #                 })
-        # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        # time.sleep(0.1)
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_mode/config"
+        MQTT_MSG=json.dumps({"name": "Mode",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "availability_topic": DOMAIN + "/alarm/online",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "state_topic": DOMAIN + "/alarm/mode",
+                             "icon":"mdi:home",
+                             "device": MQTT_DEVICE
+                        })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
+        time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_customername/config"
         MQTT_MSG=json.dumps({"name": "Customer Name",
