@@ -59,6 +59,7 @@ ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
 ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"               # List of Bypassed Zones.
 ALARMCONNECTEDTOPIC = DOMAIN+"/alarm/connected"
+ALARMMODETOPIC = DOMAIN+"/alarm/mode"                   # Integer value of current Mode. See M? and MD.
 
 ALARMCOMMANDTOPIC = DOMAIN+"/alarm/set"
 ALARMAVAILABLETOPIC = DOMAIN+"/alarm/online"
@@ -110,7 +111,6 @@ device_properties['SerialNumber'] = "00000000"
 device_properties['BatteryStatus'] = "N/A"
 device_properties['ChargerStatus'] = "N/A"
 device_properties['BridgeConnected'] = 0
-
 
 # Comfort FileSystem values and Model Numbers
 models = {34: "Comfort II ULTRA",
@@ -1578,7 +1578,7 @@ class Comfort2(mqtt.Client):
                              "BridgeConnected": str(device_properties['BridgeConnected']),
                              "device": MQTT_DEVICE
                             })
-        self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
+        self.publish(DOMAIN, MQTT_MSG,qos=2,retain=True)
         time.sleep(0.1)
 
         # MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
@@ -1769,8 +1769,8 @@ class Comfort2(mqtt.Client):
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_filesystem/config"
         MQTT_MSG=json.dumps({"name": "FileSystem",
-                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "unique_id": discoverytopic.split('/')[3],
+                             "object_id": discoverytopic.split('/')[3],
                              "availability_topic": DOMAIN + "/alarm/online",
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1875,6 +1875,20 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
         
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_mode/config"
+        MQTT_MSG=json.dumps({"name": "Mode",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "availability_topic": DOMAIN + "/alarm/online",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "state_topic": DOMAIN + "/alarm/mode",
+                             "icon":"mdi:home",
+                             "device": MQTT_DEVICE
+                        })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
+        time.sleep(0.1)
+
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_customername/config"
         MQTT_MSG=json.dumps({"name": "Customer Name",
                              "unique_id": discoverytopic.split('/')[3],
@@ -2625,7 +2639,8 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "M?" or line[1:3] == "MD":
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
-                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=2,retain=False)      # Was True
+                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=2,retain=True)
+                                self.publish(ALARMMODETOPIC, mMsg.mode,qos=2,retain=True)
                                 self.entryexitdelay = 0                         #zero out the countdown timer
 
                             elif line[1:3] == "S?":

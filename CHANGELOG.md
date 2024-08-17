@@ -1,5 +1,6 @@
 ## [1.2.0] - 2024-08-10
 
+
 ### Added
  - Added reporting for more Comfort models when detected.
  - For Future Comfort Enhancement: Check for new ARM or Toshiba Mainboard CPU. When ARM/Toshiba detected, use D?00xx as keepalives.
