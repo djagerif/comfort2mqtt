@@ -59,6 +59,7 @@ ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
 ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"               # List of Bypassed Zones.
 ALARMCONNECTEDTOPIC = DOMAIN+"/alarm/connected"
+ALARMMODETOPIC = DOMAIN+"/alarm/mode"                   # Integer value of current Mode. See M? and MD.
 
 ALARMCOMMANDTOPIC = DOMAIN+"/alarm/set"
 ALARMAVAILABLETOPIC = DOMAIN+"/alarm/online"
@@ -110,7 +111,6 @@ device_properties['SerialNumber'] = "00000000"
 device_properties['BatteryStatus'] = "N/A"
 device_properties['ChargerStatus'] = "N/A"
 device_properties['BridgeConnected'] = 0
-device_properties['Mode'] = 0
 
 # Comfort FileSystem values and Model Numbers
 models = {34: "Comfort II ULTRA",
@@ -1576,7 +1576,6 @@ class Comfort2(mqtt.Client):
                              "InstalledSlaves": int(device_properties['sem_id']),
                              "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
                              "BridgeConnected": str(device_properties['BridgeConnected']),
-                             "Mode": int(device_properties['Mode']),
                              "device": MQTT_DEVICE
                             })
         self.publish(DOMAIN, MQTT_MSG,qos=2,retain=True)
@@ -2641,8 +2640,8 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "M?" or line[1:3] == "MD":
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
-                                device_properties['Mode'] = mMsg.mode
-                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=2,retain=False)      # Was True
+                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=2,retain=True)
+                                self.publish(ALARMMODETOPIC, mMsg.mode,qos=2,retain=True)
                                 self.entryexitdelay = 0                         #zero out the countdown timer
 
                             elif line[1:3] == "S?":
