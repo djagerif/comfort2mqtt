@@ -1869,7 +1869,7 @@ class Comfort2(mqtt.Client):
                              "qos": "2",
                              "device": MQTT_DEVICE
                             })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
         time.sleep(0.1)
 
     def BatteryStatus(*voltages):  # Tuple of all voltages
