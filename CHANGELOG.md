@@ -3,6 +3,7 @@
 ### Added
  
 ### Changed
+ - Changes Counters, Sencors, Inputs and Outputs to be No-Retain.
  
 ### Fixed
  

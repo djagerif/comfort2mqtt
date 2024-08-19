@@ -854,16 +854,6 @@ class Comfort_U_SystemCPUTypeReport(object):
             elif identifier == 0:
                 self.cputype = "Toshiba"
 
-        #sem_id = int(data[2:4],16)          # 0x21 - 25
-        #sem_type = int(data[4:6],16)        # Type 190
-
-        #if sem_id > 32 and sem_id <= 37 and sem_type == 190:
-        #    self.sem_id = sem_id - 32
-        #elif sem_id > 32 and sem_id <= 37 and sem_type == 255 and int(device_properties['sem_id']) > 0:
-        #    self.sem_id = int(device_properties['sem_id'])
-        #else:
-        #    self.sem_id = 0
-
 
 class Comfort_EL_HardwareModelReport(object):
     def __init__(self, data={}):
@@ -962,7 +952,7 @@ class Comfort_D_SystemVoltageReport(object):
                 index.append(0)
         return state[max(index)]
 
-class ComfortSN_SerialNumberReport(object):     # Possible Comfort SN decode issue. Sometimes Comforts reports 'Illegal' serial number.
+class ComfortSN_SerialNumberReport(object):     # Possible Comfort SN decode issue. Sometimes Comfort reports 'Illegal' serial number.
     def __init__(self, data={}):
 
         #logging.debug("len(data): %s, %s", data, len(data))
@@ -2425,7 +2415,7 @@ class Comfort2(mqtt.Client):
                                                          "Bypass": BypassCache[ipMsg.input] if ipMsg.input <= 128 else None
                                                         })
                                     if ipMsg.input <= int(COMFORT_INPUTS) or ipMsg.input > 128:
-                                        self.publish(ALARMINPUTTOPIC % ipMsg.input, MQTT_MSG,qos=2,retain=True)
+                                        self.publish(ALARMINPUTTOPIC % ipMsg.input, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
                                         time.sleep(0.01)
 
                             elif line[1:3] == "CT" and CacheState:
@@ -2437,7 +2427,7 @@ class Comfort2(mqtt.Client):
                                                      "Value": ipMsgCT.value,
                                                      "State": ipMsgCT.state
                                                     })
-                                self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, MQTT_MSG,qos=2,retain=True)
+                                self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
                                 time.sleep(0.01)
 
                             elif line[1:3] == "s?":
@@ -2452,7 +2442,7 @@ class Comfort2(mqtt.Client):
                                                      "Name": _name,
                                                      "Value": ipMsgSR.value
                                                     })
-                                self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=True)
+                                self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
 
                             elif line[1:3] == "Z?":                             # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
@@ -2683,7 +2673,7 @@ class Comfort2(mqtt.Client):
                                                          "State": ipMsg.state
                                                         })
                                     if ipMsg.output <= int(COMFORT_OUTPUTS) or ipMsg.output > 128:
-                                        self.publish(ALARMOUTPUTTOPIC % ipMsg.output, MQTT_MSG,qos=2,retain=True)
+                                        self.publish(ALARMOUTPUTTOPIC % ipMsg.output, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
                                         time.sleep(0.01)
 
                             elif line[1:3] == "Y?":     # Comfort Outputs
@@ -2849,7 +2839,7 @@ class Comfort2(mqtt.Client):
                                                      "Bypass": BypassCache[byMsg.zone] if byMsg.zone <= int(COMFORT_INPUTS) else None
                                                     })
                                 if byMsg.zone <= int(COMFORT_INPUTS):
-                                    self.publish(ALARMINPUTTOPIC % byMsg.zone, MQTT_MSG,qos=2,retain=True)
+                                    self.publish(ALARMINPUTTOPIC % byMsg.zone, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
                                     time.sleep(0.01)    # 10mS delay between commands
 
                                     self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=2,retain=True)  # Add Zone to list of zones.
