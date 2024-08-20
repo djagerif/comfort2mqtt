@@ -1,16 +1,3 @@
-## [1.3.0] - New RC test release
-
-### Todo ###
-
-### Added
- 
-### Changed
- - Changed Counters, Sensors, Inputs and Outputs to be No-Retain. HA will request update once connected.
- - Limit O! values to [0 - 4] only.
-
-### Fixed
- 
- 
 ## [1.2.1] - 2024-08-17
 
 ### Added
