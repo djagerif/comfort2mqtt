@@ -318,9 +318,13 @@ logging.basicConfig(
 )
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
+ALPINE_VERSION = os.getenv('ALPINE_VERSION')
+logger.info("Alpine Version: %s", ALPINE_VERSION)
 
 supervisor_url = 'http://supervisor'
 addon_info_url = f'{supervisor_url}/addons/self/info'
+
+logger.info("Failed to connect to Home Assistant Supervisor")
 
 headers = {
     'Authorization': f'Bearer {TOKEN}',
