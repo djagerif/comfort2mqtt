@@ -107,7 +107,7 @@ comfort2mqtt/alarm/battery_update - sent from Home Assistant, <id> triggers a ba
 comfort2mqtt/input<1 to 96>/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input
 comfort2mqtt/input<129 to 248>/set
 
-comfort2mqtt/output<1 to 96>/set - 1 for on, 0 for off. activates the output
+comfort2mqtt/output<1 to 96>/set - 0=off, 1=on, 2=change state , 3 = Pulse Output for 1 second, 4 - Flash Output at 1 sec On/Off rate
 comfort2mqtt/output<129 to 248>/set
 
 comfort2mqtt/response<1 to 1024>/set - value is ignored. Comfort response is activated as programmed in Comfigurator
