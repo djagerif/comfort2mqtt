@@ -1187,8 +1187,9 @@ class Comfort2(mqtt.Client):
                 logger.debug("Invalid 'output%s/set' value '%s'. Only Integers allowed.", output, msgstr)
                 return
             if self.connected:
-                self.comfortsock.sendall(("\x03O!%02X%02X\r" % (output, state)).encode())
-                SAVEDTIME = datetime.now()
+                if state >= 0 and state < 5:
+                    self.comfortsock.sendall(("\x03O!%02X%02X\r" % (output, state)).encode())
+                    SAVEDTIME = datetime.now()
         elif msg.topic.startswith(DOMAIN+"/response") and msg.topic.endswith("/set"):
             response = int(msg.topic.split("/")[1][8:])
             if self.connected:

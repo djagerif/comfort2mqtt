@@ -1,10 +1,13 @@
 ## [1.3.0] - New RC test release
 
+
+
 ### Added
  
 ### Changed
- - Changes Counters, Sencors, Inputs and Outputs to be No-Retain.
- 
+ - Changed Counters, Sensors, Inputs and Outputs to be No-Retain. HA will request update once connected.
+ - Limit O! values to [0 - 4].
+
 ### Fixed
  
  
