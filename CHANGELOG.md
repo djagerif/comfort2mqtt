@@ -3,6 +3,7 @@
 ### Todo ###
 
 ### Added
+ - Added Alpine Linux release check. Requires outbound Internet access to Docker Hub.
  
 ### Changed
 

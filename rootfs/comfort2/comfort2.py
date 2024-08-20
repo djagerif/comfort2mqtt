@@ -408,7 +408,7 @@ if latest_versions:
     latest_version = sorted_semantic_versions[0] if sorted_semantic_versions else None
     
     if latest_version:
-        logger.info("Latest Alpine Linux available version: %s", latest_version)
+        #logger.info("Latest Alpine Linux available version: %s", latest_version)
         if ALPINE_VERSION == latest_version:
             logger.info("You're using the latest Alpine Linux release.")
         else:
