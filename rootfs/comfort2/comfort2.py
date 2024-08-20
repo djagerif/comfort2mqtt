@@ -342,14 +342,6 @@ else:
     else:
         logger.error("Failed to get Addon Info: Error Code %s, %s", response.status_code, response.reason)
 
-#
-#uri = "ws://supervisor/core/websocket"
-#
-#auth_message = json.dumps({
-#    "type": "auth",
-#    "access_token": TOKEN
-#})
-
 logger.info('Importing the add-on configuration options')
 
 MQTT_USER=option.broker_username
@@ -380,53 +372,53 @@ def get_ip_address(input_value):
     else:
         return resolve_to_ip(input_value)
 
-### Check Alipne Version ###
-def get_latest_alpine_versions():
-    response = requests.get('https://registry.hub.docker.com/v2/repositories/library/alpine/tags/')
-    if response.status_code == 200:
-        return [tag['name'] for tag in response.json()['results']]
-    else:
-        return []
+# ### Check Alpine Version ###
+# def get_latest_alpine_versions():
+#     response = requests.get('https://registry.hub.docker.com/v2/repositories/library/alpine/tags/')
+#     if response.status_code == 200:
+#         return [tag['name'] for tag in response.json()['results']]
+#     else:
+#         return []
 
-def parse_version(version):
-    # Extracts the version number parts for sorting (e.g., 3.14.0 -> (3, 14, 0))
-    return tuple(map(int, version.split('.')))
+# def parse_version(version):
+#     # Extracts the version number parts for sorting (e.g., 3.14.0 -> (3, 14, 0))
+#     return tuple(map(int, version.split('.')))
 
-def is_date_version(version):
-    # Check if the version is a date-based version (e.g., "20240807")
-    return re.match(r'^\d{8}$', version)
+# def is_date_version(version):
+#     # Check if the version is a date-based version (e.g., "20240807")
+#     return re.match(r'^\d{8}$', version)
 
-# Get the current Alpine Linux version
-current_version = ALPINE_VERSION
+# # Get the current Alpine Linux version
+# current_version = ALPINE_VERSION
 
-#if current_version:
-#    logger.info("Current Alpine Linux version: %s", ALPINE_VERSION)
-#else:
-#    logger.warning("Could not determine the current Alpine Linux version.")
+# #if current_version:
+# #    logger.info("Current Alpine Linux version: %s", ALPINE_VERSION)
+# #else:
+# #    logger.warning("Could not determine the current Alpine Linux version.")
 
-# Get the list of available versions
-latest_versions = get_latest_alpine_versions()
+# # Get the list of available versions
+# latest_versions = get_latest_alpine_versions()
 
-if latest_versions:
-    # Ignore date-based versions
-    semantic_versions = [v for v in latest_versions if not is_date_version(v) and re.match(r'^\d+(\.\d+)*$', v)]
+# if latest_versions:
+#     # Ignore date-based versions
+#     semantic_versions = [v for v in latest_versions if not is_date_version(v) and re.match(r'^\d+(\.\d+)*$', v)]
 
-    # Sort semantic versions numerically
-    sorted_semantic_versions = sorted(semantic_versions, key=parse_version, reverse=True)
+#     # Sort semantic versions numerically
+#     sorted_semantic_versions = sorted(semantic_versions, key=parse_version, reverse=True)
     
-    # Get the latest version
-    latest_version = sorted_semantic_versions[0] if sorted_semantic_versions else None
+#     # Get the latest version
+#     latest_version = sorted_semantic_versions[0] if sorted_semantic_versions else None
     
-    if latest_version:
-        logger.info("Latest available version: %s", latest_version)
-        if ALPINE_VERSION == latest_version:
-            logger.info("You're using the latest release.")
-        else:
-            logger.info("A new release is available: %s", latest_version)
-    else:
-        logger.info("Could not determine the latest version.")
-else:
-    logger.info("Could not retrieve the latest versions from Docker Hub.")
+#     if latest_version:
+#         logger.info("Latest available version: %s", latest_version)
+#         if ALPINE_VERSION == latest_version:
+#             logger.info("You're using the latest release.")
+#         else:
+#             logger.info("A new release is available: %s", latest_version)
+#     else:
+#         logger.info("Could not determine the latest version.")
+# else:
+#     logger.info("Could not retrieve the latest versions from Docker Hub.")
 
 
 
