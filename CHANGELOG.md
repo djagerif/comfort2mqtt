@@ -6,7 +6,7 @@
  
 ### Changed
  - Changed Counters, Sensors, Inputs and Outputs to be No-Retain. HA will request update once connected.
- - Limit O! values to [0 - 4].
+ - Limit O! values to [0 - 4] only.
 
 ### Fixed
  
