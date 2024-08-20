@@ -19,7 +19,7 @@ The installation of this add-on is pretty straightforward and no different in co
 
 Even though this is a mostly Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Alpine Linux with other platforms remaining untested and it's unclear if it will work or not.
 
-⚠️ This Add-on requires initial configuration to connect with Home Assistant and your Comfort system e.g. Comfort II ULTRA Alarm system.
+⚠️ This Add-on requires initial configuration to connect with Home Assistant and your Comfort systems.
 
 
 ## MQTT
@@ -31,10 +31,10 @@ comfort2mqtt/alarm/online - '1' for online, '0' for offline
 comfort2mqtt/alarm/message - Informational messages, e.g. the zone that triggered an alarm
 comfort2mqtt/alarm/timer - countdown entry/exit timer in seconds when arming to away mode or entering. updates every second.
 comfort2mqtt/alarm/status - Status of the alarm (Idle, Trouble, Alert, Alarm)
-comfort2mqtt/alarm/bypass - List of Bypassed zones. EG. 1,3,5,7,9. '0' indicates no zones bypassed
+comfort2mqtt/alarm/bypass - List of Bypassed zones. EG. 1,3,5,7,9. '0' indicates no bypassed zones.
 comfort2mqtt/alarm/LWT - Online or Offline text status
 comfort2mqtt/alarm/refresh - Trigger a refresh of all objects. Used when a refresh of all object states are required.
-comfort2mqtt/alarm/connected - Status of LAN Connection to Comfort. '1' when logged in.
+comfort2mqtt/alarm/connected - Status of LAN Connection to Comfort. '1' when connected and logged in.
 comfort2mqtt/alarm/doorbell - '0' for off/answered or '1' for on
 comfort2mqtt/alarm/mode - Integer values for current Alarm Mode. 0 - 4 (Off, Away, Night, Day, Vacation), See Comfort M? or MD documentation. 
 
@@ -107,7 +107,7 @@ comfort2mqtt/alarm/battery_update - sent from Home Assistant, <id> triggers a ba
 comfort2mqtt/input<1 to 96>/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input
 comfort2mqtt/input<129 to 248>/set
 
-comfort2mqtt/output<1 to 96>/set - 1 for on, 0 for off. activates the output
+comfort2mqtt/output<1 to 96>/set - 0=off, 1=on, 2=change state , 3 = Pulse Output for 1 second, 4 - Flash Output at 1 sec On/Off rate
 comfort2mqtt/output<129 to 248>/set
 
 comfort2mqtt/response<1 to 1024>/set - value is ignored. Comfort response is activated as programmed in Comfigurator

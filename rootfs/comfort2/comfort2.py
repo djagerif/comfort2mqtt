@@ -854,16 +854,6 @@ class Comfort_U_SystemCPUTypeReport(object):
             elif identifier == 0:
                 self.cputype = "Toshiba"
 
-        #sem_id = int(data[2:4],16)          # 0x21 - 25
-        #sem_type = int(data[4:6],16)        # Type 190
-
-        #if sem_id > 32 and sem_id <= 37 and sem_type == 190:
-        #    self.sem_id = sem_id - 32
-        #elif sem_id > 32 and sem_id <= 37 and sem_type == 255 and int(device_properties['sem_id']) > 0:
-        #    self.sem_id = int(device_properties['sem_id'])
-        #else:
-        #    self.sem_id = 0
-
 
 class Comfort_EL_HardwareModelReport(object):
     def __init__(self, data={}):
@@ -962,7 +952,7 @@ class Comfort_D_SystemVoltageReport(object):
                 index.append(0)
         return state[max(index)]
 
-class ComfortSN_SerialNumberReport(object):     # Possible Comfort SN decode issue. Sometimes Comforts reports 'Illegal' serial number.
+class ComfortSN_SerialNumberReport(object):     # Possible Comfort SN decode issue. Sometimes Comfort reports 'Illegal' serial number.
     def __init__(self, data={}):
 
         #logging.debug("len(data): %s, %s", data, len(data))
@@ -1197,8 +1187,9 @@ class Comfort2(mqtt.Client):
                 logger.debug("Invalid 'output%s/set' value '%s'. Only Integers allowed.", output, msgstr)
                 return
             if self.connected:
-                self.comfortsock.sendall(("\x03O!%02X%02X\r" % (output, state)).encode())
-                SAVEDTIME = datetime.now()
+                if state >= 0 and state < 5:
+                    self.comfortsock.sendall(("\x03O!%02X%02X\r" % (output, state)).encode())
+                    SAVEDTIME = datetime.now()
         elif msg.topic.startswith(DOMAIN+"/response") and msg.topic.endswith("/set"):
             response = int(msg.topic.split("/")[1][8:])
             if self.connected:
@@ -1581,85 +1572,6 @@ class Comfort2(mqtt.Client):
         self.publish(DOMAIN, MQTT_MSG,qos=2,retain=True)
         time.sleep(0.1)
 
-        # MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
-        #                 "identifiers":["comfort2mqtt"],
-        #                 "manufacturer":"Cytech Technology Pte Ltd.",
-        #                 "sw_version":str(device_properties['Version']),
-        #                 "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
-        #                 "via_device": "comfort2mqtt"
-        #             }
-
-
-        # MQTT_MSG=json.dumps({"name": "Bridge Status",
-        #                      "state_topic": "comfort2/alarm/LWT",
-        #                      "unique_id": "comfort2mqtt",
-        #                      "device" : MQTT_DEVICE
-        #                     })
-        # self.publish("homeassistant/device/comfort2mqtt/config", MQTT_MSG, qos=2, retain=False)
-        # time.sleep(0.1)
-
-#                             "CustomerName": device_properties['CustomerName'] if file_exists else None,
-#                             "Reference": device_properties['Reference'] if file_exists else None,
-
-#                             "name": "Comfort - 'House de Jager'",
-
-        #if "Reference" in device_properties and device_properties['Reference'] is not None:
-        #    _name = "Comfort - " + str(device_properties['Reference']) if len(device_properties['Reference']) > 0 else "Comfort <Default>"
-        #else:
-        #    _name = "Comfort <Default>"
-        
-        # model = models[int(device_properties['ComfortFileSystem'])] + " (" + device_properties['ComfortHardwareModel'] + ")" if int(device_properties['ComfortFileSystem']) in models else "Unknown"
-        # "name": _name, - 1
-        # "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
-        # MQTT_DEVICE = { "name": device_properties['Reference'] if file_exists else "Comfort <Default>",
-        #                 "identifiers":["comfort2mqtt"],
-        #                 "manufacturer":"Cytech Technology Pte Ltd.",
-        #                 "sw_version":str(device_properties['Version']),
-        #                 "hw_version":str(device_properties['ComfortHardwareModel']),
-        #                 "serial_number": device_properties['SerialNumber'],
-        #                 "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
-        #             }
-#                         "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
-#                        "via_device": "comfort2mqtt"
-#                         "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
-
-
-#            "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
-        # discoverytopic = "homeassistant/sensor/comfort2mqtt/device/config"
-        # MQTT_MSG=json.dumps({"name": "System",
-        #                      "unique_id": "comfort_device_properties",
-        #                      "availability_topic": "comfort2/alarm/online",
-        #                      "payload_available": "1",
-        #                      "payload_not_available": "0",
-        #                      "state_topic": "comfort2/alarm/LWT",
-        #                      "json_attributes_topic": "comfort2",
-        #                      "json_attributes_template": '''
-        #                         {% set data = value_json %}
-        #                         {% set ns = namespace(dict_items='') %}
-        #                         {% for key, value in data.items() %}
-        #                             {% if not 'Main' in key and not 'Slave' in key %}
-        #                                 {% if ns.dict_items %}
-        #                                     {% set ns.dict_items = ns.dict_items + ', "' ~ key ~ '":"' ~ value ~ '"' %}
-        #                                 {% else %}
-        #                                     {% set ns.dict_items = '"' ~ key ~ '":"' ~ value ~ '"' %}
-        #                                 {% endif %}
-        #                             {% endif %}
-        #                         {% endfor %}
-        #                         {% set dict_str = '{' ~ ns.dict_items ~ '}' %}
-        #                         {% set result = dict_str | from_json %}
-        #                         {{ result | tojson }}
-        #                         ''',
-        #                      "entity_category": "diagnostic",
-        #                      "icon":"mdi:alarm-panel-outline",
-        #                      "qos": "2",
-        #                      "device": MQTT_DEVICE
-        #                 })
-        #                     #"json_attributes_template": "{{ value_json | tojson }}",
-
-        # self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-        # time.sleep(0.1)
-
-
         discoverytopic = "homeassistant/binary_sensor/" + DOMAIN + "/status/config"
         MQTT_MSG=json.dumps({"name": "Bridge MQTT Status",
                              "unique_id": DOMAIN+"_status",
@@ -1958,55 +1870,8 @@ class Comfort2(mqtt.Client):
                              "qos": "2",
                              "device": MQTT_DEVICE
                             })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
         time.sleep(0.1)
-
-  
-#                       "url": "https://www.cytech.biz",
-#                       "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
-#                       "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
-#                       "icon": "mdi:alarm-panel-outline",
-#                       "serial_number": device_properties['SerialNumber'],
-
-        # MQTT_DEVICE = { "name": "Comfort to MQTT Bridge",
-        #                 "identifiers":["comfort2mqtt"],
-        #                 "manufacturer":"Cytech Technology Pte Ltd.",
-        #                 "sw_version":str(device_properties['Version']),
-        #                 "serial_number": device_properties['SerialNumber'],
-        #                 "model": "Comfort II Ultra" if device_properties['ComfortFileSystem'] == '34' else "Unknown",
-        #                 "via_device": "comfort2mqtt"
-        #             }
-
-        # MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
-        #                      "url": "https://www.cytech.biz",
-        #                      "Reference": device_properties['Reference'] if file_exists else None,
-        #                      "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
-        #                      "ComfortFirmwareType": device_properties['ComfortFirmwareType'] if file_exists else None,
-        #                      "sw_version":str(device_properties['Version']),
-        #                      "hw_version":str(device_properties['ComfortHardwareModel']),
-        #                      "serial_number": device_properties['SerialNumber'],
-        #                      "cpu_type": str(device_properties['CPUType']),
-        #                      "BatteryStatus": "",
-        #                      "ChargerStatus": "",
-        #                      "BatteryMain": str(device_properties['BatteryVoltageMain']),
-        #                      "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
-        #                      "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
-        #                      "BatterySlave3": str(device_properties['BatteryVoltageSlave3']),
-        #                      "BatterySlave4": str(device_properties['BatteryVoltageSlave4']),
-        #                      "BatterySlave5": str(device_properties['BatteryVoltageSlave5']),
-        #                      "ChargerMain": str(device_properties['ChargeVoltageMain']),
-        #                      "ChargerSlave1": str(device_properties['ChargeVoltageSlave1']),
-        #                      "ChargerSlave2": str(device_properties['ChargeVoltageSlave2']),
-        #                      "ChargerSlave3": str(device_properties['ChargeVoltageSlave3']),
-        #                      "ChargerSlave4": str(device_properties['ChargeVoltageSlave4']),
-        #                      "ChargerSlave5": str(device_properties['ChargeVoltageSlave5']),
-        #                      "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
-        #                      "device" : MQTT_DEVICE
-        #                     })
-        # #                     "device" : MQTT_DEVICE
-
-        # self.publish(DOMAIN, MQTT_MSG,qos=2,retain=False)
-        # time.sleep(0.1)
 
     def BatteryStatus(*voltages):  # Tuple of all voltages
         for voltage in voltages:
@@ -2551,7 +2416,7 @@ class Comfort2(mqtt.Client):
                                                          "Bypass": BypassCache[ipMsg.input] if ipMsg.input <= 128 else None
                                                         })
                                     if ipMsg.input <= int(COMFORT_INPUTS) or ipMsg.input > 128:
-                                        self.publish(ALARMINPUTTOPIC % ipMsg.input, MQTT_MSG,qos=2,retain=True)
+                                        self.publish(ALARMINPUTTOPIC % ipMsg.input, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
                                         time.sleep(0.01)
 
                             elif line[1:3] == "CT" and CacheState:
@@ -2563,7 +2428,7 @@ class Comfort2(mqtt.Client):
                                                      "Value": ipMsgCT.value,
                                                      "State": ipMsgCT.state
                                                     })
-                                self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, MQTT_MSG,qos=2,retain=True)
+                                self.publish(ALARMCOUNTERINPUTRANGE % ipMsgCT.counter, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
                                 time.sleep(0.01)
 
                             elif line[1:3] == "s?":
@@ -2578,7 +2443,7 @@ class Comfort2(mqtt.Client):
                                                      "Name": _name,
                                                      "Value": ipMsgSR.value
                                                     })
-                                self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=True)
+                                self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
 
                             elif line[1:3] == "Z?":                             # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
@@ -2809,7 +2674,7 @@ class Comfort2(mqtt.Client):
                                                          "State": ipMsg.state
                                                         })
                                     if ipMsg.output <= int(COMFORT_OUTPUTS) or ipMsg.output > 128:
-                                        self.publish(ALARMOUTPUTTOPIC % ipMsg.output, MQTT_MSG,qos=2,retain=True)
+                                        self.publish(ALARMOUTPUTTOPIC % ipMsg.output, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
                                         time.sleep(0.01)
 
                             elif line[1:3] == "Y?":     # Comfort Outputs
@@ -2975,7 +2840,7 @@ class Comfort2(mqtt.Client):
                                                      "Bypass": BypassCache[byMsg.zone] if byMsg.zone <= int(COMFORT_INPUTS) else None
                                                     })
                                 if byMsg.zone <= int(COMFORT_INPUTS):
-                                    self.publish(ALARMINPUTTOPIC % byMsg.zone, MQTT_MSG,qos=2,retain=True)
+                                    self.publish(ALARMINPUTTOPIC % byMsg.zone, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
                                     time.sleep(0.01)    # 10mS delay between commands
 
                                     self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=2,retain=True)  # Add Zone to list of zones.
