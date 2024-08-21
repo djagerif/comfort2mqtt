@@ -372,11 +372,15 @@ def get_ip_address(input_value):
 
 ### Check Alpine Version ###
 def get_latest_alpine_versions():
-    response = requests.get('https://registry.hub.docker.com/v2/repositories/library/alpine/tags/')
-    if response.status_code == 200:
-        return [tag['name'] for tag in response.json()['results']]
+    try:
+        response = requests.get('https://registry.hub.docker.com/v2/repositories/library/alpine/tags/')
+    except:
+        logger.error("Failed to connect to Docker Hub")
     else:
-        return []
+        if response.status_code == 200:
+            return [tag['name'] for tag in response.json()['results']]
+        else:
+            return []
 
 def parse_version(version):
     # Extracts the version number parts for sorting (e.g., 3.14.0 -> (3, 14, 0))
@@ -388,11 +392,6 @@ def is_date_version(version):
 
 # Get the current Alpine Linux version
 current_version = ALPINE_VERSION
-
-#if current_version:
-#    logger.info("Current Alpine Linux version: %s", ALPINE_VERSION)
-#else:
-#    logger.warning("Could not determine the current Alpine Linux version.")
 
 # Get the list of available versions
 latest_versions = get_latest_alpine_versions()
@@ -408,15 +407,14 @@ if latest_versions:
     latest_version = sorted_semantic_versions[0] if sorted_semantic_versions else None
     
     if latest_version:
-        #logger.info("Latest Alpine Linux available version: %s", latest_version)
         if ALPINE_VERSION == latest_version:
             logger.info("You're using the latest Alpine Linux release.")
         else:
             logger.info("A new release of Alpine Linux is available: %s. Please 'Rebuild' Comfort2MQTT Addon to activate new release.", latest_version)
     else:
-        logger.warning("Could not determine the latest Alpine Linux version.")
+        logger.warning("Could not determine the latest Alpine Linux version.")              # Add Internet checkbox
 else:
-    logger.warning("Could not retrieve the latest Alpine Linux versions from Docker Hub.")
+    logger.warning("Could not retrieve the latest Alpine Linux versions from Docker Hub.")  # Add Internet checkbox
 
 
 # Check to see if it's a Hostname.domain or IPv4 address. Resolve Hostname to IP.
@@ -1568,6 +1566,7 @@ class Comfort2(mqtt.Client):
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
+                            "hw_version": ALPINE_VERSION,
                             "model": "Comfort MQTT Bridge"
                         }
         else:
@@ -1575,6 +1574,7 @@ class Comfort2(mqtt.Client):
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
+                            "hw_version": ALPINE_VERSION,
                             "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
                             "model": "Comfort MQTT Bridge"
                         }

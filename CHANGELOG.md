@@ -1,6 +1,9 @@
 ## [1.3.0] - Busy...
 
 ### Todo ###
+ - Add Alpine Linux to Comfort attributes
+ - Add "Allow Docker Check' as configurable option. Used for Internet access to Docker Hub.
+ - Add hardware the Alpine Docker release EG 3.14.2 for Bridge
 
 ### Added
  - Added Alpine Linux release check. Requires outbound Internet access to Docker Hub.
