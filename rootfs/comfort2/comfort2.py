@@ -1566,7 +1566,7 @@ class Comfort2(mqtt.Client):
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
-                            "hw_version": ALPINE_VERSION,
+                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
                             "model": "Comfort MQTT Bridge"
                         }
         else:
@@ -1574,7 +1574,7 @@ class Comfort2(mqtt.Client):
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
-                            "hw_version": "Alpine " + ALPINE_VERSION,
+                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
                             "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
                             "model": "Comfort MQTT Bridge"
                         }
@@ -1635,11 +1635,6 @@ class Comfort2(mqtt.Client):
                 "payload_available": "1",
                 "payload_not_available": "0",
                 "value_template": "{{ value_json.BridgeConnected }}"
-            },
-            {
-                "topic": DOMAIN+"/alarm/online",
-                "payload_available": "1",
-                "payload_not_available": "0"
             }
             ]
         discoverytopic = "homeassistant/button/comfort2mqtt/refresh/config"
@@ -1976,6 +1971,7 @@ class Comfort2(mqtt.Client):
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
+                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
                             "model": "Comfort MQTT Bridge"
                         }
             else:
@@ -1983,6 +1979,7 @@ class Comfort2(mqtt.Client):
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
+                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
                             "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
                             "model": "Comfort MQTT Bridge"
                         }
