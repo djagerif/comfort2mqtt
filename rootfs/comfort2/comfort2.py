@@ -318,7 +318,7 @@ logging.basicConfig(
 )
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
-ALPINE_VERSION = os.getenv('ALPINE_VERSION')
+ALPINE_VERSION = "N/A" if os.getenv('ALPINE_VERSION') == None else os.getenv('ALPINE_VERSION')
 
 supervisor_url = 'http://supervisor'
 addon_info_url = f'{supervisor_url}/addons/self/info'
@@ -370,59 +370,9 @@ def get_ip_address(input_value):
     else:
         return resolve_to_ip(input_value)
 
-### Check Alpine Version ###
-def get_latest_alpine_versions():
-    try:
-        response = requests.get('https://registry.hub.docker.com/v2/repositories/library/alpine/tags/')
-    except:
-        logger.error("Failed to connect to Docker Hub")
-    else:
-        if response.status_code == 200:
-            return [tag['name'] for tag in response.json()['results']]
-        else:
-            return []
-
-def parse_version(version):
-    # Extracts the version number parts for sorting (e.g., 3.14.0 -> (3, 14, 0))
-    return tuple(map(int, version.split('.')))
-
-def is_date_version(version):
-    # Check if the version is a date-based version (e.g., "20240807")
-    return re.match(r'^\d{8}$', version)
-
-# Get the current Alpine Linux version
-current_version = ALPINE_VERSION
-
-# Get the list of available versions
-latest_versions = get_latest_alpine_versions()
-
-if latest_versions:
-    # Ignore date-based versions
-    semantic_versions = [v for v in latest_versions if not is_date_version(v) and re.match(r'^\d+(\.\d+)*$', v)]
-
-    # Sort semantic versions numerically
-    sorted_semantic_versions = sorted(semantic_versions, key=parse_version, reverse=True)
-    
-    # Get the latest version
-    latest_version = sorted_semantic_versions[0] if sorted_semantic_versions else None
-    
-    if latest_version:
-        if ALPINE_VERSION == latest_version:
-            logger.info("You're using the latest Alpine Linux release.")
-        else:
-            logger.info("A new release of Alpine Linux is available: %s. Please 'Rebuild' Comfort2MQTT Addon to activate new release.", latest_version)
-    else:
-        logger.warning("Could not determine the latest Alpine Linux version.")              # Add Internet checkbox
-else:
-    logger.warning("Could not retrieve the latest Alpine Linux versions from Docker Hub.")  # Add Internet checkbox
-
-
 # Check to see if it's a Hostname.domain or IPv4 address. Resolve Hostname to IP.
 COMFORT_ADDRESS=get_ip_address(option.comfort_address)
 MQTT_SERVER=get_ip_address(option.broker_address)
-
-#COMFORT_ADDRESS=option.comfort_address
-#MQTT_SERVER=option.broker_address
 
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id
@@ -1538,6 +1488,7 @@ class Comfort2(mqtt.Client):
         global models
         global COMFORTCONNECTED
         global ADDON_VERSION
+        global ALPINE_VERSION
         global ADDON_SLUG
         global file_exists
 
@@ -1636,13 +1587,26 @@ class Comfort2(mqtt.Client):
 #                 "payload_not_available": "0"
 #             }
 
+
+            # {
+            #     "topic": DOMAIN,
+            #     "payload_available": "1",
+            #     "payload_not_available": "0",
+            #     "value_template": "{{ value_json.BridgeConnected }}"
+            # }
+        
         availability =  [
-            {
-                "topic": DOMAIN,
-                "payload_available": "1",
-                "payload_not_available": "0",
-                "value_template": "{{ value_json.BridgeConnected }}"
-            }
+             {
+                 "topic": DOMAIN+"/alarm/online",
+                 "payload_available": "1",
+                 "payload_not_available": "0"
+             },
+             {
+                 "topic": DOMAIN,
+                 "payload_available": "1",
+                 "payload_not_available": "0",
+                 "value_template": "{{ value_json.BridgeConnected }}"
+             }
             ]
         discoverytopic = "homeassistant/button/comfort2mqtt/refresh/config"
         MQTT_MSG=json.dumps({"name": "Refresh",
@@ -1650,7 +1614,6 @@ class Comfort2(mqtt.Client):
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability": availability,
                              "availability_mode": "all",
-                             "state_topic": DOMAIN + "/alarm/status",
                              "command_topic": DOMAIN + "/alarm/refresh",
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1659,7 +1622,7 @@ class Comfort2(mqtt.Client):
                              "qos": "2",
                              "device": MQTT_DEVICE
                             })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
         
         discoverytopic = "homeassistant/button/comfort2mqtt/battery_update/config"
