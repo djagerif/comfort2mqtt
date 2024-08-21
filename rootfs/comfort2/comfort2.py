@@ -1629,6 +1629,13 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
         time.sleep(0.1)
 
+# ,
+#             {
+#                 "topic": DOMAIN+"/alarm/online",
+#                 "payload_available": "1",
+#                 "payload_not_available": "0"
+#             }
+
         availability =  [
             {
                 "topic": DOMAIN,
@@ -1643,6 +1650,7 @@ class Comfort2(mqtt.Client):
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability": availability,
                              "availability_mode": "all",
+                             "state_topic": DOMAIN + "/alarm/status",
                              "command_topic": DOMAIN + "/alarm/refresh",
                              "payload_available": "1",
                              "payload_not_available": "0",
