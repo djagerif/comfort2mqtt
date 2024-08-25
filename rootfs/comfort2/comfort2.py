@@ -1582,7 +1582,7 @@ class Comfort2(mqtt.Client):
 
         availability =  [
              {
-                 "topic": DOMAIN+"/alarm/online",
+                 "topic": ALARMAVAILABLETOPIC,
                  "payload_available": "1",
                  "payload_not_available": "0"
              },
@@ -1599,7 +1599,7 @@ class Comfort2(mqtt.Client):
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability": availability,
                              "availability_mode": "all",
-                             "command_topic": DOMAIN + "/alarm/refresh",
+                             "command_topic": REFRESHTOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "payload_press": COMFORT_KEY,
@@ -1616,7 +1616,7 @@ class Comfort2(mqtt.Client):
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability": availability,
                              "availability_mode": "all",
-                             "command_topic": DOMAIN + "/alarm/battery_update",
+                             "command_topic": BATTERYREFRESHTOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "payload_press": "1",
@@ -1642,8 +1642,8 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "State",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "state_topic": DOMAIN + "/alarm/status",
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "state_topic": ALARMSTATUSTOPIC,
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "icon":"mdi:shield-alert",
@@ -1651,14 +1651,14 @@ class Comfort2(mqtt.Client):
                              "native_value": "string",
                              "device": MQTT_DEVICE
                             })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
         time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_firmware/config"
         MQTT_MSG=json.dumps({"name": "Firmware",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -1676,7 +1676,7 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "FileSystem",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -1696,7 +1696,7 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "Battery Status",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -1732,7 +1732,7 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "Charger Status",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -1768,8 +1768,8 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "Bypassed Zones",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "state_topic": DOMAIN + "/alarm/bypass",
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "state_topic": ALARMBYPASSTOPIC,
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "icon":"mdi:shield-remove",
@@ -1779,15 +1779,16 @@ class Comfort2(mqtt.Client):
                             })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
-        
+
+        #Mode_Description = {0:"Disarmed", 1:"Away Mode", 2:"Night Mode", 3:"Day Mode", 4:"Vacation Mode"}
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_mode/config"
         MQTT_MSG=json.dumps({"name": "Mode",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
-                             "state_topic": DOMAIN + "/alarm/mode",
+                             "state_topic": ALARMMODETOPIC,
                              "icon":"mdi:home",
                              "device": MQTT_DEVICE
                         })
@@ -1798,7 +1799,7 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "Customer Name",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -1816,7 +1817,7 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "Reference",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -1834,7 +1835,7 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "Serial Number",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -2499,13 +2500,13 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "M?" or line[1:3] == "MD":
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
-                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=2,retain=True)
+                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=2,retain=True)      #Disarmed, Day etc
                                 self.publish(ALARMMODETOPIC, mMsg.mode,qos=2,retain=True)
                                 self.entryexitdelay = 0                         #zero out the countdown timer
 
                             elif line[1:3] == "S?":
                                 SMsg = ComfortS_SecurityModeReport(line[1:])
-                                self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=2,retain=True)
+                                self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=2,retain=True)     # Idle, Alert etc.
 
                             elif line[1:3] == "V?":
                                 VMsg = ComfortV_SystemTypeReport(line[1:])
