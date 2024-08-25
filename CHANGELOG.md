@@ -7,6 +7,7 @@
  - Added Homeassistant Alpine Linux Docker release version to Bridge attributes.
  
 ### Changed
+ - MQTT Bridge Status unique ID, Object ID and Name change to be more descriptive.
 
 ### Fixed
 

@@ -1565,10 +1565,10 @@ class Comfort2(mqtt.Client):
         self.publish(DOMAIN, MQTT_MSG,qos=2,retain=True)
         time.sleep(0.1)
 
-        discoverytopic = "homeassistant/binary_sensor/" + DOMAIN + "/status/config"
+        discoverytopic = "homeassistant/binary_sensor/" + DOMAIN + "/bridge_status/config"
         MQTT_MSG=json.dumps({"name": "Bridge MQTT Status",
-                             "unique_id": DOMAIN+"_status",
-                             "object_id": DOMAIN+"_status",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "state_topic": DOMAIN,
                              "value_template": "{{ value_json.BridgeConnected }}",
                              "qos": "2",
@@ -1580,21 +1580,6 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
         time.sleep(0.1)
 
-# ,
-#             {
-#                 "topic": DOMAIN+"/alarm/online",
-#                 "payload_available": "1",
-#                 "payload_not_available": "0"
-#             }
-
-
-            # {
-            #     "topic": DOMAIN,
-            #     "payload_available": "1",
-            #     "payload_not_available": "0",
-            #     "value_template": "{{ value_json.BridgeConnected }}"
-            # }
-        
         availability =  [
              {
                  "topic": DOMAIN+"/alarm/online",
