@@ -1,7 +1,4 @@
-## [1.3.0] - Busy...
-
-### Todo ###
-
+## [1.2.3] - 2024-09-02
 
 ### Added
  - Added Homeassistant Alpine Linux Docker release version to Bridge attributes.
