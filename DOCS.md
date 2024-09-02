@@ -364,6 +364,16 @@ The latest Comfort ARM powered boards have the ability to report on individual B
 
 `2024-08-08 19:05:22 WARNING  Unsupported Battery Update query received.`
 
+Voltage Levels are internally defined as per below and will output a log message accordingly:
+
+  voltage > 14.4:     # Critical Overcharge
+
+  voltage > 14.2:     # Overcharge
+
+  voltage < 12.23:    # 50% Discharged/Crital Charge or No Charge
+
+  voltage < 12.58:    # 75% Discharged/Low Charge
+
 When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery voltage and the second for the Charger voltage expressed as an 8-bit value with a 15.5V Maximum voltage. The formula for voltage calculation, using the example below, is:
 
 ```

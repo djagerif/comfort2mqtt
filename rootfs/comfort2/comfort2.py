@@ -2843,7 +2843,7 @@ if((MQTT_CLIENT_KEY and MQTT_CLIENT_KEY.strip())): client_key = os.sep.join([cer
 if not MQTT_ENCRYPTION:
     logging.warning('MQTT Transport Layer Security disabled.')
 else:
-    ### Check certificate validity here !!! ###  To Do Client Certt and Client Key !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ### Check some certificate validity here ###
     match  validate_certificate(ca_cert):
         case 1:     # Invalid CA Certificate
             logging.warning('MQTT TLS CA Certificate Expired or not Valid (%s)', ca_cert )
@@ -2858,7 +2858,7 @@ else:
             MQTT_ENCRYPTION = False
 
         case 3:     # Invalid Client Certificate or Key
-            logging.warning('Client Key or Certificate Expired or not Valid')
+            logging.warning('Client Key or Certificate Expired or Invalid')
 
         case 0:     # Valid Certificate
             logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
