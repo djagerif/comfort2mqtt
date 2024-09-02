@@ -22,6 +22,8 @@ COMFORT_RIO_INPUTS=$(bashio::config 'alarm_rio_inputs')
 COMFORT_RIO_OUTPUTS=$(bashio::config 'alarm_rio_outputs')
 COMFORT_RESPONSES=$(bashio::config 'alarm_responses')
 COMFORT_TIME=$(bashio::config 'comfort_time')
+ALPINE_VERSION=$(cat /etc/alpine-release)
+export ALPINE_VERSION
 
 # Arguments for Comfort2MQTT to run.
 COMFORT_ARGS="--broker-address ${MQTT_SERVER:?unset}"

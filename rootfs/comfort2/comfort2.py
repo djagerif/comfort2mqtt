@@ -1,5 +1,5 @@
 # Copyright(c) 2018 Khor Chin Heong (koochyrat@gmail.com) for original project code and additional 
-# Copyright(c) 2024 Ingo de Jager (ingodejager@gmail.com) for modifications done 
+# copyright(c) 2024 Ingo de Jager (ingodejager@gmail.com) for modifications done 
 # to the original project sources contained in this project.
 #
 # Modified by Ingo de Jager 2024 (ingodejager@gmail.com)
@@ -45,9 +45,9 @@ ADDON_VERSION = "N/A"
 COMFORT_SERIAL = "00000000"       # Default Serial Number.
 COMFORT_KEY = "00000000"          # Default Refresh Key.
 
-MAX_ZONES = 96                  # Configurable for future expansion
-MAX_OUTPUTS = 96                # Configurable for future expansion
-BATTERYKEEPALIVES = False       # Set to True if Cytech ever implement D?0001/D?0002 battery query commands. This will change Keepalives to monitor batteries also.
+MAX_ZONES = 96                    # Configurable for future expansion
+MAX_OUTPUTS = 96                  # Configurable for future expansion
+BATTERYKEEPALIVES = False         # Set to True if Cytech ever implement D?0001/D?0002 battery query commands. This will change Keepalives to monitor batteries also.
 
 rand_hex_str = hex(randint(268435456, 4294967295))
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts.
@@ -68,16 +68,11 @@ ALARMMESSAGETOPIC = DOMAIN+"/alarm/message"
 ALARMTIMERTOPIC = DOMAIN+"/alarm/timer"
 ALARMDOORBELLTOPIC = DOMAIN+"/alarm/doorbell"
 
-# BRIDGECONNECTEDTOPIC = DOMAIN+"/bridge/connected"
-# BRIDGESTATE = DOMAIN+"/bridge/state"
-# BRIDGEDEVICES = DOMAIN+"/bridge/devices"
-# BRIDGEINFO = DOMAIN+"/bridge/info"
-
 FIRST_LOGIN = False         # Don't scan Comfort until MQTT connection is made.
 RUN = True
 BYPASSEDZONES = []          # Global list of Bypassed Zones
-BROKERCONNECTED = False     # MQTT Status
-COMFORTCONNECTED = False    # Comfort Status
+BROKERCONNECTED = False     # MQTT Broker Status
+COMFORTCONNECTED = False    # Comfort LAN connection Status
 ZONEMAPFILE = False         # CCLX file present or not.
 SCSRIOMAPFILE = False
 OUTPUTMAPFILE = False
@@ -95,16 +90,16 @@ device_properties['BatteryVoltageSlave2'] = "-1"
 device_properties['BatteryVoltageSlave3'] = "-1"
 device_properties['BatteryVoltageSlave4'] = "-1"
 device_properties['BatteryVoltageSlave5'] = "-1"
-device_properties['BatteryVoltageSlave6'] = "-1"
-device_properties['BatteryVoltageSlave7'] = "-1"
+device_properties['BatteryVoltageSlave6'] = "-1"    # Experimental
+device_properties['BatteryVoltageSlave7'] = "-1"    # Experimental
 device_properties['ChargeVoltageMain'] = "-1"
 device_properties['ChargeVoltageSlave1'] = "-1"
 device_properties['ChargeVoltageSlave2'] = "-1"
 device_properties['ChargeVoltageSlave3'] = "-1"
 device_properties['ChargeVoltageSlave4'] = "-1"
 device_properties['ChargeVoltageSlave5'] = "-1"
-device_properties['ChargeVoltageSlave6'] = "-1"
-device_properties['ChargeVoltageSlave7'] = "-1"
+device_properties['ChargeVoltageSlave6'] = "-1"    # Experimental
+device_properties['ChargeVoltageSlave7'] = "-1"    # Experimental
 device_properties['ComfortHardwareModel'] = "CM9000-ULT"
 device_properties['sem_id'] = 0
 device_properties['SerialNumber'] = "00000000"
@@ -318,6 +313,7 @@ logging.basicConfig(
 )
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
+ALPINE_VERSION = "N/A" if os.getenv('ALPINE_VERSION') == None else os.getenv('ALPINE_VERSION')
 
 supervisor_url = 'http://supervisor'
 addon_info_url = f'{supervisor_url}/addons/self/info'
@@ -338,14 +334,6 @@ else:
         ADDON_VERSION = addon_info['data']['version']
     else:
         logger.error("Failed to get Addon Info: Error Code %s, %s", response.status_code, response.reason)
-
-#
-#uri = "ws://supervisor/core/websocket"
-#
-#auth_message = json.dumps({
-#    "type": "auth",
-#    "access_token": TOKEN
-#})
 
 logger.info('Importing the add-on configuration options')
 
@@ -376,13 +364,10 @@ def get_ip_address(input_value):
         return input_value
     else:
         return resolve_to_ip(input_value)
-    
+
 # Check to see if it's a Hostname.domain or IPv4 address. Resolve Hostname to IP.
 COMFORT_ADDRESS=get_ip_address(option.comfort_address)
 MQTT_SERVER=get_ip_address(option.broker_address)
-
-#COMFORT_ADDRESS=option.comfort_address
-#MQTT_SERVER=option.broker_address
 
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id
@@ -398,17 +383,17 @@ COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 if COMFORT_INPUTS < 8:
     COMFORT_INPUTS = 8
-if COMFORT_INPUTS > MAX_ZONES:                                # 128 is max. setting for possible future expansion. 96 currently supported by Cytech.
+if COMFORT_INPUTS > MAX_ZONES:                          # 128 is max. setting for possible future expansion. 96 currently supported by Cytech.
     COMFORT_INPUTS = MAX_ZONES
-ALARMVIRTUALINPUTRANGE = range(1,int(COMFORT_INPUTS)+1) #set according to your system config. Starts at 1 -> {value}
-ALARMINPUTCOMMANDTOPIC = DOMAIN+"/input%d/set"          #input1,input2,... input128 for virtual inputs
+ALARMVIRTUALINPUTRANGE = range(1,int(COMFORT_INPUTS)+1) 
+ALARMINPUTCOMMANDTOPIC = DOMAIN+"/input%d/set"          #input1,input2,... input128 for inputs, settable if configured as Virtual.
 
 ALARMRIOINPUTTOPIC = DOMAIN+"/input%d"                  #input129,input130,... input248 for every input. Physical SCS/RIO Inputs (Default 0), Max 120, starting at 129.  
 if int(COMFORT_RIO_INPUTS) < 0:
     COMFORT_RIO_INPUTS = 0
 if int(COMFORT_RIO_INPUTS) > 120:
     COMFORT_RIO_INPUTS = 120
-ALARMRIOINPUTRANGE = range(129,129+int(COMFORT_RIO_INPUTS))   #set this according to your system. Starts at 129 -> 248 (Max.)
+ALARMRIOINPUTRANGE = range(129,129+int(COMFORT_RIO_INPUTS))
 ALARMRIOINPUTCOMMANDTOPIC = DOMAIN+"/input%d/set"       #input129,input130,... input248 for SCS/RIO inputs. Cannot set as Virtual Input.
 
 ALARMOUTPUTTOPIC = DOMAIN+"/output%d"                   #output1,output2,... for every output
@@ -416,7 +401,7 @@ if COMFORT_OUTPUTS < 0:
     COMFORT_OUTPUTS = 0
 if COMFORT_OUTPUTS > MAX_OUTPUTS:
     COMFORT_OUTPUTS = MAX_OUTPUTS
-ALARMNUMBEROFOUTPUTS = COMFORT_OUTPUTS                  #set this according to your system. Physical Outputs (Default 0), Max 96
+ALARMNUMBEROFOUTPUTS = COMFORT_OUTPUTS                  
 ALARMOUTPUTCOMMANDTOPIC = DOMAIN+"/output%d/set"        #output1/set,output2/set,... for every output
 
 ALARMRIOOUTPUTTOPIC = DOMAIN+"/output%d"                #output129,output130,... for every SCS/RIO output
@@ -431,7 +416,7 @@ if COMFORT_RESPONSES < 0:
     COMFORT_RESPONSES = 0
 if COMFORT_RESPONSES > 1024:
     COMFORT_RESPONSES = 1024
-ALARMNUMBEROFRESPONSES = COMFORT_RESPONSES              #set this according to your system. Default 0, Max 1024
+ALARMNUMBEROFRESPONSES = COMFORT_RESPONSES              #set in configuration according to your system. Default 0, Max 1024
 ALARMRESPONSECOMMANDTOPIC = DOMAIN+"/response%d/set"    #response1,response2,... for every response
 
 ALARMNUMBEROFFLAGS = 254                                # Max Flags for system
@@ -443,8 +428,8 @@ ALARMSENSORTOPIC = DOMAIN+"/sensor%d"                   #sensor0,sensor1,...sens
 ALARMSENSORCOMMANDTOPIC = DOMAIN+"/sensor%d/set"        #sensor0,sensor1,...sensor31
 
 ALARMNUMBEROFCOUNTERS = 255                             # Hardcoded to 255
-ALARMCOUNTERINPUTRANGE = DOMAIN+"/counter%d"            #each counter represents a value EG. light level
-ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set"      # set the counter to a value for between 0 (off) to 255 (full on) or any 16-bit value.
+ALARMCOUNTERINPUTRANGE = DOMAIN+"/counter%d"            # each counter represents a value EG. light level
+ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set"      # set the counter to a value for between 0 (off) to 255 (full on) or any signed 16-bit value.
 
 logger.info('Completed importing addon configuration options')
 
@@ -497,18 +482,13 @@ class ComfortIPInputActivationReport(object):
         else:
             self.input = int(input)
             self.state = int(state)
-        #logger.debug("input: %d, state: %d", self.input, self.state)
-
 
 class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (counter) 1E = 30; state FF00 = 65280
     def __init__(self, datastr="", counter=0, value=0, state=0):
-        #logger.debug("ComfortCTCounterActivationReport[datastr]: %s, [counter]: %s, [state]: %s", datastr, counter, state)
         if datastr:
             self.counter = int(datastr[2:4], 16)    #Integer value 3
-            #logger.debug("ComfortCTCounterActivationReport[counter(int)]: %s", self.counter)
             self.value = self.ComfortSigned16(int("%s%s" % (datastr[6:8], datastr[4:6]),16))            # Use new 16-bit format
             self.state = self.state = 1 if (int(datastr[4:6],16) > 0) else 0                            # 8-bit value used for state
-            #logger.debug("ComfortCTCounterActivationReport[state(int)]: %s", self.state)
         else:
             self.counter = counter
             self.value = value
@@ -519,7 +499,6 @@ class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (coun
     
     ### Byte-Swap code below ###
     def HexToSigned16Decimal(self,value):                                       # Returns Signed Decimal value from HEX string EG. FFFF = -1
-        #logger.debug("#321 HexToSigned16Decimal[value]: %s", value)
         return -(int(value,16) & 0x8000) | (int(value,16) & 0x7fff)
 
     def byte_swap_16_bit(self, hex_string):
@@ -571,13 +550,13 @@ class ComfortBYBypassActivationReport(object):
             if (self.zone in BYPASSEDZONES):
                 BYPASSEDZONES.remove(self.zone)
                 if BYPASSEDZONES.count(-1) == 0 and len(BYPASSEDZONES) == 0:
-                    BYPASSEDZONES.append(0)        # Add '-1' when last entry is removed.
+                    BYPASSEDZONES.append(0)        
             else:
                 logger.debug("ValueError Exception: Bypassed Zone (%s) does not appear in BYPASSEDZONES List[]", self.zone)
         elif (self.state == 1) and (self.zone <= int(COMFORT_INPUTS)):                     # State == 1 meaning must be in bypasszones
             if (self.zone not in BYPASSEDZONES):
                 BYPASSEDZONES.append(self.zone)
-            if BYPASSEDZONES.count(0) >= 1:        #Remove 0 that indicates empty list.
+            if BYPASSEDZONES.count(0) >= 1:        
                 BYPASSEDZONES.remove(0)
 
         BYPASSEDZONES.sort(reverse=False)
@@ -624,7 +603,6 @@ class Comfort_RSensorActivationReport(object):
 
 class Comfort_R_ReportAllSensors(object):
     def __init__(self, data={}, sensor=0, value=0, counter=0, state=0):
-        #logger.debug("ReportAllSensors(data): %s", data)
         self.sensors = []
         self.counters = []
         b = (len(data) - 8) // 4             #Fixed number of sensors reported from r?01 command. 0-15 and 16-31.
@@ -700,7 +678,7 @@ class ComfortB_ReportAllBypassZones(object):
                         self.zones.append(ComfortBYBypassActivationReport("", hex(zone_number), hex(zone_state)))
         CacheState = True
 
-        if len(BYPASSEDZONES) == 0:      # If No Zones Bypassed, enter '-1' in the List[]
+        if len(BYPASSEDZONES) == 0:
             BYPASSEDZONES.append(0)
 
         result_string = ','.join(map(str, BYPASSEDZONES))
@@ -839,7 +817,7 @@ class ComfortV_SystemTypeReport(object):
 
 class Comfort_U_SystemCPUTypeReport(object):
 
-    global device_properties
+    #global device_properties
     
     def __init__(self, data={}):
        
@@ -926,11 +904,9 @@ class Comfort_D_SystemVoltageReport(object):
                     return
 
         if query_type == 1:
-            #logger.debug("%s", BatteryVoltageList.values())
             self.BatteryStatus = self.Battery_Status(BatteryVoltageList.values())
             device_properties['BatteryStatus'] = self.BatteryStatus
         elif query_type == 2:
-            #logger.debug("%s", ChargerVoltageList.values())
             self.ChargerStatus = self.Battery_Status(ChargerVoltageList.values())
             device_properties['ChargerStatus'] = self.ChargerStatus
 
@@ -955,7 +931,6 @@ class Comfort_D_SystemVoltageReport(object):
 class ComfortSN_SerialNumberReport(object):     # Possible Comfort SN decode issue. Sometimes Comfort reports 'Illegal' serial number.
     def __init__(self, data={}):
 
-        #logging.debug("len(data): %s, %s", data, len(data))
         if len(data) < 12:
             self.serial_number = "Invalid"
             self.refreshkey = "00000000"
@@ -1027,7 +1002,6 @@ class Comfort2(mqtt.Client):
             BROKERCONNECTED = True
             device_properties['BridgeConnected'] = 1
 
-            #logger.info('MQTT Broker %s (%s)', mqtt_strings[rc], str(rc))
             logger.info('MQTT Broker Connection %s', str(rc))
 
             time.sleep(0.25)    # Short wait for MQTT to be ready to accept commands.
@@ -1101,7 +1075,6 @@ class Comfort2(mqtt.Client):
         if reasonCode == 0:
             logger.info('MQTT Broker Disconnect Successfull (%s)', str(reasonCode))
         else:
-            #logger.error('MQTT Broker %s', str(rc))
             BROKERCONNECTED = False
             device_properties['BridgeConnected'] = 0
             logger.error('MQTT Broker Connection Failed (%s). Check Network or MQTT Broker connection settings', str(reasonCode))
@@ -1142,7 +1115,6 @@ class Comfort2(mqtt.Client):
         elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/refresh"):
             if msgstr == COMFORT_KEY:
                 logger.info("Valid Refresh AUTH key detected, initiating MQTT refresh...")
-                #logger.debug("MQTT ClientID: %s", mqtt_client_id)
                 if COMFORT_CCLX_FILE != None:
                     config_filename = self.sanitize_filename(COMFORT_CCLX_FILE,'cclx')
                     if config_filename:
@@ -1211,7 +1183,6 @@ class Comfort2(mqtt.Client):
             if self.connected:
                 self.comfortsock.sendall(("\x03I!%02X%02X\r" % (virtualinput, state)).encode())
                 SAVEDTIME = datetime.now()
-                #logger.debug("VirtualInput: %s, State: %s",virtualinput,state )
         elif msg.topic.startswith(DOMAIN+"/flag") and msg.topic.endswith("/set"):
             flag = int(msg.topic.split("/")[1][4:])
             try:
@@ -1222,7 +1193,6 @@ class Comfort2(mqtt.Client):
             if self.connected:
                 self.comfortsock.sendall(("\x03F!%02X%02X\r" % (flag, state)).encode()) #was F!
                 SAVEDTIME = datetime.now()
-                #logger.debug("Flag Set: %s, State: %s",flag,state )
         elif msg.topic.startswith(DOMAIN+"/counter") and msg.topic.endswith("/set"): # counter set
             counter = int(msg.topic.split("/")[1][7:])
             if not msgstr.isnumeric() and not msgstr == "ON" and not msgstr == "OFF":
@@ -1243,7 +1213,6 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
                     SAVEDTIME = datetime.now()
         elif msg.topic.startswith(DOMAIN+"/sensor") and msg.topic.endswith("/set"): # sensor set
-            #logger.debug("msg.topic: %s",msg.topic)
             sensor = int(msg.topic.split("/")[1][6:])
             try:
                 state = int(msgstr)
@@ -1253,7 +1222,6 @@ class Comfort2(mqtt.Client):
             if self.connected:
                 self.comfortsock.sendall(("\x03s!%02X%s\r" % (sensor, self.DecimalToSigned16(state))).encode()) # sensor needs 16 bit signed number
                 SAVEDTIME = datetime.now()
-                #logger.debug("\x03s!%02X%s\r",sensor, self.DecimalToSigned16(state))
 
     def DecimalToSigned16(self,value):      # Returns Comfort corrected HEX string value from signed 16-bit decimal value.
         return ('{:04X}'.format((int((value & 0xff) * 0x100 + (value & 0xff00) / 0x100))) )
@@ -1273,7 +1241,6 @@ class Comfort2(mqtt.Client):
             return False
     
     def HexToSigned16Decimal(self,value):        # Returns Signed Decimal value from HEX string EG. FFFF = -1
-        #logger.debug("690-HexToSigned16Decimal[value]: %s",value)
         return -(int(value,16) & 0x8000) | (int(value,16) & 0x7fff)
 
     def byte_swap_16_bit(self, hex_string):
@@ -1321,8 +1288,6 @@ class Comfort2(mqtt.Client):
                 data = self.comfortsock.recv(recv_buffer).decode()
             except socket.timeout as e:
                 err = e.args[0]
-                # this next if/else is a bit redundant, but illustrates how the
-                # timeout exception is setup
                 if err == 'timed out':
                     if BATTERYKEEPALIVES and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                         self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
@@ -1351,7 +1316,7 @@ class Comfort2(mqtt.Client):
                         self.publish(ALARMCONNECTEDTOPIC, "1" if COMFORTCONNECTED else "0", qos=2, retain=False)
                         device_properties['BridgeConnected'] = 1
                 else:
-                    # got a message do something :)
+                    # got a message, process it.
                     buffer += data
 
                     while buffer.find(delim) != -1:
@@ -1457,11 +1422,6 @@ class Comfort2(mqtt.Client):
                 SAVEDTIME = datetime.now()
                 time.sleep(0.1)
             
-            # #get CPU Type
-            # self.comfortsock.sendall("\x03u?00\r".encode())         # Get CPU type for remaining boards.
-            # SAVEDTIME = datetime.now()
-            # time.sleep(0.1)
-
             self.publish(ALARMAVAILABLETOPIC, 1,qos=2,retain=True)
             time.sleep(0.1)
             self.publish(ALARMLWTTOPIC, 'Online',qos=2,retain=True)
@@ -1469,7 +1429,6 @@ class Comfort2(mqtt.Client):
             self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)       # Emptry string removes topic.
             time.sleep(0.1)
 
-            #if device_properties['CPUType'] == 'N/A':
             device_properties['BatteryVoltageMain'] = "-1"
             device_properties['BatteryVoltageSlave1'] = "-1"
             device_properties['BatteryVoltageSlave2'] = "-1"
@@ -1498,34 +1457,18 @@ class Comfort2(mqtt.Client):
         global models
         global COMFORTCONNECTED
         global ADDON_VERSION
+        global ALPINE_VERSION
         global ADDON_SLUG
         global file_exists
 
         file_exists = _file
   
-        #UID = ("Comfort2MQTT - " + str(device_properties['uid'])) if file_exists else "Comfort2MQTT - 00000000"
-        #UUID = str(device_properties['uid'])
-       
-         # (" + UUID + ")",
-
-#                       "url": "https://www.cytech.biz",
-#                       "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
-#                       "ComfortFirmware": device_properties['ComfortFirmware'] if file_exists else None,
-#                       "icon": "mdi:alarm-panel-outline",
-#                       "serial_number": device_properties['SerialNumber'],
-
-#                       "name": device_properties['Reference'] if file_exists else "Comfort <Default>",     # 24/7/2024
-
-#                            "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
-#                            "hw_version":str(device_properties['ComfortHardwareModel']),
-#                            "serial_number": device_properties['SerialNumber'],
-#                            "sw_version":str(device_properties['Version']),
-
         if ADDON_SLUG.strip() == "":
             MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
+                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
                             "model": "Comfort MQTT Bridge"
                         }
         else:
@@ -1533,6 +1476,7 @@ class Comfort2(mqtt.Client):
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
+                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
                             "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
                             "model": "Comfort MQTT Bridge"
                         }
@@ -1572,10 +1516,10 @@ class Comfort2(mqtt.Client):
         self.publish(DOMAIN, MQTT_MSG,qos=2,retain=True)
         time.sleep(0.1)
 
-        discoverytopic = "homeassistant/binary_sensor/" + DOMAIN + "/status/config"
+        discoverytopic = "homeassistant/binary_sensor/" + DOMAIN + "/bridge_status/config"
         MQTT_MSG=json.dumps({"name": "Bridge MQTT Status",
-                             "unique_id": DOMAIN+"_status",
-                             "object_id": DOMAIN+"_status",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "state_topic": DOMAIN,
                              "value_template": "{{ value_json.BridgeConnected }}",
                              "qos": "2",
@@ -1588,17 +1532,17 @@ class Comfort2(mqtt.Client):
         time.sleep(0.1)
 
         availability =  [
-            {
-                "topic": DOMAIN,
-                "payload_available": "1",
-                "payload_not_available": "0",
-                "value_template": "{{ value_json.BridgeConnected }}"
-            },
-            {
-                "topic": DOMAIN+"/alarm/online",
-                "payload_available": "1",
-                "payload_not_available": "0"
-            }
+             {
+                 "topic": ALARMAVAILABLETOPIC,
+                 "payload_available": "1",
+                 "payload_not_available": "0"
+             },
+             {
+                 "topic": DOMAIN,
+                 "payload_available": "1",
+                 "payload_not_available": "0",
+                 "value_template": "{{ value_json.BridgeConnected }}"
+             }
             ]
         discoverytopic = "homeassistant/button/comfort2mqtt/refresh/config"
         MQTT_MSG=json.dumps({"name": "Refresh",
@@ -1606,7 +1550,7 @@ class Comfort2(mqtt.Client):
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability": availability,
                              "availability_mode": "all",
-                             "command_topic": DOMAIN + "/alarm/refresh",
+                             "command_topic": REFRESHTOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "payload_press": COMFORT_KEY,
@@ -1623,7 +1567,7 @@ class Comfort2(mqtt.Client):
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability": availability,
                              "availability_mode": "all",
-                             "command_topic": DOMAIN + "/alarm/battery_update",
+                             "command_topic": BATTERYREFRESHTOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "payload_press": "1",
@@ -1649,8 +1593,8 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "State",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "state_topic": DOMAIN + "/alarm/status",
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "state_topic": ALARMSTATUSTOPIC,
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "icon":"mdi:shield-alert",
@@ -1658,14 +1602,14 @@ class Comfort2(mqtt.Client):
                              "native_value": "string",
                              "device": MQTT_DEVICE
                             })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
         time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_firmware/config"
         MQTT_MSG=json.dumps({"name": "Firmware",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -1683,7 +1627,7 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "FileSystem",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -1694,8 +1638,6 @@ class Comfort2(mqtt.Client):
                              "qos": "2",
                              "device": MQTT_DEVICE
                         })
-        #                              "json_attributes_topic": "comfort2",
-        #                              "json_attributes_template": "{{ value_json | tojson }}",
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
@@ -1703,7 +1645,7 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "Battery Status",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -1739,7 +1681,7 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "Charger Status",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -1775,8 +1717,8 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "Bypassed Zones",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "state_topic": DOMAIN + "/alarm/bypass",
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "state_topic": ALARMBYPASSTOPIC,
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "icon":"mdi:shield-remove",
@@ -1786,15 +1728,16 @@ class Comfort2(mqtt.Client):
                             })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
-        
+
+        #Mode_Description = {0:"Disarmed", 1:"Away Mode", 2:"Night Mode", 3:"Day Mode", 4:"Vacation Mode"}
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_mode/config"
         MQTT_MSG=json.dumps({"name": "Mode",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
-                             "state_topic": DOMAIN + "/alarm/mode",
+                             "state_topic": ALARMMODETOPIC,
                              "icon":"mdi:home",
                              "device": MQTT_DEVICE
                         })
@@ -1805,7 +1748,7 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "Customer Name",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -1823,7 +1766,7 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "Reference",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -1841,7 +1784,7 @@ class Comfort2(mqtt.Client):
         MQTT_MSG=json.dumps({"name": "Serial Number",
                              "unique_id": discoverytopic.split('/')[3],
                              "object_id": discoverytopic.split('/')[3],
-                             "availability_topic": DOMAIN + "/alarm/online",
+                             "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN,
@@ -1856,8 +1799,6 @@ class Comfort2(mqtt.Client):
         time.sleep(0.1)
 
 
-#                             "ComfortConnectionState": "1" if COMFORTCONNECTED else "0",
-# "value_template": "{{ value_json.ComfortConnectionState }}",
         discoverytopic = "homeassistant/binary_sensor/comfort2mqtt/comfort_connection_state/config"
         MQTT_MSG=json.dumps({"name": "LAN Status",
                              "object_id": discoverytopic.split('/')[3],
@@ -1885,7 +1826,7 @@ class Comfort2(mqtt.Client):
                 return "Warning"
         return "Ok"
 
-#        Example usage with 8 battery voltages
+#        Example usage with 5 battery voltages
 #           battery_voltages = [13.0, 12.1, 12.8, 13.5, 14.2]                          # Test
 #           print(battery_status(*battery_voltages))  # Output will be "Critical"      # Test
     
@@ -1934,6 +1875,7 @@ class Comfort2(mqtt.Client):
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
+                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
                             "model": "Comfort MQTT Bridge"
                         }
             else:
@@ -1941,6 +1883,7 @@ class Comfort2(mqtt.Client):
                             "identifiers": ["comfort2mqtt_bridge"],
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
+                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
                             "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
                             "model": "Comfort MQTT Bridge"
                         }
@@ -2006,7 +1949,6 @@ class Comfort2(mqtt.Client):
             tree = ET.parse(file)
             root = tree.getroot()
 
-            #device_properties = {}
             input_properties = {}
             counter_properties = {}
             flag_properties = {}
@@ -2017,21 +1959,20 @@ class Comfort2(mqtt.Client):
             for entry in root.iter('ConfigInfo'):
                 CustomerName = None
                 Reference = None
-                UcmVersion = None
-                UcmRevision = None
+                #UcmVersion = None
+                #UcmRevision = None
                 ComfortFileSystem = None
                 ComfortFirmware = None
 
                 CustomerName = entry.attrib.get('CustomerName')
                 Reference = entry.attrib.get('Reference')
-                UcmVersion = entry.attrib.get('UcmVersion')
-                UcmRevision = entry.attrib.get('UcmRevision')
+                #UcmVersion = entry.attrib.get('UcmVersion')
+                #UcmRevision = entry.attrib.get('UcmRevision')
                 ComfortFileSystem = entry.attrib.get('ComfortFileSystem')
                 ComfortFirmware = entry.attrib.get('ComfortFirmwareType')
   
                 device_properties['CustomerName'] = CustomerName
                 device_properties['Reference'] = Reference
-                #device_properties['Version'] = str(UcmVersion) + "." + str(UcmRevision)
                 device_properties['ComfortFileSystem'] = ComfortFileSystem
                 device_properties['ComfortFirmwareType'] = ComfortFirmware
                 device_properties['CPUType'] = "N/A"
@@ -2081,8 +2022,6 @@ class Comfort2(mqtt.Client):
                 inner_dict['VirtualInput'] = virtualinput
                 input_properties[number] = inner_dict
                 
-                #logging.debug ("Number: %s, Name: %s, ZoneWord: %s, VirtualInput: %s", number, input_properties[number]['Name'], input_properties[number]['ZoneWord'], input_properties[number]['VirtualInput'])
-                
             for counter in root.iter('Counter'):
                 name = ''
                 number = ''
@@ -2106,8 +2045,6 @@ class Comfort2(mqtt.Client):
 
                 # Add the truncated value to the dictionary
                 counter_properties[number] = name
-
-                #logging.debug ("Number: %s, Name: %s", number, counter_properties['Name'])
 
             for flag in root.iter('Flag'):
                 name = ''
@@ -2133,8 +2070,6 @@ class Comfort2(mqtt.Client):
                 # Add the truncated value to the dictionary
                 flag_properties[number] = name
 
-                #logging.debug ("Number: %s, Name: %s", number, flag_properties['Name'])
-
             for output in root.iter('Output'):
                 name = ''
                 number = ''
@@ -2159,11 +2094,7 @@ class Comfort2(mqtt.Client):
                 # Add the truncated value to the dictionary
                 output_properties[number] = name
 
-                #logging.debug ("Number: %s, Name: %s", number, output_properties['Name'])
-
             for sensor in root.iter('SensorResponse'):
-                #SensorName = sensor.attrib.get('Name')
-                #logger.debug ("Sensor Name: '%s'", SensorName) 
                 name = ''
                 number = ''
                 name = sensor.attrib.get('Name')
@@ -2186,8 +2117,6 @@ class Comfort2(mqtt.Client):
 
                 # Add the truncated value to the dictionary
                 sensor_properties[number] = name
-
-                #logging.debug ("Number: %s, Name: %s", number, sensor_properties['Name'])
 
             for scsrio in root.iter('ScsRioResponse'):
                 name = ''
@@ -2504,20 +2433,16 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "M?" or line[1:3] == "MD":
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
-                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=2,retain=True)
+                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=2,retain=True)      #Disarmed, Day etc
                                 self.publish(ALARMMODETOPIC, mMsg.mode,qos=2,retain=True)
                                 self.entryexitdelay = 0                         #zero out the countdown timer
 
                             elif line[1:3] == "S?":
                                 SMsg = ComfortS_SecurityModeReport(line[1:])
-                                self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=2,retain=True)
+                                self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=2,retain=True)     # Idle, Alert etc.
 
                             elif line[1:3] == "V?":
                                 VMsg = ComfortV_SystemTypeReport(line[1:])
-                                #if VMsg.filesystem != 34:
-                                #    logging.warning("Unsupported Comfort System detected (File System %d).", VMsg.filesystem)
-                                #else:
-                                #logging.info("Comfort II Ultra detected (Firmware %d.%03d)", VMsg.version, VMsg.revision)
                                                  
                                 device_properties['ComfortFileSystem'] = str(VMsg.filesystem)
                                 device_properties['ComfortFirmwareType'] = str(VMsg.firmware)
@@ -2555,18 +2480,6 @@ class Comfort2(mqtt.Client):
 
                                 self.UpdateDeviceInfo(True)     # Update Device properties.
 
-                            # elif re.match(SEM_pattern, line[1:5]):       # Determine Number of Installed SEM's. Check for u?21 - 25
-                            #    uMsg = Comfort_U_SystemCPUTypeReport(line[1:])
-                                                
-                            #    device_properties['sem_id'] = str(uMsg.sem_id)  # Saves the highest number installed SEM's. Must be contiguous. Only support 5
-                                #if int(line[3:5],16) == 37:
-                                #    logging.debug("%s Installed SEM(s) detected", str(device_properties['sem_id']))
-                                
-                                # Check Slaves Installed.
-                                # Generate BatteryStatus and ChargerStatus from all Slaves + Main
-                                #device_properties['ChargerStatus'] = "N/A"     # Ok, Warning, Critical
-                                #device_properties['BatteryStatus'] = "N/A"
-
                             elif line[1:3] == "EL":       # Determine HW model number CM9000/9001 if available and number of Slave confirmation.
                                 ELMsg = Comfort_EL_HardwareModelReport(line[1:])
                                                  
@@ -2578,13 +2491,10 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "D?":       # Get Battery/Charge Voltage. ARM/Toshiba + CM-9001 Only.
 
                                 # Determine Battery/Charge Voltage and Device ID. Save Values in Comfort_D_SystemVoltageReport
-                                DLMsg = Comfort_D_SystemVoltageReport(line[1:])
+                                DLMsg = Comfort_D_SystemVoltageReport(line[1:])     # Return value not used currently.
                                 
                                 self.UpdateDeviceInfo(True)     # Update Device properties.
                                 
-                                #device_properties['BatteryVoltageMain'] = str(DLMsg.voltage)
-                                #logging.debug("Main Battery Voltage: %s V", str(device_properties['BatteryVoltageMain']))
-
                             elif line[1:5] == "SN01":       # Comfort Encoded Serial Number - Used for Refresh Key
                                 SNMsg = ComfortSN_SerialNumberReport(line[1:])
                                 if COMFORT_SERIAL != SNMsg.serial_number:
@@ -2687,7 +2597,6 @@ class Comfort2(mqtt.Client):
                                         if int(e.args[0]) < ALARMNUMBEROFOUTPUTS:
                                             logging.debug ("Output %s not in CCLX file, ignoring CCLX enrichment", str(e))
                                         _name = "Output" + "{:03d}".format(opMsgY.output)
-                                    #ZoneCache[ipMsgZ.input] = ipMsgZ.state           # Update local ZoneCache
                                     MQTT_MSG=json.dumps({"Time": _time, 
                                                          "Name": _name,
                                                          "State": opMsgY.state
@@ -2782,11 +2691,9 @@ class Comfort2(mqtt.Client):
 
                             elif (line[1:9] == "DL7FF904"):
                                 if len(line[1:]) == 18:
-                                    #logger.debug("Line: %s, Len(): %s", line[9:17], len(line[1:]))
                                     device_properties['uid'] = line[9:17]
                                     DECODED_SERIAL = ComfortSN_SerialNumberReport(line[5:17])      # Decode raw data to get SN. SN command not working for some versions of firmware.
-                                    #logger.debug("Decoded Serial: %s", DECODED_SERIAL.serial_number)
-                                    if DECODED_SERIAL.serial_number != COMFORT_SERIAL:                # Check if SN and DL data match. 
+                                    if DECODED_SERIAL.serial_number != COMFORT_SERIAL:             # Check if SN and DL data match. 
                                         COMFORT_SERIAL = DECODED_SERIAL.serial_number
                                         device_properties['SerialNumber'] = COMFORT_SERIAL
                                 else:
@@ -2852,7 +2759,6 @@ class Comfort2(mqtt.Client):
                                 self.login()
                             else:
                                 if datetime.now() > (SAVEDTIME + TIMEOUT):  # If no command sent in 2 minutes then send keepalive.
-                                    #logger.debug("Sending Keepalives")
                                     if BATTERYKEEPALIVES and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                                         self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                                         time.sleep(0.1)
@@ -2902,7 +2808,6 @@ def validate_certificate(certificate):
 
     # Load the certificate using the binary data
     x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
-    #x509 = crypto.load_certificate(crypto.FILETYPE_PEM, open("" + certificate).read())
 
     # Check the 'notAfter' attribute
     not_after = x509.get_notAfter()
@@ -2911,9 +2816,6 @@ def validate_certificate(certificate):
         ValidTo = not_after.decode()
     if not_before:
         ValidFrom = not_before.decode()
-
-    #ValidTo = x509.get_notAfter().decode()          # ValidTo - 20290603175630Z
-    #ValidFrom = x509.get_notBefore().decode()       # ValidFrom - 20240603175630Z
 
     # Define the format of the datetime strings
     datetime_format = "%Y%m%d%H%M%SZ"
@@ -2941,7 +2843,7 @@ if((MQTT_CLIENT_KEY and MQTT_CLIENT_KEY.strip())): client_key = os.sep.join([cer
 if not MQTT_ENCRYPTION:
     logging.warning('MQTT Transport Layer Security disabled.')
 else:
-    ### Check certificate validity here !!! ###  To Do Client Certt and Client Key !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ### Check some certificate validity here ###
     match  validate_certificate(ca_cert):
         case 1:     # Invalid CA Certificate
             logging.warning('MQTT TLS CA Certificate Expired or not Valid (%s)', ca_cert )
@@ -2956,7 +2858,7 @@ else:
             MQTT_ENCRYPTION = False
 
         case 3:     # Invalid Client Certificate or Key
-            logging.warning('Client Key or Certificate Expired or not Valid')
+            logging.warning('Client Key or Certificate Expired or Invalid')
 
         case 0:     # Valid Certificate
             logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
