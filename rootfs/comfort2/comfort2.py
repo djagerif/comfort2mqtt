@@ -787,8 +787,9 @@ class Comfort_A_SecurityInformationReport(object):      #  For future developmen
         low_battery = ['Main','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
         self.type = alarm_type[self.AA]
         self.state = alarm_state[self.SS]
-        if alarm_type == "LowBattery" and self.BB == 0: self.battery = low_battery[0]
-        elif alarm_type == "LowBattery" and self.BB > 0:self.battery = low_battery[(self.BB - 32)]
+        self.battery = None
+        if self.type == "LowBattery" and self.BB == 0: self.battery = low_battery[0]
+        elif self.type == "LowBattery" and self.BB > 0:self.battery = low_battery[(self.BB - 32)]
         #logger.debug('Battery ID: %s', self.id)
         #logger.debug('Alarm Type: %s', self.type)       # What happens if you have low battery and zone trouble ????
 
