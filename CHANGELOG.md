@@ -1,3 +1,13 @@
+## [1.2.4] - 2024-09-23
+
+### Added
+ 
+### Changed
+
+### Fixed
+- a? decode error causing exception.
+
+
 ## [1.2.3] - 2024-09-02
 
 ### Added
