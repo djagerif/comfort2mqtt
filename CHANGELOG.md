@@ -1,9 +1,14 @@
+## Known Issues
+ - When LAN connectivity is lost for an extended period the LWT and 'online' topics are not updated.
+ - On some older firmware S? replies with unexpected values. Upgrade to recommended version or handle unsupported return values.
+ - Perhaps exit on FW check instead of just a warning...
+
 ## [1.3.0] - Busy...
 
 ### Added
  
 ### Changed
- - Added "Unknown" state when receiving erroneous S? replies.
+ - Added "Unknown" state when receiving undocumented S? status request return values other than 0-3.
 
 ### Fixed
 
