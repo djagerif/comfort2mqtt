@@ -727,6 +727,7 @@ class ComfortS_SecurityModeReport(object):
         elif self.mode == 1: self.modename = "Trouble"
         elif self.mode == 2: self.modename = "Alert"
         elif self.mode == 3: self.modename = "Alarm"
+        else: self.modename = "Unknown"     # Should never happen.
 
 #zone = 00 means system can be armed, no open zones
 class ComfortERArmReadyNotReady(object):

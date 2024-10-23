@@ -3,6 +3,7 @@
 ### Added
  
 ### Changed
+ - Added "Unknown" state when receiving erroneous S? replies.
 
 ### Fixed
 
