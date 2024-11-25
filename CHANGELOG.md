@@ -11,6 +11,7 @@
  - Added "Unknown" state when receiving undocumented S? status request return values other than 0-3.
 
 ### Fixed
+ - Updated documentation to reflect correct "addon_configs" directory.
 
 
 ## [1.2.3] - 2024-09-02
