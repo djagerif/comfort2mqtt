@@ -1,3 +1,15 @@
+## [1.2.5] - 2024-12-14
+
+### Added
+ 
+### Changed
+
+### Fixed
+ - Added "Unknown" state when receiving undocumented S? status request return values other than 0-3.
+ - Updated documentation to reflect correct "addon_configs" directory.
+ - Fixed MQTT Battery Update automation handling.
+
+
 ## [1.2.4] - 2024-09-23
 
 ### Added

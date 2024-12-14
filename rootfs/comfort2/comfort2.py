@@ -727,6 +727,7 @@ class ComfortS_SecurityModeReport(object):
         elif self.mode == 1: self.modename = "Trouble"
         elif self.mode == 2: self.modename = "Alert"
         elif self.mode == 3: self.modename = "Alarm"
+        else: self.modename = "Unknown"     # Should never happen.
 
 #zone = 00 means system can be armed, no open zones
 class ComfortERArmReadyNotReady(object):
@@ -1128,8 +1129,8 @@ class Comfort2(mqtt.Client):
             for device in range(0, int(device_properties['sem_id'])):
                 Devices.append(str(device + 33))    # First Slave at address 33 DEC.
 
-            if msgstr in Devices and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
-                ID = str(f"{int(msgstr):02X}")
+            if msgstr.strip('"') in Devices and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
+                ID = str(f"{int(msgstr.strip('"')):02X}")
                 Command = "\x03D?" + ID + "01\r"
                 self.comfortsock.sendall(Command.encode()) # Battery Status Update
                 time.sleep(0.1)
@@ -1138,7 +1139,7 @@ class Comfort2(mqtt.Client):
                 time.sleep(0.1)
                 SAVEDTIME = datetime.now()
             else:
-                logger.warning("Unsupported Battery Update query received.")
+                logger.warning("Unsupported MQTT Battery Update query received.")
 
         elif msg.topic.startswith("homeassistant") and msg.topic.endswith("/status"):
             if msgstr == "online":
