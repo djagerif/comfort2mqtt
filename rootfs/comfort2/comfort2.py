@@ -1139,6 +1139,8 @@ class Comfort2(mqtt.Client):
                 time.sleep(0.1)
                 SAVEDTIME = datetime.now()
             else:
+                logger.debug("device: %s", device)
+                logger.debug("msgstr: %s", msgstr)
                 logger.warning("Unsupported Battery Update query received.")
 
         elif msg.topic.startswith("homeassistant") and msg.topic.endswith("/status"):
