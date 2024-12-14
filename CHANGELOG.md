@@ -1,23 +1,25 @@
+## Known Issues
+ - When LAN connectivity is lost for an extended period the LWT and 'online' topics are not updated.
+ - Perhaps exit on FW check instead of just a warning...
+
+## [1.3.0] - Busy...
+
+
+
+
+
+
+
 ## [1.2.5] - 2024-12-14
 
 ### Added
  
 ### Changed
+ - Added "Unknown" state when receiving undocumented S? status request return values other than 0-3.
 
 ### Fixed
- - Added "Unknown" state when receiving undocumented S? status request return values other than 0-3.
  - Updated documentation to reflect correct "addon_configs" directory.
  - Fixed MQTT Battery Update automation handling.
-
-
-## [1.2.4] - 2024-09-23
-
-### Added
- 
-### Changed
-
-### Fixed
-- a? decode error causing exception.
 
 
 ## [1.2.3] - 2024-09-02
