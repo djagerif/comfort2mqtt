@@ -1141,7 +1141,7 @@ class Comfort2(mqtt.Client):
             else:
                 logger.debug("device: %s", device)
                 logger.debug("msgstr: %s", msgstr)
-                logger.warning("Unsupported Battery Update query received.")
+                logger.warning("Unsupported MQTT Battery Update query received.")
 
         elif msg.topic.startswith("homeassistant") and msg.topic.endswith("/status"):
             if msgstr == "online":
@@ -1293,7 +1293,6 @@ class Comfort2(mqtt.Client):
             except socket.timeout as e:
                 err = e.args[0]
                 if err == 'timed out':
-                    logger.debug("BATTERYKEEPALIVES: %s", BATTERYKEEPALIVES)
                     if BATTERYKEEPALIVES and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                         self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
                         time.sleep(0.1)
