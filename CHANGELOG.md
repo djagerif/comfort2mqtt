@@ -3,7 +3,7 @@
  - On some older firmware S? replies with unexpected values. Upgrade to recommended version or handle unsupported return values.
  - Perhaps exit on FW check instead of just a warning...
 
-## [1.3.0] - 2024-12-14
+## [1.2.5] - 2024-12-14
 
 ### Added
  
