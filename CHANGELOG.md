@@ -3,7 +3,7 @@
  - On some older firmware S? replies with unexpected values. Upgrade to recommended version or handle unsupported return values.
  - Perhaps exit on FW check instead of just a warning...
 
-## [1.3.0] - Busy...
+## [1.3.0] - 2024-12-14
 
 ### Added
  
@@ -12,6 +12,7 @@
 
 ### Fixed
  - Updated documentation to reflect correct "addon_configs" directory.
+ - Fixed MQTT Battery Update automation handling.
 
 
 ## [1.2.3] - 2024-09-02
