@@ -3,7 +3,7 @@
 ### Added
  
 ### Changed
- - Updated ARM Battery Status voltage levels accordingto Cytech requirements.
+ - Updated ARM Battery Status voltage levels according to Cytech requirements.
 
 ### Fixed
  
