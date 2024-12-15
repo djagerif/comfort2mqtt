@@ -2264,7 +2264,7 @@ class Comfort2(mqtt.Client):
                         else:
                             continue
 
-                        if line[1:] != "cc00" and not line[1:].startswith("D?00"):
+                        if line[1:] != "cc00" and not line[1:].startswith("D?00"):      # D?00 replies might not be used - wait Cytech command inclusion.
                             logger.debug(line[1:])  	    # Print all responses in DEBUG mode only. Print all received Comfort commands except keepalives.
 
                             if datetime.now() > SAVEDTIME + TIMEOUT:            #

@@ -1,7 +1,6 @@
 ## Known Issues
  - When LAN connectivity is lost for an extended period the LWT and 'online' topics are not updated.
  - Perhaps exit on FW check instead of just a warning...
- - Update D?0001/D?0002 for future Battery Management.
 
 ## [1.3.0] - Busy...
 
