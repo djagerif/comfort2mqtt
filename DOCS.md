@@ -377,8 +377,8 @@ Voltage Levels are internally defined as per below and will output a log message
 When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery voltage and the second for the Charger voltage expressed as an 8-bit value with a 18.27V Maximum voltage. The formula for voltage calculation, using the example below, is:
 
 ```
-Battery Voltage = 196/255 * (3.3/2.71) * 15V = 14V
-Charger Voltage = 199/255 * (3.3/2.71) * 15V = 14.3V
+Battery Voltage = 196/255 * (3.3/2.71) * 15V = 14.04V
+Charger Voltage = 199/255 * (3.3/2.71) * 15V = 14.25V
 ```
 ```
 2024-08-08 19:07:37 DEBUG    D?0101C4
