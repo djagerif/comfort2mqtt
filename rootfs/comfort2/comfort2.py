@@ -883,7 +883,8 @@ class Comfort_D_SystemVoltageReport(object):
 
         for x in range(6, len(data), 2):
             value = int(data[x:x+2],16)
-            voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'     
+            #voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Old Formula
+            voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula according to Cytech.
             if query_type == 1:
                 if id == 0:
                     device_properties[BatteryVoltageNameList[(x-6)/2]] = voltage
@@ -918,13 +919,13 @@ class Comfort_D_SystemVoltageReport(object):
         for voltage in voltages:
             if float(voltage) == -1:
                 index.append(0)
-            elif float(voltage) > 14.4:       # Critical Overcharge(Value to be determined still)
+            elif float(voltage) > 15:           # Critical Overcharge
                 index.append(2)
-            elif float(voltage) > 14.2:       # Overcharge(Value to be determined still)
+            elif float(voltage) > 14.6:         # Overcharge(Value to be determined still)
                 index.append(1)
-            elif float(voltage) < 12.23:      # 50% Discharged/Critical Low Charge or No Charge
+            elif float(voltage) <= 9.5:         # Discharged/Critical Low Charge or No Charge
                 index.append(2)
-            elif float(voltage) < 12.58:      # 75% Discharged/Low Charge
+            elif float(voltage) < 11.5:         # Severely Discharged/Low Charge
                 index.append(1)
             else:
                 index.append(0)
@@ -1818,13 +1819,13 @@ class Comfort2(mqtt.Client):
 
     def BatteryStatus(*voltages):  # Tuple of all voltages
         for voltage in voltages:
-            if voltage > 14.4:      # Critical Overcharge
+            if voltage > 15:        # Critical Overcharge
                 return "Critical"
-            if voltage > 14.2:      # Overcharge
+            if voltage > 14.6:      # Overcharge
                 return "Warning"
-            if voltage < 12.23:     # 50% Discharged/Crital Charge or No Charge
+            if voltage <= 9.5:     # Discharged/Crital Charge or No Charge
                 return "Critical"
-            elif voltage < 12.58:   # 75% Discharged/Low Charge
+            elif voltage < 11.5:   # Severely Discharged/Low Charge
                 return "Warning"
         return "Ok"
 
@@ -2263,7 +2264,7 @@ class Comfort2(mqtt.Client):
                         else:
                             continue
 
-                        if line[1:] != "cc00" and not line[1:].startswith("D?00"):
+                        if line[1:] != "cc00" and not line[1:].startswith("D?00"):      # D?00 replies might not be used - wait Cytech command inclusion.
                             logger.debug(line[1:])  	    # Print all responses in DEBUG mode only. Print all received Comfort commands except keepalives.
 
                             if datetime.now() > SAVEDTIME + TIMEOUT:            #
