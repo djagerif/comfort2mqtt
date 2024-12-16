@@ -883,9 +883,10 @@ class Comfort_D_SystemVoltageReport(object):
 
         for x in range(6, len(data), 2):
             value = int(data[x:x+2],16)
-            #voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Old Formula
-            voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula according to Cytech.
+            #voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Old Formula used for Batteries.
+            #voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for Chargers.
             if query_type == 1:
+                voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Old Formula used for Batteries.
                 if id == 0:
                     device_properties[BatteryVoltageNameList[(x-6)/2]] = voltage
                     BatteryVoltageList[(x-6)/2] = voltage
@@ -896,6 +897,7 @@ class Comfort_D_SystemVoltageReport(object):
                 else:
                     return
             elif query_type == 2:
+                voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for Chargers.
                 if id == 0:
                     device_properties[ChargerVoltageNameList[(x-6)/2]] = voltage
                     ChargerVoltageList[(x-6)/2] = voltage
