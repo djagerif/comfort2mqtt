@@ -47,7 +47,7 @@ COMFORT_KEY = "00000000"          # Default Refresh Key.
 
 MAX_ZONES = 96                    # Configurable for future expansion
 MAX_OUTPUTS = 96                  # Configurable for future expansion
-BATTERYKEEPALIVES = False         # Set to True if Cytech ever implement D?0001/D?0002 battery query commands. This will change Keepalives to monitor batteries also.
+BATTERYKEEPALIVES = True         # Set to True if Cytech ever implement D?0000 battery query commands. This will change Keepalives to monitor batteries also.
 
 rand_hex_str = hex(randint(268435456, 4294967295))
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts.
@@ -1293,9 +1293,7 @@ class Comfort2(mqtt.Client):
                 err = e.args[0]
                 if err == 'timed out':
                     if BATTERYKEEPALIVES and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
-                        self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
-                        time.sleep(0.1)
-                        self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
+                        self.comfortsock.sendall("\x03D?0000\r".encode()) #echo command for keepalive on ARM 8.xxx firmware and later.
                     else:
                         self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                     SAVEDTIME = datetime.now()
@@ -2269,9 +2267,7 @@ class Comfort2(mqtt.Client):
 
                             if datetime.now() > SAVEDTIME + TIMEOUT:            #
                                 if BATTERYKEEPALIVES and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
-                                    self.comfortsock.sendall("\x03D?0001\r".encode()) #Possible future echo command for keepalive
-                                    time.sleep(0.1)
-                                    self.comfortsock.sendall("\x03D?0002\r".encode()) #Possible future echo command for keepalive
+                                    self.comfortsock.sendall("\x03D?0000\r".encode()) #echo command for keepalive on ARM v8.xxx and later
                                 else:
                                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                                 SAVEDTIME = datetime.now()
@@ -2763,9 +2759,7 @@ class Comfort2(mqtt.Client):
                             else:
                                 if datetime.now() > (SAVEDTIME + TIMEOUT):  # If no command sent in 2 minutes then send keepalive.
                                     if BATTERYKEEPALIVES and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
-                                        self.comfortsock.sendall("\x03D?0001\r".encode()) #echo command for keepalive
-                                        time.sleep(0.1)
-                                        self.comfortsock.sendall("\x03D?0002\r".encode()) #echo command for keepalive
+                                        self.comfortsock.sendall("\x03D?0000\r".encode()) #echo command for keepalive on ARM v8.xxx and later
                                     else:
                                         self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive. cc00
                                     SAVEDTIME = datetime.now()

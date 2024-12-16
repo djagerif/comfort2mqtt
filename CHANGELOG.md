@@ -5,13 +5,18 @@
 ## [1.3.0] - Busy...
 
 ### Added
+ - Added D?0000 for future ARM processor keepalives abd Battery Check. Implement check to see if new command is supported. Busy...
+
+
+## [1.2.6] - 2024-12-15
+
+### Added
  
 ### Changed
  - Updated ARM Battery Status voltage levels accordingto Cytech requirements.
 
 ### Fixed
  
-
 
 ## [1.2.5] - 2024-12-14
 
