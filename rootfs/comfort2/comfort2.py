@@ -1710,9 +1710,9 @@ class Comfort2(mqtt.Client):
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
-                             "state_topic": DOMAIN,
+                             "state_topic": DOMAIN+"/alarm/battery_status",
                              "value_template": "{{ value_json.BatteryStatus }}",
-                             "json_attributes_topic": DOMAIN,
+                             "json_attributes_topic": DOMAIN+"/alarm/battery_status",
                              "json_attributes_template": '''
                                 {% set data = value_json %}
                                 {% set slaves = data['InstalledSlaves'] %}
@@ -1746,9 +1746,9 @@ class Comfort2(mqtt.Client):
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
-                             "state_topic": DOMAIN,
+                             "state_topic": DOMAIN+"/alarm/battery_status",
                              "value_template": "{{ value_json.ChargerStatus }}",
-                             "json_attributes_topic": DOMAIN,
+                             "json_attributes_topic": DOMAIN+"/alarm/battery_status",
                              "json_attributes_template": '''
                                 {% set data = value_json %}
                                 {% set slaves = data['InstalledSlaves'] %}
