@@ -2564,6 +2564,7 @@ class Comfort2(mqtt.Client):
                                     logging.error("Addon will now exit")
                                     self.exit_gracefully(1,1)
                                     self.loop_stop
+                                    break
 
                             elif line[1:5] == "u?01":       # Determine CPU type if available.
                                 uMsg = Comfort_U_SystemCPUTypeReport(line[1:])
