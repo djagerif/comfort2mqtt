@@ -2,19 +2,19 @@
  - When LAN connectivity is lost for an extended period the LWT and 'online' topics are not updated.
  - Perhaps exit on FW check instead of just a warning...
  - Add initial battery query on ARM. Check for D?0000 replies, if not, stay with cc00 and Battery Automation.
- - Split Battery and Charger thresholds
  - Split Battery Voltages from Comfort2mqtt main - too many updates for fully populated system.
 
 ## [1.3.0] - Busy...
 
 ### Added
- - Added D?0000 for future ARM processor keepalives and Battery Check. Implement check to see if new command is supported. Busy...
+ - Added D?0000 for future ARM processor keepalives and Battery Check. !!! To implement check to see if new command is supported. Busy...
+ add battery_status topic.
 
 ### Changed
  - Upgraded to Alpine Linux 3.21.0
- - Updated ARM Charger Threshold levels according to Cytech requirements.
 
 ### Fixed
+- Updated ARM Charger Threshold levels according to Cytech requirements.
 
 
 ## [1.2.6] - 2024-12-15

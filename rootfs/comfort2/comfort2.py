@@ -54,6 +54,7 @@ mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client
 
 REFRESHTOPIC = DOMAIN+"/alarm/refresh"                  # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
 BATTERYREFRESHTOPIC = DOMAIN+"/alarm/battery_update"    # Used to request Battery and Charger updates. To be used by HA Automation for periodic polling.
+BATTERYSTATUSTOPIC = DOMAIN+"/alarm/battery_status"     # List of Battery and Charger Status.
 
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
@@ -2511,7 +2512,8 @@ class Comfort2(mqtt.Client):
 
                                 # Determine Battery/Charge Voltage and Device ID. Save Values in Comfort_D_SystemVoltageReport
                                 DLMsg = Comfort_D_SystemVoltageReport(line[1:])     # Return value not used currently.
-                                
+                                self.publish(BATTERYSTATUSTOPIC, DLMsg.modename,qos=2,retain=False)     
+
                                 self.UpdateDeviceInfo(True)     # Update Device properties.
                                 
                             elif line[1:5] == "SN01":       # Comfort Encoded Serial Number - Used for Refresh Key
