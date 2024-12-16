@@ -2550,7 +2550,7 @@ class Comfort2(mqtt.Client):
 
                                 self.UpdateDeviceInfo(True)     # Update Device properties.
                                 
-                                current_firmware = float(VMsg.version & "." & VMsg.revision)
+                                current_firmware = float(str(VMsg.version) + "." + str(VMsg.revision))
                                 supported_firmware = 7.201
 
                                 logging.info("%s detected (Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown device", VMsg.version, VMsg.revision)
