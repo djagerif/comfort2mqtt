@@ -2,7 +2,7 @@
  - When LAN connectivity is lost for an extended period the LWT and 'online' topics are not updated.
  - Perhaps exit on FW check instead of just a warning...
  - Add initial battery query on ARM. Check for D?0000 replies, if not, stay with cc00 and Battery Automation.
- - Split Battery Voltages from Comfort2mqtt main - too many updates for fully populated system.
+ - Split Battery Voltages from Comfort2mqtt main - too many updates for fully populated system. Testing. Removed from main topic.
 
 ## [1.3.0] - Busy...
 
