@@ -1494,7 +1494,8 @@ class Comfort2(mqtt.Client):
                              "ChargerSlave4": str(device_properties['ChargeVoltageSlave4']),
                              "ChargerSlave5": str(device_properties['ChargeVoltageSlave5']),
                              "ChargerSlave6": str(device_properties['ChargeVoltageSlave6']),
-                             "ChargerSlave7": str(device_properties['ChargeVoltageSlave7'])
+                             "ChargerSlave7": str(device_properties['ChargeVoltageSlave7']),
+                             "InstalledSlaves": int(device_properties['sem_id'])
                             })
         self.publish(discoverytopic, MQTT_MSG,qos=2,retain=False)
         time.sleep(0.1)
@@ -2017,7 +2018,8 @@ class Comfort2(mqtt.Client):
                              "ChargerSlave4": str(device_properties['ChargeVoltageSlave4']),
                              "ChargerSlave5": str(device_properties['ChargeVoltageSlave5']),
                              "ChargerSlave6": str(device_properties['ChargeVoltageSlave6']),
-                             "ChargerSlave7": str(device_properties['ChargeVoltageSlave7'])
+                             "ChargerSlave7": str(device_properties['ChargeVoltageSlave7']),
+                             "InstalledSlaves": int(device_properties['sem_id'])
                             })
             infot = self.publish(discoverytopic, MQTT_MSG,qos=2,retain=False)
             infot.wait_for_publish()
