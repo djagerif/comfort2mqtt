@@ -912,7 +912,7 @@ class Comfort_D_SystemVoltageReport(object):
             self.BatteryStatus = self.Battery_Status(BatteryVoltageList.values())
             device_properties['BatteryStatus'] = self.BatteryStatus
         elif query_type == 2:
-            self.ChargerStatus = self.Battery_Status(ChargerVoltageList.values())
+            self.ChargerStatus = self.Charger_Status(ChargerVoltageList.values())
             device_properties['ChargerStatus'] = self.ChargerStatus
 
     def Battery_Status(self, voltages):  # Tuple of all voltages.
@@ -923,7 +923,7 @@ class Comfort_D_SystemVoltageReport(object):
                 index.append(0)
             elif float(voltage) > 15:           # Critical Overcharge
                 index.append(2)
-            elif float(voltage) > 14.6:         # Overcharge(Value to be determined still)
+            elif float(voltage) > 14.6:         # Overcharge
                 index.append(1)
             elif float(voltage) <= 9.5:         # Discharged/Critical Low Charge or No Charge
                 index.append(2)
@@ -933,6 +933,24 @@ class Comfort_D_SystemVoltageReport(object):
                 index.append(0)
         return state[max(index)]
 
+    def Charger_Status(self, voltages):  # Tuple of all voltages.
+        state = ["Ok","Warning","Critical"]
+        index = []
+        for voltage in voltages:
+            if float(voltage) == -1:
+                index.append(0)
+            elif float(voltage) > 18:           # Critical Overcharge
+                index.append(2)
+            elif float(voltage) > 17:           # Overcharge
+                index.append(1)
+            elif float(voltage) <= 7:           # Critical Low Charge or No Charge
+                index.append(2)
+            elif float(voltage) < 12:           # Low Charge
+                index.append(1)
+            else:
+                index.append(0)
+        return state[max(index)]
+    
 class ComfortSN_SerialNumberReport(object):     # Possible Comfort SN decode issue. Sometimes Comfort reports 'Illegal' serial number.
     def __init__(self, data={}):
 
