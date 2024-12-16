@@ -1473,6 +1473,32 @@ class Comfort2(mqtt.Client):
             if BROKERCONNECTED and COMFORTCONNECTED:
                 self.publish(ALARMCONNECTEDTOPIC, 1,qos=2,retain=True)
 
+    def UpdateBatteryStatus(self):
+        global device_properties
+
+        discoverytopic = DOMAIN + "/alarm/battery_status"
+        MQTT_MSG=json.dumps({"BatteryStatus": str(device_properties['BatteryStatus']),
+                             "ChargerStatus": str(device_properties['ChargerStatus']),
+                             "BatteryMain": str(device_properties['BatteryVoltageMain']),
+                             "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
+                             "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
+                             "BatterySlave3": str(device_properties['BatteryVoltageSlave3']),
+                             "BatterySlave4": str(device_properties['BatteryVoltageSlave4']),
+                             "BatterySlave5": str(device_properties['BatteryVoltageSlave5']),
+                             "BatterySlave6": str(device_properties['BatteryVoltageSlave6']),
+                             "BatterySlave7": str(device_properties['BatteryVoltageSlave7']),
+                             "ChargerMain": str(device_properties['ChargeVoltageMain']),
+                             "ChargerSlave1": str(device_properties['ChargeVoltageSlave1']),
+                             "ChargerSlave2": str(device_properties['ChargeVoltageSlave2']),
+                             "ChargerSlave3": str(device_properties['ChargeVoltageSlave3']),
+                             "ChargerSlave4": str(device_properties['ChargeVoltageSlave4']),
+                             "ChargerSlave5": str(device_properties['ChargeVoltageSlave5']),
+                             "ChargerSlave6": str(device_properties['ChargeVoltageSlave6']),
+                             "ChargerSlave7": str(device_properties['ChargeVoltageSlave7'])
+                            })
+        self.publish(discoverytopic, MQTT_MSG,qos=2,retain=False)
+        time.sleep(0.1)
+
     def UpdateDeviceInfo(self, _file = False):
 
         global device_properties
@@ -2512,9 +2538,8 @@ class Comfort2(mqtt.Client):
 
                                 # Determine Battery/Charge Voltage and Device ID. Save Values in Comfort_D_SystemVoltageReport
                                 DLMsg = Comfort_D_SystemVoltageReport(line[1:])     # Return value not used currently.
-                                self.publish(BATTERYSTATUSTOPIC, DLMsg.modename,qos=2,retain=False)     
-
-                                self.UpdateDeviceInfo(True)     # Update Device properties.
+                                self.UpdateBatteryStatus()
+                                #self.UpdateDeviceInfo(True)     # Update Device properties.
                                 
                             elif line[1:5] == "SN01":       # Comfort Encoded Serial Number - Used for Refresh Key
                                 SNMsg = ComfortSN_SerialNumberReport(line[1:])
