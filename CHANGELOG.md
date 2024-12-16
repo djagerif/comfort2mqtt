@@ -1,6 +1,5 @@
 ## Known Issues
  - When LAN connectivity is lost for an extended period the LWT and 'online' topics are not updated.
- - Perhaps exit on FW check instead of just a warning...
  - Add initial battery query on ARM. Check for D?0000 replies, if not, stay with cc00 and Battery Automation.
  - Split Battery Voltages from Comfort2mqtt main - too many updates for fully populated system. Testing. Removed from main topic. Update DOCS.
  - Determine D?0000 support eg firmware version or just a check.
@@ -10,6 +9,7 @@
 ### Added
  - Added D?0000 for future ARM processor keepalives and Battery Check. !!! To implement check to see if new command is supported. Busy...
  add battery_status topic.
+ - Add "Unsupported Firmware" message to log if detected.
 
 ### Changed
  - Upgraded to Alpine Linux 3.21.0

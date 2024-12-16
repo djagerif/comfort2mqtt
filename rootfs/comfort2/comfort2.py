@@ -2561,9 +2561,6 @@ class Comfort2(mqtt.Client):
                                     logging.info("%s detected (Supported Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown device", VMsg.version, VMsg.revision)
                                 else:
                                     logging.error("%s detected (Unsupported Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown device", VMsg.version, VMsg.revision)
-                                    logging.error("Addon will now exit")
-                                    self.exit_gracefully(1,1)
-                                    os._exit(0)
 
                             elif line[1:5] == "u?01":       # Determine CPU type if available.
                                 uMsg = Comfort_U_SystemCPUTypeReport(line[1:])
