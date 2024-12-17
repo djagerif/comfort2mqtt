@@ -1173,7 +1173,7 @@ class Comfort2(mqtt.Client):
                 SAVEDTIME = datetime.now()
             else:
                 logger.warning("Unsupported MQTT Battery Update query received for ID: %s.", msgstr.strip('"'))
-                logger.warning("Valid ID's: [0,1,33-39]")
+                logger.warning("Valid ID's: [0,1,33-39] with ARM-powered Comfort is required.")
 
         elif msg.topic.startswith("homeassistant") and msg.topic.endswith("/status"):
             if msgstr == "online":
@@ -1484,6 +1484,8 @@ class Comfort2(mqtt.Client):
 
             if BROKERCONNECTED and COMFORTCONNECTED:
                 self.publish(ALARMCONNECTEDTOPIC, 1,qos=2,retain=True)
+                time.sleep(0.1)
+                self.UpdateBatteryStatus()
 
     def UpdateBatteryStatus(self):
         global device_properties

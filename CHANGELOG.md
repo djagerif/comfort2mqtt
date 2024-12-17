@@ -1,20 +1,18 @@
 ## Known Issues
  - When LAN connectivity is lost for an extended period the LWT and 'online' topics are not updated.
  - Add initial battery query on ARM. Check for D?0000 replies, if not, stay with cc00 and Battery Automation.
- - Split Battery Voltages from Comfort2mqtt main - too many updates for fully populated system. Testing. Removed from main topic. Update DOCS.
- - Determine D?0000 support eg firmware version or just a check.
+
 
 ## [1.3.0] - Busy...
 
 ### Added
- - Added D?0000 for future ARM processor keepalives and Battery Check. !!! To implement check to see if new command is supported. Busy...
- add battery_status topic.
+ - Added D?0000 for future ARM processor firmware.
  - Add "Unsupported Firmware" message to log if detected.
 
 ### Changed
- - Upgraded to Alpine Linux 3.21.0
- - Optimise MQTT Main topic for improved speed. Split Battery and Charger to seperate topic.
- - Expanded on Battery Check Automation. Allowing '0' for bulk updates also.
+ - Using Alpine Linux 3.21.0 as the Home Assistant base image has been upgraded.
+ - Optimise MQTT Main topic for improved speed. Split Battery and Charger information to seperate topic.
+ - Expanded on Battery Check Home Assistant Automation. Allowing '0' for bulk updates with improved logging messages.
 
 ### Fixed
 - Updated ARM Charger Threshold levels according to Cytech requirements.
