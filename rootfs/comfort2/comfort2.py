@@ -44,6 +44,7 @@ ADDON_SLUG = ''
 ADDON_VERSION = "N/A"
 COMFORT_SERIAL = "00000000"       # Default Serial Number.
 COMFORT_KEY = "00000000"          # Default Refresh Key.
+SupportedFirmware = float(7.201)  # Minimum Supported firmware.
 
 MAX_ZONES = 96                    # Configurable for future expansion
 MAX_OUTPUTS = 96                  # Configurable for future expansion
@@ -2559,13 +2560,13 @@ class Comfort2(mqtt.Client):
                                 self.UpdateDeviceInfo(True)     # Update Device properties.
                                 
                                 current_firmware = float(str(VMsg.version) + "." + str(VMsg.revision).zfill(3))
-                                supported_firmware = float(7.201)
-                                logging.info("current: %s", current_firmware)
-                                logging.info("supported: %s", supported_firmware)
+                                #supported_firmware = float(SupportedFirmware)
+                                #logging.info("current: %s", current_firmware)
+                                logging.info("supported: %s", float(self.SupportedFirmware))
                                              
                                 #logging.info("%s detected (Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown device", VMsg.version, VMsg.revision)
 
-                                if current_firmware >= supported_firmware:
+                                if current_firmware >= self.SupportedFirmware:
                                     logging.info("%s detected (Supported Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown device", VMsg.version, VMsg.revision)
                                 else:
                                     logging.error("%s detected (Unsupported Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown device", VMsg.version, VMsg.revision)
