@@ -1,3 +1,18 @@
+## [1.3.0] - 2024-12-17
+
+### Added
+ - Added D?0000 for future ARM processor firmware.
+ - Add "Unsupported Firmware" message to log if detected.
+
+### Changed
+ - Using Alpine Linux 3.21.0 as the Home Assistant base image has been upgraded.
+ - Optimise MQTT Main topic for improved speed. Split Battery and Charger information to seperate topic.
+ - Expanded on Battery Check Home Assistant Automation. Allowing '0' for bulk updates with improved logging messages.
+
+### Fixed
+- Updated ARM Charger Threshold levels according to Cytech requirements.
+
+
 ## [1.2.6] - 2024-12-15
 
 ### Added
@@ -7,7 +22,6 @@
 
 ### Fixed
  
-
 
 ## [1.2.5] - 2024-12-14
 

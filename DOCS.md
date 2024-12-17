@@ -36,7 +36,8 @@ comfort2mqtt/alarm/LWT - Online or Offline text status
 comfort2mqtt/alarm/refresh - Trigger a refresh of all objects. Used when a refresh of all object states are required.
 comfort2mqtt/alarm/connected - Status of LAN Connection to Comfort. '1' when connected and logged in.
 comfort2mqtt/alarm/doorbell - '0' for off/answered or '1' for on
-comfort2mqtt/alarm/mode - Integer values for current Alarm Mode. 0 - 4 (Off, Away, Night, Day, Vacation), See Comfort M? or MD documentation. 
+comfort2mqtt/alarm/mode - Integer values for current Alarm Mode. 0 - 4 (Off, Away, Night, Day, Vacation), See Comfort M? or MD documentation.
+ comfort2mqtt/alarm/battery_status - ARM based systems support battery and charger sensors.
 
 comfort2mqtt/input<1 to 96> (Zone Input) have the following JSON attributes EG.
 {
@@ -102,7 +103,7 @@ The following MQTT topics are subscribed.
 comfort2mqtt/alarm/set - sent from Home Assistant, DISARM, ARMED_HOME, ARMED_NIGHT, ARMED_VACATION or ARMED_AWAY
 comfort2mqtt/alarm/refresh - sent from Home Assistant, <Key> triggers a complete object refresh
 comfort2mqtt/alarm/battery_update - sent from Home Assistant, <id> triggers a battery update query 'D?id01 and D?id02
-                                    id's 1,33-37 are supported for Main and Slaves when ARM CPU is detected.
+                                    id's 0,1,33-37 are supported for Main and Slaves when ARM CPU is detected. 0 for bulk if supported.
 
 comfort2mqtt/input<1 to 96>/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input
 comfort2mqtt/input<129 to 248>/set
@@ -358,26 +359,39 @@ mode: single
 
 ## Home Assistant - 'Battery Update' Automation (Optional)
 
-The latest Comfort ARM powered boards have the ability to report on individual Battery and DC Charger voltages. Below is an automation you can use to query Comfort every minute for these values. You can safely extend the interval to 15 minutes or more as voltages don't usually change abruptly in a mostly-floating voltage device operation.
+The latest Comfort ARM-powered boards can report individual Battery and DC Charger voltages. Below is an automation you can use to query Comfort every minute for these values. You can safely extend the interval to 15 minutes or more as voltages don't usually change abruptly in a mostly-floating voltage device operation.
 
 ⚠️ **Note:** If you try this on a non-ARM powered mainboard then a warning message will be displayed in the Addon log as shown below.
 
-`2024-08-08 19:05:22 WARNING  Unsupported MQTT Battery Update query received.`
+`2024-08-08 19:05:22 WARNING  Unsupported MQTT Battery Update query received for ID: <UCMID>.`
+`2024-08-08 19:05:22 WARNING  Valid ID's: [0,1,33-39] with ARM-powered Comfort is required.`
 
-Voltage Levels are internally defined as per below and will output a log message accordingly:
+Threshold values are internally defined as per below and will output a log message accordingly.
+
+**Battery Voltage Levels:**
 
   voltage > 15:       # Critical Overcharge
 
   voltage > 14.6:     # Overcharge
 
-  voltage <= 9.5:     # Battery Flat/Crital Charge or No Charge
+  voltage <= 9.5:     # Battery Flat
 
-  voltage < 11.5:     # Discharged/Low Charge
+  voltage < 11.5:     # Discharged
 
-When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery voltage and the second for the Charger voltage expressed as an 8-bit value with a 18.27V Maximum voltage. The formula for voltage calculation, using the example below, is:
+**Charger Voltage Levels:**
+
+  voltage > 18:       # Critical Overcharge
+
+  voltage > 17:       # Overcharge
+
+  voltage <= 7:       # Crital Low Charge or No Charge
+
+  voltage < 12:       # Low Charge
+
+When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery voltage and the second for the Charger voltage expressed as an 8-bit value. The formulas for voltage calculation, using the examples below, are:
 
 ```
-Battery Voltage = 196/255 * (3.3/2.71) * 15V = 14.04V
+Battery Voltage = 196/255 * 15.5V = 11.91V
 Charger Voltage = 199/255 * (3.3/2.71) * 15V = 14.25V
 ```
 ```
@@ -410,7 +424,7 @@ action:
     action: mqtt.publish
 mode: single
 ```
-
+⚠️ **Note:** For supported ARM-based firmware you can change the 'payload' data from e.g. "1" to "0" for a bulk update of all voltages. It does however require a new Comfort ARM firmware which is currently still in development.
 
 ## Hardware and Interface support
 
