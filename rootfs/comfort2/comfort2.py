@@ -1152,7 +1152,14 @@ class Comfort2(mqtt.Client):
                 Devices.append(str(device + 33))    # First Slave at address 33 DEC.
 
             if msgstr.strip('"') in Devices and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
+                
                 ID = str(f"{int(msgstr.strip('"')):02X}")
+
+                logger.info("msgstr: %s", msgstr.strip('"'))
+                logger.info("ID: %s", ID)
+
+
+
                 Command = "\x03D?" + ID + "01\r"
                 self.comfortsock.sendall(Command.encode()) # Battery Status Update
                 time.sleep(0.1)
