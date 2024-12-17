@@ -1156,11 +1156,11 @@ class Comfort2(mqtt.Client):
                 
                 ID = str(f"{int(msgstr.strip('"')):02X}")
 
-                logger.info("msgstr: %s", msgstr.strip('"'))
-                logger.info("msgstr type: %s", type(msgstr.strip('"')))
+                #logger.info("msgstr: %s", msgstr.strip('"'))
+                #logger.info("msgstr type: %s", type(msgstr.strip('"')))
 
                 #logger.info("ID: %s", ID)
-                if msgstr.strip('"') == '2':
+                if msgstr.strip('"') == '0':
                     Command = "\x03D?0000\r"
                     self.comfortsock.sendall(Command.encode()) # Battery Status Update
                 else:
@@ -1172,7 +1172,8 @@ class Comfort2(mqtt.Client):
                     time.sleep(0.1)
                 SAVEDTIME = datetime.now()
             else:
-                logger.warning("Unsupported MQTT Battery Update query received for ID:%s.", msgstr.strip('"'))
+                logger.warning("Unsupported MQTT Battery Update query received for ID: %s.", msgstr.strip('"'))
+                logger.warning("Valid ID's: [0,1,33-39]")
 
         elif msg.topic.startswith("homeassistant") and msg.topic.endswith("/status"):
             if msgstr == "online":

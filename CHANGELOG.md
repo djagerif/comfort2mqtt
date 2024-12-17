@@ -14,6 +14,7 @@
 ### Changed
  - Upgraded to Alpine Linux 3.21.0
  - Optimise MQTT Main topic for improved speed. Split Battery and Charger to seperate topic.
+ - Expanded on Battery Check Automation. Allowing '0' for bulk updates also.
 
 ### Fixed
 - Updated ARM Charger Threshold levels according to Cytech requirements.
