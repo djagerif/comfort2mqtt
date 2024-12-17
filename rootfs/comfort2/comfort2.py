@@ -2330,6 +2330,7 @@ class Comfort2(mqtt.Client):
         global BypassCache
         global CacheState
         global models
+        global SupportedFirmware
 
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         if os.name != 'nt':
@@ -2562,11 +2563,11 @@ class Comfort2(mqtt.Client):
                                 current_firmware = float(str(VMsg.version) + "." + str(VMsg.revision).zfill(3))
                                 #supported_firmware = float(SupportedFirmware)
                                 #logging.info("current: %s", current_firmware)
-                                logging.info("supported: %s", float(self.SupportedFirmware))
+                                logging.info("supported: %s", float(SupportedFirmware))
                                              
                                 #logging.info("%s detected (Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown device", VMsg.version, VMsg.revision)
 
-                                if current_firmware >= self.SupportedFirmware:
+                                if current_firmware >= SupportedFirmware:
                                     logging.info("%s detected (Supported Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown device", VMsg.version, VMsg.revision)
                                 else:
                                     logging.error("%s detected (Unsupported Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown device", VMsg.version, VMsg.revision)
