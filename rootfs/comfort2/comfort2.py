@@ -1156,7 +1156,9 @@ class Comfort2(mqtt.Client):
                 
                 ID = str(f"{int(msgstr.strip('"')):02X}")
 
-                #logger.info("msgstr: %s", msgstr.strip('"'))
+                logger.info("msgstr: %s", msgstr.strip('"'))
+                logger.info("msgstr type: %s", type(msgstr.strip('"')))
+                
                 #logger.info("ID: %s", ID)
                 if msgstr.strip('"') == '2':
                     Command = "\x03D?0000\r"
