@@ -1,6 +1,5 @@
 ## Known Issues
  - When LAN connectivity is lost for an extended period the LWT and 'online' topics are not updated.
- - Add initial battery query on ARM. Check for D?0000 replies, if not, stay with cc00 and Battery Automation.
 
 
 ## [1.3.0] - Busy...
