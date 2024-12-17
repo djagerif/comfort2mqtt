@@ -1,6 +1,6 @@
 name: "Comfort to MQTT"
 description: "Cytech Comfort to MQTT bridge"
-version: "1.2.6"
+version: "1.4.0"
 slug: "comfort2mqtt"
 init: false
 startup: application
