@@ -1148,7 +1148,7 @@ class Comfort2(mqtt.Client):
         
         elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/battery_update"):
 
-            Devices = ['1']        # Mainboard + Installed Slaves EG. ['1','33','34','35']
+            Devices = ['0','1']        # Mainboard + Installed Slaves EG. ['1','33','34','35']. Added '0' for new command.
             for device in range(0, int(device_properties['sem_id'])):
                 Devices.append(str(device + 33))    # First Slave at address 33 DEC.
 
@@ -1158,7 +1158,7 @@ class Comfort2(mqtt.Client):
 
                 logger.info("msgstr: %s", msgstr.strip('"'))
                 logger.info("msgstr type: %s", type(msgstr.strip('"')))
-                
+
                 #logger.info("ID: %s", ID)
                 if msgstr.strip('"') == '2':
                     Command = "\x03D?0000\r"
@@ -1172,7 +1172,7 @@ class Comfort2(mqtt.Client):
                     time.sleep(0.1)
                 SAVEDTIME = datetime.now()
             else:
-                logger.warning("Unsupported MQTT Battery Update query received.")
+                logger.warning("Unsupported MQTT Battery Update query received for ID:%s.", msgstr.strip('"'))
 
         elif msg.topic.startswith("homeassistant") and msg.topic.endswith("/status"):
             if msgstr == "online":
@@ -2565,7 +2565,7 @@ class Comfort2(mqtt.Client):
                                 current_firmware = float(str(VMsg.version) + "." + str(VMsg.revision).zfill(3))
                                 #supported_firmware = float(SupportedFirmware)
                                 #logging.info("current: %s", current_firmware)
-                                logging.info("supported: %s", float(SupportedFirmware))
+                                #logging.info("supported: %s", float(SupportedFirmware))
                                              
                                 #logging.info("%s detected (Firmware %d.%03d)", models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown device", VMsg.version, VMsg.revision)
 
