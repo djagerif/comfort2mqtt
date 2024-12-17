@@ -1,8 +1,4 @@
-## Known Issues
- - When LAN connectivity is lost for an extended period the LWT and 'online' topics are not updated.
-
-
-## [1.3.0] - Busy...
+## [1.3.0] - 2024-12-17
 
 ### Added
  - Added D?0000 for future ARM processor firmware.
