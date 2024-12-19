@@ -1576,6 +1576,16 @@ class Comfort2(mqtt.Client):
         #                      "BridgeConnected": str(device_properties['BridgeConnected']),
         #                      "device": MQTT_DEVICE
         #                     })
+
+        # "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+        try:
+            if int(device_properties['ComfortFileSystem']) in models:
+                _model = models[int(device_properties['ComfortFileSystem'])]
+            else:
+                _model = "Unknown"
+        except:
+            _model = "Unknown"
+
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
                              "support_url": "https://www.cytech.biz",
                              "Reference": device_properties['Reference'] if file_exists else None,
@@ -1586,10 +1596,24 @@ class Comfort2(mqtt.Client):
                              "serial_number": device_properties['SerialNumber'],
                              "cpu_type": str(device_properties['CPUType']),
                              "InstalledSlaves": int(device_properties['sem_id']),
-                             "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
+                             "model": _model,
                              "BridgeConnected": str(device_properties['BridgeConnected']),
                              "device": MQTT_DEVICE
                             })
+        # MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
+        #                      "support_url": "https://www.cytech.biz",
+        #                      "Reference": device_properties['Reference'] if file_exists else None,
+        #                      "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
+        #                      "ComfortFirmwareType": device_properties['ComfortFirmwareType'] if file_exists else None,
+        #                      "sw_version":str(device_properties['Version']),
+        #                      "hw_version":str(device_properties['ComfortHardwareModel']),
+        #                      "serial_number": device_properties['SerialNumber'],
+        #                      "cpu_type": str(device_properties['CPUType']),
+        #                      "InstalledSlaves": int(device_properties['sem_id']),
+        #                      "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
+        #                      "BridgeConnected": str(device_properties['BridgeConnected']),
+        #                      "device": MQTT_DEVICE
+        #                     })
         self.publish(DOMAIN, MQTT_MSG,qos=2,retain=True)
         time.sleep(0.1)
 
@@ -2603,9 +2627,9 @@ class Comfort2(mqtt.Client):
                                     device_properties['ChargerStatus'] = "N/A"
                                     device_properties['BatteryStatus'] = "N/A"
 
-                                logging.debug("device_properties: %s", device_properties)
+                                #logging.debug("device_properties: %s", device_properties)
 
-                                self.UpdateDeviceInfo(False)     # Update Device properties.
+                                self.UpdateDeviceInfo(True)     # Update Device properties.
 
                             elif line[1:3] == "EL":       # Determine HW model number CM9000/9001 if available and number of Slave confirmation.
                                 ELMsg = Comfort_EL_HardwareModelReport(line[1:])
