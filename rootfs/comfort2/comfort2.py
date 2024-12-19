@@ -1382,16 +1382,16 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             
-            #get CPU Type
-            self.comfortsock.sendall("\x03u?01\r".encode())         # Get CPU type for Main board.
-            SAVEDTIME = datetime.now()
-            time.sleep(0.1)
-
-            #get Comfort type
+            #get Comfort FileSystem
             self.comfortsock.sendall("\x03V?\r".encode())
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             
+            #get CPU Type
+            self.comfortsock.sendall("\x03u?01\r".encode())         # Get CPU type for Main board.
+            SAVEDTIME = datetime.now()
+            time.sleep(0.1)
+                       
             # #get HW model
             self.comfortsock.sendall("\x03EL\r".encode())
             SAVEDTIME = datetime.now()
@@ -2627,9 +2627,9 @@ class Comfort2(mqtt.Client):
                                     device_properties['ChargerStatus'] = "N/A"
                                     device_properties['BatteryStatus'] = "N/A"
 
-                                #logging.debug("device_properties: %s", device_properties)
+                                logging.debug("device_properties: %s", device_properties)
 
-                                #self.UpdateDeviceInfo(True)     # Update Device properties.
+                                self.UpdateDeviceInfo(True)     # Update Device properties.
 
                             elif line[1:3] == "EL":       # Determine HW model number CM9000/9001 if available and number of Slave confirmation.
                                 ELMsg = Comfort_EL_HardwareModelReport(line[1:])
