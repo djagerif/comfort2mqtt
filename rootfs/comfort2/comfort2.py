@@ -1596,7 +1596,7 @@ class Comfort2(mqtt.Client):
                              "serial_number": device_properties['SerialNumber'],
                              "cpu_type": str(device_properties['CPUType']),
                              "InstalledSlaves": int(device_properties['sem_id']),
-                             "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+                             "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
                              "BridgeConnected": str(device_properties['BridgeConnected']),
                              "device": MQTT_DEVICE
                             })
