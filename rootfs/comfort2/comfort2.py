@@ -2629,7 +2629,7 @@ class Comfort2(mqtt.Client):
 
                                 #logging.debug("device_properties: %s", device_properties)
 
-                                self.UpdateDeviceInfo(True)     # Update Device properties.
+                                #self.UpdateDeviceInfo(True)     # Update Device properties.
 
                             elif line[1:3] == "EL":       # Determine HW model number CM9000/9001 if available and number of Slave confirmation.
                                 ELMsg = Comfort_EL_HardwareModelReport(line[1:])
