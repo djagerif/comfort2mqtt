@@ -5,6 +5,7 @@
 ### Changed
 
 ### Fixed
+ - Possible startup exception that can happen on new installation without a cclx file uploaded. Swapped V? and u?01 queries to correctly populate internal structure.
 
 
 ## [1.3.0] - 2024-12-17
