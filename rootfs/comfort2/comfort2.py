@@ -1578,13 +1578,13 @@ class Comfort2(mqtt.Client):
         #                     })
 
         # "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
-        try:
-            if int(device_properties['ComfortFileSystem']) in models:
-                _model = models[int(device_properties['ComfortFileSystem'])]
-            else:
-                _model = "Unknown"
-        except:
-            _model = "Unknown"
+        # try:
+        #     if int(device_properties['ComfortFileSystem']) in models:
+        #         _model = models[int(device_properties['ComfortFileSystem'])]
+        #     else:
+        #         _model = "Unknown"
+        # except:
+        #     _model = "Unknown"
 
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
                              "support_url": "https://www.cytech.biz",
@@ -1596,7 +1596,7 @@ class Comfort2(mqtt.Client):
                              "serial_number": device_properties['SerialNumber'],
                              "cpu_type": str(device_properties['CPUType']),
                              "InstalledSlaves": int(device_properties['sem_id']),
-                             "model": _model,
+                             "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
                              "BridgeConnected": str(device_properties['BridgeConnected']),
                              "device": MQTT_DEVICE
                             })
@@ -2627,7 +2627,7 @@ class Comfort2(mqtt.Client):
                                     device_properties['ChargerStatus'] = "N/A"
                                     device_properties['BatteryStatus'] = "N/A"
 
-                                logging.debug("device_properties: %s", device_properties)
+                                #logging.debug("device_properties: %s", device_properties)
 
                                 self.UpdateDeviceInfo(True)     # Update Device properties.
 
