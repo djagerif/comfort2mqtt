@@ -12,7 +12,7 @@ Cytech Comfort to MQTT bridge for Home Assistant.
 
 For more information about Cytech Comfort systems, please see the [Cytech Technology Pte Ltd.][cytech] website.
 
-If you find this AddOn useful, <a href="https://www.buymeacoffee.com/IngoDeJager" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 12px !important;width: 60px !important;" ></a>.
+If you find this AddOn useful, consider [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/ingodejager)
 
 [koochyrat]: https://github.com/koochyrat/comfort2
 [cytech]: http://www.cytech.biz/index.html
