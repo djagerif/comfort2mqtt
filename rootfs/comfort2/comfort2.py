@@ -1414,6 +1414,8 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall("\x03Z?\r".encode())       # Comfort Zones/Inputs
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
+
+            logging.debug("Config z value: %s", str(COMFORT_RIO_INPUTS))
             #get all SCS/RIO input states
             self.comfortsock.sendall("\x03z?\r".encode())       # Comfort SCS/RIO Inputs
             SAVEDTIME = datetime.now()
@@ -1422,6 +1424,8 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall("\x03Y?\r".encode())
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
+
+            logging.debug("Config y value: %s", str(COMFORT_RIO_OUTPUTS))
             #get all RIO output states
             self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all SCS/RIO Outputs
             SAVEDTIME = datetime.now()
