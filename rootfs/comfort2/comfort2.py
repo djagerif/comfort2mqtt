@@ -1079,7 +1079,8 @@ class Comfort2(mqtt.Client):
 
             for i in range(1, ALARMNUMBEROFRESPONSES + 1):      # Responses as specified from HA options.
                 self.subscribe(ALARMRESPONSECOMMANDTOPIC % i)
-            logger.debug("Subscribed to %d Responses", ALARMNUMBEROFRESPONSES)
+            if ALARMNUMBEROFRESPONSES > 0:
+                logger.debug("Subscribed to %d Responses", ALARMNUMBEROFRESPONSES)
 
             if FIRST_LOGIN == True:
                 logger.debug("Synchronizing Comfort Data...")
