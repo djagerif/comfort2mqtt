@@ -1041,7 +1041,10 @@ class Comfort2(mqtt.Client):
             for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
             
-            logger.debug("Subscribed to %d Zone Outputs", ALARMNUMBEROFOUTPUTS)
+            if ALARMNUMBEROFOUTPUTS > 0:
+                logger.debug("Subscribed to %d Zone Outputs", ALARMNUMBEROFOUTPUTS)
+            else:
+                logger.debug("Not Subscribed to any Zone Outputs")
 
             for i in ALARMVIRTUALINPUTRANGE: #for virtual inputs #inputs+1 to 128
                 self.subscribe(ALARMINPUTCOMMANDTOPIC % i)
@@ -1053,14 +1056,16 @@ class Comfort2(mqtt.Client):
 
             if COMFORT_RIO_INPUTS > 0:              
                 logger.debug("Subscribed to %d RIO Inputs", ALARMRIOINPUTRANGE[-1] - 128)
+            else:
+                logger.debug("Not Subscribed to any RIO Inputs")
 
             for i in ALARMRIOOUTPUTRANGE: #for outputs 129 to Max Value
                 self.subscribe(ALARMRIOOUTPUTCOMMANDTOPIC % i)
-                
+
             if COMFORT_RIO_OUTPUTS > 0:              
                 logger.debug("Subscribed to %d RIO Outputs", ALARMRIOOUTPUTRANGE[-1] - 128)
             else:
-                logger.debug("Subscribed to 0 RIO Outputs")
+                logger.debug("Not Subscribed to any RIO Outputs")
 
             for i in range(1, ALARMNUMBEROFFLAGS + 1):
                 if i >= 255:
@@ -1079,7 +1084,10 @@ class Comfort2(mqtt.Client):
 
             for i in range(1, ALARMNUMBEROFRESPONSES + 1):      # Responses as specified from HA options.
                 self.subscribe(ALARMRESPONSECOMMANDTOPIC % i)
-            logger.debug("Subscribed to %d Responses", ALARMNUMBEROFRESPONSES)
+            if ALARMNUMBEROFRESPONSES > 0:
+                logger.debug("Subscribed to %d Responses", ALARMNUMBEROFRESPONSES)
+            else:
+                logger.debug("Not Subscribed to any Responses")
 
             if FIRST_LOGIN == True:
                 logger.debug("Synchronizing Comfort Data...")
@@ -1382,16 +1390,16 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             
-            #get CPU Type
-            self.comfortsock.sendall("\x03u?01\r".encode())         # Get CPU type for Main board.
-            SAVEDTIME = datetime.now()
-            time.sleep(0.1)
-
-            #get Comfort type
+            #get Comfort FileSystem
             self.comfortsock.sendall("\x03V?\r".encode())
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
             
+            #get CPU Type
+            self.comfortsock.sendall("\x03u?01\r".encode())         # Get CPU type for Main board.
+            SAVEDTIME = datetime.now()
+            time.sleep(0.1)
+                       
             # #get HW model
             self.comfortsock.sendall("\x03EL\r".encode())
             SAVEDTIME = datetime.now()
@@ -1414,18 +1422,27 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall("\x03Z?\r".encode())       # Comfort Zones/Inputs
             SAVEDTIME = datetime.now()
             time.sleep(0.1)
+
+            #logging.debug("Config z value: %s", str(COMFORT_RIO_INPUTS))
             #get all SCS/RIO input states
-            self.comfortsock.sendall("\x03z?\r".encode())       # Comfort SCS/RIO Inputs
-            SAVEDTIME = datetime.now()
-            time.sleep(0.1)
+            if COMFORT_RIO_INPUTS > 0:
+                self.comfortsock.sendall("\x03z?\r".encode())       # Comfort SCS/RIO Inputs
+                SAVEDTIME = datetime.now()
+                time.sleep(0.1)
+
             #get all output states
-            self.comfortsock.sendall("\x03Y?\r".encode())
-            SAVEDTIME = datetime.now()
-            time.sleep(0.1)
+            if ALARMNUMBEROFOUTPUTS > 0:
+                self.comfortsock.sendall("\x03Y?\r".encode())
+                SAVEDTIME = datetime.now()
+                time.sleep(0.1)
+
+            #logging.debug("Config y value: %s", str(COMFORT_RIO_OUTPUTS))
             #get all RIO output states
-            self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all SCS/RIO Outputs
-            SAVEDTIME = datetime.now()
-            time.sleep(0.1)
+            if COMFORT_RIO_OUTPUTS > 0:
+                self.comfortsock.sendall("\x03y?\r".encode())       # Request/Report all SCS/RIO Outputs
+                SAVEDTIME = datetime.now()
+                time.sleep(0.1)
+
             #get all flag states
             self.comfortsock.sendall("\x03f?00\r".encode())
             SAVEDTIME = datetime.now()
@@ -1576,6 +1593,16 @@ class Comfort2(mqtt.Client):
         #                      "BridgeConnected": str(device_properties['BridgeConnected']),
         #                      "device": MQTT_DEVICE
         #                     })
+
+        # "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
+        # try:
+        #     if int(device_properties['ComfortFileSystem']) in models:
+        #         _model = models[int(device_properties['ComfortFileSystem'])]
+        #     else:
+        #         _model = "Unknown"
+        # except:
+        #     _model = "Unknown"
+
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
                              "support_url": "https://www.cytech.biz",
                              "Reference": device_properties['Reference'] if file_exists else None,
@@ -1590,6 +1617,20 @@ class Comfort2(mqtt.Client):
                              "BridgeConnected": str(device_properties['BridgeConnected']),
                              "device": MQTT_DEVICE
                             })
+        # MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
+        #                      "support_url": "https://www.cytech.biz",
+        #                      "Reference": device_properties['Reference'] if file_exists else None,
+        #                      "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
+        #                      "ComfortFirmwareType": device_properties['ComfortFirmwareType'] if file_exists else None,
+        #                      "sw_version":str(device_properties['Version']),
+        #                      "hw_version":str(device_properties['ComfortHardwareModel']),
+        #                      "serial_number": device_properties['SerialNumber'],
+        #                      "cpu_type": str(device_properties['CPUType']),
+        #                      "InstalledSlaves": int(device_properties['sem_id']),
+        #                      "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
+        #                      "BridgeConnected": str(device_properties['BridgeConnected']),
+        #                      "device": MQTT_DEVICE
+        #                     })
         self.publish(DOMAIN, MQTT_MSG,qos=2,retain=True)
         time.sleep(0.1)
 
@@ -2602,6 +2643,8 @@ class Comfort2(mqtt.Client):
                                     device_properties['ChargeVoltageSlave7'] = "-1"
                                     device_properties['ChargerStatus'] = "N/A"
                                     device_properties['BatteryStatus'] = "N/A"
+
+                                #logging.debug("device_properties: %s", device_properties)
 
                                 self.UpdateDeviceInfo(True)     # Update Device properties.
 
