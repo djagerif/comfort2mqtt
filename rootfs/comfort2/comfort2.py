@@ -1056,7 +1056,8 @@ class Comfort2(mqtt.Client):
 
             for i in ALARMRIOOUTPUTRANGE: #for outputs 129 to Max Value
                 self.subscribe(ALARMRIOOUTPUTCOMMANDTOPIC % i)
-                
+
+            logger.debug("RIO OUTPUTS: %d", COMFORT_RIO_OUTPUTS)    
             if COMFORT_RIO_OUTPUTS > 0:              
                 logger.debug("Subscribed to %d RIO Outputs", ALARMRIOOUTPUTRANGE[-1] - 128)
             else:
