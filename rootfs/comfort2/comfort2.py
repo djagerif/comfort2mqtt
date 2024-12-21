@@ -1041,7 +1041,10 @@ class Comfort2(mqtt.Client):
             for i in range(1, ALARMNUMBEROFOUTPUTS + 1):
                 self.subscribe(ALARMOUTPUTCOMMANDTOPIC % i)
             
-            logger.debug("Subscribed to %d Zone Outputs", ALARMNUMBEROFOUTPUTS)
+            if ALARMNUMBEROFOUTPUTS > 0:
+                logger.debug("Subscribed to %d Zone Outputs", ALARMNUMBEROFOUTPUTS)
+            else:
+                logger.debug("Not Subscribed to any Zone Outputs")
 
             for i in ALARMVIRTUALINPUTRANGE: #for virtual inputs #inputs+1 to 128
                 self.subscribe(ALARMINPUTCOMMANDTOPIC % i)
@@ -1053,14 +1056,16 @@ class Comfort2(mqtt.Client):
 
             if COMFORT_RIO_INPUTS > 0:              
                 logger.debug("Subscribed to %d RIO Inputs", ALARMRIOINPUTRANGE[-1] - 128)
+            else:
+                logger.debug("Not Subscribed to any RIO Inputs")
 
             for i in ALARMRIOOUTPUTRANGE: #for outputs 129 to Max Value
                 self.subscribe(ALARMRIOOUTPUTCOMMANDTOPIC % i)
 
             if COMFORT_RIO_OUTPUTS > 0:              
                 logger.debug("Subscribed to %d RIO Outputs", ALARMRIOOUTPUTRANGE[-1] - 128)
-            #else:
-            #    logger.debug("Subscribed to 0 RIO Outputs")
+            else:
+                logger.debug("Not Subscribed to any RIO Outputs")
 
             for i in range(1, ALARMNUMBEROFFLAGS + 1):
                 if i >= 255:
@@ -1081,6 +1086,8 @@ class Comfort2(mqtt.Client):
                 self.subscribe(ALARMRESPONSECOMMANDTOPIC % i)
             if ALARMNUMBEROFRESPONSES > 0:
                 logger.debug("Subscribed to %d Responses", ALARMNUMBEROFRESPONSES)
+            else:
+                logger.debug("Not Subscribed to any Responses")
 
             if FIRST_LOGIN == True:
                 logger.debug("Synchronizing Comfort Data...")

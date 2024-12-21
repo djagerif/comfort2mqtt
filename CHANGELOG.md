@@ -1,13 +1,12 @@
 ## [1.4.0] - Busy...
- - Do not query SCS/RIO if configuration is set to 0. y?00
- - Check all other's as well EG responses.
-
+ 
 ### Added
 
 ### Changed
+ - Do not query SCS/RIO Inputs/Outputs and Responses if set to 0 in the configuration.
 
 ### Fixed
- - Startup exception that can happen on new installation without a cclx file uploaded. Swapped V? and u?01 queries to correctly populate internal structure.
+ - Startup exception that can happen without a cclx file uploaded. Swapped V? and u?01 queries to correctly populate internal structure.
 
 
 ## [1.3.0] - 2024-12-17
