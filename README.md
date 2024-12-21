@@ -14,7 +14,6 @@ For more information about Cytech Comfort systems, please see the [Cytech Techno
 
 If you find this AddOn useful, consider
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/ingodejager)
-<a href="https://www.buymeacoffee.com/ingodejager" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
 [koochyrat]: https://github.com/koochyrat/comfort2
 [cytech]: http://www.cytech.biz/index.html
