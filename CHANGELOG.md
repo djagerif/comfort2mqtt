@@ -1,12 +1,11 @@
 ## [1.4.0] - Busy...
+ - Perhaps add Buy a Coffee option.
 
 ### Added
 
 ### Changed
- - Do not query SCS/RIO Inputs/Outputs and Responses if set to 0 in the configuration.
 
 ### Fixed
- - Startup exception that can happen without a cclx file uploaded. Swapped V? and u?01 queries to correctly populate internal structure.
 
 
 ## [1.3.1] - 2024-12-21
