@@ -9,11 +9,10 @@ Cytech Comfort to MQTT bridge for Home Assistant.
 [armhf-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 [armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
-<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="IngoDeJager" data-color="#FFDD00" data-emoji="☕"  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
 
 For more information about Cytech Comfort systems, please see the [Cytech Technology Pte Ltd.][cytech] website.
 
-If you find this AddOn useful, consider buying me a <a href="https://www.buymeacoffee.com/IngoDeJager" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>.
+If you find this AddOn useful, consider <a href="https://www.buymeacoffee.com/IngoDeJager" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 12px !important;width: 217px !important;" ></a>.
 
 [koochyrat]: https://github.com/koochyrat/comfort2
 [cytech]: http://www.cytech.biz/index.html
