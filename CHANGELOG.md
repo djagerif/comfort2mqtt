@@ -1,7 +1,8 @@
 ## [1.4.0] - Busy...
- - Perhaps add Buy a Coffee option.
-
+ 
+ 
 ### Added
+ 
 
 ### Changed
 
