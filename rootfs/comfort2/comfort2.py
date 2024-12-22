@@ -1712,9 +1712,6 @@ class Comfort2(mqtt.Client):
                              "device": MQTT_DEVICE
                             })
         if device_properties['CPUType'] != "N/A":
-            
-            logging.debug("MQTT_MSG: %s", MQTT_MSG)
-
             self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
             time.sleep(0.1)
 
