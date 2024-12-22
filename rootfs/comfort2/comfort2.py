@@ -320,7 +320,7 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-logger.debug("OPTION: %s", option)
+logger.debug("OPTION: %s", option)          # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
 ALPINE_VERSION = "N/A" if os.getenv('ALPINE_VERSION') == None else os.getenv('ALPINE_VERSION')
@@ -389,7 +389,7 @@ COMFORT_RESPONSES=int(option.alarm_responses)
 COMFORT_TIME=str(option.comfort_time)
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs)
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
-COMFORT_BATTERY_STATUS_ID=option.comfort_battery_update
+COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update)
 
 #logger.info("COMFORT_INPUTS: %s", str(COMFORT_INPUTS))
 #logger.info("COMFORT_BATTERY_STATUS_ID: %s", str(option.comfort_battery_update))
