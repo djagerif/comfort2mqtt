@@ -363,7 +363,7 @@ The latest Comfort ARM-powered boards can report individual Battery and DC Charg
 
 ⚠️ **Note:** If you try this on a non-ARM powered mainboard then a warning message will be displayed in the Addon log as shown below.
 
-`2024-08-08 19:05:22 WARNING  Unsupported MQTT Battery Update query received for ID: <UCMID>.`
+`2024-08-08 19:05:22 WARNING  Unsupported MQTT Battery Update query received for ID: <UCMID>.`  
 `2024-08-08 19:05:22 WARNING  Valid ID's: [0,1,33-39] with ARM-powered Comfort is required.`
 
 Threshold values are internally defined as per below and will output a log message accordingly.
