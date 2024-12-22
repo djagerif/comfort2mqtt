@@ -458,6 +458,7 @@ logger.debug('COMFORT_ADDRESS = %s', COMFORT_ADDRESS)
 logger.debug('COMFORT_PORT = %s', COMFORT_PORT)
 logger.debug('COMFORT_LOGIN_ID = ******')
 logger.debug('COMFORT_CCLX_FILE = %s', COMFORT_CCLX_FILE)
+logger.debug('COMFORT_BATTERY_STATUS_ID = %s', str(COMFORT_BATTERY_STATUS_ID))
 logger.debug('MQTT_CA_CERT = %s', MQTT_CA_CERT)          
 logger.debug('MQTT_CLIENT_CERT = %s', MQTT_CLIENT_CERT)  
 logger.debug('MQTT_CLIENT_KEY = %s', MQTT_CLIENT_KEY)    
@@ -1691,6 +1692,7 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
         
+        logging.debug("COMFORT_BATTERY_STATUS_ID: %s", str(COMFORT_BATTERY_STATUS_ID))
 
         discoverytopic = "homeassistant/button/comfort2mqtt/battery_update/config"
         MQTT_MSG=json.dumps({"name": "Battery Update",
@@ -1707,6 +1709,9 @@ class Comfort2(mqtt.Client):
                              "device": MQTT_DEVICE
                             })
         if device_properties['CPUType'] != "N/A":
+            
+            logging.debug("MQTT_MSG: %s", MQTT_MSG)
+
             self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
             time.sleep(0.1)
 
