@@ -1554,6 +1554,8 @@ class Comfort2(mqtt.Client):
         global ADDON_SLUG
         global file_exists
 
+        COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update)
+        
         file_exists = _file
   
         if ADDON_SLUG.strip() == "":
