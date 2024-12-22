@@ -385,7 +385,10 @@ COMFORT_RESPONSES=int(option.alarm_responses)
 COMFORT_TIME=str(option.comfort_time)
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs)
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
-COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_status_id)
+COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update)
+
+logger.info("COMFORT_BATTERY_STATUS_ID: %s", str(COMFORT_BATTERY_STATUS_ID))
+exit(0)
 
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 if COMFORT_INPUTS < 8:
