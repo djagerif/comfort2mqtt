@@ -44,13 +44,12 @@ ADDON_SLUG = ''
 ADDON_VERSION = "N/A"
 COMFORT_SERIAL = "00000000"       # Default Serial Number.
 COMFORT_KEY = "00000000"          # Default Refresh Key.
-COMFORT_BATTERY_STATUS_ID = 1     # Default Battery Status ID.
 
 SupportedFirmware = float(7.201)  # Minimum Supported firmware.
 
 MAX_ZONES = 96                    # Configurable for future expansion
 MAX_OUTPUTS = 96                  # Configurable for future expansion
-BATTERYKEEPALIVES = True         # Set to True if Cytech ever implement D?0000 battery query commands. This will change Keepalives to monitor batteries also.
+BATTERYKEEPALIVES = True          # Can be removed, not using D?0000 as keepalives.
 
 rand_hex_str = hex(randint(268435456, 4294967295))
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts.
@@ -387,7 +386,7 @@ COMFORT_RESPONSES=int(option.alarm_responses)
 COMFORT_TIME=str(option.comfort_time)
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs)
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
-COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update)
+COMFORT_BATTERY_STATUS_ID=option.comfort_battery_update
 
 logger.info("COMFORT_BATTERY_STATUS_ID: %s", str(COMFORT_BATTERY_STATUS_ID))
 
