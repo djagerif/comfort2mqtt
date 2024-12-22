@@ -320,6 +320,8 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
+logger.debug("OPTION: %s", option)
+
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
 ALPINE_VERSION = "N/A" if os.getenv('ALPINE_VERSION') == None else os.getenv('ALPINE_VERSION')
 
