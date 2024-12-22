@@ -269,6 +269,10 @@ group.add_argument(
     help='Comfort (CCLX) Configuration filename.')
 
 group.add_argument(
+    '--comfort-battery-status',
+    help="Comfort MQTT Bridge Battery Update query ID. [default: '1']")
+
+group.add_argument(
     '--comfort-time',
     type=boolean_string, default='false',
     help="Set Comfort Date and Time flag, 'True'|'False'. [default: 'False']")
@@ -381,6 +385,7 @@ COMFORT_RESPONSES=int(option.alarm_responses)
 COMFORT_TIME=str(option.comfort_time)
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs)
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
+COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_status)
 
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 if COMFORT_INPUTS < 8:
@@ -1156,7 +1161,7 @@ class Comfort2(mqtt.Client):
         
         elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/battery_update"):
 
-            Devices = ['0','1']        # Mainboard + Installed Slaves EG. ['1','33','34','35']. Added '0' for new command.
+            Devices = ['0','1']        # Mainboard + Installed Slaves EG. ['0', '1','33','34','35' ti '39'].
             for device in range(0, int(device_properties['sem_id'])):
                 Devices.append(str(device + 33))    # First Slave at address 33 DEC.
 
@@ -1688,7 +1693,7 @@ class Comfort2(mqtt.Client):
                              "command_topic": BATTERYREFRESHTOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
-                             "payload_press": "1",
+                             "payload_press": COMFORT_BATTERY_STATUS_ID,
                              "icon":"mdi:battery-sync-outline",
                              "qos": "2",
                              "device": MQTT_DEVICE
