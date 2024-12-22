@@ -1695,8 +1695,6 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
         
-        logging.debug("COMFORT_BATTERY_STATUS_ID: %s", str(COMFORT_BATTERY_STATUS_ID))
-
         discoverytopic = "homeassistant/button/comfort2mqtt/battery_update/config"
         MQTT_MSG=json.dumps({"name": "Battery Update",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
