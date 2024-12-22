@@ -271,6 +271,7 @@ group.add_argument(
 
 group.add_argument(
     '--comfort-battery-update',
+    type=int, default=1,
     help="Comfort MQTT Bridge 'Battery Update' query ID. [default: '1']")
 
 group.add_argument(
@@ -318,8 +319,6 @@ logging.basicConfig(
     level=option.log_verbosity,
     datefmt='%Y-%m-%d %H:%M:%S'
 )
-
-logger.debug("OPTION: %s", option)          # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
 ALPINE_VERSION = "N/A" if os.getenv('ALPINE_VERSION') == None else os.getenv('ALPINE_VERSION')
