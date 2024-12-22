@@ -308,7 +308,7 @@ group.add_argument(
 group = parser.add_argument_group('Logging options')
 group.add_argument(
     '--verbosity',
-    dest='verbosity', default='INFO', choices=(
+    dest='log_verbosity', default='INFO', choices=(
         'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'),
     help='Verbosity of logging to emit [default: %(default)s]')
 
