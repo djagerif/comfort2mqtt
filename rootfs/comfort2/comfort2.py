@@ -386,7 +386,7 @@ COMFORT_RESPONSES=int(option.alarm_responses)
 COMFORT_TIME=str(option.comfort_time)
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs)
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
-COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update)
+COMFORT_BATTERY_STATUS_ID=option.comfort_battery_update
 
 logger.info("COMFORT_INPUTS: %s", str(COMFORT_INPUTS))
 logger.info("COMFORT_BATTERY_STATUS_ID: %s", str(COMFORT_BATTERY_STATUS_ID))
