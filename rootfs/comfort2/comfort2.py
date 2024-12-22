@@ -386,7 +386,7 @@ COMFORT_RESPONSES=int(option.alarm_responses)
 COMFORT_TIME=str(option.comfort_time)
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs)
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
-COMFORT_BATTERY_STATUS_ID=option.comfort_battery_update
+COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update)
 
 logger.info("COMFORT_BATTERY_STATUS_ID: %s", str(COMFORT_BATTERY_STATUS_ID))
 
@@ -1168,15 +1168,16 @@ class Comfort2(mqtt.Client):
             for device in range(0, int(device_properties['sem_id'])):
                 Devices.append(str(device + 33))    # First Slave at address 33 DEC.
 
-            if msgstr.strip('"') in Devices and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
+            msgstr_cleaned = msgstr.strip('"')
+            if msgstr_cleaned in Devices and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                 
-                ID = str(f"{int(msgstr.strip('"')):02X}")
+                ID = str(f"{int(msgstr_cleaned):02X}")
 
                 #logger.info("msgstr: %s", msgstr.strip('"'))
                 #logger.info("msgstr type: %s", type(msgstr.strip('"')))
 
                 #logger.info("ID: %s", ID)
-                if msgstr.strip('"') == '0':
+                if msgstr_cleaned == '0':
                     Command = "\x03D?0000\r"
                     self.comfortsock.sendall(Command.encode()) # Battery Status Update
                 else:
@@ -1188,7 +1189,7 @@ class Comfort2(mqtt.Client):
                     time.sleep(0.1)
                 SAVEDTIME = datetime.now()
             else:
-                logger.warning("Unsupported MQTT Battery Update query received for ID: %s.", msgstr.strip('"'))
+                logger.warning("Unsupported MQTT Battery Update query received for ID: %s.", msgstr_cleaned)
                 logger.warning("Valid ID's: [0,1,33-39] with ARM-powered Comfort is required.")
 
         elif msg.topic.startswith("homeassistant") and msg.topic.endswith("/status"):
