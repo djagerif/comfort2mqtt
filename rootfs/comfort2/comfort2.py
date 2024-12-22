@@ -316,7 +316,7 @@ option = parser.parse_args()
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
-    level=option.verbosity,
+    level=option.log_verbosity,
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
@@ -382,7 +382,7 @@ MQTT_SERVER=get_ip_address(option.broker_address)
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id
 COMFORT_CCLX_FILE=option.comfort_cclx_file
-MQTT_LOG_LEVEL=option.verbosity
+MQTT_LOG_LEVEL=option.log_verbosity
 COMFORT_INPUTS=int(option.alarm_inputs)
 COMFORT_OUTPUTS=int(option.alarm_outputs)
 COMFORT_RESPONSES=int(option.alarm_responses)
