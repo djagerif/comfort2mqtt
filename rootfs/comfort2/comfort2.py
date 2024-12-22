@@ -314,13 +314,17 @@ group.add_argument(
 
 option = parser.parse_args()
 
+comfort_battery_update = option.get('comfort_battery_update')
+
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=option.log_verbosity,
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
+
 logger.debug("OPTION: %s", option)          # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+logger.debug("comfort_battery_update: %s", comfort_battery_update)
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
 ALPINE_VERSION = "N/A" if os.getenv('ALPINE_VERSION') == None else os.getenv('ALPINE_VERSION')
