@@ -271,7 +271,6 @@ group.add_argument(
 
 group.add_argument(
     '--comfort-battery-update',
-    type=int, default=1,
     help="Comfort MQTT Bridge 'Battery Update' query ID. [default: '1']")
 
 group.add_argument(
