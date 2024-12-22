@@ -1543,6 +1543,7 @@ class Comfort2(mqtt.Client):
         global COMFORTCONNECTED
         global ADDON_VERSION
         global ALPINE_VERSION
+        global COMFORT_BATTERY_STATUS_ID
         global ADDON_SLUG
         global file_exists
 
