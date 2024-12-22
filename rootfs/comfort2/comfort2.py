@@ -271,7 +271,7 @@ group.add_argument(
     help='Comfort (CCLX) Configuration filename.')
 
 group.add_argument(
-    '--comfort-battery-status',
+    '--comfort-battery-update',
     help="Comfort MQTT Bridge Battery Update query ID. [default: '1']")
 
 group.add_argument(
