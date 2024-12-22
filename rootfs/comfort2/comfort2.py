@@ -271,7 +271,7 @@ group.add_argument(
 
 group.add_argument(
     '--comfort-battery-update',
-    dest='comfort_battery_update', default='1', choices=('0','1','33','34','35','36','37','38','39'),
+    type=int, default=1,
     help="Comfort MQTT Bridge 'Battery Update' query ID. [default: '1']")
 
 group.add_argument(
@@ -392,7 +392,7 @@ COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
 COMFORT_BATTERY_STATUS_ID=option.comfort_battery_update
 
 #logger.info("COMFORT_INPUTS: %s", str(COMFORT_INPUTS))
-logger.info("COMFORT_BATTERY_STATUS_ID: %s", str(option.comfort_battery_update))
+#logger.info("COMFORT_BATTERY_STATUS_ID: %s", str(option.comfort_battery_update))
 
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 if COMFORT_INPUTS < 8:
