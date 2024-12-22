@@ -549,7 +549,7 @@ If your network is segmented using a firewall, or any other similar device, you 
 
 ### Option: `Comfort MQTT Bridge Battery Update Target ID` (Optional)
 
-  This sets the ID to be queried by the `Battery Update` Bridge Control. Valid range values are [0,1,33 - 39]. The Default value is `1`.
+  This sets the ID to be queried by the `Battery Update` Bridge Control button. Valid range values are [0,1,33 - 39]. The Default value is `1`.
 
 ### Option: `Set Comfort Time and Date` (Optional)
 
