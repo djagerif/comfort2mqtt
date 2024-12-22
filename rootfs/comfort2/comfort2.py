@@ -44,6 +44,8 @@ ADDON_SLUG = ''
 ADDON_VERSION = "N/A"
 COMFORT_SERIAL = "00000000"       # Default Serial Number.
 COMFORT_KEY = "00000000"          # Default Refresh Key.
+COMFORT_BATTERY_STATUS_ID = 1     # Default Battery Status ID.
+
 SupportedFirmware = float(7.201)  # Minimum Supported firmware.
 
 MAX_ZONES = 96                    # Configurable for future expansion
