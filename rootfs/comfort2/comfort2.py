@@ -387,7 +387,7 @@ COMFORT_RESPONSES=int(option.alarm_responses)
 COMFORT_TIME=str(option.comfort_time)
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs)
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
-COMFORT_BATTERY_STATUS_ID=str(option.comfort_battery_update)
+COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update)
 
 #logger.info("COMFORT_INPUTS: %s", str(COMFORT_INPUTS))
 #logger.info("COMFORT_BATTERY_STATUS_ID: %s", str(option.comfort_battery_update))
@@ -1691,6 +1691,7 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
         
+
         discoverytopic = "homeassistant/button/comfort2mqtt/battery_update/config"
         MQTT_MSG=json.dumps({"name": "Battery Update",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
@@ -1700,7 +1701,7 @@ class Comfort2(mqtt.Client):
                              "command_topic": BATTERYREFRESHTOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
-                             "payload_press": COMFORT_BATTERY_STATUS_ID,
+                             "payload_press": str(COMFORT_BATTERY_STATUS_ID),
                              "icon":"mdi:battery-sync-outline",
                              "qos": "2",
                              "device": MQTT_DEVICE
