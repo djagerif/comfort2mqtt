@@ -1149,6 +1149,10 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.sendall(("\x03m!01"+self.comfort_pincode+"\r").encode()) #Local arm to 01 away mode. Requires # for open zones + Exit door
                     SAVEDTIME = datetime.now()
                     self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
+                elif msgstr == "REM_ARM_AWAY":
+                    self.comfortsock.sendall(("\x03M!01"+self.comfort_pincode+"\r").encode()) #Remote arm to 01 away mode. Requires # for open zones
+                    SAVEDTIME = datetime.now()
+                    self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
                 elif msgstr == "ARM_CUSTOM_BYPASS":
                     self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send '#' key code (KD1A)
                     SAVEDTIME = datetime.now()

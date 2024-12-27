@@ -4,6 +4,7 @@
  
 ### Added
  - Configurable Battery Update ID via UI. Select which component is updated when pressing the 'Battery Update' control. [0,1,33,34..39]. Default 1 (Mainboard).
+ - Add Remote Arm Away mode via MQTT. Send 'REM_ARM_AWAY' to /comfort2mqtt/alarm/set. Does not requires entry/exit activation.
 
 ### Changed
 
