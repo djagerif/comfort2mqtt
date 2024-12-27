@@ -1,3 +1,12 @@
+## [1.5.0] - Busy
+ 
+### Added
+
+### Changed
+
+### Fixed
+ - Updated DOCS
+
 ## [1.4.0] - 2024-12-27
  
 ### Added

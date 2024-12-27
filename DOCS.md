@@ -360,13 +360,13 @@ mode: single
 
 ## Home Assistant - 'Remote ARM Away' Automation (Optional)
 
-Arming Comfort to AWAY mode requires the Entry/Exit door to activate as usual. There is however a way to arm to AWAY mode when the user is not at home, meaning in a Remote location. To arm Comfort without triggering the Entry/Exit door is possible via MQTT only.
+Local arming Comfort to AWAY mode requires the Entry/Exit door to activate. There is however a way to arm to AWAY mode when the user is not at home, meaning in a Remote location. To arm Comfort without triggering the Entry/Exit door is possible via MQTT only.
 
-If you want to trigger a Remote AWAY_ARM condition tou can send the `REM_AWAY_ARM` string to the `comfort2mqtt/alarm/set` topic. Below is a quick Automation you can use to arm to REM_ARM_AWAY.
+If you want to trigger a Remote AWAY_ARM condition you can send the `REM_AWAY_ARM` string to the `comfort2mqtt/alarm/set` topic. Below is a quick Automation you can use to arm to REM_ARM_AWAY.
 
 ⚠️ **Note:** Never disarm your security system using insecure MQTT or other insecure connectivity methods. Make sure you use a trusted VPN to connect from the Internet and use MQTT encryption on your local network.
 
-I'v used a input_boolean as my test button below. Note that both the MQTT and native Alarm Control Panel methods are shown. The Alarm Control Panel methods are shown as optional methods without the ability to Remote Away Arm. They are disabled.
+I've used an input_boolean as my test button below. Note that both the MQTT and native Alarm Control Panel methods are shown. The Alarm Control Panel method is shown as optional, without the ability to Remote Away Arm. They are disabled in the Automation.
 
 ```
 alias: Alarm Arm Test
@@ -405,7 +405,7 @@ actions:
       entity_id: alarm_control_panel.comfort_alarm
     enabled: false
 mode: single
-```
+```  
 
 
 ## Home Assistant - 'Battery Update' Automation (Optional)
