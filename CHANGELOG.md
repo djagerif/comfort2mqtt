@@ -5,7 +5,7 @@
 ### Changed
 
 ### Fixed
- - Updated DOCS
+ - Updated DOCS.
 
 ## [1.4.0] - 2024-12-27
  
