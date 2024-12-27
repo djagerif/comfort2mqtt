@@ -22,6 +22,8 @@ COMFORT_RIO_INPUTS=$(bashio::config 'alarm_rio_inputs')
 COMFORT_RIO_OUTPUTS=$(bashio::config 'alarm_rio_outputs')
 COMFORT_RESPONSES=$(bashio::config 'alarm_responses')
 COMFORT_TIME=$(bashio::config 'comfort_time')
+COMFORT_BATTERY_STATUS_ID=$(bashio::config 'comfort_battery_update')
+
 ALPINE_VERSION=$(cat /etc/alpine-release)
 export ALPINE_VERSION
 
@@ -102,6 +104,10 @@ fi
 
 if [ "${COMFORT_CCLX_FILE}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --comfort-cclx-file ${COMFORT_CCLX_FILE}"
+fi
+
+if [ "${COMFORT_BATTERY_STATUS_ID}" != "null" ]; then
+    COMFORT_ARGS="${COMFORT_ARGS} --comfort-battery-update ${COMFORT_BATTERY_STATUS_ID}"
 fi
 
 if [ "${COMFORT_TIME}" != "null" ]; then

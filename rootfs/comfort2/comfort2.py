@@ -44,11 +44,12 @@ ADDON_SLUG = ''
 ADDON_VERSION = "N/A"
 COMFORT_SERIAL = "00000000"       # Default Serial Number.
 COMFORT_KEY = "00000000"          # Default Refresh Key.
+
 SupportedFirmware = float(7.201)  # Minimum Supported firmware.
 
 MAX_ZONES = 96                    # Configurable for future expansion
 MAX_OUTPUTS = 96                  # Configurable for future expansion
-BATTERYKEEPALIVES = True         # Set to True if Cytech ever implement D?0000 battery query commands. This will change Keepalives to monitor batteries also.
+BATTERYKEEPALIVES = True          # Can be removed, not using D?0000 as keepalives.
 
 rand_hex_str = hex(randint(268435456, 4294967295))
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts.
@@ -269,6 +270,11 @@ group.add_argument(
     help='Comfort (CCLX) Configuration filename.')
 
 group.add_argument(
+    '--comfort-battery-update',
+    type=int, default=1,
+    help="Comfort MQTT Bridge 'Battery Update' query ID. [default: '1']")
+
+group.add_argument(
     '--comfort-time',
     type=boolean_string, default='false',
     help="Set Comfort Date and Time flag, 'True'|'False'. [default: 'False']")
@@ -302,7 +308,7 @@ group.add_argument(
 group = parser.add_argument_group('Logging options')
 group.add_argument(
     '--verbosity',
-    dest='verbosity', default='INFO', choices=(
+    dest='log_verbosity', default='INFO', choices=(
         'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'),
     help='Verbosity of logging to emit [default: %(default)s]')
 
@@ -310,7 +316,7 @@ option = parser.parse_args()
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
-    level=option.verbosity,
+    level=option.log_verbosity,
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
@@ -374,13 +380,17 @@ MQTT_SERVER=get_ip_address(option.broker_address)
 COMFORT_PORT=option.comfort_port
 COMFORT_LOGIN_ID=option.comfort_login_id
 COMFORT_CCLX_FILE=option.comfort_cclx_file
-MQTT_LOG_LEVEL=option.verbosity
+MQTT_LOG_LEVEL=option.log_verbosity
 COMFORT_INPUTS=int(option.alarm_inputs)
 COMFORT_OUTPUTS=int(option.alarm_outputs)
 COMFORT_RESPONSES=int(option.alarm_responses)
 COMFORT_TIME=str(option.comfort_time)
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs)
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
+COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update)
+
+#logger.info("COMFORT_INPUTS: %s", str(COMFORT_INPUTS))
+#logger.info("COMFORT_BATTERY_STATUS_ID: %s", str(option.comfort_battery_update))
 
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 if COMFORT_INPUTS < 8:
@@ -448,6 +458,7 @@ logger.debug('COMFORT_ADDRESS = %s', COMFORT_ADDRESS)
 logger.debug('COMFORT_PORT = %s', COMFORT_PORT)
 logger.debug('COMFORT_LOGIN_ID = ******')
 logger.debug('COMFORT_CCLX_FILE = %s', COMFORT_CCLX_FILE)
+logger.debug('COMFORT_BATTERY_STATUS_ID = %s', str(COMFORT_BATTERY_STATUS_ID))
 logger.debug('MQTT_CA_CERT = %s', MQTT_CA_CERT)          
 logger.debug('MQTT_CLIENT_CERT = %s', MQTT_CLIENT_CERT)  
 logger.debug('MQTT_CLIENT_KEY = %s', MQTT_CLIENT_KEY)    
@@ -1138,6 +1149,10 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.sendall(("\x03m!01"+self.comfort_pincode+"\r").encode()) #Local arm to 01 away mode. Requires # for open zones + Exit door
                     SAVEDTIME = datetime.now()
                     self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
+                elif msgstr == "REM_ARM_AWAY":
+                    self.comfortsock.sendall(("\x03M!01"+self.comfort_pincode+"\r").encode()) #Remote arm to 01 away mode. Requires # for open zones
+                    SAVEDTIME = datetime.now()
+                    self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
                 elif msgstr == "ARM_CUSTOM_BYPASS":
                     self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send '#' key code (KD1A)
                     SAVEDTIME = datetime.now()
@@ -1156,19 +1171,20 @@ class Comfort2(mqtt.Client):
         
         elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/battery_update"):
 
-            Devices = ['0','1']        # Mainboard + Installed Slaves EG. ['1','33','34','35']. Added '0' for new command.
+            Devices = ['0','1']        # Mainboard + Installed Slaves EG. ['0', '1','33','34','35' ti '39'].
             for device in range(0, int(device_properties['sem_id'])):
                 Devices.append(str(device + 33))    # First Slave at address 33 DEC.
 
-            if msgstr.strip('"') in Devices and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
+            msgstr_cleaned = msgstr.strip('"')
+            if msgstr_cleaned in Devices and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
                 
-                ID = str(f"{int(msgstr.strip('"')):02X}")
+                ID = str(f"{int(msgstr_cleaned):02X}")
 
                 #logger.info("msgstr: %s", msgstr.strip('"'))
                 #logger.info("msgstr type: %s", type(msgstr.strip('"')))
 
                 #logger.info("ID: %s", ID)
-                if msgstr.strip('"') == '0':
+                if msgstr_cleaned == '0':
                     Command = "\x03D?0000\r"
                     self.comfortsock.sendall(Command.encode()) # Battery Status Update
                 else:
@@ -1180,7 +1196,7 @@ class Comfort2(mqtt.Client):
                     time.sleep(0.1)
                 SAVEDTIME = datetime.now()
             else:
-                logger.warning("Unsupported MQTT Battery Update query received for ID: %s.", msgstr.strip('"'))
+                logger.warning("Unsupported MQTT Battery Update query received for ID: %s.", msgstr_cleaned)
                 logger.warning("Valid ID's: [0,1,33-39] with ARM-powered Comfort is required.")
 
         elif msg.topic.startswith("homeassistant") and msg.topic.endswith("/status"):
@@ -1538,9 +1554,13 @@ class Comfort2(mqtt.Client):
         global COMFORTCONNECTED
         global ADDON_VERSION
         global ALPINE_VERSION
+        global COMFORT_BATTERY_STATUS_ID
         global ADDON_SLUG
         global file_exists
 
+        #option = parser.parse_args()
+        #COMFORT_BATTERY_STATUS_ID=option.comfort_battery_update
+        
         file_exists = _file
   
         if ADDON_SLUG.strip() == "":
@@ -1688,7 +1708,7 @@ class Comfort2(mqtt.Client):
                              "command_topic": BATTERYREFRESHTOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
-                             "payload_press": "1",
+                             "payload_press": str(COMFORT_BATTERY_STATUS_ID),
                              "icon":"mdi:battery-sync-outline",
                              "qos": "2",
                              "device": MQTT_DEVICE

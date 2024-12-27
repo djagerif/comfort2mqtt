@@ -100,7 +100,8 @@ comfort2mqtt/counter<0 to 254> have the following JSON attributes EG.
 The following MQTT topics are subscribed.
 
 ```
-comfort2mqtt/alarm/set - sent from Home Assistant, DISARM, ARMED_HOME, ARMED_NIGHT, ARMED_VACATION or ARMED_AWAY
+comfort2mqtt/alarm/set - sent from Home Assistant, DISARM, ARM_HOME, ARM_NIGHT, ARM_VACATION, ARM_AWAY or REM_ARM_AWAY.
+                         ARM_CUSTOM_BYPASS is a special case and is used to send the # key instead.
 comfort2mqtt/alarm/refresh - sent from Home Assistant, <Key> triggers a complete object refresh
 comfort2mqtt/alarm/battery_update - sent from Home Assistant, <id> triggers a battery update query 'D?id01 and D?id02
                                     id's 0,1,33-37 are supported for Main and Slaves when ARM CPU is detected. 0 for bulk if supported.
@@ -357,13 +358,63 @@ mode: single
 `2024-06-12 17:45:27 INFO     Refresh Key: 000F8EC8`
 
 
+## Home Assistant - 'Remote ARM Away' Automation (Optional)
+
+Arming Comfort to AWAY mode requires the Entry/Exit door to activate as usual. There is however a way to arm to AWAY mode when the user is not at home, meaning in a Remote location. To arm Comfort without triggering the Entry/Exit door is possible via MQTT only.
+
+If you want to trigger a Remote AWAY_ARM condition tou can send the `REM_AWAY_ARM` string to the `comfort2mqtt/alarm/set` topic. Below is a quick Automation you can use to arm to REM_ARM_AWAY.
+
+⚠️ **Note:** Never disarm your security system using insecure MQTT or other insecure connectivity methods. Make sure you use a trusted VPN to connect from the Internet and use MQTT encryption on your local network.
+
+I'v used a input_boolean as my test button below. Note that both the MQTT and native Alarm Control Panel methods are shown. The Alarm Control Panel methods are shown as optional methods without the ability to Remote Away Arm. They are disabled.
+
+```
+alias: Alarm Arm Test
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - input_boolean.test_button
+    from: "off"
+    to: "on"
+conditions: []
+actions:
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      qos: 0
+      topic: comfort2mqtt/alarm/set
+      payload: REM_ARM_AWAY
+    enabled: true
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      topic: comfort2mqtt/alarm/set
+      payload: ARM_CUSTOM_BYPASS
+    enabled: true
+  - action: alarm_control_panel.alarm_arm_away
+    metadata: {}
+    data: {}
+    target:
+      entity_id: alarm_control_panel.comfort_alarm
+    enabled: false
+  - action: alarm_control_panel.alarm_arm_custom_bypass
+    metadata: {}
+    data: {}
+    target:
+      entity_id: alarm_control_panel.comfort_alarm
+    enabled: false
+mode: single
+```
+
+
 ## Home Assistant - 'Battery Update' Automation (Optional)
 
 The latest Comfort ARM-powered boards can report individual Battery and DC Charger voltages. Below is an automation you can use to query Comfort every minute for these values. You can safely extend the interval to 15 minutes or more as voltages don't usually change abruptly in a mostly-floating voltage device operation.
 
 ⚠️ **Note:** If you try this on a non-ARM powered mainboard then a warning message will be displayed in the Addon log as shown below.
 
-`2024-08-08 19:05:22 WARNING  Unsupported MQTT Battery Update query received for ID: <UCMID>.`
+`2024-08-08 19:05:22 WARNING  Unsupported MQTT Battery Update query received for ID: <UCMID>.`  
 `2024-08-08 19:05:22 WARNING  Valid ID's: [0,1,33-39] with ARM-powered Comfort is required.`
 
 Threshold values are internally defined as per below and will output a log message accordingly.
@@ -546,6 +597,10 @@ If your network is segmented using a firewall, or any other similar device, you 
 ### Option: `Comfort Responses` (Optional)
 
   This sets the number of Responses that the Add-on subscribes to. Valid range values are from 0 - 1024. If you subscribe to the first 100 responses and trigger a response number EG. 200, then it will not be sent to Comfort for execution. Only subscribed responses are executed. The Default value is `0`.
+
+### Option: `Comfort MQTT Bridge Battery Update Target ID` (Optional)
+
+  This sets the ID to be queried by the `Battery Update` Bridge Control button. Valid range values are [0,1,33 - 39]. The Default value is `1`. `0` is used on a yet to be released ARM firmware that queries all batteries and chargers so you can monitor all of them with a single query.
 
 ### Option: `Set Comfort Time and Date` (Optional)
 

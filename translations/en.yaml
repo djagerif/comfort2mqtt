@@ -62,6 +62,10 @@ configuration:
     name: Comfort Configuration file
     description: >-
       Comfort Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc.
+  comfort_battery_update:
+    name: Comfort MQTT Bridge Battery Update target ID.
+    description: >-
+      The ID to query when the Comfort MQTT Bridge 'Battery Update' control is pressed. Range consisting of [0,1,33,34,35,36,37,38,39] (Default is 1).    
   log_verbosity:
     name: Global Log Verbosity
     description: >-
