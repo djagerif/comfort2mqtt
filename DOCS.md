@@ -100,7 +100,8 @@ comfort2mqtt/counter<0 to 254> have the following JSON attributes EG.
 The following MQTT topics are subscribed.
 
 ```
-comfort2mqtt/alarm/set - sent from Home Assistant, DISARM, ARMED_HOME, ARMED_NIGHT, ARMED_VACATION or ARMED_AWAY
+comfort2mqtt/alarm/set - sent from Home Assistant, DISARM, ARM_HOME, ARM_NIGHT, ARM_VACATION, ARM_AWAY or REM_ARM_AWAY.
+                         ARM_CUSTOM_BYPASS is a special case and is used to send the # key instead.
 comfort2mqtt/alarm/refresh - sent from Home Assistant, <Key> triggers a complete object refresh
 comfort2mqtt/alarm/battery_update - sent from Home Assistant, <id> triggers a battery update query 'D?id01 and D?id02
                                     id's 0,1,33-37 are supported for Main and Slaves when ARM CPU is detected. 0 for bulk if supported.
