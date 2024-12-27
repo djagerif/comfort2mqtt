@@ -1,6 +1,4 @@
-## [1.4.0] - Busy...
-
-
+## [1.4.0] - 2024-12-27
  
 ### Added
  - Configurable Battery Update ID via UI. Select which component is updated when pressing the 'Battery Update' control. [0,1,33,34..39]. Default 1 (Mainboard).
