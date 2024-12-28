@@ -19,7 +19,6 @@
 # Notes:
 #
 #
-#import xml.etree.ElementTree as ET
 import defusedxml.ElementTree as ET
 import ssl
 from OpenSSL import crypto
@@ -2993,29 +2992,31 @@ def validate_certificate(certificate):
     with open(certificate, 'rb') as cert_file:
         cert_data = cert_file.read()
 
-    # Load the certificate using the binary data
-    x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
+    try:
+        # Load the certificate using the binary data
+        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
 
-    # Check the 'notAfter' attribute
-    not_after = x509.get_notAfter()
-    not_before = x509.get_notBefore() 
-    if not_after:
-        ValidTo = not_after.decode()
-    if not_before:
-        ValidFrom = not_before.decode()
+        # Check the 'notAfter' attribute
+        not_after = x509.get_notAfter()
+        not_before = x509.get_notBefore() 
+        if not_after:
+            ValidTo = not_after.decode()
+        if not_before:
+            ValidFrom = not_before.decode()
 
-    # Define the format of the datetime strings
-    datetime_format = "%Y%m%d%H%M%SZ"
+        # Define the format of the datetime strings
+        datetime_format = "%Y%m%d%H%M%SZ"
 
-    # Convert the strings to datetime objects
-    ValidTo = datetime.strptime(ValidTo, datetime_format)
-    ValidFrom = datetime.strptime(ValidFrom, datetime_format)
+        # Convert the strings to datetime objects
+        ValidTo = datetime.strptime(ValidTo, datetime_format)
+        ValidFrom = datetime.strptime(ValidFrom, datetime_format)
     
-    if (datetime.now() >= ValidFrom) and (datetime.now() < ValidTo):
-        return 0    # Valid certificate
-    else:
-        return 1    # Expired certificate
-
+        if (datetime.now() >= ValidFrom) and (datetime.now() < ValidTo):
+            return 0    # Valid certificate
+        else:
+            return 1    # Expired certificate
+    except crypto.Error as e:
+        raise ValueError(f"Error loading certificate: {e}")
 
 mqttc = Comfort2(callback_api_version = mqtt.CallbackAPIVersion.VERSION2, client_id=mqtt_client_id, protocol=mqtt.MQTTv5, transport=MQTT_PROTOCOL)
 

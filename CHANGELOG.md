@@ -3,6 +3,9 @@
 ### Added
 
 ### Changed
+ - Moved to defusedxml for cclx file loading.
+ - Added 5s timeout to internal Home Assistant http connection.
+ - Add additional checks for valid certificate file.
 
 ### Fixed
  - Updated DOCS.
