@@ -3052,7 +3052,6 @@ else:
             logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
             tls_args = {}
             tls_args['ca_certs'] = ca_cert
-            logging.debug('tls_args: %s', tls_args )
             mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)
             mqttc.tls_insecure_set(True)
 
@@ -3060,6 +3059,5 @@ else:
             # Default
             pass
 
-#mqttc.tls_set(ca_certs="ca.crt", certfile="client.crt", keyfile="client.key", tls_version=ssl.PROTOCOL_TLSv1_2)
 mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE, mqtt.MQTTv5)
 mqttc.run()
