@@ -19,7 +19,8 @@
 # Notes:
 #
 #
-import xml.etree.ElementTree as ET
+#import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 import ssl
 from OpenSSL import crypto
 import os
@@ -52,7 +53,7 @@ MAX_OUTPUTS = 96                  # Configurable for future expansion
 BATTERYKEEPALIVES = True          # Can be removed, not using D?0000 as keepalives.
 
 rand_hex_str = hex(randint(268435456, 4294967295))
-mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts.
+mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate pseudo random client-id each time it starts.
 
 REFRESHTOPIC = DOMAIN+"/alarm/refresh"                  # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
 BATTERYREFRESHTOPIC = DOMAIN+"/alarm/battery_update"    # Used to request Battery and Charger updates. To be used by HA Automation for periodic polling.
@@ -332,7 +333,7 @@ headers = {
 }
 
 try:
-    response = requests.get(addon_info_url, headers=headers)
+    response = requests.get(addon_info_url, headers=headers, timeout=5)
 except:
     logger.error("Failed to connect to Home Assistant Supervisor")
 else:
