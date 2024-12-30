@@ -394,22 +394,14 @@ MQTT_SERVER=get_ip_address(option.broker_address)
 COMFORT_PORT=int(option.comfort_port) if validate_port(option.comfort_port) else 1002
 COMFORT_LOGIN_ID=option.comfort_login_id
 COMFORT_CCLX_FILE=option.comfort_cclx_file
-MQTT_LOG_LEVEL=option.log_verbosity
+MQTT_LOG_LEVEL=option.log_verbosity if option.log_verbosity in ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'] else 'INFO'
 COMFORT_INPUTS=int(option.alarm_inputs) if validate_port(option.alarm_inputs,8,MAX_ZONES) else 8
 COMFORT_OUTPUTS=int(option.alarm_outputs) if validate_port(option.alarm_outputs,0,MAX_OUTPUTS) else 0
 COMFORT_RESPONSES=int(option.alarm_responses) if validate_port(option.alarm_responses,0,MAX_RESPONSES) else 0
-
-COMFORT_TIME='True' if boolean_string(option.comfort_time) else 'False'
-#COMFORT_TIME=str(option.comfort_time)
-logging.error(f"COMFORT_TIME!!!: {COMFORT_TIME}")
-logging.error(f"COMFORT_TIME_TYPE: {type(COMFORT_TIME)}")
-
+COMFORT_TIME=str(option.comfort_time)
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs) if validate_port(option.alarm_rio_inputs,0,120) else 0
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs) if validate_port(option.alarm_rio_outputs,0,120) else 0
-COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update)
-
-#logger.info("COMFORT_INPUTS: %s", str(COMFORT_INPUTS))
-#logger.info("COMFORT_BATTERY_STATUS_ID: %s", str(option.comfort_battery_update))
+COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update) if int(option.comfort_battery_update) in [0,1]+list(range(33,40)) else 1
 
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 if COMFORT_INPUTS < 8:
