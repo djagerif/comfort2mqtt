@@ -3053,7 +3053,8 @@ else:
             tls_args = {}
             tls_args['ca_certs'] = ca_cert
             mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)
-            mqttc.tls_insecure_set(True)
+            #mqttc.tls_insecure_set(True)
+            mqttc.tls_insecure_set(False)
 
         case _:
             # Default
