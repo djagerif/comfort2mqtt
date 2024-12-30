@@ -194,10 +194,11 @@ def boolean_string(s):
 
     if s.lower() == 'true':
         return True
-    elif s.lower() == 'false':
-        return False
+    #elif s.lower() == 'false':
+    #    return False
     else:
-        raise ValueError("Not a valid boolean string. Set to either 'True' or 'False'.")
+        #raise ValueError("Not a valid boolean string. Set to either 'True' or 'False'.")
+        return False
     
 parser = ArgumentParser()
 
