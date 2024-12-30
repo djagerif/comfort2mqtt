@@ -49,6 +49,7 @@ SupportedFirmware = float(7.201)  # Minimum Supported firmware.
 
 MAX_ZONES = 96                    # Configurable for future expansion
 MAX_OUTPUTS = 96                  # Configurable for future expansion
+MAX_RESPONSES = 1024              # Configurable for future expansion
 BATTERYKEEPALIVES = True          # Can be removed, not using D?0000 as keepalives.
 
 rand_hex_str = hex(randint(268435456, 4294967295))
@@ -373,20 +374,35 @@ def get_ip_address(input_value):
     else:
         return resolve_to_ip(input_value)
 
+def validate_port(_port, min=1, max=65535):
+    try:
+        port = int(_port)
+        if min <= int(port) <= max:
+            return True
+        else:
+            logging.error(f"Invalid parameter: {port}")     #Integer
+            return False
+    except Exception as e:
+        logging.error(f"Invalid parameter: {_port}")        #Original passed value
+        return False    
+    
 # Check to see if it's a Hostname.domain or IPv4 address. Resolve Hostname to IP.
 COMFORT_ADDRESS=get_ip_address(option.comfort_address)
 MQTT_SERVER=get_ip_address(option.broker_address)
 
-COMFORT_PORT=option.comfort_port
+COMFORT_PORT=int(option.comfort_port) if validate_port(option.comfort_port) else 1002
 COMFORT_LOGIN_ID=option.comfort_login_id
 COMFORT_CCLX_FILE=option.comfort_cclx_file
 MQTT_LOG_LEVEL=option.log_verbosity
-COMFORT_INPUTS=int(option.alarm_inputs)
-COMFORT_OUTPUTS=int(option.alarm_outputs)
-COMFORT_RESPONSES=int(option.alarm_responses)
+COMFORT_INPUTS=int(option.alarm_inputs) if validate_port(option.alarm_inputs,8,MAX_ZONES) else 8
+COMFORT_OUTPUTS=int(option.alarm_outputs) if validate_port(option.alarm_outputs,0,MAX_OUTPUTS) else 0
+COMFORT_RESPONSES=int(option.alarm_responses) if validate_port(option.alarm_responses,0,MAX_RESPONSES) else 0
+
 COMFORT_TIME=str(option.comfort_time)
-COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs)
-COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
+logging.error(f"COMFORT_TIME: {COMFORT_TIME}")        
+
+COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs) if validate_port(option.alarm_rio_inputs,0,120) else 0
+COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs) if validate_port(option.alarm_rio_outputs,0,120) else 0
 COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update)
 
 #logger.info("COMFORT_INPUTS: %s", str(COMFORT_INPUTS))

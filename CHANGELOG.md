@@ -1,6 +1,7 @@
 ## [1.5.0] - Busy
  
 ### Added
+ - Add input validation checks.
 
 ### Changed
  - Moved to defusedxml for cclx file loading.
