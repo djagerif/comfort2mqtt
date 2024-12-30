@@ -197,7 +197,7 @@ def boolean_string(s):
     elif s.lower() == 'false':
         return False
     else:
-        raise ValueError("Not a valid boolean string. Set to 'True' or 'False'.")
+        raise ValueError("Not a valid boolean string. Set to either 'True' or 'False'.")
     
 parser = ArgumentParser()
 
@@ -398,7 +398,8 @@ COMFORT_INPUTS=int(option.alarm_inputs) if validate_port(option.alarm_inputs,8,M
 COMFORT_OUTPUTS=int(option.alarm_outputs) if validate_port(option.alarm_outputs,0,MAX_OUTPUTS) else 0
 COMFORT_RESPONSES=int(option.alarm_responses) if validate_port(option.alarm_responses,0,MAX_RESPONSES) else 0
 
-COMFORT_TIME=str(option.comfort_time)
+COMFORT_TIME='True' if boolean_string(option.comfort_time) else 'False'
+#COMFORT_TIME=str(option.comfort_time)
 logging.error(f"COMFORT_TIME!!!: {COMFORT_TIME}")
 logging.error(f"COMFORT_TIME_TYPE: {type(COMFORT_TIME)}")
 
