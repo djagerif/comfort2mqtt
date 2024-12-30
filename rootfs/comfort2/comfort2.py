@@ -399,7 +399,8 @@ COMFORT_OUTPUTS=int(option.alarm_outputs) if validate_port(option.alarm_outputs,
 COMFORT_RESPONSES=int(option.alarm_responses) if validate_port(option.alarm_responses,0,MAX_RESPONSES) else 0
 
 COMFORT_TIME=str(option.comfort_time)
-logging.error(f"COMFORT_TIME: {COMFORT_TIME}")        
+logging.error(f"COMFORT_TIME!!!: {COMFORT_TIME}")
+logging.error(f"COMFORT_TIME_TYPE: {type(COMFORT_TIME)}")
 
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs) if validate_port(option.alarm_rio_inputs,0,120) else 0
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs) if validate_port(option.alarm_rio_outputs,0,120) else 0
