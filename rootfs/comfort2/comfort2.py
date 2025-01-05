@@ -784,9 +784,9 @@ class ComfortAMSystemAlarmReport(object):
             elif self.alarm == 12: self.message = "Entry Warning, Zone "+str(self.parameter)+" ("+str(input_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
             elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
             elif self.alarm == 14: self.message = "Siren Tamper"
-            elif self.alarm == 15: self.message = "Bypass, Zone "+str(input_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
+            elif self.alarm == 15: self.message = "Bypass, Zone "+str(self.parameter)+" ("+str(input_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
             elif self.alarm == 17: self.message = "Dial Test, User "+str(self.parameter); self.triggered = False
-            elif self.alarm == 19: self.message = "Entry Alert, Zone "+str(input_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
+            elif self.alarm == 19: self.message = "Entry Alert, Zone "+str(self.parameter)+" ("+str(input_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
             elif self.alarm == 20: self.message = "Fire"
             elif self.alarm == 21: self.message = "Panic"
             elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
