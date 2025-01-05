@@ -1,7 +1,8 @@
 ## [1.5.0] - Busy
  
 ### Added
- - Add input validation checks.
+ - Add additional input validation checks.
+ - `Alarm Message` enhancements when CCLX file is loaded.
 
 ### Changed
  - Moved to defusedxml for cclx file loading.

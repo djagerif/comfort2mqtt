@@ -2196,13 +2196,12 @@ class Comfort2(mqtt.Client):
                 ComfortFileSystem = None
                 ComfortFirmware = None
 
-                CustomerName = entry.attrib.get('CustomerName')
-                Reference = entry.attrib.get('Reference')
+                CustomerName = entry.attrib.get('CustomerName')[:200] if entry.attrib.get('CustomerName') else None          # Limit to 200 characters
+                Reference = entry.attrib.get('Reference')[:200] if entry.attrib.get('Reference') else None                 # Limit to 200 characters
                 #UcmVersion = entry.attrib.get('UcmVersion')
                 #UcmRevision = entry.attrib.get('UcmRevision')
-                ComfortFileSystem = entry.attrib.get('ComfortFileSystem')
-                ComfortFirmware = entry.attrib.get('ComfortFirmwareType')
-  
+                ComfortFileSystem = entry.attrib.get('ComfortFileSystem')[:2] if entry.attrib.get('ComfortFileSystem') else None   # Limit to 2 characters
+                ComfortFirmware = entry.attrib.get('ComfortFirmwareType')  
                 device_properties['CustomerName'] = CustomerName
                 device_properties['Reference'] = Reference
                 device_properties['ComfortFileSystem'] = ComfortFileSystem
@@ -2220,16 +2219,16 @@ class Comfort2(mqtt.Client):
                 ZoneWord3 = ''
                 ZoneWord4 = ''
                 ZoneWord = ''
-                name = zone.attrib.get('Name')
-                number = zone.attrib.get('Number')
-                virtualinput = zone.attrib.get('VirtualInput')
-                ZoneWord1 = zone.attrib.get('ZoneWord1')
+                name = zone.attrib.get('Name')[:16] if zone.attrib.get('Name') else ''
+                number = zone.attrib.get('Number')[:3] if zone.attrib.get('Number') else ''
+                virtualinput = zone.attrib.get('VirtualInput')[:5] if zone.attrib.get('VirtualInput') else ''
+                ZoneWord1 = zone.attrib.get('ZoneWord1')[:16] if zone.attrib.get('ZoneWord1') else ''
                 if ZoneWord1 != None: ZoneWord = ZoneWord1
-                ZoneWord2 = zone.attrib.get('ZoneWord2')
+                ZoneWord2 = zone.attrib.get('ZoneWord2')[:16] if zone.attrib.get('ZoneWord2') else ''
                 if ZoneWord2 != None: ZoneWord = ZoneWord + " " +ZoneWord2
-                ZoneWord3 = zone.attrib.get('ZoneWord3')
+                ZoneWord3 = zone.attrib.get('ZoneWord3')[:16] if zone.attrib.get('ZoneWord3') else ''
                 if ZoneWord3 != None: ZoneWord = ZoneWord + " " +ZoneWord3
-                ZoneWord4 = zone.attrib.get('ZoneWord4')
+                ZoneWord4 = zone.attrib.get('ZoneWord4')[:16] if zone.attrib.get('ZoneWord4') else ''
                 if ZoneWord4 != None: ZoneWord = ZoneWord + " " +ZoneWord4
 
                 if self.CheckIndexNumberFormat(number):
@@ -2257,8 +2256,8 @@ class Comfort2(mqtt.Client):
             for counter in root.iter('Counter'):
                 name = ''
                 number = ''
-                name = counter.attrib.get('Name')
-                number = counter.attrib.get('Number')
+                name = counter.attrib.get('Name')[:16] if counter.attrib.get('Name') else ''
+                number = counter.attrib.get('Number')[:3] if counter.attrib.get('Number') else ''
 
                 if self.CheckIndexNumberFormat(number):
                     COUNTERMAPFILE = True               
@@ -2281,8 +2280,8 @@ class Comfort2(mqtt.Client):
             for flag in root.iter('Flag'):
                 name = ''
                 number = ''
-                name = flag.attrib.get('Name')
-                number = flag.attrib.get('Number')
+                name = flag.attrib.get('Name')[:16] if flag.attrib.get('Name') else ''
+                number = flag.attrib.get('Number')[:3] if flag.attrib.get('Number') else ''
 
                 if self.CheckIndexNumberFormat(number):
                     FLAGMAPFILE = True               
@@ -2305,8 +2304,8 @@ class Comfort2(mqtt.Client):
             for output in root.iter('Output'):
                 name = ''
                 number = ''
-                name = output.attrib.get('Name')
-                number = output.attrib.get('Number')
+                name = output.attrib.get('Name')[:16] if output.attrib.get('Name') else ''
+                number = output.attrib.get('Number')[:3] if output.attrib.get('Number') else ''
 
                 if self.CheckIndexNumberFormat(number):
                     OUTPUTMAPFILE = True               
@@ -2329,8 +2328,8 @@ class Comfort2(mqtt.Client):
             for sensor in root.iter('SensorResponse'):
                 name = ''
                 number = ''
-                name = sensor.attrib.get('Name')
-                number = sensor.attrib.get('Number')
+                name = sensor.attrib.get('Name')[:16] if sensor.attrib.get('Name') else ''
+                number = sensor.attrib.get('Number')[:3] if sensor.attrib.get('Number') else ''
 
                 if self.CheckIndexNumberFormat(number):
                     SENSORMAPFILE = True               
@@ -2353,8 +2352,8 @@ class Comfort2(mqtt.Client):
             for scsrio in root.iter('ScsRioResponse'):
                 name = ''
                 number = ''
-                name = scsrio.attrib.get('Name')
-                number = scsrio.attrib.get('Number')
+                name = scsrio.attrib.get('Name')[:16] if scsrio.attrib.get('Name') else ''
+                number = scsrio.attrib.get('Number')[:3] if scsrio.attrib.get('Number') else ''
 
                 if self.CheckIndexNumberFormat(number):
                     SCSRIOMAPFILE = True               
