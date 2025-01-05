@@ -84,6 +84,7 @@ COUNTERMAPFILE = False
 SENSORMAPFILE = False
 FLAGMAPFILE = False
 DEVICEMAPFILE = False
+USERMAPFILE = False
 device_properties = {}
 
 device_properties['CPUType'] = "N/A"
@@ -777,19 +778,19 @@ class ComfortAMSystemAlarmReport(object):
             elif self.alarm == 5: self.message = "Duress"
             elif self.alarm == 6: self.message = "Arm Failure"
             elif self.alarm == 7: self.message = "Family Care"
-            elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
-            elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter)+" ("+str(user_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
+            elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter)+" ("+str(user_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
             elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
             elif self.alarm == 12: self.message = "Entry Warning, "+str(input_properties[str(self.parameter)]['Name']); self.triggered = False
             elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
             elif self.alarm == 14: self.message = "Siren Tamper"
             elif self.alarm == 15: self.message = "Bypass, "+str(input_properties[str(self.parameter)]['Name']); self.triggered = False
-            elif self.alarm == 17: self.message = "Dial Test, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 17: self.message = "Dial Test, User "+str(self.parameter)+" ("+str(user_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
             elif self.alarm == 19: self.message = "Entry Alert, "+str(input_properties[str(self.parameter)]['Name']); self.triggered = False
             elif self.alarm == 20: self.message = "Fire"
             elif self.alarm == 21: self.message = "Panic"
             elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
-            elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
+            elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter)+" ("+str(user_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
             elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
             elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
             elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
@@ -2166,6 +2167,7 @@ class Comfort2(mqtt.Client):
         global SENSORMAPFILE
         global SCSRIOMAPFILE
         global DEVICEMAPFILE
+        global USERMAPFILE
 
         global input_properties
         global counter_properties
@@ -2174,6 +2176,7 @@ class Comfort2(mqtt.Client):
         global sensor_properties
         global scsrio_properties
         global device_properties
+        global user_properties
         
         if file.is_file():
             file_stats = os.stat(file)
@@ -2187,6 +2190,7 @@ class Comfort2(mqtt.Client):
             output_properties = {}
             sensor_properties = {}
             scsrio_properties = {}
+            user_properties = {}
 
             for entry in root.iter('ConfigInfo'):
                 CustomerName = None
@@ -2372,6 +2376,30 @@ class Comfort2(mqtt.Client):
 
                 # Add the truncated value to the dictionary
                 scsrio_properties[number] = name
+
+            for user in root.iter('Authorisation'):
+                name = ''
+                number = ''
+                name = user.attrib.get('Name')[:16] if user.attrib.get('Name') else ''
+                number = user.attrib.get('Number')[:3] if user.attrib.get('Number') else ''
+
+                if self.CheckIndexNumberFormat(number):
+                    USERMAPFILE = True               
+                else:
+                    number = ''
+                    logger.error("Invalid User Number detected in '%s'.", file)
+                    USERMAPFILE = False
+                    break
+                if self.CheckZoneNameFormat(name): 
+                    USERMAPFILE = True              
+                else:
+                    name = ''
+                    logger.error("Invalid User Name detected in '%s'.", file)
+                    USERMAPFILE = False             
+                    break
+
+                # Add the truncated value to the dictionary
+                user_properties[number] = name
         else:
             device_properties['CustomerName'] = None
             device_properties['Reference'] = None
@@ -2437,6 +2465,7 @@ class Comfort2(mqtt.Client):
         global SENSORMAPFILE
         global SCSRIOMAPFILE
         global DEVICEMAPFILE
+        global USERMAPFILE
 
         global input_properties
         global counter_properties
@@ -2445,6 +2474,7 @@ class Comfort2(mqtt.Client):
         global sensor_properties
         global scsrio_properties
         global device_properties
+        global user_properties
 
         global ZoneCache
         global BypassCache
