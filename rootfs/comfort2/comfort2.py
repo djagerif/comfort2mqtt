@@ -760,36 +760,66 @@ class ComfortERArmReadyNotReady(object):
 
 class ComfortAMSystemAlarmReport(object):
     def __init__(self, data={}):
+        
+        global ZONEMAPFILE
+        global input_properties
 
         self.alarm = int(data[2:4],16)
         self.triggered = True               # For Comfort Alarm State Alert, Trouble, Alarm
         self.parameter = int(data[4:6],16)
         low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
-        if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
-        elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
-        elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
-        elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
-        elif self.alarm == 4: self.message = "Phone Trouble"
-        elif self.alarm == 5: self.message = "Duress"
-        elif self.alarm == 6: self.message = "Arm Failure"
-        elif self.alarm == 7: self.message = "Family Care"
-        elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
-        elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
-        elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
-        elif self.alarm == 12: self.message = "Entry Warning, Zone "+str(self.parameter); self.triggered = False
-        elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
-        elif self.alarm == 14: self.message = "Siren Tamper"
-        elif self.alarm == 15: self.message = "Bypass, Zone "+str(self.parameter); self.triggered = False
-        elif self.alarm == 17: self.message = "Dial Test, User "+str(self.parameter); self.triggered = False
-        elif self.alarm == 19: self.message = "Entry Alert, Zone "+str(self.parameter); self.triggered = False
-        elif self.alarm == 20: self.message = "Fire"
-        elif self.alarm == 21: self.message = "Panic"
-        elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
-        elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
-        elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
-        elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
-        elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
-        else: self.message = "Unknown("+str(self.alarm)+")"
+        if ZONEMAPFILE:
+            if self.alarm == 0: self.message = "Intruder, "+ str(input_properties[str(self.parameter)]['Name'])
+            elif self.alarm == 1: self.message = str(input_properties[str(self.parameter)]['Name'])+" Trouble"
+            elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+            elif self.alarm == 4: self.message = "Phone Trouble"
+            elif self.alarm == 5: self.message = "Duress"
+            elif self.alarm == 6: self.message = "Arm Failure"
+            elif self.alarm == 7: self.message = "Family Care"
+            elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
+            elif self.alarm == 12: self.message = "Entry Warning, "+str(input_properties[str(self.parameter)]['Name']); self.triggered = False
+            elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
+            elif self.alarm == 14: self.message = "Siren Tamper"
+            elif self.alarm == 15: self.message = "Bypass, "+str(input_properties[str(self.parameter)]['Name']); self.triggered = False
+            elif self.alarm == 17: self.message = "Dial Test, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 19: self.message = "Entry Alert, "+str(input_properties[str(self.parameter)]['Name']); self.triggered = False
+            elif self.alarm == 20: self.message = "Fire"
+            elif self.alarm == 21: self.message = "Panic"
+            elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
+            elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
+            elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
+            elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
+            elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
+            else: self.message = "Unknown("+str(self.alarm)+")"
+        else:
+            if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
+            elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
+            elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+            elif self.alarm == 4: self.message = "Phone Trouble"
+            elif self.alarm == 5: self.message = "Duress"
+            elif self.alarm == 6: self.message = "Arm Failure"
+            elif self.alarm == 7: self.message = "Family Care"
+            elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
+            elif self.alarm == 12: self.message = "Entry Warning, Zone "+str(self.parameter); self.triggered = False
+            elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
+            elif self.alarm == 14: self.message = "Siren Tamper"
+            elif self.alarm == 15: self.message = "Bypass, Zone "+str(self.parameter); self.triggered = False
+            elif self.alarm == 17: self.message = "Dial Test, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 19: self.message = "Entry Alert, Zone "+str(self.parameter); self.triggered = False
+            elif self.alarm == 20: self.message = "Fire"
+            elif self.alarm == 21: self.message = "Panic"
+            elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
+            elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
+            elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
+            elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
+            elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
+            else: self.message = "Unknown("+str(self.alarm)+")"
 
 class Comfort_A_SecurityInformationReport(object):      #  For future development !!!
     #a?000000000000000000
@@ -821,18 +851,32 @@ class Comfort_A_SecurityInformationReport(object):      #  For future developmen
 
 class ComfortARSystemAlarmReport(object):
     def __init__(self, data={}):
+        global ZONEMAPFILE
+        global input_properties
+
         self.alarm = int(data[2:4],16)
         self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
         self.parameter = int(data[4:6],16)
         low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
-        if self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"+" Restore"
-        elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
-        elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
-        elif self.alarm == 4: self.message = "Phone Trouble"+" Restore"
-        elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)+" Restore"
-        elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
-        elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)+" Restore"
-        elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
+        if ZONEMAPFILE:
+            if self.alarm == 1: self.message = str(input_properties[str(self.parameter)]['Name'])+" Trouble Restore"
+            elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+            elif self.alarm == 4: self.message = "Phone Trouble"+" Restore"
+            elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)+" Restore"
+            elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
+            elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)+" Restore"
+            elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
+        else:
+            if self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"+" Restore"
+            elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+            elif self.alarm == 4: self.message = "Phone Trouble"+" Restore"
+            elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)+" Restore"
+            elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
+            elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)+" Restore"
+            elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
+
 
 class ComfortV_SystemTypeReport(object):
     def __init__(self, data={}):
@@ -2716,10 +2760,12 @@ class Comfort2(mqtt.Client):
 
                                     if ZONEMAPFILE & self.CheckIndexNumberFormat(str(erMsg.zone)):
                                         logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), input_properties[str(erMsg.zone)]['Name'])
+                                        message_topic = str(input_properties[str(erMsg.zone)]['Name'])+ " Not Ready"
                                     else: 
                                         logging.warning("Zone %s Not Ready", str(erMsg.zone))
+                                        message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
 
-                                    message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
+                                    #message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
                                     self.publish(ALARMMESSAGETOPIC, message_topic, qos=2, retain=True)          # Empty string removes topic.
                                 else:
                                     logging.info("Ready To Arm...")
