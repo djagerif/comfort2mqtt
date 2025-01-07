@@ -867,6 +867,7 @@ class ComfortARSystemAlarmReport(object):
             elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
             elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)+" Restore"
             elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
+            else: self.message = "Unknown("+str(self.alarm)+")"
         else:
             if self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"+" Restore"
             elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
@@ -876,6 +877,7 @@ class ComfortARSystemAlarmReport(object):
             elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
             elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)+" Restore"
             elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
+            else: self.message = "Unknown("+str(self.alarm)+")"
 
 
 class ComfortV_SystemTypeReport(object):
