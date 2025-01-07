@@ -1,4 +1,4 @@
-## [1.5.0] - Busy
+## [1.4.1] - 2025-01-07
  
 ### Added
  - Additional input validation checks.
@@ -10,7 +10,7 @@
  - Added 5s timeout to internal Home Assistant http connection.
  - Updated DOCS.
 
-### Fixed
+### Fixed  
 
 
 ## [1.4.0] - 2024-12-27
