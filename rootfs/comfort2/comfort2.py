@@ -742,6 +742,7 @@ class ComfortM_SecurityModeReport(object):
         elif self.mode == 2: self.modename = "armed_night"; logger.info("Armed Night Mode")
         elif self.mode == 3: self.modename = "armed_home"; logger.info("Armed Day Mode")
         elif self.mode == 4: self.modename = "armed_vacation"; logger.info("Armed Vacation Mode")
+        else: self.modename = "Unknown"; logger.info("Unknown Mode")
 
 #nn 00 = Idle, 1 = Trouble, 2 = Alert, 3 = Alarm
 class ComfortS_SecurityModeReport(object):
