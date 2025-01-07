@@ -1,3 +1,18 @@
+## [1.4.1] - 2025-01-07
+ 
+### Added
+ - Additional input validation checks.
+ - Additional checks for valid certificate file.
+ - `Alarm Message` UI enhancements when CCLX file is loaded.
+
+### Changed
+ - Moved to defusedxml for cclx file parsing.
+ - Added 5s timeout to internal Home Assistant http connection.
+ - Updated DOCS.
+
+### Fixed  
+
+
 ## [1.4.0] - 2024-12-27
  
 ### Added

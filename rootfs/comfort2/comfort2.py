@@ -19,7 +19,7 @@
 # Notes:
 #
 #
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 import ssl
 from OpenSSL import crypto
 import os
@@ -49,10 +49,10 @@ SupportedFirmware = float(7.201)  # Minimum Supported firmware.
 
 MAX_ZONES = 96                    # Configurable for future expansion
 MAX_OUTPUTS = 96                  # Configurable for future expansion
-BATTERYKEEPALIVES = True          # Can be removed, not using D?0000 as keepalives.
+MAX_RESPONSES = 1024              # Configurable for future expansion
 
 rand_hex_str = hex(randint(268435456, 4294967295))
-mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate random client-id each time it starts.
+mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate pseudo random client-id each time it starts.
 
 REFRESHTOPIC = DOMAIN+"/alarm/refresh"                  # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
 BATTERYREFRESHTOPIC = DOMAIN+"/alarm/battery_update"    # Used to request Battery and Charger updates. To be used by HA Automation for periodic polling.
@@ -83,6 +83,7 @@ COUNTERMAPFILE = False
 SENSORMAPFILE = False
 FLAGMAPFILE = False
 DEVICEMAPFILE = False
+USERMAPFILE = False
 device_properties = {}
 
 device_properties['CPUType'] = "N/A"
@@ -193,10 +194,11 @@ def boolean_string(s):
 
     if s.lower() == 'true':
         return True
-    elif s.lower() == 'false':
-        return False
+    #elif s.lower() == 'false':
+    #    return False
     else:
-        raise ValueError("Not a valid boolean string. Set to 'True' or 'False'.")
+        #raise ValueError("Not a valid boolean string. Set to either 'True' or 'False'.")
+        return False
     
 parser = ArgumentParser()
 
@@ -332,7 +334,7 @@ headers = {
 }
 
 try:
-    response = requests.get(addon_info_url, headers=headers)
+    response = requests.get(addon_info_url, headers=headers, timeout=5)
 except:
     logger.error("Failed to connect to Home Assistant Supervisor")
 else:
@@ -373,24 +375,33 @@ def get_ip_address(input_value):
     else:
         return resolve_to_ip(input_value)
 
+def validate_port(_port, min=1, max=65535):
+    try:
+        port = int(_port)
+        if min <= int(port) <= max:
+            return True
+        else:
+            logging.error(f"Invalid parameter: {port}")     #Integer
+            return False
+    except Exception as e:
+        logging.error(f"Invalid parameter: {_port}")        #Original passed value
+        return False    
+    
 # Check to see if it's a Hostname.domain or IPv4 address. Resolve Hostname to IP.
 COMFORT_ADDRESS=get_ip_address(option.comfort_address)
 MQTT_SERVER=get_ip_address(option.broker_address)
 
-COMFORT_PORT=option.comfort_port
+COMFORT_PORT=int(option.comfort_port) if validate_port(option.comfort_port) else 1002
 COMFORT_LOGIN_ID=option.comfort_login_id
 COMFORT_CCLX_FILE=option.comfort_cclx_file
-MQTT_LOG_LEVEL=option.log_verbosity
-COMFORT_INPUTS=int(option.alarm_inputs)
-COMFORT_OUTPUTS=int(option.alarm_outputs)
-COMFORT_RESPONSES=int(option.alarm_responses)
+MQTT_LOG_LEVEL=option.log_verbosity if option.log_verbosity in ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'] else 'INFO'
+COMFORT_INPUTS=int(option.alarm_inputs) if validate_port(option.alarm_inputs,8,MAX_ZONES) else 8
+COMFORT_OUTPUTS=int(option.alarm_outputs) if validate_port(option.alarm_outputs,0,MAX_OUTPUTS) else 0
+COMFORT_RESPONSES=int(option.alarm_responses) if validate_port(option.alarm_responses,0,MAX_RESPONSES) else 0
 COMFORT_TIME=str(option.comfort_time)
-COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs)
-COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs)
-COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update)
-
-#logger.info("COMFORT_INPUTS: %s", str(COMFORT_INPUTS))
-#logger.info("COMFORT_BATTERY_STATUS_ID: %s", str(option.comfort_battery_update))
+COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs) if validate_port(option.alarm_rio_inputs,0,120) else 0
+COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs) if validate_port(option.alarm_rio_outputs,0,120) else 0
+COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update) if int(option.comfort_battery_update) in [0,1]+list(range(33,40)) else 1
 
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 if COMFORT_INPUTS < 8:
@@ -731,6 +742,7 @@ class ComfortM_SecurityModeReport(object):
         elif self.mode == 2: self.modename = "armed_night"; logger.info("Armed Night Mode")
         elif self.mode == 3: self.modename = "armed_home"; logger.info("Armed Day Mode")
         elif self.mode == 4: self.modename = "armed_vacation"; logger.info("Armed Vacation Mode")
+        else: self.modename = "Unknown"; logger.info("Unknown Mode")
 
 #nn 00 = Idle, 1 = Trouble, 2 = Alert, 3 = Alarm
 class ComfortS_SecurityModeReport(object):
@@ -749,36 +761,66 @@ class ComfortERArmReadyNotReady(object):
 
 class ComfortAMSystemAlarmReport(object):
     def __init__(self, data={}):
+        
+        global ZONEMAPFILE
+        global input_properties
 
         self.alarm = int(data[2:4],16)
         self.triggered = True               # For Comfort Alarm State Alert, Trouble, Alarm
         self.parameter = int(data[4:6],16)
         low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
-        if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
-        elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
-        elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
-        elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
-        elif self.alarm == 4: self.message = "Phone Trouble"
-        elif self.alarm == 5: self.message = "Duress"
-        elif self.alarm == 6: self.message = "Arm Failure"
-        elif self.alarm == 7: self.message = "Family Care"
-        elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
-        elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
-        elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
-        elif self.alarm == 12: self.message = "Entry Warning, Zone "+str(self.parameter); self.triggered = False
-        elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
-        elif self.alarm == 14: self.message = "Siren Tamper"
-        elif self.alarm == 15: self.message = "Bypass, Zone "+str(self.parameter); self.triggered = False
-        elif self.alarm == 17: self.message = "Dial Test, User "+str(self.parameter); self.triggered = False
-        elif self.alarm == 19: self.message = "Entry Alert, Zone "+str(self.parameter); self.triggered = False
-        elif self.alarm == 20: self.message = "Fire"
-        elif self.alarm == 21: self.message = "Panic"
-        elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
-        elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
-        elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
-        elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
-        elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
-        else: self.message = "Unknown("+str(self.alarm)+")"
+        if ZONEMAPFILE:
+            if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)+" ("+ str(input_properties[str(self.parameter)]['Name'])+")"
+            elif self.alarm == 1: self.message = str(input_properties[str(self.parameter)]['Name'])+" Trouble"
+            elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+            elif self.alarm == 4: self.message = "Phone Trouble"
+            elif self.alarm == 5: self.message = "Duress"
+            elif self.alarm == 6: self.message = "Arm Failure"
+            elif self.alarm == 7: self.message = "Family Care"
+            elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
+            elif self.alarm == 12: self.message = "Entry Warning, Zone "+str(self.parameter)+" ("+str(input_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
+            elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
+            elif self.alarm == 14: self.message = "Siren Tamper"
+            elif self.alarm == 15: self.message = "Bypass, Zone "+str(self.parameter)+" ("+str(input_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
+            elif self.alarm == 17: self.message = "Dial Test, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 19: self.message = "Entry Alert, Zone "+str(self.parameter)+" ("+str(input_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
+            elif self.alarm == 20: self.message = "Fire"
+            elif self.alarm == 21: self.message = "Panic"
+            elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
+            elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
+            elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
+            elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
+            elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
+            else: self.message = "Unknown("+str(self.alarm)+")"
+        else:
+            if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
+            elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
+            elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+            elif self.alarm == 4: self.message = "Phone Trouble"
+            elif self.alarm == 5: self.message = "Duress"
+            elif self.alarm == 6: self.message = "Arm Failure"
+            elif self.alarm == 7: self.message = "Family Care"
+            elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
+            elif self.alarm == 12: self.message = "Entry Warning, Zone "+str(self.parameter); self.triggered = False
+            elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
+            elif self.alarm == 14: self.message = "Siren Tamper"
+            elif self.alarm == 15: self.message = "Bypass, Zone "+str(self.parameter); self.triggered = False
+            elif self.alarm == 17: self.message = "Dial Test, User "+str(self.parameter); self.triggered = False
+            elif self.alarm == 19: self.message = "Entry Alert, Zone "+str(self.parameter); self.triggered = False
+            elif self.alarm == 20: self.message = "Fire"
+            elif self.alarm == 21: self.message = "Panic"
+            elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
+            elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
+            elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
+            elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
+            elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
+            else: self.message = "Unknown("+str(self.alarm)+")"
 
 class Comfort_A_SecurityInformationReport(object):      #  For future development !!!
     #a?000000000000000000
@@ -810,18 +852,34 @@ class Comfort_A_SecurityInformationReport(object):      #  For future developmen
 
 class ComfortARSystemAlarmReport(object):
     def __init__(self, data={}):
+        global ZONEMAPFILE
+        global input_properties
+
         self.alarm = int(data[2:4],16)
         self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
         self.parameter = int(data[4:6],16)
         low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
-        if self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"+" Restore"
-        elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
-        elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
-        elif self.alarm == 4: self.message = "Phone Trouble"+" Restore"
-        elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)+" Restore"
-        elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
-        elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)+" Restore"
-        elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
+        if ZONEMAPFILE:
+            if self.alarm == 1: self.message = str(input_properties[str(self.parameter)]['Name'])+" Trouble Restore"
+            elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+            elif self.alarm == 4: self.message = "Phone Trouble"+" Restore"
+            elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)+" Restore"
+            elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
+            elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)+" Restore"
+            elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
+            else: self.message = "Unknown("+str(self.alarm)+")"
+        else:
+            if self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"+" Restore"
+            elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+            elif self.alarm == 4: self.message = "Phone Trouble"+" Restore"
+            elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)+" Restore"
+            elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
+            elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)+" Restore"
+            elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
+            else: self.message = "Unknown("+str(self.alarm)+")"
+
 
 class ComfortV_SystemTypeReport(object):
     def __init__(self, data={}):
@@ -1349,9 +1407,6 @@ class Comfort2(mqtt.Client):
             except socket.timeout as e:
                 err = e.args[0]
                 if err == 'timed out':
-                    #if BATTERYKEEPALIVES and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
-                    #    self.comfortsock.sendall("\x03D?0000\r".encode()) #echo command for keepalive on ARM 8.xxx firmware and later.
-                    #else:
                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                     SAVEDTIME = datetime.now()
                     time.sleep(0.1)
@@ -2111,6 +2166,7 @@ class Comfort2(mqtt.Client):
         global SENSORMAPFILE
         global SCSRIOMAPFILE
         global DEVICEMAPFILE
+        global USERMAPFILE
 
         global input_properties
         global counter_properties
@@ -2119,6 +2175,7 @@ class Comfort2(mqtt.Client):
         global sensor_properties
         global scsrio_properties
         global device_properties
+        global user_properties
         
         if file.is_file():
             file_stats = os.stat(file)
@@ -2132,6 +2189,7 @@ class Comfort2(mqtt.Client):
             output_properties = {}
             sensor_properties = {}
             scsrio_properties = {}
+            user_properties = {}
 
             for entry in root.iter('ConfigInfo'):
                 CustomerName = None
@@ -2141,13 +2199,12 @@ class Comfort2(mqtt.Client):
                 ComfortFileSystem = None
                 ComfortFirmware = None
 
-                CustomerName = entry.attrib.get('CustomerName')
-                Reference = entry.attrib.get('Reference')
+                CustomerName = entry.attrib.get('CustomerName')[:200] if entry.attrib.get('CustomerName') else None          # Limit to 200 characters
+                Reference = entry.attrib.get('Reference')[:200] if entry.attrib.get('Reference') else None                 # Limit to 200 characters
                 #UcmVersion = entry.attrib.get('UcmVersion')
                 #UcmRevision = entry.attrib.get('UcmRevision')
-                ComfortFileSystem = entry.attrib.get('ComfortFileSystem')
-                ComfortFirmware = entry.attrib.get('ComfortFirmwareType')
-  
+                ComfortFileSystem = entry.attrib.get('ComfortFileSystem')[:2] if entry.attrib.get('ComfortFileSystem') else None   # Limit to 2 characters
+                ComfortFirmware = entry.attrib.get('ComfortFirmwareType')  
                 device_properties['CustomerName'] = CustomerName
                 device_properties['Reference'] = Reference
                 device_properties['ComfortFileSystem'] = ComfortFileSystem
@@ -2165,16 +2222,16 @@ class Comfort2(mqtt.Client):
                 ZoneWord3 = ''
                 ZoneWord4 = ''
                 ZoneWord = ''
-                name = zone.attrib.get('Name')
-                number = zone.attrib.get('Number')
-                virtualinput = zone.attrib.get('VirtualInput')
-                ZoneWord1 = zone.attrib.get('ZoneWord1')
+                name = zone.attrib.get('Name')[:16] if zone.attrib.get('Name') else ''
+                number = zone.attrib.get('Number')[:3] if zone.attrib.get('Number') else ''
+                virtualinput = zone.attrib.get('VirtualInput')[:5] if zone.attrib.get('VirtualInput') else ''
+                ZoneWord1 = zone.attrib.get('ZoneWord1')[:16] if zone.attrib.get('ZoneWord1') else ''
                 if ZoneWord1 != None: ZoneWord = ZoneWord1
-                ZoneWord2 = zone.attrib.get('ZoneWord2')
+                ZoneWord2 = zone.attrib.get('ZoneWord2')[:16] if zone.attrib.get('ZoneWord2') else ''
                 if ZoneWord2 != None: ZoneWord = ZoneWord + " " +ZoneWord2
-                ZoneWord3 = zone.attrib.get('ZoneWord3')
+                ZoneWord3 = zone.attrib.get('ZoneWord3')[:16] if zone.attrib.get('ZoneWord3') else ''
                 if ZoneWord3 != None: ZoneWord = ZoneWord + " " +ZoneWord3
-                ZoneWord4 = zone.attrib.get('ZoneWord4')
+                ZoneWord4 = zone.attrib.get('ZoneWord4')[:16] if zone.attrib.get('ZoneWord4') else ''
                 if ZoneWord4 != None: ZoneWord = ZoneWord + " " +ZoneWord4
 
                 if self.CheckIndexNumberFormat(number):
@@ -2202,8 +2259,8 @@ class Comfort2(mqtt.Client):
             for counter in root.iter('Counter'):
                 name = ''
                 number = ''
-                name = counter.attrib.get('Name')
-                number = counter.attrib.get('Number')
+                name = counter.attrib.get('Name')[:16] if counter.attrib.get('Name') else ''
+                number = counter.attrib.get('Number')[:3] if counter.attrib.get('Number') else ''
 
                 if self.CheckIndexNumberFormat(number):
                     COUNTERMAPFILE = True               
@@ -2226,8 +2283,8 @@ class Comfort2(mqtt.Client):
             for flag in root.iter('Flag'):
                 name = ''
                 number = ''
-                name = flag.attrib.get('Name')
-                number = flag.attrib.get('Number')
+                name = flag.attrib.get('Name')[:16] if flag.attrib.get('Name') else ''
+                number = flag.attrib.get('Number')[:3] if flag.attrib.get('Number') else ''
 
                 if self.CheckIndexNumberFormat(number):
                     FLAGMAPFILE = True               
@@ -2250,8 +2307,8 @@ class Comfort2(mqtt.Client):
             for output in root.iter('Output'):
                 name = ''
                 number = ''
-                name = output.attrib.get('Name')
-                number = output.attrib.get('Number')
+                name = output.attrib.get('Name')[:16] if output.attrib.get('Name') else ''
+                number = output.attrib.get('Number')[:3] if output.attrib.get('Number') else ''
 
                 if self.CheckIndexNumberFormat(number):
                     OUTPUTMAPFILE = True               
@@ -2274,8 +2331,8 @@ class Comfort2(mqtt.Client):
             for sensor in root.iter('SensorResponse'):
                 name = ''
                 number = ''
-                name = sensor.attrib.get('Name')
-                number = sensor.attrib.get('Number')
+                name = sensor.attrib.get('Name')[:16] if sensor.attrib.get('Name') else ''
+                number = sensor.attrib.get('Number')[:3] if sensor.attrib.get('Number') else ''
 
                 if self.CheckIndexNumberFormat(number):
                     SENSORMAPFILE = True               
@@ -2298,8 +2355,8 @@ class Comfort2(mqtt.Client):
             for scsrio in root.iter('ScsRioResponse'):
                 name = ''
                 number = ''
-                name = scsrio.attrib.get('Name')
-                number = scsrio.attrib.get('Number')
+                name = scsrio.attrib.get('Name')[:16] if scsrio.attrib.get('Name') else ''
+                number = scsrio.attrib.get('Number')[:3] if scsrio.attrib.get('Number') else ''
 
                 if self.CheckIndexNumberFormat(number):
                     SCSRIOMAPFILE = True               
@@ -2318,6 +2375,30 @@ class Comfort2(mqtt.Client):
 
                 # Add the truncated value to the dictionary
                 scsrio_properties[number] = name
+
+            for user in root.iter('Authorisation'):
+                name = ''
+                number = ''
+                name = user.attrib.get('Name')[:16] if user.attrib.get('Name') else ''
+                number = user.attrib.get('Number')[:3] if user.attrib.get('Number') else ''
+
+                if self.CheckIndexNumberFormat(number):
+                    USERMAPFILE = True               
+                else:
+                    number = ''
+                    logger.error("Invalid User Number detected in '%s'.", file)
+                    USERMAPFILE = False
+                    break
+                if self.CheckZoneNameFormat(name): 
+                    USERMAPFILE = True              
+                else:
+                    name = ''
+                    logger.error("Invalid User Name detected in '%s'.", file)
+                    USERMAPFILE = False             
+                    break
+
+                # Add the truncated value to the dictionary
+                user_properties[number] = name
         else:
             device_properties['CustomerName'] = None
             device_properties['Reference'] = None
@@ -2383,6 +2464,7 @@ class Comfort2(mqtt.Client):
         global SENSORMAPFILE
         global SCSRIOMAPFILE
         global DEVICEMAPFILE
+        global USERMAPFILE
 
         global input_properties
         global counter_properties
@@ -2391,6 +2473,7 @@ class Comfort2(mqtt.Client):
         global sensor_properties
         global scsrio_properties
         global device_properties
+        global user_properties
 
         global ZoneCache
         global BypassCache
@@ -2443,9 +2526,6 @@ class Comfort2(mqtt.Client):
                             logger.debug(line[1:])  	    # Print all responses in DEBUG mode only. Print all received Comfort commands except keepalives.
 
                             if datetime.now() > SAVEDTIME + TIMEOUT:            #
-                                #if BATTERYKEEPALIVES and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
-                                #    self.comfortsock.sendall("\x03D?0000\r".encode()) #echo command for keepalive on ARM v8.xxx and later
-                                #else:
                                 self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
                                 SAVEDTIME = datetime.now()
                                 time.sleep(0.1)
@@ -2705,10 +2785,12 @@ class Comfort2(mqtt.Client):
 
                                     if ZONEMAPFILE & self.CheckIndexNumberFormat(str(erMsg.zone)):
                                         logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), input_properties[str(erMsg.zone)]['Name'])
+                                        message_topic = "Zone "+str(erMsg.zone)+ " ("+str(input_properties[str(erMsg.zone)]['Name'])+ ") Not Ready"
                                     else: 
                                         logging.warning("Zone %s Not Ready", str(erMsg.zone))
+                                        message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
 
-                                    message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
+                                    #message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
                                     self.publish(ALARMMESSAGETOPIC, message_topic, qos=2, retain=True)          # Empty string removes topic.
                                 else:
                                     logging.info("Ready To Arm...")
@@ -2947,9 +3029,6 @@ class Comfort2(mqtt.Client):
                                 self.login()
                             else:
                                 if datetime.now() > (SAVEDTIME + TIMEOUT):  # If no command sent in 2 minutes then send keepalive.
-                                    #if BATTERYKEEPALIVES and (str(device_properties['CPUType']) == 'ARM' or str(device_properties['CPUType']) == 'Toshiba'):
-                                    #    self.comfortsock.sendall("\x03D?0000\r".encode()) #echo command for keepalive on ARM v8.xxx and later
-                                    #else:
                                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive. cc00
                                     SAVEDTIME = datetime.now()
                                     time.sleep(0.1)
@@ -2992,29 +3071,31 @@ def validate_certificate(certificate):
     with open(certificate, 'rb') as cert_file:
         cert_data = cert_file.read()
 
-    # Load the certificate using the binary data
-    x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
+    try:
+        # Load the certificate using the binary data
+        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
 
-    # Check the 'notAfter' attribute
-    not_after = x509.get_notAfter()
-    not_before = x509.get_notBefore() 
-    if not_after:
-        ValidTo = not_after.decode()
-    if not_before:
-        ValidFrom = not_before.decode()
+        # Check the 'notAfter' attribute
+        not_after = x509.get_notAfter()
+        not_before = x509.get_notBefore() 
+        if not_after:
+            ValidTo = not_after.decode()
+        if not_before:
+            ValidFrom = not_before.decode()
 
-    # Define the format of the datetime strings
-    datetime_format = "%Y%m%d%H%M%SZ"
+        # Define the format of the datetime strings
+        datetime_format = "%Y%m%d%H%M%SZ"
 
-    # Convert the strings to datetime objects
-    ValidTo = datetime.strptime(ValidTo, datetime_format)
-    ValidFrom = datetime.strptime(ValidFrom, datetime_format)
+        # Convert the strings to datetime objects
+        ValidTo = datetime.strptime(ValidTo, datetime_format)
+        ValidFrom = datetime.strptime(ValidFrom, datetime_format)
     
-    if (datetime.now() >= ValidFrom) and (datetime.now() < ValidTo):
-        return 0    # Valid certificate
-    else:
-        return 1    # Expired certificate
-
+        if (datetime.now() >= ValidFrom) and (datetime.now() < ValidTo):
+            return 0    # Valid certificate
+        else:
+            return 1    # Expired certificate
+    except crypto.Error as e:
+        raise ValueError(f"Error loading certificate: {e}")
 
 mqttc = Comfort2(callback_api_version = mqtt.CallbackAPIVersion.VERSION2, client_id=mqtt_client_id, protocol=mqtt.MQTTv5, transport=MQTT_PROTOCOL)
 
@@ -3051,12 +3132,12 @@ else:
             tls_args = {}
             tls_args['ca_certs'] = ca_cert
             mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)
-            mqttc.tls_insecure_set(True)
+            #mqttc.tls_insecure_set(True)
+            mqttc.tls_insecure_set(False)
 
         case _:
             # Default
             pass
 
-#mqttc.tls_set(ca_certs="ca.crt", certfile="client.crt", keyfile="client.key", tls_version=ssl.PROTOCOL_TLSv1_2)
 mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE, mqtt.MQTTv5)
 mqttc.run()
