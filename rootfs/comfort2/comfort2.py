@@ -2784,7 +2784,7 @@ class Comfort2(mqtt.Client):
                                 if not erMsg.zone == 0:
 
                                     if ZONEMAPFILE & self.CheckIndexNumberFormat(str(erMsg.zone)):
-                                        logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), input_properties[str(erMsg.zone)]['Name'])
+                                        logging.warning("Zone %s (%s) Not Ready", str(erMsg.zone), input_properties[str(erMsg.zone)]['Name'])
                                         message_topic = "Zone "+str(erMsg.zone)+ " ("+str(input_properties[str(erMsg.zone)]['Name'])+ ") Not Ready"
                                     else: 
                                         logging.warning("Zone %s Not Ready", str(erMsg.zone))
@@ -3003,11 +3003,11 @@ class Comfort2(mqtt.Client):
 
                                 if byMsg.state == 1 and byMsg.zone <= int(COMFORT_INPUTS):
                                     if ZONEMAPFILE and self.CheckIndexNumberFormat(str(byMsg.zone)):
-                                        logging.warning("Zone %s Bypassed (%s)", str(byMsg.zone), _name)
+                                        logging.warning("Zone %s (%s) Bypassed", str(byMsg.zone), _name)
                                     else: logging.warning("Zone %s Bypassed", str(byMsg.zone))
                                 elif byMsg.state == 0 and byMsg.zone <= int(COMFORT_INPUTS):
                                     if ZONEMAPFILE and self.CheckIndexNumberFormat(str(byMsg.zone)):
-                                        logging.info("Zone %s Unbypassed (%s)", str(byMsg.zone), _name)
+                                        logging.info("Zone %s (%s) Unbypassed", str(byMsg.zone), _name)
                                     else: logging.info("Zone %s Unbypassed", str(byMsg.zone))
 
                                 MQTT_MSG=json.dumps({"Time": _time, 
