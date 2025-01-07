@@ -1,3 +1,14 @@
+## [1.5.0] - Busy
+ 
+### Added
+ 
+
+### Changed
+ - Update LOG messages for Zones to be the same as the Alarm Message format.
+
+### Fixed  
+
+
 ## [1.4.1] - 2025-01-07
  
 ### Added
