@@ -2782,7 +2782,7 @@ class Comfort2(mqtt.Client):
 
                                     if ZONEMAPFILE & self.CheckIndexNumberFormat(str(erMsg.zone)):
                                         logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), input_properties[str(erMsg.zone)]['Name'])
-                                        message_topic = str(input_properties[str(erMsg.zone)]['Name'])+ " Not Ready"
+                                        message_topic = "Zone "+str(erMsg.zone)+ " ("+str(input_properties[str(erMsg.zone)]['Name'])+ ") Not Ready"
                                     else: 
                                         logging.warning("Zone %s Not Ready", str(erMsg.zone))
                                         message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
