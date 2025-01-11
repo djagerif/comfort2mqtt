@@ -85,6 +85,7 @@ FLAGMAPFILE = False
 DEVICEMAPFILE = False
 USERMAPFILE = False
 device_properties = {}
+file_exists  = False
 
 device_properties['CPUType'] = "N/A"
 device_properties['Version'] = "N/A"
