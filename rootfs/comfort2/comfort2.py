@@ -830,7 +830,7 @@ class Comfort_A_SecurityInformationReport(object):      #  For future developmen
         self.SS = int(data[4:6],16)     #SS is alarm state 0-3 (Idle, Trouble, Alert, Alarm)
         self.XX = int(data[6:8],16)     #XX is Trouble bits
         self.YY = int(data[8:10],16)    #YY is for Spare Trouble Bits, 0 if unused
-        self.BB = int(data[10:12],16)   #BB = Low Battery ID = 0 for Comfort or none
+        self.BB = int(data[10:12],16)   #BB = Low Battery ID = 1 for Comfort or none
         self.zz = int(data[12:14],16)   #zz = Zone Trouble number, =0 if none
         self.RR = int(data[14:16],16)   #RR = RS485 Trouble ID, = 0 if none
         self.TT = int(data[16:18],16)   #TT = Tamper ID = 0 if none
@@ -844,7 +844,8 @@ class Comfort_A_SecurityInformationReport(object):      #  For future developmen
         low_battery = ['', 'Main','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
         self.type = alarm_type[self.AA]
         self.state = alarm_state[self.SS]
-        self.battery = None
+        #self.battery = None
+        self.acfail = (int(data[6:8],16) >> 0) & 1   #XX = AC Fail, bit 0. 0=AC OK, 1=AC Fail
         #if self.type == "LowBattery" and self.BB == 1: self.battery = low_battery[1]
         #elif self.type == "LowBattery" and self.BB > 1:self.battery = low_battery[(self.BB - 32)]
         if self.type == "LowBattery" and self.BB == 1: self.battery = low_battery[1]
@@ -2781,7 +2782,9 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "a?":     # Not Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
                                 if aMsg.type == 'LowBattery':
-                                    logging.debug("Low Battery %s", aMsg.battery)
+                                    logging.warning("Low Battery %s", aMsg.battery)
+                                elif aMsg.type == 'PowerFail':
+                                    logging.warning("AC Fail %s", aMsg.acfail)
 
                             elif line[1:3] == "ER" and CacheState:           
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
