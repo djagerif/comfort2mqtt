@@ -841,12 +841,15 @@ class Comfort_A_SecurityInformationReport(object):      #  For future developmen
                       'Tamper','Fire','Gas','FamilyCare','Perimeter', 'BypassZone','Disarm','CMSTest','SystemArmed', 'AlarmAbort', 'EntryWarning', \
                       'SirenTrouble','AlarmType23', 'RS485Comms','Doorbell','HomeSafe','DialTest','AlarmType28','NewMessage','Temperature','SigninTamper']
         alarm_state = ['Idle','Trouble','Alert','Alarm']
-        low_battery = ['Main','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
+        low_battery = ['', 'Main','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
         self.type = alarm_type[self.AA]
         self.state = alarm_state[self.SS]
         self.battery = None
-        if self.type == "LowBattery" and self.BB == 0: self.battery = low_battery[0]
-        elif self.type == "LowBattery" and self.BB > 0:self.battery = low_battery[(self.BB - 32)]
+        #if self.type == "LowBattery" and self.BB == 1: self.battery = low_battery[1]
+        #elif self.type == "LowBattery" and self.BB > 1:self.battery = low_battery[(self.BB - 32)]
+        if self.type == "LowBattery" and self.BB == 1: self.battery = low_battery[1]
+        elif self.type == "LowBattery" and self.BB in low_battery:self.battery = low_battery[(self.BB - 32)]
+        else:self.battery = "Unknown"
         #logger.debug('Battery ID: %s', self.id)
         #logger.debug('Alarm Type: %s', self.type)       # What happens if you have low battery and zone trouble ????
 
