@@ -781,7 +781,7 @@ class ComfortAMSystemAlarmReport(object):
             elif self.alarm == 7: self.message = "Family Care"
             elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
             elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
-            elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
+            elif self.alarm == 10: self.message = "Tamper Zone "+str(self.parameter)+" ("+str(input_properties[str(self.parameter)]['Name'])+")"
             elif self.alarm == 12: self.message = "Entry Warning, Zone "+str(self.parameter)+" ("+str(input_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
             elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
             elif self.alarm == 14: self.message = "Siren Tamper"
@@ -807,7 +807,7 @@ class ComfortAMSystemAlarmReport(object):
             elif self.alarm == 7: self.message = "Family Care"
             elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
             elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
-            elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
+            elif self.alarm == 10: self.message = "Tamper Zone "+str(self.parameter)
             elif self.alarm == 12: self.message = "Entry Warning, Zone "+str(self.parameter); self.triggered = False
             elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
             elif self.alarm == 14: self.message = "Siren Tamper"
@@ -835,8 +835,6 @@ class Comfort_A_SecurityInformationReport(object):      #  For future developmen
         self.RR = int(data[14:16],16)   #RR = RS485 Trouble ID, = 0 if none
         self.TT = int(data[16:18],16)   #TT = Tamper ID = 0 if none
         self.GG = int(data[18:20],16)   #GG = GSM ID =0 if no trouble
-        #self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
-        #logger.debug('a? - data: %s  - still under development', str(data[2:]))
         alarm_type = ['','Intruder','Duress','LineCut','ArmFail','ZoneTrouble','ZoneAlert','LowBattery', 'PowerFail', 'Panic', 'EntryAlert', \
                       'Tamper','Fire','Gas','FamilyCare','Perimeter', 'BypassZone','Disarm','CMSTest','SystemArmed', 'AlarmAbort', 'EntryWarning', \
                       'SirenTrouble','AlarmType23', 'RS485Comms','Doorbell','HomeSafe','DialTest','AlarmType28','NewMessage','Temperature','SigninTamper']
@@ -846,14 +844,9 @@ class Comfort_A_SecurityInformationReport(object):      #  For future developmen
         self.state = alarm_state[self.SS]
         #self.battery = None
         self.acfail = (int(data[6:8],16) >> 0) & 1   #XX = AC Fail, bit 0. 0=AC OK, 1=AC Fail
-        #if self.type == "LowBattery" and self.BB == 1: self.battery = low_battery[1]
-        #elif self.type == "LowBattery" and self.BB > 1:self.battery = low_battery[(self.BB - 32)]
-        if self.type == "LowBattery" and self.BB == 1: self.battery = low_battery[1]
+        if self.type == "LowBattery" and self.BB <= 1: self.battery = low_battery[1]
         elif self.type == "LowBattery" and self.BB in low_battery:self.battery = low_battery[(self.BB - 32)]
         else:self.battery = "Unknown"
-        #logger.debug('Battery ID: %s', self.id)
-        #logger.debug('Alarm Type: %s', self.type)       # What happens if you have low battery and zone trouble ????
-
 
 class ComfortARSystemAlarmReport(object):
     def __init__(self, data={}):
@@ -2784,7 +2777,9 @@ class Comfort2(mqtt.Client):
                                 if aMsg.type == 'LowBattery':
                                     logging.warning("Low Battery %s", aMsg.battery)
                                 elif aMsg.type == 'PowerFail':
-                                    logging.warning("AC Fail %s", aMsg.acfail)
+                                    logging.warning("AC Fail")      # Comfort doesn't yet report which unit fails.
+                                elif aMsg.type == 'Disarm':
+                                    logging.info("System Disarmed")
 
                             elif line[1:3] == "ER" and CacheState:           
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
@@ -2809,8 +2804,9 @@ class Comfort2(mqtt.Client):
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 if amMsg.parameter <= int(COMFORT_INPUTS):
                                     self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
-                                if amMsg.triggered:
-                                    self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
+                                    logging.warning("Zone %s (%s) Tamper", str(amMsg.parameter), input_properties[str(amMsg.parameter)]['Name'])
+                                    if amMsg.triggered:
+                                        self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
 
                             elif line[1:3] == "AR":
                                 arMsg = ComfortARSystemAlarmReport(line[1:])
