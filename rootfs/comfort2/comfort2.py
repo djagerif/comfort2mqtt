@@ -2804,7 +2804,7 @@ class Comfort2(mqtt.Client):
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 if amMsg.parameter <= int(COMFORT_INPUTS):
                                     self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
-                                    logging.warning("Zone %s (%s) Tamper", str(amMsg.parameter), input_properties[str(amMsg.parameter)]['Name'])
+                                    logging.warning("Tamper %s", str(amMsg.parameter))
                                     if amMsg.triggered:
                                         self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
 
