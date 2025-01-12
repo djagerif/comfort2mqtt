@@ -781,7 +781,7 @@ class ComfortAMSystemAlarmReport(object):
             elif self.alarm == 7: self.message = "Family Care"
             elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
             elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
-            elif self.alarm == 10: self.message = "Tamper Zone "+str(self.parameter)+" ("+str(input_properties[str(self.parameter)]['Name'])+")"
+            elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
             elif self.alarm == 12: self.message = "Entry Warning, Zone "+str(self.parameter)+" ("+str(input_properties[str(self.parameter)]['Name'])+")"; self.triggered = False
             elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
             elif self.alarm == 14: self.message = "Siren Tamper"
@@ -807,7 +807,7 @@ class ComfortAMSystemAlarmReport(object):
             elif self.alarm == 7: self.message = "Family Care"
             elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
             elif self.alarm == 9: self.message = "System Armed, User "+str(self.parameter); self.triggered = False
-            elif self.alarm == 10: self.message = "Tamper Zone "+str(self.parameter)
+            elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)
             elif self.alarm == 12: self.message = "Entry Warning, Zone "+str(self.parameter); self.triggered = False
             elif self.alarm == 13: self.message = "Alarm Abort"; self.triggered = False
             elif self.alarm == 14: self.message = "Siren Tamper"
