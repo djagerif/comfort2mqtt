@@ -120,5 +120,5 @@ fi
 
 ## Run Comfort2MQTT program
 bashio::log.info "Starting Comfort to MQTT..."
-bashio::log.debug "COMFORT_ARGS: $COMFORT_ARGS"
+bashio::log.debug "${COMFORT_ARGS}"
 exec python /comfort2/comfort2.py $COMFORT_ARGS
