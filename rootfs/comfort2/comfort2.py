@@ -395,6 +395,9 @@ MQTT_SERVER=get_ip_address(option.broker_address)
 COMFORT_PORT=int(option.comfort_port) if validate_port(option.comfort_port) else 1002
 COMFORT_LOGIN_ID=option.comfort_login_id
 COMFORT_CCLX_FILE=option.comfort_cclx_file
+
+logger.info('CCLX File: %s', COMFORT_CCLX_FILE)
+
 MQTT_LOG_LEVEL=option.log_verbosity if option.log_verbosity in ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'] else 'INFO'
 COMFORT_INPUTS=int(option.alarm_inputs) if validate_port(option.alarm_inputs,8,MAX_ZONES) else 8
 COMFORT_OUTPUTS=int(option.alarm_outputs) if validate_port(option.alarm_outputs,0,MAX_OUTPUTS) else 0
