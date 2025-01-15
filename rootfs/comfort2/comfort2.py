@@ -111,6 +111,11 @@ device_properties['SerialNumber'] = "00000000"
 device_properties['BatteryStatus'] = "N/A"
 device_properties['ChargerStatus'] = "N/A"
 device_properties['BridgeConnected'] = 0
+device_properties['CustomerName'] = None
+device_properties['Reference'] = None
+device_properties['Version'] = None
+device_properties['ComfortFileSystem'] = None
+device_properties['ComfortFirmwareType'] = None
 
 # Comfort FileSystem values and Model Numbers
 models = {34: "Comfort II ULTRA",
@@ -1639,48 +1644,6 @@ class Comfort2(mqtt.Client):
                             "model": "Comfort MQTT Bridge"
                         }
         
-        # MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
-        #                      "support_url": "https://www.cytech.biz",
-        #                      "Reference": device_properties['Reference'] if file_exists else None,
-        #                      "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
-        #                      "ComfortFirmwareType": device_properties['ComfortFirmwareType'] if file_exists else None,
-        #                      "sw_version":str(device_properties['Version']),
-        #                      "hw_version":str(device_properties['ComfortHardwareModel']),
-        #                      "serial_number": device_properties['SerialNumber'],
-        #                      "cpu_type": str(device_properties['CPUType']),
-        #                      "BatteryStatus": str(device_properties['BatteryStatus']),
-        #                      "ChargerStatus": str(device_properties['ChargerStatus']),
-        #                      "BatteryMain": str(device_properties['BatteryVoltageMain']),
-        #                      "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
-        #                      "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
-        #                      "BatterySlave3": str(device_properties['BatteryVoltageSlave3']),
-        #                      "BatterySlave4": str(device_properties['BatteryVoltageSlave4']),
-        #                      "BatterySlave5": str(device_properties['BatteryVoltageSlave5']),
-        #                      "BatterySlave6": str(device_properties['BatteryVoltageSlave6']),
-        #                      "BatterySlave7": str(device_properties['BatteryVoltageSlave7']),
-        #                      "ChargerMain": str(device_properties['ChargeVoltageMain']),
-        #                      "ChargerSlave1": str(device_properties['ChargeVoltageSlave1']),
-        #                      "ChargerSlave2": str(device_properties['ChargeVoltageSlave2']),
-        #                      "ChargerSlave3": str(device_properties['ChargeVoltageSlave3']),
-        #                      "ChargerSlave4": str(device_properties['ChargeVoltageSlave4']),
-        #                      "ChargerSlave5": str(device_properties['ChargeVoltageSlave5']),
-        #                      "ChargerSlave6": str(device_properties['ChargeVoltageSlave6']),
-        #                      "ChargerSlave7": str(device_properties['ChargeVoltageSlave7']),
-        #                      "InstalledSlaves": int(device_properties['sem_id']),
-        #                      "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
-        #                      "BridgeConnected": str(device_properties['BridgeConnected']),
-        #                      "device": MQTT_DEVICE
-        #                     })
-
-        # "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
-        # try:
-        #     if int(device_properties['ComfortFileSystem']) in models:
-        #         _model = models[int(device_properties['ComfortFileSystem'])]
-        #     else:
-        #         _model = "Unknown"
-        # except:
-        #     _model = "Unknown"
-
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
                              "support_url": "https://www.cytech.biz",
                              "Reference": device_properties['Reference'] if file_exists else None,
@@ -1695,20 +1658,7 @@ class Comfort2(mqtt.Client):
                              "BridgeConnected": str(device_properties['BridgeConnected']),
                              "device": MQTT_DEVICE
                             })
-        # MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
-        #                      "support_url": "https://www.cytech.biz",
-        #                      "Reference": device_properties['Reference'] if file_exists else None,
-        #                      "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
-        #                      "ComfortFirmwareType": device_properties['ComfortFirmwareType'] if file_exists else None,
-        #                      "sw_version":str(device_properties['Version']),
-        #                      "hw_version":str(device_properties['ComfortHardwareModel']),
-        #                      "serial_number": device_properties['SerialNumber'],
-        #                      "cpu_type": str(device_properties['CPUType']),
-        #                      "InstalledSlaves": int(device_properties['sem_id']),
-        #                      "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
-        #                      "BridgeConnected": str(device_properties['BridgeConnected']),
-        #                      "device": MQTT_DEVICE
-        #                     })
+
         self.publish(DOMAIN, MQTT_MSG,qos=2,retain=True)
         time.sleep(0.1)
 
@@ -2083,39 +2033,7 @@ class Comfort2(mqtt.Client):
                             "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
                             "model": "Comfort MQTT Bridge"
                         }
-        
-            # MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
-            #                  "support_url": "https://www.cytech.biz",
-            #                  "Reference": device_properties['Reference'] if file_exists else None,
-            #                  "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
-            #                  "ComfortFirmwareType": device_properties['ComfortFirmwareType'] if file_exists else None,
-            #                  "sw_version":str(device_properties['Version']),
-            #                  "hw_version":str(device_properties['ComfortHardwareModel']),
-            #                  "serial_number": device_properties['SerialNumber'],
-            #                  "cpu_type": str(device_properties['CPUType']),
-            #                  "BatteryStatus": str(device_properties['BatteryStatus']),
-            #                  "ChargerStatus": str(device_properties['ChargerStatus']),
-            #                  "BatteryMain": str(device_properties['BatteryVoltageMain']),
-            #                  "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
-            #                  "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
-            #                  "BatterySlave3": str(device_properties['BatteryVoltageSlave3']),
-            #                  "BatterySlave4": str(device_properties['BatteryVoltageSlave4']),
-            #                  "BatterySlave5": str(device_properties['BatteryVoltageSlave5']),
-            #                  "BatterySlave6": str(device_properties['BatteryVoltageSlave6']),
-            #                  "BatterySlave7": str(device_properties['BatteryVoltageSlave7']),
-            #                  "ChargerMain": str(device_properties['ChargeVoltageMain']),
-            #                  "ChargerSlave1": str(device_properties['ChargeVoltageSlave1']),
-            #                  "ChargerSlave2": str(device_properties['ChargeVoltageSlave2']),
-            #                  "ChargerSlave3": str(device_properties['ChargeVoltageSlave3']),
-            #                  "ChargerSlave4": str(device_properties['ChargeVoltageSlave4']),
-            #                  "ChargerSlave5": str(device_properties['ChargeVoltageSlave5']),
-            #                  "ChargerSlave6": str(device_properties['ChargeVoltageSlave6']),
-            #                  "ChargerSlave7": str(device_properties['ChargeVoltageSlave7']),
-            #                  "InstalledSlaves": int(device_properties['sem_id']),
-            #                  "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
-            #                  "BridgeConnected": str(device_properties['BridgeConnected']),
-            #                  "device": MQTT_DEVICE
-            #                 })
+
             MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
                              "support_url": "https://www.cytech.biz",
                              "Reference": device_properties['Reference'] if file_exists else None,
@@ -2496,7 +2414,7 @@ class Comfort2(mqtt.Client):
             else:
                 logging.info("Illegal Comfigurator CCLX file detected, no enrichment will be loaded.")
         else:
-            logging.info("Missing Comfigurator CCLX file, no enrichment will be loaded.")
+            logging.info("No Comfigurator CCLX file found, no enrichment will be loaded.")
         
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         if self.connected == True:

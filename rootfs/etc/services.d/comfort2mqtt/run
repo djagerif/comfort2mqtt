@@ -11,9 +11,6 @@ COMFORT_ADDRESS=$(bashio::config 'comfort_address')
 COMFORT_PORT=$(bashio::config 'comfort_port')
 COMFORT_LOGIN_ID=$(bashio::config 'comfort_login_id')
 COMFORT_CCLX_FILE=$(bashio::config 'comfort_cclx_file')
-
-bashio::log.info "${COMFORT_CCLX_FILE}"
-
 MQTT_USE_TLS=$(bashio::config 'mqtt_encryption')
 MQTT_CA_CERT=$(bashio::config 'broker_ca')
 MQTT_CLIENT_CERT=$(bashio::config 'broker_client_cert')

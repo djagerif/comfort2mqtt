@@ -1,12 +1,16 @@
 ## [1.5.0] - Busy
  
+ - Add longfilename support to CCLX file
+ - Test missing CCLX file - defaults seem buggy
+
 ### Added
  
 
 ### Changed
  - Update LOG messages for Zones to be the same as the Alarm Message format.
 
-### Fixed  
+### Fixed
+ - Fix a? exception when Comfort is powered on without a battery.
 
 
 ## [1.4.1] - 2025-01-07
