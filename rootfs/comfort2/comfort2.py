@@ -2361,6 +2361,7 @@ class Comfort2(mqtt.Client):
         if '..' in sanitized_filename or '/' in sanitized_filename or '\\' in sanitized_filename:
             return None
     
+        logging.debug("Sanitized Filename: %s", sanitized_filename)
         return sanitized_filename
 
     def run(self):
