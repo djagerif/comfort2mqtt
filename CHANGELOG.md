@@ -1,7 +1,5 @@
 ## [1.5.0] - Busy
  
- - Add longfilename support to CCLX file
-
 
 ### Added
  

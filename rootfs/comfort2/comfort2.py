@@ -2338,7 +2338,7 @@ class Comfort2(mqtt.Client):
         :return: A sanitized filename or None if invalid.
         """
         # Define a regular expression pattern for a valid filename (alphanumeric and specific special characters)
-        valid_filename_pattern = r'^[\w\-. ]+$'  # Alphanumeric characters, underscores, hyphens, dots, and spaces
+        valid_filename_pattern = r'^[\w\-. ]+$'  # Alphanumeric characters, underscores, hyphens and dots. Spaces (for future development)
     
         # Split the filename and extension
         base, ext = os.path.splitext(input_string)
@@ -2361,7 +2361,7 @@ class Comfort2(mqtt.Client):
         if '..' in sanitized_filename or '/' in sanitized_filename or '\\' in sanitized_filename:
             return None
     
-        logging.debug("Sanitized Filename: %s", sanitized_filename)
+        #logging.debug("Sanitized Filename: %s", sanitized_filename)
         return sanitized_filename
 
     def run(self):
