@@ -103,7 +103,7 @@ if [ "${COMFORT_RESPONSES}" != "null" ]; then
 fi
 
 if [ "${COMFORT_CCLX_FILE}" != "null" ]; then
-    COMFORT_ARGS='${COMFORT_ARGS} --comfort-cclx-file "${COMFORT_CCLX_FILE}"'
+    COMFORT_ARGS="${COMFORT_ARGS} --comfort-cclx-file \"${COMFORT_CCLX_FILE}\""
 fi
 
 if [ "${COMFORT_BATTERY_STATUS_ID}" != "null" ]; then
