@@ -33,8 +33,7 @@ options:
   comfort_address: null
   comfort_port: 1002
   comfort_login_id: null
-  #comfort_cclx_file: "comfigurator.cclx"
-  #comfort_cclx_file: null
+  comfort_cclx_file: "comfigurator.cclx"
   comfort_battery_update: 1
   log_verbosity: INFO
   alarm_inputs: 8
