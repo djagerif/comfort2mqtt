@@ -1,8 +1,8 @@
 # Copyright(c) 2018 Khor Chin Heong (koochyrat@gmail.com) for original project code and additional 
-# copyright(c) 2024 Ingo de Jager (ingodejager@gmail.com) for modifications done 
+# copyright(c) 2025 Ingo de Jager (ingodejager@gmail.com) for modifications done 
 # to the original project sources contained in this project.
 #
-# Modified by Ingo de Jager 2024 (ingodejager@gmail.com)
+# Modified by Ingo de Jager 2025 (ingodejager@gmail.com)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -2354,7 +2354,8 @@ class Comfort2(mqtt.Client):
                 return None
     
         # Join the base and extension back
-        sanitized_filename = f"{base}.{ext}" if ext else base
+        # sanitized_filename = f"{base}.{ext}" if ext else base
+        sanitized_filename = f"\"{base}.{ext}\"" if ext else base
     
         # Ensure no directory traversal characters are present
         if '..' in sanitized_filename or '/' in sanitized_filename or '\\' in sanitized_filename:
