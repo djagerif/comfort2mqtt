@@ -1,7 +1,7 @@
 ## [1.5.0] - Busy
  - Work on AL decoding
  - Work on a? decoding.
-
+ - fix ALxx00xxxx restore trouble mqtt message to idle.
 
 ### Added
 

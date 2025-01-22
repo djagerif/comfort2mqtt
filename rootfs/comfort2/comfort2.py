@@ -2720,9 +2720,10 @@ class Comfort2(mqtt.Client):
                                 
                                 self.UpdateDeviceInfo(True)     # Update Device properties.
 
-                            elif line[1:3] == "a?":     # Not Implemented. For Future Development !!!
+                            elif line[1:3] == "a?":     # Not Fully Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
                                 ALARMSTATE = aMsg.SS         # Save Numerical state.
+                                self.publish(ALARMSTATUSTOPIC, aMsg.state, qos=2, retain=True)          
                                 if aMsg.type == 'LowBattery':
                                     logging.warning("Low Battery %s", aMsg.battery)
                                 elif aMsg.type == 'PowerFail':
