@@ -2767,20 +2767,19 @@ class Comfort2(mqtt.Client):
                                     if amMsg.triggered:
                                         self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
 
-#                            elif line[1:3] == "AL":     # Under development (Alarm Type Report)
-#                                alMsg = ComfortALSystemAlarmReport(line[1:])
-#                                match ALARMSTATE:
-#                                    case 0:     # Idle
-#                                        self.publish(ALARMSTATUSTOPIC, "Idle", qos=2, retain=False)
-#                                    case 1:     # Trouble
-#                                        self.publish(ALARMSTATUSTOPIC, "Trouble", qos=2, retain=False)
-#                                    case 2:     # Alert
-#                                        self.publish(ALARMSTATUSTOPIC, "Alert", qos=2, retain=False)
-#                                    case 3:     # Alarm
-#                                        self.publish(ALARMSTATUSTOPIC, "Alarm", qos=2, retain=False)
-#                                    case _:     # Unknown (default)
-#                                        self.publish(ALARMSTATUSTOPIC, "Unknown", qos=2, retain=False)
-
+                            elif line[1:3] == "AL":     # Under development (Alarm Type Report)
+                                alMsg = ComfortALSystemAlarmReport(line[1:])
+                                match ALARMSTATE:
+                                    case 0:     # Idle
+                                        self.publish(ALARMSTATUSTOPIC, "Idle", qos=2, retain=False)
+                                    case 1:     # Trouble
+                                        self.publish(ALARMSTATUSTOPIC, "Trouble", qos=2, retain=False)
+                                    case 2:     # Alert
+                                        self.publish(ALARMSTATUSTOPIC, "Alert", qos=2, retain=False)
+                                    case 3:     # Alarm
+                                        self.publish(ALARMSTATUSTOPIC, "Alarm", qos=2, retain=False)
+                                    case _:     # Unknown (default)
+                                        self.publish(ALARMSTATUSTOPIC, "Unknown", qos=2, retain=False)
 
                                 #if alMsg.parameter <= int(COMFORT_INPUTS):
                                 #    self.publish(ALARMMESSAGETOPIC, alMsg.message, qos=2, retain=True)
