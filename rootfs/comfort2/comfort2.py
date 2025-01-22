@@ -828,6 +828,29 @@ class ComfortAMSystemAlarmReport(object):
             elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
             else: self.message = "Unknown("+str(self.alarm)+")"
 
+class ComfortALSystemAlarmReport(object):
+    def __init__(self, data={}):
+        
+        global ZONEMAPFILE
+        global input_properties
+        global ALARMSTATE           # Numerical value for state. 0=Idle, 1=Trouble, 2=Alert, 3=Alarm
+
+        self.priority = ALARMSTATE
+        self.alarm = int(data[2:4],16)
+        self.triggered = True               # For Comfort Alarm State Alert, Trouble, Alarm
+        self.state = int(data[6:8],16)
+        low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
+        alarm_types = ['No Alarm','Intruder Alarm','Duress','Phone Line Trouble','Arm Fail','Zone Trouble','Zone Alert','Low Battery',
+                       'Power Fail','Panic','Entry Alert','Tamper','Fire','Gas','Family Care','Perimeter Alert','Bypass Zone','System Disarmed',
+                       'CMS Test','System Armed','Alarm Abort','Entry Warning','Siren Trouble','Unused','RS485 Comms Fail','Doorbell','Homesafe',
+                       'Dial Test','SMS Trouble','New Message','Engineer Sign in','Sign-in Tamper']
+        if self.state > self.priority:
+            self.priority = self.state
+            ALARMSTATE = self.state  # Save new state
+        elif self.state == 0:
+            ALARMSTATE = 0
+
+
 class Comfort_A_SecurityInformationReport(object):      #  For future development !!!
     #a?000000000000000000
     def __init__(self, data={}):
@@ -845,6 +868,7 @@ class Comfort_A_SecurityInformationReport(object):      #  For future developmen
                       'SirenTrouble','AlarmType23', 'RS485Comms','Doorbell','HomeSafe','DialTest','AlarmType28','NewMessage','Temperature','SigninTamper']
         alarm_state = ['Idle','Trouble','Alert','Alarm']
         low_battery = ['', 'Main','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
+        troublebits = ['AC Failure','Low Battery','Zone Trouble','RS485 Comms Fail','Tamper','Phone Trouble','GSM Trouble','Unknown']
         self.type = alarm_type[self.AA]
         self.state = alarm_state[self.SS]
         #self.battery = None
@@ -2399,6 +2423,8 @@ class Comfort2(mqtt.Client):
         global models
         global SupportedFirmware
 
+        global ALARMSTATE
+
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         if os.name != 'nt':
             signal.signal(signal.SIGQUIT, self.exit_gracefully)
@@ -2609,11 +2635,13 @@ class Comfort2(mqtt.Client):
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
                                 self.publish(ALARMSTATETOPIC, mMsg.modename,qos=2,retain=True)      #Disarmed, Day etc
                                 self.publish(ALARMMODETOPIC, mMsg.mode,qos=2,retain=True)
+                                ALARMSTATE = mMsg.mode         # Save Numerical state.
                                 self.entryexitdelay = 0                         #zero out the countdown timer
 
                             elif line[1:3] == "S?":
                                 SMsg = ComfortS_SecurityModeReport(line[1:])
                                 self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=2,retain=True)     # Idle, Alert etc.
+                                ALARMSTATE = SMsg.mode         # Save Numerical state.
 
                             elif line[1:3] == "V?":
                                 VMsg = ComfortV_SystemTypeReport(line[1:])
@@ -2694,6 +2722,7 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "a?":     # Not Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
+                                ALARMSTATE = aMsg.SS         # Save Numerical state.
                                 if aMsg.type == 'LowBattery':
                                     logging.warning("Low Battery %s", aMsg.battery)
                                 elif aMsg.type == 'PowerFail':
@@ -2720,7 +2749,7 @@ class Comfort2(mqtt.Client):
                                     # Not all Zones are announced and it 'presses' the '#' key on your behalf.
                                     # self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
 
-                            elif line[1:3] == "AM":
+                            elif line[1:3] == "AM":    # AM/AR for Non-Detector alarms
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 if amMsg.parameter <= int(COMFORT_INPUTS):
                                     self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
@@ -2728,6 +2757,27 @@ class Comfort2(mqtt.Client):
                                     if amMsg.triggered:
                                         self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
 
+#                            elif line[1:3] == "AL":     # Under development (Alarm Type Report)
+#                                alMsg = ComfortALSystemAlarmReport(line[1:])
+#                                match ALARMSTATE:
+#                                    case 0:     # Idle
+#                                        self.publish(ALARMSTATUSTOPIC, "Idle", qos=2, retain=False)
+#                                    case 1:     # Trouble
+#                                        self.publish(ALARMSTATUSTOPIC, "Trouble", qos=2, retain=False)
+#                                    case 2:     # Alert
+#                                        self.publish(ALARMSTATUSTOPIC, "Alert", qos=2, retain=False)
+#                                    case 3:     # Alarm
+#                                        self.publish(ALARMSTATUSTOPIC, "Alarm", qos=2, retain=False)
+#                                    case _:     # Unknown (default)
+#                                        self.publish(ALARMSTATUSTOPIC, "Unknown", qos=2, retain=False)
+
+
+                                #if alMsg.parameter <= int(COMFORT_INPUTS):
+                                #    self.publish(ALARMMESSAGETOPIC, alMsg.message, qos=2, retain=True)
+                                #    logging.warning("Tamper %s", str(alMsg.parameter))
+                                #    if alMsg.triggered:
+                                #        self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
+                            
                             elif line[1:3] == "AR":
                                 arMsg = ComfortARSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=2,retain=True)

@@ -1,15 +1,13 @@
-## [1.5.0] - Busy
- 
+## [1.4.2] - 2025-01-22
 
 ### Added
- 
 
 ### Changed
  - Update LOG messages for Zones to be the same as the Alarm Message format.
- - Update DOCS.md on specifying the CCLX file to be used for enrichment.
+ - Update DOCS.md on specifying the CCLX filename format to be used for enrichment.
 
 ### Fixed
- - Fix a? exception when Comfort is powered on without a battery.
+ - Fix a? exception when Comfort is powered on without a battery or Low battery is detected.
 
 
 ## [1.4.1] - 2025-01-07
