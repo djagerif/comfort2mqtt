@@ -1,8 +1,8 @@
 # Copyright(c) 2018 Khor Chin Heong (koochyrat@gmail.com) for original project code and additional 
-# copyright(c) 2024 Ingo de Jager (ingodejager@gmail.com) for modifications done 
+# copyright(c) 2025 Ingo de Jager (ingodejager@gmail.com) for modifications done 
 # to the original project sources contained in this project.
 #
-# Modified by Ingo de Jager 2024 (ingodejager@gmail.com)
+# Modified by Ingo de Jager 2025 (ingodejager@gmail.com)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -85,6 +85,7 @@ FLAGMAPFILE = False
 DEVICEMAPFILE = False
 USERMAPFILE = False
 device_properties = {}
+file_exists  = False
 
 device_properties['CPUType'] = "N/A"
 device_properties['Version'] = "N/A"
@@ -110,6 +111,11 @@ device_properties['SerialNumber'] = "00000000"
 device_properties['BatteryStatus'] = "N/A"
 device_properties['ChargerStatus'] = "N/A"
 device_properties['BridgeConnected'] = 0
+device_properties['CustomerName'] = None
+device_properties['Reference'] = None
+device_properties['Version'] = None
+device_properties['ComfortFileSystem'] = None
+device_properties['ComfortFirmwareType'] = None
 
 # Comfort FileSystem values and Model Numbers
 models = {34: "Comfort II ULTRA",
@@ -822,6 +828,29 @@ class ComfortAMSystemAlarmReport(object):
             elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
             else: self.message = "Unknown("+str(self.alarm)+")"
 
+class ComfortALSystemAlarmReport(object):
+    def __init__(self, data={}):
+        
+        global ZONEMAPFILE
+        global input_properties
+        global ALARMSTATE           # Numerical value for state. 0=Idle, 1=Trouble, 2=Alert, 3=Alarm
+
+        self.priority = ALARMSTATE
+        self.alarm = int(data[2:4],16)
+        self.triggered = True               # For Comfort Alarm State Alert, Trouble, Alarm
+        self.state = int(data[6:8],16)
+        low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
+        alarm_types = ['No Alarm','Intruder Alarm','Duress','Phone Line Trouble','Arm Fail','Zone Trouble','Zone Alert','Low Battery',
+                       'Power Fail','Panic','Entry Alert','Tamper','Fire','Gas','Family Care','Perimeter Alert','Bypass Zone','System Disarmed',
+                       'CMS Test','System Armed','Alarm Abort','Entry Warning','Siren Trouble','Unused','RS485 Comms Fail','Doorbell','Homesafe',
+                       'Dial Test','SMS Trouble','New Message','Engineer Sign in','Sign-in Tamper']
+        if self.state > self.priority:
+            self.priority = self.state
+            ALARMSTATE = self.state  # Save new state
+        elif self.state == 0:
+            ALARMSTATE = 0
+
+
 class Comfort_A_SecurityInformationReport(object):      #  For future development !!!
     #a?000000000000000000
     def __init__(self, data={}):
@@ -829,26 +858,24 @@ class Comfort_A_SecurityInformationReport(object):      #  For future developmen
         self.SS = int(data[4:6],16)     #SS is alarm state 0-3 (Idle, Trouble, Alert, Alarm)
         self.XX = int(data[6:8],16)     #XX is Trouble bits
         self.YY = int(data[8:10],16)    #YY is for Spare Trouble Bits, 0 if unused
-        self.BB = int(data[10:12],16)   #BB = Low Battery ID = 0 for Comfort or none
+        self.BB = int(data[10:12],16)   #BB = Low Battery ID = 1 for Comfort or none
         self.zz = int(data[12:14],16)   #zz = Zone Trouble number, =0 if none
         self.RR = int(data[14:16],16)   #RR = RS485 Trouble ID, = 0 if none
         self.TT = int(data[16:18],16)   #TT = Tamper ID = 0 if none
         self.GG = int(data[18:20],16)   #GG = GSM ID =0 if no trouble
-        #self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
-        #logger.debug('a? - data: %s  - still under development', str(data[2:]))
         alarm_type = ['','Intruder','Duress','LineCut','ArmFail','ZoneTrouble','ZoneAlert','LowBattery', 'PowerFail', 'Panic', 'EntryAlert', \
                       'Tamper','Fire','Gas','FamilyCare','Perimeter', 'BypassZone','Disarm','CMSTest','SystemArmed', 'AlarmAbort', 'EntryWarning', \
                       'SirenTrouble','AlarmType23', 'RS485Comms','Doorbell','HomeSafe','DialTest','AlarmType28','NewMessage','Temperature','SigninTamper']
         alarm_state = ['Idle','Trouble','Alert','Alarm']
-        low_battery = ['Main','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
+        low_battery = ['', 'Main','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
+        troublebits = ['AC Failure','Low Battery','Zone Trouble','RS485 Comms Fail','Tamper','Phone Trouble','GSM Trouble','Unknown']
         self.type = alarm_type[self.AA]
         self.state = alarm_state[self.SS]
-        self.battery = None
-        if self.type == "LowBattery" and self.BB == 0: self.battery = low_battery[0]
-        elif self.type == "LowBattery" and self.BB > 0:self.battery = low_battery[(self.BB - 32)]
-        #logger.debug('Battery ID: %s', self.id)
-        #logger.debug('Alarm Type: %s', self.type)       # What happens if you have low battery and zone trouble ????
-
+        #self.battery = None
+        self.acfail = (int(data[6:8],16) >> 0) & 1   #XX = AC Fail, bit 0. 0=AC OK, 1=AC Fail
+        if self.type == "LowBattery" and self.BB <= 1: self.battery = low_battery[1]
+        elif self.type == "LowBattery" and self.BB in low_battery:self.battery = low_battery[(self.BB - 32)]
+        else:self.battery = "Unknown"
 
 class ComfortARSystemAlarmReport(object):
     def __init__(self, data={}):
@@ -1636,48 +1663,6 @@ class Comfort2(mqtt.Client):
                             "model": "Comfort MQTT Bridge"
                         }
         
-        # MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
-        #                      "support_url": "https://www.cytech.biz",
-        #                      "Reference": device_properties['Reference'] if file_exists else None,
-        #                      "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
-        #                      "ComfortFirmwareType": device_properties['ComfortFirmwareType'] if file_exists else None,
-        #                      "sw_version":str(device_properties['Version']),
-        #                      "hw_version":str(device_properties['ComfortHardwareModel']),
-        #                      "serial_number": device_properties['SerialNumber'],
-        #                      "cpu_type": str(device_properties['CPUType']),
-        #                      "BatteryStatus": str(device_properties['BatteryStatus']),
-        #                      "ChargerStatus": str(device_properties['ChargerStatus']),
-        #                      "BatteryMain": str(device_properties['BatteryVoltageMain']),
-        #                      "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
-        #                      "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
-        #                      "BatterySlave3": str(device_properties['BatteryVoltageSlave3']),
-        #                      "BatterySlave4": str(device_properties['BatteryVoltageSlave4']),
-        #                      "BatterySlave5": str(device_properties['BatteryVoltageSlave5']),
-        #                      "BatterySlave6": str(device_properties['BatteryVoltageSlave6']),
-        #                      "BatterySlave7": str(device_properties['BatteryVoltageSlave7']),
-        #                      "ChargerMain": str(device_properties['ChargeVoltageMain']),
-        #                      "ChargerSlave1": str(device_properties['ChargeVoltageSlave1']),
-        #                      "ChargerSlave2": str(device_properties['ChargeVoltageSlave2']),
-        #                      "ChargerSlave3": str(device_properties['ChargeVoltageSlave3']),
-        #                      "ChargerSlave4": str(device_properties['ChargeVoltageSlave4']),
-        #                      "ChargerSlave5": str(device_properties['ChargeVoltageSlave5']),
-        #                      "ChargerSlave6": str(device_properties['ChargeVoltageSlave6']),
-        #                      "ChargerSlave7": str(device_properties['ChargeVoltageSlave7']),
-        #                      "InstalledSlaves": int(device_properties['sem_id']),
-        #                      "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
-        #                      "BridgeConnected": str(device_properties['BridgeConnected']),
-        #                      "device": MQTT_DEVICE
-        #                     })
-
-        # "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown"
-        # try:
-        #     if int(device_properties['ComfortFileSystem']) in models:
-        #         _model = models[int(device_properties['ComfortFileSystem'])]
-        #     else:
-        #         _model = "Unknown"
-        # except:
-        #     _model = "Unknown"
-
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
                              "support_url": "https://www.cytech.biz",
                              "Reference": device_properties['Reference'] if file_exists else None,
@@ -1692,20 +1677,7 @@ class Comfort2(mqtt.Client):
                              "BridgeConnected": str(device_properties['BridgeConnected']),
                              "device": MQTT_DEVICE
                             })
-        # MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
-        #                      "support_url": "https://www.cytech.biz",
-        #                      "Reference": device_properties['Reference'] if file_exists else None,
-        #                      "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
-        #                      "ComfortFirmwareType": device_properties['ComfortFirmwareType'] if file_exists else None,
-        #                      "sw_version":str(device_properties['Version']),
-        #                      "hw_version":str(device_properties['ComfortHardwareModel']),
-        #                      "serial_number": device_properties['SerialNumber'],
-        #                      "cpu_type": str(device_properties['CPUType']),
-        #                      "InstalledSlaves": int(device_properties['sem_id']),
-        #                      "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
-        #                      "BridgeConnected": str(device_properties['BridgeConnected']),
-        #                      "device": MQTT_DEVICE
-        #                     })
+
         self.publish(DOMAIN, MQTT_MSG,qos=2,retain=True)
         time.sleep(0.1)
 
@@ -2080,39 +2052,7 @@ class Comfort2(mqtt.Client):
                             "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
                             "model": "Comfort MQTT Bridge"
                         }
-        
-            # MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
-            #                  "support_url": "https://www.cytech.biz",
-            #                  "Reference": device_properties['Reference'] if file_exists else None,
-            #                  "ComfortFileSystem": device_properties['ComfortFileSystem'] if file_exists else None,
-            #                  "ComfortFirmwareType": device_properties['ComfortFirmwareType'] if file_exists else None,
-            #                  "sw_version":str(device_properties['Version']),
-            #                  "hw_version":str(device_properties['ComfortHardwareModel']),
-            #                  "serial_number": device_properties['SerialNumber'],
-            #                  "cpu_type": str(device_properties['CPUType']),
-            #                  "BatteryStatus": str(device_properties['BatteryStatus']),
-            #                  "ChargerStatus": str(device_properties['ChargerStatus']),
-            #                  "BatteryMain": str(device_properties['BatteryVoltageMain']),
-            #                  "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
-            #                  "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
-            #                  "BatterySlave3": str(device_properties['BatteryVoltageSlave3']),
-            #                  "BatterySlave4": str(device_properties['BatteryVoltageSlave4']),
-            #                  "BatterySlave5": str(device_properties['BatteryVoltageSlave5']),
-            #                  "BatterySlave6": str(device_properties['BatteryVoltageSlave6']),
-            #                  "BatterySlave7": str(device_properties['BatteryVoltageSlave7']),
-            #                  "ChargerMain": str(device_properties['ChargeVoltageMain']),
-            #                  "ChargerSlave1": str(device_properties['ChargeVoltageSlave1']),
-            #                  "ChargerSlave2": str(device_properties['ChargeVoltageSlave2']),
-            #                  "ChargerSlave3": str(device_properties['ChargeVoltageSlave3']),
-            #                  "ChargerSlave4": str(device_properties['ChargeVoltageSlave4']),
-            #                  "ChargerSlave5": str(device_properties['ChargeVoltageSlave5']),
-            #                  "ChargerSlave6": str(device_properties['ChargeVoltageSlave6']),
-            #                  "ChargerSlave7": str(device_properties['ChargeVoltageSlave7']),
-            #                  "InstalledSlaves": int(device_properties['sem_id']),
-            #                  "model": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
-            #                  "BridgeConnected": str(device_properties['BridgeConnected']),
-            #                  "device": MQTT_DEVICE
-            #                 })
+
             MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
                              "support_url": "https://www.cytech.biz",
                              "Reference": device_properties['Reference'] if file_exists else None,
@@ -2422,7 +2362,7 @@ class Comfort2(mqtt.Client):
         :return: A sanitized filename or None if invalid.
         """
         # Define a regular expression pattern for a valid filename (alphanumeric and specific special characters)
-        valid_filename_pattern = r'^[\w\-. ]+$'  # Alphanumeric characters, underscores, hyphens, dots, and spaces
+        valid_filename_pattern = r'^[\w\-. ]+$'  # Alphanumeric characters, underscores, hyphens and dots. Spaces (for future development)
     
         # Split the filename and extension
         base, ext = os.path.splitext(input_string)
@@ -2438,12 +2378,14 @@ class Comfort2(mqtt.Client):
                 return None
     
         # Join the base and extension back
-        sanitized_filename = f"{base}.{ext}" if ext else base
+        # sanitized_filename = f"{base}.{ext}" if ext else base
+        sanitized_filename = f"\"{base}.{ext}\"" if ext else base
     
         # Ensure no directory traversal characters are present
         if '..' in sanitized_filename or '/' in sanitized_filename or '\\' in sanitized_filename:
             return None
     
+        #logging.debug("Sanitized Filename: %s", sanitized_filename)
         return sanitized_filename
 
     def run(self):
@@ -2481,6 +2423,8 @@ class Comfort2(mqtt.Client):
         global models
         global SupportedFirmware
 
+        global ALARMSTATE
+
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         if os.name != 'nt':
             signal.signal(signal.SIGQUIT, self.exit_gracefully)
@@ -2493,7 +2437,7 @@ class Comfort2(mqtt.Client):
             else:
                 logging.info("Illegal Comfigurator CCLX file detected, no enrichment will be loaded.")
         else:
-            logging.info("Missing Comfigurator CCLX file, no enrichment will be loaded.")
+            logging.info("No Comfigurator CCLX file found, no enrichment will be loaded.")
         
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         if self.connected == True:
@@ -2691,11 +2635,13 @@ class Comfort2(mqtt.Client):
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
                                 self.publish(ALARMSTATETOPIC, mMsg.modename,qos=2,retain=True)      #Disarmed, Day etc
                                 self.publish(ALARMMODETOPIC, mMsg.mode,qos=2,retain=True)
+                                ALARMSTATE = mMsg.mode         # Save Numerical state.
                                 self.entryexitdelay = 0                         #zero out the countdown timer
 
                             elif line[1:3] == "S?":
                                 SMsg = ComfortS_SecurityModeReport(line[1:])
                                 self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=2,retain=True)     # Idle, Alert etc.
+                                ALARMSTATE = SMsg.mode         # Save Numerical state.
 
                             elif line[1:3] == "V?":
                                 VMsg = ComfortV_SystemTypeReport(line[1:])
@@ -2776,15 +2722,20 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "a?":     # Not Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
+                                ALARMSTATE = aMsg.SS         # Save Numerical state.
                                 if aMsg.type == 'LowBattery':
-                                    logging.debug("Low Battery %s", aMsg.battery)
+                                    logging.warning("Low Battery %s", aMsg.battery)
+                                elif aMsg.type == 'PowerFail':
+                                    logging.warning("AC Fail")      # Comfort doesn't yet report which unit fails.
+                                elif aMsg.type == 'Disarm':
+                                    logging.info("System Disarmed")
 
                             elif line[1:3] == "ER" and CacheState:           
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
                                 if not erMsg.zone == 0:
 
                                     if ZONEMAPFILE & self.CheckIndexNumberFormat(str(erMsg.zone)):
-                                        logging.warning("Zone %s Not Ready (%s)", str(erMsg.zone), input_properties[str(erMsg.zone)]['Name'])
+                                        logging.warning("Zone %s (%s) Not Ready", str(erMsg.zone), input_properties[str(erMsg.zone)]['Name'])
                                         message_topic = "Zone "+str(erMsg.zone)+ " ("+str(input_properties[str(erMsg.zone)]['Name'])+ ") Not Ready"
                                     else: 
                                         logging.warning("Zone %s Not Ready", str(erMsg.zone))
@@ -2798,13 +2749,35 @@ class Comfort2(mqtt.Client):
                                     # Not all Zones are announced and it 'presses' the '#' key on your behalf.
                                     # self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
 
-                            elif line[1:3] == "AM":
+                            elif line[1:3] == "AM":    # AM/AR for Non-Detector alarms
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 if amMsg.parameter <= int(COMFORT_INPUTS):
                                     self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
-                                if amMsg.triggered:
-                                    self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
+                                    logging.warning("Tamper %s", str(amMsg.parameter))
+                                    if amMsg.triggered:
+                                        self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
 
+#                            elif line[1:3] == "AL":     # Under development (Alarm Type Report)
+#                                alMsg = ComfortALSystemAlarmReport(line[1:])
+#                                match ALARMSTATE:
+#                                    case 0:     # Idle
+#                                        self.publish(ALARMSTATUSTOPIC, "Idle", qos=2, retain=False)
+#                                    case 1:     # Trouble
+#                                        self.publish(ALARMSTATUSTOPIC, "Trouble", qos=2, retain=False)
+#                                    case 2:     # Alert
+#                                        self.publish(ALARMSTATUSTOPIC, "Alert", qos=2, retain=False)
+#                                    case 3:     # Alarm
+#                                        self.publish(ALARMSTATUSTOPIC, "Alarm", qos=2, retain=False)
+#                                    case _:     # Unknown (default)
+#                                        self.publish(ALARMSTATUSTOPIC, "Unknown", qos=2, retain=False)
+
+
+                                #if alMsg.parameter <= int(COMFORT_INPUTS):
+                                #    self.publish(ALARMMESSAGETOPIC, alMsg.message, qos=2, retain=True)
+                                #    logging.warning("Tamper %s", str(alMsg.parameter))
+                                #    if alMsg.triggered:
+                                #        self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
+                            
                             elif line[1:3] == "AR":
                                 arMsg = ComfortARSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=2,retain=True)
@@ -3003,11 +2976,11 @@ class Comfort2(mqtt.Client):
 
                                 if byMsg.state == 1 and byMsg.zone <= int(COMFORT_INPUTS):
                                     if ZONEMAPFILE and self.CheckIndexNumberFormat(str(byMsg.zone)):
-                                        logging.warning("Zone %s Bypassed (%s)", str(byMsg.zone), _name)
+                                        logging.warning("Zone %s (%s) Bypassed", str(byMsg.zone), _name)
                                     else: logging.warning("Zone %s Bypassed", str(byMsg.zone))
                                 elif byMsg.state == 0 and byMsg.zone <= int(COMFORT_INPUTS):
                                     if ZONEMAPFILE and self.CheckIndexNumberFormat(str(byMsg.zone)):
-                                        logging.info("Zone %s Unbypassed (%s)", str(byMsg.zone), _name)
+                                        logging.info("Zone %s (%s) Unbypassed", str(byMsg.zone), _name)
                                     else: logging.info("Zone %s Unbypassed", str(byMsg.zone))
 
                                 MQTT_MSG=json.dumps({"Time": _time, 
