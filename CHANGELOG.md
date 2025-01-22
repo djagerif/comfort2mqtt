@@ -1,5 +1,5 @@
 ## [1.5.0] - Busy
- - Work on AL command
+ - Work on AL decoding
  - Work on a? decoding.
 
 
@@ -8,6 +8,7 @@
 ### Changed
 
 ### Fixed
+ - Fixed AM log messages.
 
 
 ## [1.4.2] - 2025-01-22

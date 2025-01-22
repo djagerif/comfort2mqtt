@@ -2753,7 +2753,16 @@ class Comfort2(mqtt.Client):
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 if amMsg.parameter <= int(COMFORT_INPUTS):
                                     self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
-                                    logging.warning("Tamper %s", str(amMsg.parameter))
+                                    #if amMsg.alarm == 0:
+                                    logging.warning(str(amMsg.message))
+                                    #elif amMsg.alarm == 1:
+                                    #    logging.warning("Zone Trouble Zone %s", str(amMsg.parameter))
+                                    #elif amMsg.alarm == 2:
+                                    #    logging.warning("Low Battery id %s", str(amMsg.parameter))
+                                    #elif amMsg.alarm == 3:
+                                    #    logging.warning("Power Fail %s", str(amMsg.parameter))
+                                    #elif amMsg.alarm == 10:
+                                    #    logging.warning("Tamper %s", str(amMsg.parameter))
                                     if amMsg.triggered:
                                         self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
 
