@@ -1,7 +1,4 @@
-## [1.5.0] - Busy
- - Work on AL decoding
- - Work on a? decoding.
- - fix ALxx00xxxx restore trouble mqtt message to idle.
+## [1.4.3] - 2025-01-26
 
 ### Added
 
@@ -11,6 +8,7 @@
 ### Fixed
  - Fixed AM log messages.
  - For unsupported firmware where the b? command is not available, start the BypassZone cache with all '0'.
+ - Remove extraneous " character from filename path.
 
 
 ## [1.4.2] - 2025-01-22
