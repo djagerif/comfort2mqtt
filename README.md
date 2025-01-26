@@ -41,6 +41,6 @@ The following objects are supported:
 
 <div style="text-align:center"> <img src="https://github.com/djagerif/comfort2mqtt/assets/5621764/64abe350-6b37-4b79-8fea-12fa5e89353a" alt="Comfort II ULTRA Keypad"/> </div>
 
-⚠️ This Add-on was specifically developed for the Comfort II ULTRA Alarm System with File System type `34`. As tested firmware is `7.201` on model CM9000-ULT.
+⚠️ This Add-on was specifically developed for Home Assistant OS and Comfort II ULTRA Alarm System with File System type `34`. As tested firmware is `7.201` on model CM9000-ULT. Home Assistant Container and Core have not been tested and is not supported at present.
 
 Copyright 2025 Ingo de Jager. Licensed under Apache-2.0. For more details see the `LICENCE` file.

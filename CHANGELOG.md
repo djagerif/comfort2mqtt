@@ -6,6 +6,7 @@
 ### Added
 
 ### Changed
+ - Updated DOCS.MD to specify supported Home Assistant OS only. Container and Core are not supported.
 
 ### Fixed
  - Fixed AM log messages.
