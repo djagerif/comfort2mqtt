@@ -2379,8 +2379,8 @@ class Comfort2(mqtt.Client):
                 return None
     
         # Join the base and extension back
-        # sanitized_filename = f"{base}.{ext}" if ext else base
-        sanitized_filename = f"\"{base}.{ext}\"" if ext else base
+        sanitized_filename = f"{base}.{ext}" if ext else base
+        #sanitized_filename = f"\"{base}.{ext}\"" if ext else base
     
         # Ensure no directory traversal characters are present
         if '..' in sanitized_filename or '/' in sanitized_filename or '\\' in sanitized_filename:
@@ -2433,7 +2433,7 @@ class Comfort2(mqtt.Client):
         if COMFORT_CCLX_FILE != None:
             config_filename = self.sanitize_filename(COMFORT_CCLX_FILE,'cclx')
             if config_filename:
-                #logging.debug ("/config/" + config_filename)
+                logging.debug ("/config/" + config_filename)
                 self.add_descriptions(Path("/config/" + config_filename))
             else:
                 logging.info("Illegal Comfigurator CCLX file detected, no enrichment will be loaded.")
