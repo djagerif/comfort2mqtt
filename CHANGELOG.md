@@ -1,3 +1,16 @@
+## [1.4.3] - 2025-01-26
+
+### Added
+
+### Changed
+ - Updated DOCS.MD to specify supported Home Assistant OS only. Container and Core are not supported.
+
+### Fixed
+ - Fixed AM log messages.
+ - Workaround for unsupported firmware where the b? command is not available, start the BypassZone cache with all '0's.
+ - Remove extraneous " character from filename path.
+
+
 ## [1.4.2] - 2025-01-22
 
 ### Added

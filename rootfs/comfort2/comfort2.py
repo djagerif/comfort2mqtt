@@ -191,7 +191,8 @@ ChargerVoltageList = {0:"-1",
 }
 
 ZoneCache = {}              # Zone Cache dictionary.
-BypassCache = {}            # Zone Bypass Cache dictionary.
+#BypassCache = {}            # Zone Bypass Cache dictionary.
+BypassCache = {i: 0 for i in range(1,MAX_ZONES + 1)}   # generate empty bypass cache for all zones. (Up to MAX_ZONES)
 CacheState = False          # Initial Cache state. False when not in sync with Bypass Zones (b?). True, when in Sync.
 
 logger = logging.getLogger(__name__)
@@ -2378,8 +2379,8 @@ class Comfort2(mqtt.Client):
                 return None
     
         # Join the base and extension back
-        # sanitized_filename = f"{base}.{ext}" if ext else base
-        sanitized_filename = f"\"{base}.{ext}\"" if ext else base
+        sanitized_filename = f"{base}.{ext}" if ext else base
+        #sanitized_filename = f"\"{base}.{ext}\"" if ext else base
     
         # Ensure no directory traversal characters are present
         if '..' in sanitized_filename or '/' in sanitized_filename or '\\' in sanitized_filename:
@@ -2720,9 +2721,10 @@ class Comfort2(mqtt.Client):
                                 
                                 self.UpdateDeviceInfo(True)     # Update Device properties.
 
-                            elif line[1:3] == "a?":     # Not Implemented. For Future Development !!!
+                            elif line[1:3] == "a?":     # Not Fully Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
                                 ALARMSTATE = aMsg.SS         # Save Numerical state.
+                                self.publish(ALARMSTATUSTOPIC, aMsg.state, qos=2, retain=True)          
                                 if aMsg.type == 'LowBattery':
                                     logging.warning("Low Battery %s", aMsg.battery)
                                 elif aMsg.type == 'PowerFail':
@@ -2753,24 +2755,32 @@ class Comfort2(mqtt.Client):
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 if amMsg.parameter <= int(COMFORT_INPUTS):
                                     self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
-                                    logging.warning("Tamper %s", str(amMsg.parameter))
+                                    #if amMsg.alarm == 0:
+                                    logging.warning(str(amMsg.message))
+                                    #elif amMsg.alarm == 1:
+                                    #    logging.warning("Zone Trouble Zone %s", str(amMsg.parameter))
+                                    #elif amMsg.alarm == 2:
+                                    #    logging.warning("Low Battery id %s", str(amMsg.parameter))
+                                    #elif amMsg.alarm == 3:
+                                    #    logging.warning("Power Fail %s", str(amMsg.parameter))
+                                    #elif amMsg.alarm == 10:
+                                    #    logging.warning("Tamper %s", str(amMsg.parameter))
                                     if amMsg.triggered:
                                         self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
 
-#                            elif line[1:3] == "AL":     # Under development (Alarm Type Report)
-#                                alMsg = ComfortALSystemAlarmReport(line[1:])
-#                                match ALARMSTATE:
-#                                    case 0:     # Idle
-#                                        self.publish(ALARMSTATUSTOPIC, "Idle", qos=2, retain=False)
-#                                    case 1:     # Trouble
-#                                        self.publish(ALARMSTATUSTOPIC, "Trouble", qos=2, retain=False)
-#                                    case 2:     # Alert
-#                                        self.publish(ALARMSTATUSTOPIC, "Alert", qos=2, retain=False)
-#                                    case 3:     # Alarm
-#                                        self.publish(ALARMSTATUSTOPIC, "Alarm", qos=2, retain=False)
-#                                    case _:     # Unknown (default)
-#                                        self.publish(ALARMSTATUSTOPIC, "Unknown", qos=2, retain=False)
-
+                            #elif line[1:3] == "AL":     # Under development (Alarm Type Report)
+                            #    alMsg = ComfortALSystemAlarmReport(line[1:])
+                            #    match ALARMSTATE:
+                            #        case 0:     # Idle
+                            #            self.publish(ALARMSTATUSTOPIC, "Idle", qos=2, retain=False)
+                            #        case 1:     # Trouble
+                            #            self.publish(ALARMSTATUSTOPIC, "Trouble", qos=2, retain=False)
+                            #        case 2:     # Alert
+                            #            self.publish(ALARMSTATUSTOPIC, "Alert", qos=2, retain=False)
+                            #        case 3:     # Alarm
+                            #            self.publish(ALARMSTATUSTOPIC, "Alarm", qos=2, retain=False)
+                            #        case _:     # Unknown (default)
+                            #            self.publish(ALARMSTATUSTOPIC, "Unknown", qos=2, retain=False)
 
                                 #if alMsg.parameter <= int(COMFORT_INPUTS):
                                 #    self.publish(ALARMMESSAGETOPIC, alMsg.message, qos=2, retain=True)
