@@ -191,7 +191,8 @@ ChargerVoltageList = {0:"-1",
 }
 
 ZoneCache = {}              # Zone Cache dictionary.
-BypassCache = {}            # Zone Bypass Cache dictionary.
+#BypassCache = {}            # Zone Bypass Cache dictionary.
+BypassCache = {i: 0 for i in range(1,MAX_ZONES + 1)}   # generate empty bypass cache for all zones. (Up to MAX_ZONES)
 CacheState = False          # Initial Cache state. False when not in sync with Bypass Zones (b?). True, when in Sync.
 
 logger = logging.getLogger(__name__)
