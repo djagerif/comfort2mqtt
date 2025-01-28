@@ -2753,19 +2753,10 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "AM":    # AM/AR for Non-Detector alarms
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
-                                logging.warning(amMsg.message)
+                                #logging.warning(amMsg.message)     # Removed logging for AM as it duplicates messages.
                                 if amMsg.parameter <= int(COMFORT_INPUTS):
                                     self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
-                                    #if amMsg.alarm == 0:
-                                    logging.warning(str(amMsg.message))
-                                    #elif amMsg.alarm == 1:
-                                    #    logging.warning("Zone Trouble Zone %s", str(amMsg.parameter))
-                                    #elif amMsg.alarm == 2:
-                                    #    logging.warning("Low Battery id %s", str(amMsg.parameter))
-                                    #elif amMsg.alarm == 3:
-                                    #    logging.warning("Power Fail %s", str(amMsg.parameter))
-                                    #elif amMsg.alarm == 10:
-                                    #    logging.warning("Tamper %s", str(amMsg.parameter))
+                                    logging.warning(amMsg.message)
                                     if amMsg.triggered:
                                         self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
 
@@ -2792,7 +2783,7 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "AR":
                                 arMsg = ComfortARSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=2,retain=True)
-                                logging.info(arMsg.message)
+                                #logging.info(arMsg.message)        # Removed logging for AR as it duplicates messages.
 
                             elif line[1:3] == "EX":
                                 exMsg = ComfortEXEntryExitDelayStarted(line[1:])
