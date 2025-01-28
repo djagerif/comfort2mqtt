@@ -1,6 +1,14 @@
 ## [1.5.0] - Busy...
 
+AL Commands
+AM Commands
+AR Commnds
+a? Commands
+Look at long filenames again.
+
+
 ### Added
+ - Add additional log output for AR commands.
 
 ### Changed
 

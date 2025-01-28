@@ -797,9 +797,9 @@ class ComfortAMSystemAlarmReport(object):
             elif self.alarm == 20: self.message = "Fire"
             elif self.alarm == 21: self.message = "Panic"
             elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
-            elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
+            elif self.alarm == 23: self.message = "New Message, User "+str(self.parameter); self.triggered = False
             elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
-            elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
+            elif self.alarm == 25: self.message = "Comms Failure RS485 id "+str(self.parameter)
             elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
             else: self.message = "Unknown("+str(self.alarm)+")"
         else:
@@ -823,9 +823,9 @@ class ComfortAMSystemAlarmReport(object):
             elif self.alarm == 20: self.message = "Fire"
             elif self.alarm == 21: self.message = "Panic"
             elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
-            elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
+            elif self.alarm == 23: self.message = "New Message, User "+str(self.parameter); self.triggered = False
             elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
-            elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
+            elif self.alarm == 25: self.message = "Comms Failure RS485 id "+str(self.parameter)
             elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
             else: self.message = "Unknown("+str(self.alarm)+")"
 
@@ -2753,6 +2753,7 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "AM":    # AM/AR for Non-Detector alarms
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
+                                logging.warning(amMsg.message)
                                 if amMsg.parameter <= int(COMFORT_INPUTS):
                                     self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
                                     #if amMsg.alarm == 0:
@@ -2791,6 +2792,7 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "AR":
                                 arMsg = ComfortARSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=2,retain=True)
+                                logging.info(arMsg.message)
 
                             elif line[1:3] == "EX":
                                 exMsg = ComfortEXEntryExitDelayStarted(line[1:])
