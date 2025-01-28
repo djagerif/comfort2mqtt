@@ -1,9 +1,5 @@
 ## [1.5.0] - Busy...
 
-AL Commands
-AM Commands - Not implemented.
-AR Commnds - Not implemented.
-a? Commands
 Look at long filenames again.
 
 

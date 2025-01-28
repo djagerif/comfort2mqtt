@@ -2753,12 +2753,11 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "AM":    # AM/AR for Non-Detector alarms
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
-                                #logging.warning(amMsg.message)     # Removed logging for AM as it duplicates messages.
-                                if amMsg.parameter <= int(COMFORT_INPUTS):
-                                    self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
-                                    logging.warning(amMsg.message)
-                                    if amMsg.triggered:
-                                        self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
+                                logging.warning(amMsg.message)
+                                #if amMsg.parameter <= int(COMFORT_INPUTS):
+                                self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
+                                if amMsg.triggered:
+                                    self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
 
                             #elif line[1:3] == "AL":     # Under development (Alarm Type Report)
                             #    alMsg = ComfortALSystemAlarmReport(line[1:])
