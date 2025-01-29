@@ -229,7 +229,7 @@ mqtt:
       optimistic: false
       on_command_type: "first"
 ```
-To Enable or Disable the various modes displayed on the Alarm Control Panel you need to edit the UI element and select the desired mode to be visible.
+![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) To Enable or Disable the various modes displayed on the Alarm Control Panel you need to edit the UI element and select the desired mode to be visible.
 
 ![image](https://github.com/user-attachments/assets/86418ce8-6042-480c-a5fd-1b888758ae0f)
 
