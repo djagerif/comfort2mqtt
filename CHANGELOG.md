@@ -4,6 +4,7 @@ Look at long filenames again.
 
 
 ### Added
+ - Update DOCS.md to add Alarm Control Panel UI configuration options.
  
 ### Changed
 
