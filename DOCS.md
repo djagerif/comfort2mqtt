@@ -229,6 +229,10 @@ mqtt:
       optimistic: false
       on_command_type: "first"
 ```
+To Enable or Disable the various modes displayed on the Alarm Control Panel you need to edit the UI element and select the desired mode to be visible.
+
+![image](https://github.com/user-attachments/assets/86418ce8-6042-480c-a5fd-1b888758ae0f)
+
 Comfort II ULTRA supports both Unsigned 8-bit and Signed 16-bit values. However, many integrations like Clipsal C-BUS, by Schneider Electric, uses Unsigned 8-bit values and sets Counter values of 0xFF(255) for 'On' and 0x00(0) for 'Off' states and any other value in between when required for example dimming. If you have a Comfort II ULTRA integration that is different to the example mentioned then you need to adjust your `payload_on` and `payload_off` integer values accordingly.
 
 The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable light, both mapped to their respective Comfort Counters. You could also map your Non-Dimmable Lights to Comfort Flags which should operate in a similar manner as Counters except the `payload_on`value will be `1` rather than `255`. With the Light examples above you can also add the `Brightness` secondary info to the Dimmer light icon and it will display as per below.
