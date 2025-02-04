@@ -2073,7 +2073,7 @@ class Comfort2(mqtt.Client):
 
             discoverytopic = DOMAIN + "/alarm/battery_status"
             MQTT_MSG=json.dumps({"BatteryStatus": str(device_properties['BatteryStatus']),
-                             "12VDCOutput": str(device_properties['ChargerStatus']),
+                             "12VDCOutputStatus": str(device_properties['ChargerStatus']),
                              "BatteryMain": str(device_properties['BatteryVoltageMain']),
                              "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
                              "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
