@@ -4,9 +4,16 @@ Look at long filenames again.
 
 
 ### Added
- - Update DOCS.md to add Alarm Control Panel UI configuration options.
+ - Update DOCS.md to add explanation of Alarm Control Panel UI configuration options.
  
 ### Changed
+- Clarify D?nn01 voltage UI definition for Battery Voltage. This is the Battery/Charge voltage measured at the battery terminals.
+- Clarify D?nn02 voltage UI definition for Charger Voltage. This is the 12V DC Output circuit voltage measured at the power supply.
+
+*Note: Possibly breaking change !!
+- Update `Battery Status` UI definition to `Battery/Charger Status`.
+- Update `Charger Status` UI definition to `12V DC Output Status`.
+
 
 ### Fixed
 
