@@ -1844,7 +1844,7 @@ class Comfort2(mqtt.Client):
             time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/charger_status/config"
-        MQTT_MSG=json.dumps({"name": "12V DC Output Status",
+        MQTT_MSG=json.dumps({"name": "DC 12V Output Status",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability_topic": ALARMAVAILABLETOPIC,
@@ -1858,7 +1858,7 @@ class Comfort2(mqtt.Client):
                                 {% set slaves = data['InstalledSlaves'] %}
                                 {% set ns = namespace(dict_items='') %}
                                 {% for key, value in data.items() %}
-                                    {% if 'DC12VCOutputMain' in key or ('DC12VOutputSlave' in key and key[-1:] | int <= slaves) %}
+                                    {% if 'DC12VOutputMain' in key or ('DC12VOutputSlave' in key and key[-1:] | int <= slaves) %}
                                         {% if ns.dict_items %}
                                             {% set ns.dict_items = ns.dict_items + ', "' ~ key ~ '":"' ~ value ~ '"' %}
                                         {% else %}
@@ -1878,7 +1878,7 @@ class Comfort2(mqtt.Client):
         if device_properties['CPUType'] != "N/A":
             self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
             time.sleep(0.1)
-            logging.debug(MQTT_MSG)
+            #logging.debug(MQTT_MSG)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_bypass_zones/config"
         MQTT_MSG=json.dumps({"name": "Bypassed Zones",
