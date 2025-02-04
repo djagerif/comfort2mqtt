@@ -1851,7 +1851,7 @@ class Comfort2(mqtt.Client):
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN+"/alarm/battery_status",
-                             "value_template": "{{ value_json.ChargerStatus }}",
+                             "value_template": "{{ value_json.12VDCOutputStatus }}",
                              "json_attributes_topic": DOMAIN+"/alarm/battery_status",
                              "json_attributes_template": '''
                                 {% set data = value_json %}
@@ -2073,7 +2073,7 @@ class Comfort2(mqtt.Client):
 
             discoverytopic = DOMAIN + "/alarm/battery_status"
             MQTT_MSG=json.dumps({"BatteryStatus": str(device_properties['BatteryStatus']),
-                             "ChargerStatus": str(device_properties['ChargerStatus']),
+                             "12VDCOutput": str(device_properties['ChargerStatus']),
                              "BatteryMain": str(device_properties['BatteryVoltageMain']),
                              "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
                              "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
