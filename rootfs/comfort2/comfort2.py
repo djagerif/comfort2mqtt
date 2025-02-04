@@ -55,8 +55,8 @@ rand_hex_str = hex(randint(268435456, 4294967295))
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate pseudo random client-id each time it starts.
 
 REFRESHTOPIC = DOMAIN+"/alarm/refresh"                  # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
-BATTERYREFRESHTOPIC = DOMAIN+"/alarm/battery_update"    # Used to request Battery and Charger updates. To be used by HA Automation for periodic polling.
-BATTERYSTATUSTOPIC = DOMAIN+"/alarm/battery_status"     # List of Battery and Charger Status.
+BATTERYREFRESHTOPIC = DOMAIN+"/alarm/battery_update"    # Used to request Battery and DC 12V Output updates. To be used by HA Automation for periodic polling.
+BATTERYSTATUSTOPIC = DOMAIN+"/alarm/battery_status"     # List of Battery and DC 12V Output Status.
 
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
@@ -983,7 +983,7 @@ class Comfort_D_SystemVoltageReport(object):
         for x in range(6, len(data), 2):
             value = int(data[x:x+2],16)
             #voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Old Formula used for Batteries.
-            #voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for Chargers.
+            #voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC 12V Output.
             if query_type == 1:
                 voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Old Formula used for Batteries.
                 if id == 0:
@@ -996,7 +996,7 @@ class Comfort_D_SystemVoltageReport(object):
                 else:
                     return
             elif query_type == 2:
-                voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for Chargers.
+                voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC 12V Output.
                 if id == 0:
                     device_properties[ChargerVoltageNameList[(x-6)/2]] = voltage
                     ChargerVoltageList[(x-6)/2] = voltage
@@ -2704,7 +2704,7 @@ class Comfort2(mqtt.Client):
                                 logging.debug("Hardware Model %s", str(device_properties['ComfortHardwareModel']))
                                 self.UpdateDeviceInfo(True)     # Update Device properties. Issue with no CCLX file and ComfortFileSyste, = Null.
 
-                            elif line[1:3] == "D?":       # Get Battery/Charge or DC 12V Charger voltage. ARM/Toshiba + CM-9001 Only.
+                            elif line[1:3] == "D?":       # Get Battery/Charge or DC 12V Output voltage. ARM/Toshiba + CM-9001 Only.
 
                                 # Determine Battery/Charge Voltage and Device ID. Save Values in Comfort_D_SystemVoltageReport
                                 DLMsg = Comfort_D_SystemVoltageReport(line[1:])     # Return value not used currently.
