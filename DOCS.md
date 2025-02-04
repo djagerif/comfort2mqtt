@@ -435,15 +435,15 @@ Threshold values are internally defined as per below and will output a log messa
 
 **DC 12V Output Voltage Levels:**
 
-  voltage > 18:       # Critical High
+  voltage > 18:       # Criticaly High Voltage
 
-  voltage > 17:       # High
+  voltage > 17:       # High Voltage
 
-  voltage <= 7:       # Crital Low or No Output
+  voltage <= 7:       # Criticaly Low Voltage or No Output
 
   voltage < 12:       # Low Voltage
 
-When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery/Charge voltage and the second for the 12V DC Output voltage expressed as an 8-bit value. The formulas for voltage calculation, using the examples below, are:
+When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery/Charge voltage and the second for the DC 12V Output voltage expressed as an 8-bit value. The formulas for voltage calculation, using the examples below, are:
 
 ```
 Battery/Charge Voltage = 196/255 * 15.5V = 11.91V
@@ -483,7 +483,7 @@ mode: single
 
 ## Hardware and Interface support
 
-This Add-on was specifically developed for the Comfort II ULTRA range of Alarm Systems with File System type `34`. Comfort II ULTRA firmware as tested is `7.201`. If any other Comfort system, model or firmware other than `7.201`, is used then results may be unexpected.
+This Add-on was specifically developed for the Comfort II ULTRA range of Alarm Systems with File System type `34`. Comfort II ULTRA firmware as tested is `7.201`. If any other Comfort system, model or firmware lower than `7.201`, is used then results may be unexpected.
 
 The following Cytech Universal Communications Modules (UCM) Ethernet modules are supported:
 
@@ -491,9 +491,9 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 * [UCM/Eth02] - Obsolete/Untested
 
-* [UCM/Wifi01] - Not Recommended (WiFi) - Firmware 7.176
+* [UCM/Wifi01] - Not Recommended (WiFi) - Firmware 7.176 or later.
 
-* [UCM/Eth03 or Eth03 Mainboard Plug-in] - Recommended (LAN) - Firmware 7.176
+* [UCM/Eth03 or Eth03 Mainboard Plug-in] - Recommended (LAN) - Firmware 7.176 or later.
 
 This software _requires_ a fully functional Comfort Ethernet or Wifi configuration with inactivity timeout set to the default value of 2 minutes. The UCM/Wifi is not recommended due to possible connectivity issues that could arise from switching between different AP's or other possible sources of RF noise. For best performance it is recommended to use either the UCM/Eth03 or the onboard Eth03 Plug-in module on the newer CM9001 Comfort Ultra models. Use a good quality CAT5e or better cable between Comfort and your network device.
 
