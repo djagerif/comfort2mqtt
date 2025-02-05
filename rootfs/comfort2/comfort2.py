@@ -55,8 +55,8 @@ rand_hex_str = hex(randint(268435456, 4294967295))
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate pseudo random client-id each time it starts.
 
 REFRESHTOPIC = DOMAIN+"/alarm/refresh"                  # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
-BATTERYREFRESHTOPIC = DOMAIN+"/alarm/battery_update"    # Used to request Battery and DC 12V Output updates. To be used by HA Automation for periodic polling.
-BATTERYSTATUSTOPIC = DOMAIN+"/alarm/battery_status"     # List of Battery and DC 12V Output Status.
+BATTERYREFRESHTOPIC = DOMAIN+"/alarm/battery_update"    # Used to request Battery and DC Supply voltage updates. To be used by HA Automation for periodic polling.
+BATTERYSTATUSTOPIC = DOMAIN+"/alarm/battery_status"     # List of Battery and DC Supply Output Status.
 
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
@@ -983,7 +983,7 @@ class Comfort_D_SystemVoltageReport(object):
         for x in range(6, len(data), 2):
             value = int(data[x:x+2],16)
             #voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Old Formula used for Batteries.
-            #voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC 12V Output.
+            #voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC Supply voltage.
             if query_type == 1:
                 voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Old Formula used for Batteries.
                 if id == 0:
@@ -996,7 +996,7 @@ class Comfort_D_SystemVoltageReport(object):
                 else:
                     return
             elif query_type == 2:
-                voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC 12V Output.
+                voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC Supply voltage.
                 if id == 0:
                     device_properties[ChargerVoltageNameList[(x-6)/2]] = voltage
                     ChargerVoltageList[(x-6)/2] = voltage
@@ -1272,13 +1272,13 @@ class Comfort2(mqtt.Client):
                 #logger.info("ID: %s", ID)
                 if msgstr_cleaned == '0':
                     Command = "\x03D?0000\r"
-                    self.comfortsock.sendall(Command.encode()) # Battery and 12V DC Output Status Update
+                    self.comfortsock.sendall(Command.encode()) # Battery and DC Supply Status Update
                 else:
                     Command = "\x03D?" + ID + "01\r"
                     self.comfortsock.sendall(Command.encode()) # Battery Status Update
                     time.sleep(0.1)
                     Command = "\x03D?" + ID + "02\r"
-                    self.comfortsock.sendall(Command.encode()) # 12V DC Output Status Update
+                    self.comfortsock.sendall(Command.encode()) # DC Supply Status Update
                     time.sleep(0.1)
                 SAVEDTIME = datetime.now()
             else:
@@ -1608,7 +1608,7 @@ class Comfort2(mqtt.Client):
 
         discoverytopic = DOMAIN + "/alarm/battery_status"
         MQTT_MSG=json.dumps({"BatteryStatus": str(device_properties['BatteryStatus']),
-                             "DC12VOutputStatus": str(device_properties['ChargerStatus']),
+                             "DCOutputStatus": str(device_properties['ChargerStatus']),
                              "BatteryMain": str(device_properties['BatteryVoltageMain']),
                              "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
                              "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
@@ -1617,14 +1617,14 @@ class Comfort2(mqtt.Client):
                              "BatterySlave5": str(device_properties['BatteryVoltageSlave5']),
                              "BatterySlave6": str(device_properties['BatteryVoltageSlave6']),
                              "BatterySlave7": str(device_properties['BatteryVoltageSlave7']),
-                             "DC12VOutputMain": str(device_properties['ChargeVoltageMain']),
-                             "DC12VOutputSlave1": str(device_properties['ChargeVoltageSlave1']),
-                             "DC12VOutputSlave2": str(device_properties['ChargeVoltageSlave2']),
-                             "DC12VOutputSlave3": str(device_properties['ChargeVoltageSlave3']),
-                             "DC12VOutputSlave4": str(device_properties['ChargeVoltageSlave4']),
-                             "DC12VOutputSlave5": str(device_properties['ChargeVoltageSlave5']),
-                             "DC12VOutputSlave6": str(device_properties['ChargeVoltageSlave6']),
-                             "DC12VOutputSlave7": str(device_properties['ChargeVoltageSlave7']),
+                             "DCOutputMain": str(device_properties['ChargeVoltageMain']),
+                             "DCOutputSlave1": str(device_properties['ChargeVoltageSlave1']),
+                             "DCOutputSlave2": str(device_properties['ChargeVoltageSlave2']),
+                             "DCOutputSlave3": str(device_properties['ChargeVoltageSlave3']),
+                             "DCOutputSlave4": str(device_properties['ChargeVoltageSlave4']),
+                             "DCOutputSlave5": str(device_properties['ChargeVoltageSlave5']),
+                             "DCOutputSlave6": str(device_properties['ChargeVoltageSlave6']),
+                             "DCOutputSlave7": str(device_properties['ChargeVoltageSlave7']),
                              "InstalledSlaves": int(device_properties['sem_id'])
                             })
         self.publish(discoverytopic, MQTT_MSG,qos=2,retain=False)
@@ -1844,21 +1844,21 @@ class Comfort2(mqtt.Client):
             time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/charger_status/config"
-        MQTT_MSG=json.dumps({"name": "DC 12V Output Status",
+        MQTT_MSG=json.dumps({"name": "DC Supply Status",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN+"/alarm/battery_status",
-                             "value_template": "{{ value_json.DC12VOutputStatus }}",
+                             "value_template": "{{ value_json.DCOutputStatus }}",
                              "json_attributes_topic": DOMAIN+"/alarm/battery_status",
                              "json_attributes_template": '''
                                 {% set data = value_json %}
                                 {% set slaves = data['InstalledSlaves'] %}
                                 {% set ns = namespace(dict_items='') %}
                                 {% for key, value in data.items() %}
-                                    {% if 'DC12VOutputMain' in key or ('DC12VOutputSlave' in key and key[-1:] | int <= slaves) %}
+                                    {% if 'DCOutputMain' in key or ('DCOutputSlave' in key and key[-1:] | int <= slaves) %}
                                         {% if ns.dict_items %}
                                             {% set ns.dict_items = ns.dict_items + ', "' ~ key ~ '":"' ~ value ~ '"' %}
                                         {% else %}
@@ -2074,7 +2074,7 @@ class Comfort2(mqtt.Client):
 
             discoverytopic = DOMAIN + "/alarm/battery_status"
             MQTT_MSG=json.dumps({"BatteryStatus": str(device_properties['BatteryStatus']),
-                             "DC12VOutputStatus": str(device_properties['ChargerStatus']),
+                             "DCOutputStatus": str(device_properties['ChargerStatus']),
                              "BatteryMain": str(device_properties['BatteryVoltageMain']),
                              "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
                              "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
@@ -2083,14 +2083,14 @@ class Comfort2(mqtt.Client):
                              "BatterySlave5": str(device_properties['BatteryVoltageSlave5']),
                              "BatterySlave6": str(device_properties['BatteryVoltageSlave6']),
                              "BatterySlave7": str(device_properties['BatteryVoltageSlave7']),
-                             "DC12VOutputMain": str(device_properties['ChargeVoltageMain']),
-                             "DC12VOutputSlave1": str(device_properties['ChargeVoltageSlave1']),
-                             "DC12VOutputSlave2": str(device_properties['ChargeVoltageSlave2']),
-                             "DC12VOutputSlave3": str(device_properties['ChargeVoltageSlave3']),
-                             "DC12VOutputSlave4": str(device_properties['ChargeVoltageSlave4']),
-                             "DC12VOutputSlave5": str(device_properties['ChargeVoltageSlave5']),
-                             "DC12VOutputSlave6": str(device_properties['ChargeVoltageSlave6']),
-                             "DC12VOutputSlave7": str(device_properties['ChargeVoltageSlave7']),
+                             "DCOutputMain": str(device_properties['ChargeVoltageMain']),
+                             "DCOutputSlave1": str(device_properties['ChargeVoltageSlave1']),
+                             "DCOutputSlave2": str(device_properties['ChargeVoltageSlave2']),
+                             "DCOutputSlave3": str(device_properties['ChargeVoltageSlave3']),
+                             "DCOutputSlave4": str(device_properties['ChargeVoltageSlave4']),
+                             "DCOutputSlave5": str(device_properties['ChargeVoltageSlave5']),
+                             "DCOutputSlave6": str(device_properties['ChargeVoltageSlave6']),
+                             "DCOutputSlave7": str(device_properties['ChargeVoltageSlave7']),
                              "InstalledSlaves": int(device_properties['sem_id'])
                             })
             infot = self.publish(discoverytopic, MQTT_MSG,qos=2,retain=False)
@@ -2704,7 +2704,7 @@ class Comfort2(mqtt.Client):
                                 logging.debug("Hardware Model %s", str(device_properties['ComfortHardwareModel']))
                                 self.UpdateDeviceInfo(True)     # Update Device properties. Issue with no CCLX file and ComfortFileSyste, = Null.
 
-                            elif line[1:3] == "D?":       # Get Battery/Charge or DC 12V Output voltage. ARM/Toshiba + CM-9001 Only.
+                            elif line[1:3] == "D?":       # Get Battery/Charge or DC Supply voltage. ARM/Toshiba + CM-9001 Only.
 
                                 # Determine Battery/Charge Voltage and Device ID. Save Values in Comfort_D_SystemVoltageReport
                                 DLMsg = Comfort_D_SystemVoltageReport(line[1:])     # Return value not used currently.

@@ -414,7 +414,7 @@ mode: single
 
 ## Home Assistant - 'Battery Update' Automation (Optional)
 
-The latest Comfort ARM-powered boards can report individual Battery/Charge and DC 12V Output voltages. Below is an automation you can use to query Comfort every minute for these values. You can safely extend the interval to 15 minutes or more as voltages don't usually change abruptly in a mostly-floating voltage device operation.
+The latest Comfort ARM-powered boards can report individual Battery/Charge and DC Supply voltages. Below is an automation you can use to query Comfort every minute for these values. You can safely extend the interval to 15 minutes or more as voltages don't usually change abruptly in a mostly-floating voltage device operation.
 
 ⚠️ **Note:** If you try this on a non-ARM powered mainboard then a warning message will be displayed in the Addon log as shown below.
 
@@ -433,7 +433,7 @@ Threshold values are internally defined as per below and will output a log messa
 
   voltage < 11.5:     # Discharged
 
-**DC 12V Output Voltage Levels:**
+**DC Supply Voltage Levels:**
 
   voltage > 18:       # Criticaly High Voltage
 
@@ -443,11 +443,11 @@ Threshold values are internally defined as per below and will output a log messa
 
   voltage < 12:       # Low Voltage
 
-When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery/Charge voltage and the second for the DC 12V Output voltage expressed as an 8-bit value. The formulas for voltage calculation, using the examples below, are:
+When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery/Charge voltage and the second for the DC Supply voltage expressed as an 8-bit value. The formulas for voltage calculation, using the examples below, are:
 
 ```
 Battery/Charge Voltage = 196/255 * 15.5V = 11.91V
-DC 12V Output Voltage = 199/255 * (3.3/2.71) * 15V = 14.25V
+DC Supply Voltage = 199/255 * (3.3/2.71) * 15V = 14.25V
 ```
 ```
 2024-08-08 19:07:37 DEBUG    D?0101C4
@@ -460,7 +460,7 @@ Take note of the `condition` block below, this is your Comfort II ULTRA device a
 
 ```
 alias: Comfort Battery Update Query (Mainboard)
-description: Query an ARM powered Comfort Mainboard Battery and DC 12V Output voltages.
+description: Query an ARM powered Comfort Mainboard Battery and DC Supply voltages.
 trigger:
   - platform: time_pattern
     seconds: "0"

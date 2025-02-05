@@ -8,11 +8,11 @@ Look at long filenames again.
  
 ### Changed
 - Clarify D?nn01 voltage UI definition for `Battery Voltage` renamed to `Battery/Charge Voltage`. This is the Battery/Charge voltage measured at the PCB battery terminals.
-- Clarify D?nn02 voltage UI definition for `Charger Voltage` renamed to `DC 12V Output Voltage`. This is the 12V DC Output circuit voltage measured at the power supply.
+- Clarify D?nn02 voltage UI definition for `Charger Voltage` renamed to `DC Supply Voltage`. This is the 12V DC Output circuit voltage measured at the power supply.
 
 *Note: Possible breaking change for CM-9001 ARM based boards only !!
 - Update `Battery Status` UI definition to `Battery/Charger Status`.
-- Update `Charger Status` UI definition to `DC 12V Output Status`.
+- Update `Charger Status` UI definition to `DC Supply Status`.
 *Go to Settings -> Devices and services. Select MQTT and click on 'Devices. Click on `Comfort II ULTRA` and under `Device Info` select the three dots which give the option to Download Diagnostics or Delete. Click on Delete. Now go back and restart the Addon from the Settings/Addon screen menu.
 
 
