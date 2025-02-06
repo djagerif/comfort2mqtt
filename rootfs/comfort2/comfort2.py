@@ -997,7 +997,7 @@ class Comfort_D_SystemVoltageReport(object):
                     return
             elif query_type == 2:
                 #voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC Supply voltage.
-                voltage =  str(format(round(((value/255)*(3.3/2.7)*14.875),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC Supply voltage - testing.
+                voltage =  str(format(round(((value/255)*(3.3/2.7)*14.9),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC Supply voltage - testing.
                 if id == 0:
                     device_properties[ChargerVoltageNameList[(x-6)/2]] = voltage
                     ChargerVoltageList[(x-6)/2] = voltage
