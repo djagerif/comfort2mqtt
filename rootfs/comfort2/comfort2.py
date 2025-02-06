@@ -986,7 +986,7 @@ class Comfort_D_SystemVoltageReport(object):
             #voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC Supply voltage.
             if query_type == 1:
                 #voltage = str(format(round(((value/255)*15.522),2), ".2f")) if value < 255 else '-1'  # Formula used for Batteries.
-                voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 - 0.7),2), ".2f")) if value < 255 else '-1'  # - testing.
+                voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 - 0.75),2), ".2f")) if value < 255 else '-1'  # - testing.
                 #voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Formula used for Batteries.
                 if id == 0:
                     device_properties[BatteryVoltageNameList[(x-6)/2]] = voltage
