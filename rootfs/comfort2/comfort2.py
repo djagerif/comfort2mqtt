@@ -86,6 +86,7 @@ DEVICEMAPFILE = False
 USERMAPFILE = False
 device_properties = {}
 file_exists  = False
+ACFail = False              # Indicates ACFail status.
 
 device_properties['CPUType'] = "N/A"
 device_properties['Version'] = "N/A"
@@ -771,6 +772,7 @@ class ComfortAMSystemAlarmReport(object):
         
         global ZONEMAPFILE
         global input_properties
+        global ACFail
 
         self.alarm = int(data[2:4],16)
         self.triggered = True               # For Comfort Alarm State Alert, Trouble, Alarm
@@ -780,7 +782,9 @@ class ComfortAMSystemAlarmReport(object):
             if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)+" ("+ str(input_properties[str(self.parameter)]['Name'])+")"
             elif self.alarm == 1: self.message = str(input_properties[str(self.parameter)]['Name'])+" Trouble"
             elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
-            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+            elif self.alarm == 3: 
+                self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+                ACFail = True
             elif self.alarm == 4: self.message = "Phone Trouble"
             elif self.alarm == 5: self.message = "Duress"
             elif self.alarm == 6: self.message = "Arm Failure"
@@ -806,7 +810,9 @@ class ComfortAMSystemAlarmReport(object):
             if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
             elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
             elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
-            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+            elif self.alarm == 3: 
+                self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+                ACFail = True
             elif self.alarm == 4: self.message = "Phone Trouble"
             elif self.alarm == 5: self.message = "Duress"
             elif self.alarm == 6: self.message = "Arm Failure"
@@ -855,6 +861,9 @@ class ComfortALSystemAlarmReport(object):
 class Comfort_A_SecurityInformationReport(object):      #  For future development !!!
     #a?000000000000000000
     def __init__(self, data={}):
+            
+        global ACFail
+
         self.AA = int(data[2:4],16)     #AA is the current Alarm Type 01 to 1FH (Defaults can be changed in Comfigurator)
         self.SS = int(data[4:6],16)     #SS is alarm state 0-3 (Idle, Trouble, Alert, Alarm)
         self.XX = int(data[6:8],16)     #XX is Trouble bits
@@ -874,6 +883,10 @@ class Comfort_A_SecurityInformationReport(object):      #  For future developmen
         self.state = alarm_state[self.SS]
         #self.battery = None
         self.acfail = (int(data[6:8],16) >> 0) & 1   #XX = AC Fail, bit 0. 0=AC OK, 1=AC Fail
+        if self.acfail == 1: 
+            ACFail = True
+        elif self.acfail == 0: 
+            ACFail = False
         if self.type == "LowBattery" and self.BB <= 1: self.battery = low_battery[1]
         elif self.type == "LowBattery" and self.BB in low_battery:self.battery = low_battery[(self.BB - 32)]
         else:self.battery = "Unknown"
@@ -882,6 +895,7 @@ class ComfortARSystemAlarmReport(object):
     def __init__(self, data={}):
         global ZONEMAPFILE
         global input_properties
+        global ACFail
 
         self.alarm = int(data[2:4],16)
         self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
@@ -890,7 +904,9 @@ class ComfortARSystemAlarmReport(object):
         if ZONEMAPFILE:
             if self.alarm == 1: self.message = str(input_properties[str(self.parameter)]['Name'])+" Trouble Restore"
             elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
-            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+            elif self.alarm == 3: 
+                self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+                ACFail = False
             elif self.alarm == 4: self.message = "Phone Trouble"+" Restore"
             elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)+" Restore"
             elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
@@ -900,7 +916,9 @@ class ComfortARSystemAlarmReport(object):
         else:
             if self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"+" Restore"
             elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
-            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+            elif self.alarm == 3: 
+                self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+                ACFail = False
             elif self.alarm == 4: self.message = "Phone Trouble"+" Restore"
             elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)+" Restore"
             elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
@@ -974,6 +992,7 @@ class Comfort_D_SystemVoltageReport(object):
         global ChargerVoltageList
         global BatterySlaveIDs
         global ChargerSlaveIDs
+        global ACFail
 
         if len(data) < 6:
             return
@@ -982,11 +1001,16 @@ class Comfort_D_SystemVoltageReport(object):
 
         for x in range(6, len(data), 2):
             value = int(data[x:x+2],16)
+
             #voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Old Formula used for Batteries.
             #voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC Supply voltage.
             if query_type == 1:
                 #voltage = str(format(round(((value/255)*15.522),2), ".2f")) if value < 255 else '-1'  # Formula used for Batteries.
-                voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 - 0.75),2), ".2f")) if value < 255 else '-1'  # - testing.
+                if ACFail == False:
+                    voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 - 0.75),2), ".2f")) if value < 255 else '-1'  # - testing.
+                else:
+                    voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 + 0.4),2), ".2f")) if value < 255 else '-1'  # - testing.
+
                 #voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Formula used for Batteries.
                 if id == 0:
                     device_properties[BatteryVoltageNameList[(x-6)/2]] = voltage

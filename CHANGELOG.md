@@ -5,6 +5,7 @@ Look at long filenames again.
 
 ### Added
  - Update DOCS.md to add explanation of Alarm Control Panel UI configuration options.
+ - Updated Battery Voltage calculation.
  
 ### Changed
 - Clarify D?nn01 voltage UI definition for `Battery Voltage` renamed to `Battery/Charge Voltage`. This is the Battery/Charge voltage measured at the PCB battery terminals.
