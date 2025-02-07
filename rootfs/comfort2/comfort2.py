@@ -465,7 +465,7 @@ ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set"      # set the counter to a v
 logger.info('Completed importing addon configuration options')
 
 # The following variables values were passed through via the Home Assistant add on configuration options
-logger.debug('The following variable values were passed through via the Home Assistant')
+logger.debug('The following variable values were passed through via Home Assistant')
 logger.debug('MQTT_USER = %s', MQTT_USER)
 logger.debug('MQTT_PASSWORD = ******')
 logger.debug('MQTT_SERVER = %s', MQTT_SERVER)
@@ -1007,9 +1007,9 @@ class Comfort_D_SystemVoltageReport(object):
             if query_type == 1:
                 #voltage = str(format(round(((value/255)*15.522),2), ".2f")) if value < 255 else '-1'  # Formula used for Batteries.
                 if ACFail == False:
-                    voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 - 0.7),2), ".2f")) if value < 255 else '-1'  # - testing.
+                    voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 - 0.75),2), ".2f")) if value < 255 else '-1'  # - testing.
                 else:
-                    voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 + 0.4),2), ".2f")) if value < 255 else '-1'  # - testing.
+                    voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 + 0.45),2), ".2f")) if value < 255 else '-1'  # - testing.
 
                 #voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Formula used for Batteries.
                 if id == 0:
