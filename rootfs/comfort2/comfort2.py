@@ -1002,6 +1002,9 @@ class Comfort_D_SystemVoltageReport(object):
         for x in range(6, len(data), 2):
             value = int(data[x:x+2],16)
 
+            if query_type == 2 and value > 10:      # Set to a value larger than 0V to indicate AC Ok.
+                ACFail = False
+
             #voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Old Formula used for Batteries.
             #voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC Supply voltage.
             if query_type == 1:
