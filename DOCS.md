@@ -445,13 +445,22 @@ Threshold values are internally defined as per below and will output a log messa
 
 When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery/Charge voltage and the second for the DC Supply voltage expressed as an 8-bit value. The formulas for voltage calculation, using the examples below, are:
 
+⚠️ **Note:** Battery voltages change when AC is connected or not. When AC is connected you will see the Charge voltage. When disconnected, it will be the battery voltage. Due to component tolerances, the values might not be exactly what is measured with a precision test instrument.
+
 ```
-Battery/Charge Voltage = 196/255 * 15.5V = 11.91V
-DC Supply Voltage = 199/255 * (3.3/2.71) * 15V = 14.25V
+Battery/Charge Voltage = 209/255 * (3.3/2.7) * 12.7 - 0.35 = 12.37V (AC Disconnected)
+DC Supply Voltage = 0/255 * (3.3/2.7) * 14.9 = 0V
+
+2025-02-16 10:54:58 DEBUG    D?0101D1
+2025-02-16 10:54:58 DEBUG    D?010200
 ```
+
 ```
-2024-08-08 19:07:37 DEBUG    D?0101C4
-2024-08-08 19:07:39 DEBUG    D?0102C7
+Battery/Charge Voltage = 233/255 * (3.3/2.7) * 12.7 - 0.75 = 13.43V (AC Connected)
+DC Supply Voltage = 209/255 * (3.3/2.7) * 14.9 = 14.96V
+
+2025-02-16 10:55:58 DEBUG    D?0101E9
+2025-02-16 10:55:58 DEBUG    D?0102D1
 ```
 
 Take note of the `condition` block below, this is your Comfort II ULTRA device and is used as a check to make sure the LAN connection to Comfort is in a Connected state.

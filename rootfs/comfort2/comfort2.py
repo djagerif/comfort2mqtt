@@ -1013,7 +1013,7 @@ class Comfort_D_SystemVoltageReport(object):
                 if ACFail == False:
                     voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 - 0.75),2), ".2f")) if value < 255 else '-1'  # - testing.
                 else:
-                    voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 + 0.45),2), ".2f")) if value < 255 else '-1'  # - testing.
+                    voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 + 0.35),2), ".2f")) if value < 255 else '-1'  # - testing.
 
                 #voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Formula used for Batteries.
                 if id == 0:
