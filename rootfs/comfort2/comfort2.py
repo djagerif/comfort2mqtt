@@ -888,7 +888,8 @@ class Comfort_A_SecurityInformationReport(object):      #  For future developmen
         elif self.acfail == 0: 
             ACFail = False
         if self.type == "LowBattery" and self.BB <= 1: self.battery = low_battery[1]
-        elif self.type == "LowBattery" and self.BB in low_battery:self.battery = low_battery[(self.BB - 32)]
+        #elif self.type == "LowBattery" and self.BB - 31 in low_battery:self.battery = low_battery[(self.BB - 31)]
+        elif self.type == "LowBattery" and 0 <= (self.BB - 31) < len(low_battery):self.battery = low_battery[self.BB - 31]
         else:self.battery = "Unknown"
 
 class ComfortARSystemAlarmReport(object):

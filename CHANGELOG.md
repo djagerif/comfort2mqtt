@@ -18,6 +18,7 @@ Look at long filenames again.
 
 
 ### Fixed
+ - a? Low Battery decode referenced incorrect index.
 
 
 ## [1.4.3] - 2025-01-26
