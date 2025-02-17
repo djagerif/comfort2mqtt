@@ -10,6 +10,7 @@ Look at long filenames again.
 ### Changed
 - Clarify D?nn01 voltage UI definition for `Battery Voltage` renamed to `Battery/Charge Voltage`. This is the Battery/Charge Test Point voltage measured at the +12V/COM terminals adding average component voltage losses to indicate approximate battery voltage.
 - Clarify D?nn02 voltage UI definition for `Charger Voltage` renamed to `DC Supply Voltage`. This is the 12V DC Output circuit Test Point voltage measured after the external PSU control circuit.
+- Update random MQTT client ID generator.
 
 *Note: Possible breaking change for CM-9001 ARM based boards only !!
 - Update `Battery Status` UI definition to `Battery/Charger Status`.

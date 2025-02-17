@@ -35,7 +35,7 @@ import datetime
 import threading
 import logging
 from datetime import datetime, timedelta
-from random import randint
+import secrets
 import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
@@ -51,7 +51,10 @@ MAX_ZONES = 96                    # Configurable for future expansion
 MAX_OUTPUTS = 96                  # Configurable for future expansion
 MAX_RESPONSES = 1024              # Configurable for future expansion
 
-rand_hex_str = hex(randint(268435456, 4294967295))
+lower = 268435456
+upper = 4294967295
+rand_int = lower + secrets.randbelow(upper - lower + 1)
+rand_hex_str = hex(rand_int)
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate pseudo random client-id each time it starts.
 
 REFRESHTOPIC = DOMAIN+"/alarm/refresh"                  # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
