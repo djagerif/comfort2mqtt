@@ -1,12 +1,12 @@
 ## [1.5.0] - Busy...
 
 Look at long filenames again.
+Rework Keepalives + Dropped connections
 
 
 ### Added
  - Update DOCS.md to add explanation of Alarm Control Panel UI configuration options.
  - Updated Battery Voltage calculation.
- - Added OS level TCP connection keepalives.
  
 ### Changed
 - Clarify D?nn01 voltage UI definition for `Battery Voltage` renamed to `Battery/Charge Voltage`. This is the Battery/Charge Test Point voltage measured at the +12V/COM terminals adding average component voltage losses to indicate approximate battery voltage.
