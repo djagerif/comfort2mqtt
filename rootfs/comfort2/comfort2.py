@@ -2488,6 +2488,11 @@ class Comfort2(mqtt.Client):
             while RUN:
                 try:
                     self.comfortsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.comfortsock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    self.comfortsock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 10)   # Start keepalive after 10s of inactivity
+                    self.comfortsock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 5)   # Interval between keepalive probes
+                    self.comfortsock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)     # Number of failed probes before disconnect
+
                     logger.info('Connecting to Comfort (%s) on port %s', self.comfort_ip, str(self.comfort_port) )
                     self.comfortsock.connect((self.comfort_ip, self.comfort_port))
                     self.comfortsock.settimeout(TIMEOUT.seconds)
@@ -2502,7 +2507,7 @@ class Comfort2(mqtt.Client):
                         else:
                             continue
 
-                        if line[1:] != "cc00": #and not line[1:].startswith("D?00"):      # D?00 replies might not be used - wait Cytech command inclusion.
+                        if line[1:] != "cc09": #and not line[1:].startswith("D?00"):      # D?00 replies might not be used - wait Cytech command inclusion.
                             logger.debug(line[1:])  	    # Print all responses in DEBUG mode only. Print all received Comfort commands except keepalives.
 
                             if datetime.now() > SAVEDTIME + TIMEOUT:            #
