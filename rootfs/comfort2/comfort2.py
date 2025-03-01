@@ -1469,8 +1469,9 @@ class Comfort2(mqtt.Client):
             except socket.timeout as e:
                 err = e.args[0]
                 if err == 'timed out':
-                    self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
-                    SAVEDTIME = datetime.now()
+                    #self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                    self.SendCommand("cc00")
+                    #SAVEDTIME = datetime.now()
                     time.sleep(0.1)
                     continue
                 else:
@@ -1483,8 +1484,9 @@ class Comfort2(mqtt.Client):
             else:
                 if len(data) == 0:
                     logger.debug('Comfort initiated disconnect (LU00).')
-                    self.comfortsock.sendall("\x03LI\r".encode()) # Try and gracefully logout if possible.
-                    SAVEDTIME = datetime.now()
+                    #self.comfortsock.sendall("\x03LI\r".encode()) # Try and gracefully logout if possible.
+                    self.SendCommand("LI")
+                    #SAVEDTIME = datetime.now()
                     FIRST_LOGIN = True
                     COMFORTCONNECTED = False
                     if BROKERCONNECTED:
@@ -1498,6 +1500,17 @@ class Comfort2(mqtt.Client):
                         line, buffer = buffer.split('\r', 1)
                         yield line
         return
+
+    def SendCommand(self, command):
+        global SAVEDTIME
+
+        try:
+            self.comfortsock.sendall(("\x03"+command+"\r").encode())
+            #self.comfortsock.sendall((command).encode())
+            SAVEDTIME = datetime.now()
+        except socket.error as e:
+            logger.error("Error sending command %s", e)
+            self.comfortsock.close()
 
     def login(self):
         global SAVEDTIME
@@ -2710,7 +2723,7 @@ class Comfort2(mqtt.Client):
                                                 
                                 device_properties['CPUType'] = str(uMsg.cputype)
                                 if str(uMsg.cputype) != "N/A":
-                                    logging.debug("%s Mainboard CPU detected, Battery Monitoring Enabled.", str(device_properties['CPUType']))
+                                    logging.debug("%s Mainboard CPU detected. Battery Monitoring Enabled.", str(device_properties['CPUType']))
                                 else:   # Clear out battery voltages
                                     device_properties['BatteryVoltageMain'] = "-1"
                                     device_properties['BatteryVoltageSlave1'] = "-1"

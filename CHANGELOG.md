@@ -1,7 +1,7 @@
 ## [1.5.0] - Busy...
 
 Look at long filenames again.
-Rework Keepalives + Dropped connections
+Rework Keepalives + Dropped connections. TCP keepalives don't work in HA sandbox.
 
 
 ### Added
@@ -12,15 +12,17 @@ Rework Keepalives + Dropped connections
 - Clarify D?nn01 voltage UI definition for `Battery Voltage` renamed to `Battery/Charge Voltage`. This is the Battery/Charge Test Point voltage measured at the +12V/COM terminals adding average component voltage losses to indicate approximate battery voltage.
 - Clarify D?nn02 voltage UI definition for `Charger Voltage` renamed to `DC Supply Voltage`. This is the 12V DC Output circuit Test Point voltage measured after the external PSU control circuit.
 - Update random MQTT client ID generator.
+- Minor syntax changes.
 
 *Note: Possible breaking change for CM-9001 ARM based boards only !!
 - Update `Battery Status` UI definition to `Battery/Charger Status`.
 - Update `Charger Status` UI definition to `DC Supply Status`.
-*Go to Settings -> Devices and services. Select MQTT and click on 'Devices. Click on `Comfort II ULTRA` and under `Device Info` select the three dots which give the option to Download Diagnostics or Delete. Click on Delete. Now go back and restart the Addon from the Settings/Addon screen menu.
+*Go to Settings -> Devices and services. Select MQTT and click on 'Devices. Click on `Comfort II ULTRA` and under `Device Info` select the three dots (...) which give the option to Download Diagnostics or Delete. Click on Delete. Now go back and restart the Addon from the Settings/Addon screen menu.
 
 
 ### Fixed
  - a? Low Battery decode referenced incorrect index.
+ 
 
 
 ## [1.4.3] - 2025-01-26
