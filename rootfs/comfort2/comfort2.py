@@ -1508,9 +1508,11 @@ class Comfort2(mqtt.Client):
             self.comfortsock.sendall(("\x03"+command+"\r").encode())
             #self.comfortsock.sendall((command).encode())
             SAVEDTIME = datetime.now()
+            logger.debug("Sending Command %s", command)
         except socket.error as e:
             logger.error("Error sending command %s", e)
             self.comfortsock.close()
+            raise
 
     def login(self):
         global SAVEDTIME
