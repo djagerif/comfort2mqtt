@@ -4,7 +4,11 @@ FROM $BUILD_FROM
 # Install most Python deps here, because that way we don't need to include build tools in the
 # final image.
 
-RUN apk update --no-cache && apk upgrade --no-cache
+#RUN apk update --no-cache && apk upgrade --no-cache
+#RUN pip install --no-cache-dir --upgrade pip
+#RUN pip install paho-mqtt pyopenssl requests defusedxml
+
+RUN apk update && apt-get install --no-install-recommends -y && apt-get clean
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install paho-mqtt pyopenssl requests defusedxml
 
