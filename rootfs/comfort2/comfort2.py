@@ -1476,7 +1476,7 @@ class Comfort2(mqtt.Client):
                     continue
                 else:
                     logger.error ("readlines() error %s", e)
-            except socket.error as e:
+            except (socket.error, ConnectionResetError, BrokenPipeError, TimeoutError) as e:
                 logger.debug("Unknown Comfort connection error %s", e)
                 COMFORTCONNECTED = False
                 FIRST_LOGIN = True
@@ -3058,7 +3058,7 @@ class Comfort2(mqtt.Client):
                                 logger.warning('Reset detected')
                                 self.login()
                             else:
-                                if datetime.now() > (SAVEDTIME + TIMEOUT):  # If no command sent in 2 minutes then send keepalive.
+                                if datetime.now() > (SAVEDTIME + TIMEOUT):  # If no command sent in 30 seconds then send keepalive.
                                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive. cc00
                                     SAVEDTIME = datetime.now()
                                     time.sleep(0.1)
