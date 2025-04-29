@@ -2503,7 +2503,7 @@ class Comfort2(mqtt.Client):
             while RUN:
                 try:
                     self.comfortsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    #self.comfortsock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)     # Only works on Linux outside docker.
+                    self.comfortsock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)     # Only works on Linux outside docker.
                     self.comfortsock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 10)   # Start keepalive after 10s of inactivity
                     self.comfortsock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 5)   # Interval between keepalive probes
                     self.comfortsock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)     # Number of failed probes before disconnect
