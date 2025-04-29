@@ -3069,6 +3069,7 @@ class Comfort2(mqtt.Client):
                 except (socket.error, ConnectionResetError, BrokenPipeError, TimeoutError) as v:
                     logger.error('Comfort Socket Error %s', str(v))
                     COMFORTCONNECTED = False
+                    self.comfortsock.close()
                 logger.error('Lost connection to Comfort, reconnecting...')
                 if BROKERCONNECTED == True:      # MQTT Connected ??
                     self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
@@ -3085,11 +3086,13 @@ class Comfort2(mqtt.Client):
                 self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
             RUN = False
             self.loop_stop
+            self.comfortsock.close()
         finally:
             if BROKERCONNECTED == True:      # MQTT Connected ??
                 infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
                 infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
                 infot.wait_for_publish(1)
+                self.comfortsock.close()
                 self.loop_stop
 
 
