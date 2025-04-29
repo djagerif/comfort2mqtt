@@ -1,11 +1,12 @@
 ## [1.5.0] - Busy...
 
 Look at long filenames again.
-Rework Keepalives + Dropped connections. TCP keepalives don't work in HA sandbox.
+Rework Keepalives + Dropped connections. TCP keepalives don't work in HA sandbox. With Simulator FIN is sent on disconnect, that works. Line disconnect causes issue and is not reported correctly. After default TCP timeout it goes OffLine but when reconnected it goes Connected but still Offline - the Addon does not login again.
 
 
 ### Added
  - Update DOCS.md to add explanation of Alarm Control Panel UI configuration options.
+ - Updated DOCS.md to clarify `LAN Connected` state.
  - Updated Battery Voltage calculation.
  
 ### Changed

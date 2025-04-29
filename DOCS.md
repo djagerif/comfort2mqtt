@@ -463,7 +463,7 @@ DC Supply Voltage = 209/255 * (3.3/2.7) * 14.9 = 14.96V
 2025-02-16 10:55:58 DEBUG    D?0102D1
 ```
 
-Take note of the `condition` block below, this is your Comfort II ULTRA device and is used as a check to make sure the LAN connection to Comfort is in a Connected state.
+Take note of the `condition` block below, this is your Comfort II ULTRA device and is used as a check to make sure the LAN connection to Comfort is in a Connected and Logged-In state.
 
 ![image](https://github.com/user-attachments/assets/c387efcc-89a0-4af2-9c66-0ea36a8e5e72)
 
