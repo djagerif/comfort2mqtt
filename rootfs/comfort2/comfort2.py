@@ -3069,7 +3069,7 @@ class Comfort2(mqtt.Client):
                 except (socket.error, ConnectionResetError, BrokenPipeError, TimeoutError) as v:
                     logger.error('Comfort Socket Error %s', str(v))
                     COMFORTCONNECTED = False
-                    self.comfortsock.close()
+                    #self.comfortsock.close()        # Socket closed, cannot use existing socket. Need to find a way to create new socket.
                 logger.error('Lost connection to Comfort, reconnecting...')
                 if BROKERCONNECTED == True:      # MQTT Connected ??
                     self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
@@ -3077,6 +3077,7 @@ class Comfort2(mqtt.Client):
                     self.publish(ALARMCONNECTEDTOPIC, "1" if COMFORTCONNECTED else "0", qos=2, retain=False)
                     
                 time.sleep(RETRY.seconds)
+                return
         except KeyboardInterrupt as e:
             logger.debug("SIGINT (Ctrl-C) Intercepted")
             logger.info('Shutting down.')
@@ -3092,7 +3093,7 @@ class Comfort2(mqtt.Client):
                 infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
                 infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
                 infot.wait_for_publish(1)
-                self.comfortsock.close()
+                #self.comfortsock.close()   # This closes the socket and exists.
                 self.loop_stop
 
 
