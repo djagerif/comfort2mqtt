@@ -2501,6 +2501,7 @@ class Comfort2(mqtt.Client):
 
         try:
             while RUN:
+                self.comfortsock = None     # Added 29/4/2025
                 try:
                     self.comfortsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     self.comfortsock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)     # Only works on Linux outside docker.
@@ -2512,6 +2513,8 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.connect((self.comfort_ip, self.comfort_port))
                     self.comfortsock.settimeout(TIMEOUT.seconds)
                     self.login()
+
+                    SAVEDTIME = datetime.now()      # Added 29/4/2025
 
                     for line in self.readlines():
 
@@ -3068,8 +3071,17 @@ class Comfort2(mqtt.Client):
                 #except socket.error as v:
                 except (socket.error, ConnectionResetError, BrokenPipeError, TimeoutError) as v:
                     logger.error('Comfort Socket Error %s', str(v))
-                    COMFORTCONNECTED = False
-                    #self.comfortsock.close()        # Socket closed, cannot use existing socket. Need to find a way to create new socket.
+                finally:        # Added 29/4/2025
+                    if self.comfortsock:
+                        try:
+                            self.comfortsock.close()
+                        except Exception:
+                            pass
+                        self.comfortsock = None
+
+
+                COMFORTCONNECTED = False
+                FIRST_LOGIN = True  # Added 29/4/2025
                 logger.error('Lost connection to Comfort, reconnecting...')
                 if BROKERCONNECTED == True:      # MQTT Connected ??
                     self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
@@ -3077,23 +3089,23 @@ class Comfort2(mqtt.Client):
                     self.publish(ALARMCONNECTEDTOPIC, "1" if COMFORTCONNECTED else "0", qos=2, retain=False)
                     
                 time.sleep(RETRY.seconds)
-                return
         except KeyboardInterrupt as e:
             logger.debug("SIGINT (Ctrl-C) Intercepted")
             logger.info('Shutting down.')
             self.exit_gracefully(1,1)
             if self.connected == True:
                 device_properties['BridgeConnected'] = 0
-                self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
+                try:
+                    self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
+                except:
+                    pass
             RUN = False
             self.loop_stop
-            self.comfortsock.close()
         finally:
             if BROKERCONNECTED == True:      # MQTT Connected ??
                 infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
                 infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
                 infot.wait_for_publish(1)
-                #self.comfortsock.close()   # This closes the socket and exists.
                 self.loop_stop
 
 
