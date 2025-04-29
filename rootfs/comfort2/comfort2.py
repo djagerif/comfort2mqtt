@@ -3065,7 +3065,8 @@ class Comfort2(mqtt.Client):
                         else:
                             logger.warning("Invalid response received (%s)", line.encode())
 
-                except socket.error as v:
+                #except socket.error as v:
+                except (socket.error, ConnectionResetError, BrokenPipeError, TimeoutError) as v:
                     logger.error('Comfort Socket Error %s', str(v))
                     COMFORTCONNECTED = False
                 logger.error('Lost connection to Comfort, reconnecting...')
