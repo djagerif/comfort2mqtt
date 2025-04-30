@@ -1454,25 +1454,43 @@ class Comfort2(mqtt.Client):
         if self.entryexitdelay >= 0:
             threading.Timer(1, self.entryexit_timer).start()
 
-    def _send_keepalive_and_check(self):
-        """Send keepalive (cc00) and check if the socket is still alive."""
-        try:
-            self.SendCommand("cc00")
-            time.sleep(0.1)
+    def _send_keepalive_and_check(self, max_attempts=3, delay_between_attempts=2):
+        """Send keepalive (cc00) and check if the socket is alive, retrying up to max_attempts."""
+        attempt = 0
 
-            # Set short timeout for probe
-            self.comfortsock.settimeout(5)
-            probe = self.comfortsock.recv(1)
+        while attempt < max_attempts:
+            attempt += 1
+            logger.debug("Keepalive attempt %d of %d", attempt, max_attempts)
 
-            if not probe:
-                logger.error("Keepalive failed: empty probe, socket dead.")
-                raise socket.error("Dead socket after keepalive.")
+            try:
+                self.SendCommand("cc00")
+                time.sleep(0.1)
 
-            logger.debug("Keepalive successful, socket alive.")
+                # Set short timeout for probe
+                self.comfortsock.settimeout(5)
+                probe = self.comfortsock.recv(1)
 
-        finally:
-            # Always restore the original timeout, even if an error occurs
-            self.comfortsock.settimeout(TIMEOUT.seconds)
+                if not probe:
+                    logger.warning("Keepalive attempt %d: empty probe response.", attempt)
+                else:
+                    logger.debug("Keepalive successful on attempt %d.", attempt)
+                    return  # Success
+
+            except (socket.timeout, socket.error) as e:
+                logger.warning("Keepalive attempt %d failed: %s", attempt, e)
+
+            finally:
+                # Always restore the main timeout after each attempt
+                self.comfortsock.settimeout(TIMEOUT.seconds)
+
+            # If not last attempt, wait a bit before trying again
+            if attempt < max_attempts:
+                time.sleep(delay_between_attempts)
+
+        # All attempts failed
+        logger.error("All %d keepalive attempts failed. Declaring socket dead.", max_attempts)
+        raise socket.error("Dead socket after keepalive retries.")
+
 
     def readlines(self, recv_buffer=BUFFER_SIZE, delim='\r'):
         """Reads lines from the Comfort socket, sending cc00 Comfort keepalive on timeout."""
@@ -2543,7 +2561,7 @@ class Comfort2(mqtt.Client):
                 self.comfortsock = None     # Added 29/4/2025
                 try:
                     self.comfortsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    self.comfortsock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)     # Only works on Linux outside docker.
+                    self.comfortsock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
                     self.comfortsock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 10)   # Start keepalive after 10s of inactivity
                     self.comfortsock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 5)   # Interval between keepalive probes
                     self.comfortsock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)     # Number of failed probes before disconnect
