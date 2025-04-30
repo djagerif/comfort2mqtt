@@ -3124,6 +3124,7 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "RS":
                                 #on rare occassions comfort ucm might get reset (RS11), our session is no longer valid, need to relogin
                                 logger.warning('Reset detected')
+                                FIRST_LOGIN = True
                                 self.login()
                             else:
                                 if datetime.now() > (SAVEDTIME + TIMEOUT):  # If no command sent in 30 seconds then send keepalive.
