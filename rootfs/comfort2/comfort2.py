@@ -1459,11 +1459,11 @@ class Comfort2(mqtt.Client):
         Send a keepalive (cc00) command and verify the socket is still alive.
         Retry up to max_attempts times before declaring the socket dead.
         """
-        logger.debug("Starting keepalive health check (%d attempts allowed)", max_attempts)
+        #logger.debug("Starting keepalive health check (%d attempts allowed)", max_attempts)
 
         for attempt in range(1, max_attempts + 1):
             try:
-                logger.debug("Keepalive attempt %d of %d", attempt, max_attempts)
+                #logger.debug("Keepalive attempt %d of %d", attempt, max_attempts)
             
                 # Send keepalive command
                 self.SendCommand("cc00")
@@ -1476,7 +1476,7 @@ class Comfort2(mqtt.Client):
                 probe = self.comfortsock.recv(1)
 
                 if probe:
-                    logger.info("Keepalive probe succeeded on attempt %d.", attempt)
+                    #logger.info("Keepalive probe succeeded on attempt %d.", attempt)
                     # Restore original timeout and exit successfully
                     self.comfortsock.settimeout(original_timeout)
                     return
@@ -1484,7 +1484,8 @@ class Comfort2(mqtt.Client):
                     logger.warning("Keepalive probe empty on attempt %d.", attempt)
 
             except (socket.timeout, socket.error) as e:
-                logger.warning("Keepalive probe failed on attempt %d: %s", attempt, e)
+                #logger.warning("Keepalive probe failed on attempt %d: %s", attempt, e)
+                dummy_var = 1   # Not used, just to avoid unused variable error.
 
             finally:
                 # Restore original timeout after each attempt
@@ -1492,11 +1493,11 @@ class Comfort2(mqtt.Client):
 
             # If not last attempt, wait a little before retrying
             if attempt < max_attempts:
-                logger.debug("Waiting %d seconds before next keepalive attempt.", delay_between_attempts)
+                #logger.debug("Waiting %d seconds before next keepalive attempt.", delay_between_attempts)
                 time.sleep(delay_between_attempts)
 
         # If we reach here, all attempts failed
-        logger.error("All %d keepalive attempts failed. Marking socket as dead.", max_attempts)
+        #logger.error("All %d keepalive attempts failed. Marking socket as dead.", max_attempts)
         raise socket.error(f"Socket unresponsive after {max_attempts} keepalive attempts.")
 
     def readlines(self, recv_buffer=BUFFER_SIZE, delim='\r'):
