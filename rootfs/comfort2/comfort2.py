@@ -1454,8 +1454,28 @@ class Comfort2(mqtt.Client):
         if self.entryexitdelay >= 0:
             threading.Timer(1, self.entryexit_timer).start()
 
+    def _send_keepalive_and_check(self):
+        """Send keepalive (cc00) and check if the socket is still alive."""
+        try:
+            self.SendCommand("cc00")
+            time.sleep(0.1)
+
+            # Set short timeout for probe
+            self.comfortsock.settimeout(5)
+            probe = self.comfortsock.recv(1)
+
+            if not probe:
+                logger.error("Keepalive failed: empty probe, socket dead.")
+                raise socket.error("Dead socket after keepalive.")
+
+            logger.debug("Keepalive successful, socket alive.")
+
+        finally:
+            # Always restore the original timeout, even if an error occurs
+            self.comfortsock.settimeout(TIMEOUT.seconds)
+
     def readlines(self, recv_buffer=BUFFER_SIZE, delim='\r'):
-        """Reads lines from the Comfort socket, sending keepalive on timeout."""
+        """Reads lines from the Comfort socket, sending cc00 Comfort keepalive on timeout."""
         global FIRST_LOGIN
         global SAVEDTIME
         global device_properties
@@ -1467,23 +1487,25 @@ class Comfort2(mqtt.Client):
             try:
                 data = self.comfortsock.recv(recv_buffer).decode()
             except socket.timeout as e:
-                logger.debug("Socket timeout - sending keepalive...")
+                #logger.debug("Socket timeout - sending keepalive...")
 
                 try:
-                    # Send keepalive
-                    self.SendCommand("cc00")
-                    time.sleep(0.1)
+                    # # Send keepalive
+                    # self.SendCommand("cc00")
+                    # time.sleep(0.1)
 
-                    # Temporarily set short timeout to quickly detect dead socket
-                    self.comfortsock.settimeout(5)
-                    probe = self.comfortsock.recv(1)
+                    # # Temporarily set short timeout to quickly detect dead socket
+                    # self.comfortsock.settimeout(5)
+                    # probe = self.comfortsock.recv(1)
 
-                    if not probe:
-                        logger.error("Keepalive failed: empty response, socket dead.")
-                        raise socket.error("Dead socket (empty probe).")
+                    # if not probe:
+                    #     logger.error("Keepalive failed: empty response, socket dead.")
+                    #     raise socket.error("Dead socket (empty probe).")
 
-                    # Restore normal timeout
-                    self.comfortsock.settimeout(TIMEOUT.seconds)
+                    # # Restore normal timeout
+                    # self.comfortsock.settimeout(TIMEOUT.seconds)
+
+                    self._send_keepalive_and_check()    # Send keepalive and check socket status
 
                 except (socket.timeout, socket.error) as err:
                     logger.error("Keepalive check failed: %s", err)
