@@ -1454,8 +1454,8 @@ class Comfort2(mqtt.Client):
         if self.entryexitdelay >= 0:
             threading.Timer(1, self.entryexit_timer).start()
 
-    def readlines(self, recv_buffer=BUFFER_SIZE, delim='\r'):       # Correct string values terminate with 0x0d (CR)
-
+    def readlines(self, recv_buffer=BUFFER_SIZE, delim='\r'):
+        """Reads lines from the Comfort socket, sending keepalive on timeout."""
         global FIRST_LOGIN
         global SAVEDTIME
         global device_properties
@@ -1467,39 +1467,56 @@ class Comfort2(mqtt.Client):
             try:
                 data = self.comfortsock.recv(recv_buffer).decode()
             except socket.timeout as e:
-                err = e.args[0]
-                if err == 'timed out':
-                    #self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
+                logger.debug("Socket timeout - sending keepalive...")
+
+                try:
+                    # Send keepalive
                     self.SendCommand("cc00")
-                    #SAVEDTIME = datetime.now()
                     time.sleep(0.1)
-                    continue
-                else:
-                    logger.error ("readlines() error %s", e)
+
+                    # Temporarily set short timeout to quickly detect dead socket
+                    self.comfortsock.settimeout(5)
+                    probe = self.comfortsock.recv(1)
+
+                    if not probe:
+                        logger.error("Keepalive failed: empty response, socket dead.")
+                        raise socket.error("Dead socket (empty probe).")
+
+                    # Restore normal timeout
+                    self.comfortsock.settimeout(TIMEOUT.seconds)
+
+                except (socket.timeout, socket.error) as err:
+                    logger.error("Keepalive check failed: %s", err)
+                    COMFORTCONNECTED = False
+                    FIRST_LOGIN = True
+                    raise
+                continue
+
             except (socket.error, ConnectionResetError, BrokenPipeError, TimeoutError) as e:
-                logger.debug("Unknown Comfort connection error %s", e)
+                logger.error("Comfort connection error during recv: %s", e)
                 COMFORTCONNECTED = False
                 FIRST_LOGIN = True
                 raise
+
             else:
                 if len(data) == 0:
-                    logger.debug('Comfort initiated disconnect (LU00).')
-                    #self.comfortsock.sendall("\x03LI\r".encode()) # Try and gracefully logout if possible.
+                    logger.debug('Comfort initiated disconnect (empty recv).')
                     self.SendCommand("LI")
-                    #SAVEDTIME = datetime.now()
                     FIRST_LOGIN = True
                     COMFORTCONNECTED = False
+
                     if BROKERCONNECTED:
                         self.publish(ALARMCONNECTEDTOPIC, "1" if COMFORTCONNECTED else "0", qos=2, retain=False)
                         device_properties['BridgeConnected'] = 1
                 else:
-                    # got a message, process it.
+                    # Received normal data
                     buffer += data
 
                     while buffer.find(delim) != -1:
-                        line, buffer = buffer.split('\r', 1)
+                        line, buffer = buffer.split(delim, 1)
                         yield line
         return
+
 
     def SendCommand(self, command):
         global SAVEDTIME
