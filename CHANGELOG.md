@@ -1,7 +1,6 @@
 ## [1.5.0] - Busy...
 
 Look at long filenames again.
-Rework Keepalives + Dropped connections. TCP keepalives don't work in HA sandbox. With Simulator FIN is sent on disconnect, that works. Line disconnect causes issue and is not reported correctly. After default TCP timeout it goes OffLine but when reconnected it goes Connected but still Offline - the Addon does not login again.
 
 
 ### Added
@@ -14,6 +13,7 @@ Rework Keepalives + Dropped connections. TCP keepalives don't work in HA sandbox
 - Clarify D?nn02 voltage UI definition for `Charger Voltage` renamed to `DC Supply Voltage`. This is the 12V DC Output circuit Test Point voltage measured after the external PSU control circuit.
 - Update random MQTT client ID generator.
 - Minor syntax changes.
+- Reworked TCP and Application Keepalives. Now correctly indicates LAN status.
 
 *Note: Possible breaking change for CM-9001 ARM based boards only !!
 - Update `Battery Status` UI definition to `Battery/Charger Status`.
