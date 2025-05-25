@@ -37,7 +37,7 @@ comfort2mqtt/alarm/refresh - Trigger a refresh of all objects. Used when a refre
 comfort2mqtt/alarm/connected - Status of LAN Connection to Comfort. '1' when connected and logged in.
 comfort2mqtt/alarm/doorbell - '0' for off/answered or '1' for on
 comfort2mqtt/alarm/mode - Integer values for current Alarm Mode. 0 - 4 (Off, Away, Night, Day, Vacation), See Comfort M? or MD documentation.
- comfort2mqtt/alarm/battery_status - ARM based systems support battery and charger sensors.
+ comfort2mqtt/alarm/battery_status - ARM based systems support battery and dv 12v output sensors.
 
 comfort2mqtt/input<1 to 96> (Zone Input) have the following JSON attributes EG.
 {
@@ -229,6 +229,10 @@ mqtt:
       optimistic: false
       on_command_type: "first"
 ```
+![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) To Enable or Disable the various modes displayed on the Alarm Control Panel you need to edit the UI element and select the desired mode to be visible.
+
+![image](https://github.com/user-attachments/assets/86418ce8-6042-480c-a5fd-1b888758ae0f)
+
 Comfort II ULTRA supports both Unsigned 8-bit and Signed 16-bit values. However, many integrations like Clipsal C-BUS, by Schneider Electric, uses Unsigned 8-bit values and sets Counter values of 0xFF(255) for 'On' and 0x00(0) for 'Off' states and any other value in between when required for example dimming. If you have a Comfort II ULTRA integration that is different to the example mentioned then you need to adjust your `payload_on` and `payload_off` integer values accordingly.
 
 The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a Non-Dimmable light, both mapped to their respective Comfort Counters. You could also map your Non-Dimmable Lights to Comfort Flags which should operate in a similar manner as Counters except the `payload_on`value will be `1` rather than `255`. With the Light examples above you can also add the `Brightness` secondary info to the Dimmer light icon and it will display as per below.
@@ -410,7 +414,7 @@ mode: single
 
 ## Home Assistant - 'Battery Update' Automation (Optional)
 
-The latest Comfort ARM-powered boards can report individual Battery and DC Charger voltages. Below is an automation you can use to query Comfort every minute for these values. You can safely extend the interval to 15 minutes or more as voltages don't usually change abruptly in a mostly-floating voltage device operation.
+The latest Comfort ARM-powered boards can report individual Battery/Charge and DC Supply voltages. Below is an automation you can use to query Comfort every minute for these values. You can safely extend the interval to 15 minutes or more as voltages don't usually change abruptly in a mostly-floating voltage device operation.
 
 ⚠️ **Note:** If you try this on a non-ARM powered mainboard then a warning message will be displayed in the Addon log as shown below.
 
@@ -419,7 +423,7 @@ The latest Comfort ARM-powered boards can report individual Battery and DC Charg
 
 Threshold values are internally defined as per below and will output a log message accordingly.
 
-**Battery Voltage Levels:**
+**Battery/Charge Voltage Levels:**
 
   voltage > 15:       # Critical Overcharge
 
@@ -429,34 +433,43 @@ Threshold values are internally defined as per below and will output a log messa
 
   voltage < 11.5:     # Discharged
 
-**Charger Voltage Levels:**
+**DC Supply Voltage Levels:**
 
-  voltage > 18:       # Critical Overcharge
+  voltage > 18:       # Criticaly High Voltage
 
-  voltage > 17:       # Overcharge
+  voltage > 17:       # High Voltage
 
-  voltage <= 7:       # Crital Low Charge or No Charge
+  voltage <= 7:       # Criticaly Low Voltage or No Output
 
-  voltage < 12:       # Low Charge
+  voltage < 12:       # Low Voltage
 
-When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery voltage and the second for the Charger voltage expressed as an 8-bit value. The formulas for voltage calculation, using the examples below, are:
+When activating this automation on an ARM mainboard then the following two responses are received from Comfort. The first is for Battery/Charge voltage and the second for the DC Supply voltage expressed as an 8-bit value. The formulas for voltage calculation, using the examples below, are:
+
+⚠️ **Note:** Battery voltages change when AC is connected or not. When AC is connected you will see the Charge voltage. When disconnected, it will be the battery voltage. Due to component tolerances, the values might not be exactly what is measured with a precision test instrument.
 
 ```
-Battery Voltage = 196/255 * 15.5V = 11.91V
-Charger Voltage = 199/255 * (3.3/2.71) * 15V = 14.25V
-```
-```
-2024-08-08 19:07:37 DEBUG    D?0101C4
-2024-08-08 19:07:39 DEBUG    D?0102C7
+Battery/Charge Voltage = 209/255 * (3.3/2.7) * 12.7 - 0.35 = 12.37V (AC Disconnected)
+DC Supply Voltage = 0/255 * (3.3/2.7) * 14.9 = 0V
+
+2025-02-16 10:54:58 DEBUG    D?0101D1
+2025-02-16 10:54:58 DEBUG    D?010200
 ```
 
-Take note of the `condition` block below, this is your Comfort II ULTRA device and is used as a check to make sure the LAN connection to Comfort is in a Connected state.
+```
+Battery/Charge Voltage = 233/255 * (3.3/2.7) * 12.7 - 0.75 = 13.43V (AC Connected)
+DC Supply Voltage = 209/255 * (3.3/2.7) * 14.9 = 14.96V
+
+2025-02-16 10:55:58 DEBUG    D?0101E9
+2025-02-16 10:55:58 DEBUG    D?0102D1
+```
+
+Take note of the `condition` block below, this is your Comfort II ULTRA device and is used as a check to make sure the LAN connection to Comfort is in a Connected and Logged-In state.
 
 ![image](https://github.com/user-attachments/assets/c387efcc-89a0-4af2-9c66-0ea36a8e5e72)
 
 ```
 alias: Comfort Battery Update Query (Mainboard)
-description: Query an ARM powered Comfort Mainboard battery and charger voltages.
+description: Query an ARM powered Comfort Mainboard Battery and DC Supply voltages.
 trigger:
   - platform: time_pattern
     seconds: "0"
@@ -479,7 +492,7 @@ mode: single
 
 ## Hardware and Interface support
 
-This Add-on was specifically developed for the Comfort II ULTRA range of Alarm Systems with File System type `34`. Comfort II ULTRA firmware as tested is `7.201`. If any other Comfort system, model or firmware other than `7.201`, is used then results may be unexpected.
+This Add-on was specifically developed for the Comfort II ULTRA range of Alarm Systems with File System type `34`. Comfort II ULTRA firmware as tested is `7.201`. If any other Comfort system, model or firmware lower than `7.201`, is used then results may be unexpected.
 
 The following Cytech Universal Communications Modules (UCM) Ethernet modules are supported:
 
@@ -487,9 +500,9 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 * [UCM/Eth02] - Obsolete/Untested
 
-* [UCM/Wifi01] - Not Recommended (WiFi) - Firmware 7.176
+* [UCM/Wifi01] - Not Recommended (WiFi) - Firmware 7.176 or later.
 
-* [UCM/Eth03 or Eth03 Mainboard Plug-in] - Recommended (LAN) - Firmware 7.176
+* [UCM/Eth03 or Eth03 Mainboard Plug-in] - Recommended (LAN) - Firmware 7.176 or later.
 
 This software _requires_ a fully functional Comfort Ethernet or Wifi configuration with inactivity timeout set to the default value of 2 minutes. The UCM/Wifi is not recommended due to possible connectivity issues that could arise from switching between different AP's or other possible sources of RF noise. For best performance it is recommended to use either the UCM/Eth03 or the onboard Eth03 Plug-in module on the newer CM9001 Comfort Ultra models. Use a good quality CAT5e or better cable between Comfort and your network device.
 

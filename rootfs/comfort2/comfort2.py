@@ -35,7 +35,7 @@ import datetime
 import threading
 import logging
 from datetime import datetime, timedelta
-from random import randint
+import secrets
 import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
@@ -51,12 +51,15 @@ MAX_ZONES = 96                    # Configurable for future expansion
 MAX_OUTPUTS = 96                  # Configurable for future expansion
 MAX_RESPONSES = 1024              # Configurable for future expansion
 
-rand_hex_str = hex(randint(268435456, 4294967295))
+lower = 268435456
+upper = 4294967295
+rand_int = lower + secrets.randbelow(upper - lower + 1)
+rand_hex_str = hex(rand_int)
 mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate pseudo random client-id each time it starts.
 
 REFRESHTOPIC = DOMAIN+"/alarm/refresh"                  # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
-BATTERYREFRESHTOPIC = DOMAIN+"/alarm/battery_update"    # Used to request Battery and Charger updates. To be used by HA Automation for periodic polling.
-BATTERYSTATUSTOPIC = DOMAIN+"/alarm/battery_status"     # List of Battery and Charger Status.
+BATTERYREFRESHTOPIC = DOMAIN+"/alarm/battery_update"    # Used to request Battery and DC Supply voltage updates. To be used by HA Automation for periodic polling.
+BATTERYSTATUSTOPIC = DOMAIN+"/alarm/battery_status"     # List of Battery and DC Supply Output Status.
 
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
@@ -86,6 +89,7 @@ DEVICEMAPFILE = False
 USERMAPFILE = False
 device_properties = {}
 file_exists  = False
+ACFail = False              # Indicates ACFail status.
 
 device_properties['CPUType'] = "N/A"
 device_properties['Version'] = "N/A"
@@ -464,7 +468,7 @@ ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set"      # set the counter to a v
 logger.info('Completed importing addon configuration options')
 
 # The following variables values were passed through via the Home Assistant add on configuration options
-logger.debug('The following variable values were passed through via the Home Assistant')
+logger.debug('The following variable values were passed through via Home Assistant')
 logger.debug('MQTT_USER = %s', MQTT_USER)
 logger.debug('MQTT_PASSWORD = ******')
 logger.debug('MQTT_SERVER = %s', MQTT_SERVER)
@@ -771,6 +775,7 @@ class ComfortAMSystemAlarmReport(object):
         
         global ZONEMAPFILE
         global input_properties
+        global ACFail
 
         self.alarm = int(data[2:4],16)
         self.triggered = True               # For Comfort Alarm State Alert, Trouble, Alarm
@@ -780,7 +785,9 @@ class ComfortAMSystemAlarmReport(object):
             if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)+" ("+ str(input_properties[str(self.parameter)]['Name'])+")"
             elif self.alarm == 1: self.message = str(input_properties[str(self.parameter)]['Name'])+" Trouble"
             elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
-            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+            elif self.alarm == 3: 
+                self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+                ACFail = True
             elif self.alarm == 4: self.message = "Phone Trouble"
             elif self.alarm == 5: self.message = "Duress"
             elif self.alarm == 6: self.message = "Arm Failure"
@@ -797,16 +804,18 @@ class ComfortAMSystemAlarmReport(object):
             elif self.alarm == 20: self.message = "Fire"
             elif self.alarm == 21: self.message = "Panic"
             elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
-            elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
+            elif self.alarm == 23: self.message = "New Message, User "+str(self.parameter); self.triggered = False
             elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
-            elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
+            elif self.alarm == 25: self.message = "Comms Failure RS485 id "+str(self.parameter)
             elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
             else: self.message = "Unknown("+str(self.alarm)+")"
         else:
             if self.alarm == 0: self.message = "Intruder, Zone "+str(self.parameter)
             elif self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"
             elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
-            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+            elif self.alarm == 3: 
+                self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
+                ACFail = True
             elif self.alarm == 4: self.message = "Phone Trouble"
             elif self.alarm == 5: self.message = "Duress"
             elif self.alarm == 6: self.message = "Arm Failure"
@@ -823,9 +832,9 @@ class ComfortAMSystemAlarmReport(object):
             elif self.alarm == 20: self.message = "Fire"
             elif self.alarm == 21: self.message = "Panic"
             elif self.alarm == 22: self.message = "GSM Trouble "+str(self.parameter)
-            elif self.alarm == 23: self.message = "New Message, User"+str(self.parameter); self.triggered = False
+            elif self.alarm == 23: self.message = "New Message, User "+str(self.parameter); self.triggered = False
             elif self.alarm == 24: self.message = "Doorbell "+str(self.parameter); self.triggered = False
-            elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)
+            elif self.alarm == 25: self.message = "Comms Failure RS485 id "+str(self.parameter)
             elif self.alarm == 26: self.message = "Signin Tamper "+str(self.parameter)
             else: self.message = "Unknown("+str(self.alarm)+")"
 
@@ -855,6 +864,9 @@ class ComfortALSystemAlarmReport(object):
 class Comfort_A_SecurityInformationReport(object):      #  For future development !!!
     #a?000000000000000000
     def __init__(self, data={}):
+            
+        global ACFail
+
         self.AA = int(data[2:4],16)     #AA is the current Alarm Type 01 to 1FH (Defaults can be changed in Comfigurator)
         self.SS = int(data[4:6],16)     #SS is alarm state 0-3 (Idle, Trouble, Alert, Alarm)
         self.XX = int(data[6:8],16)     #XX is Trouble bits
@@ -874,14 +886,20 @@ class Comfort_A_SecurityInformationReport(object):      #  For future developmen
         self.state = alarm_state[self.SS]
         #self.battery = None
         self.acfail = (int(data[6:8],16) >> 0) & 1   #XX = AC Fail, bit 0. 0=AC OK, 1=AC Fail
+        if self.acfail == 1: 
+            ACFail = True
+        elif self.acfail == 0: 
+            ACFail = False
         if self.type == "LowBattery" and self.BB <= 1: self.battery = low_battery[1]
-        elif self.type == "LowBattery" and self.BB in low_battery:self.battery = low_battery[(self.BB - 32)]
+        #elif self.type == "LowBattery" and self.BB - 31 in low_battery:self.battery = low_battery[(self.BB - 31)]
+        elif self.type == "LowBattery" and 0 <= (self.BB - 31) < len(low_battery):self.battery = low_battery[self.BB - 31]
         else:self.battery = "Unknown"
 
 class ComfortARSystemAlarmReport(object):
     def __init__(self, data={}):
         global ZONEMAPFILE
         global input_properties
+        global ACFail
 
         self.alarm = int(data[2:4],16)
         self.triggered = True   #for comfort alarm state Alert, Trouble, Alarm
@@ -890,7 +908,9 @@ class ComfortARSystemAlarmReport(object):
         if ZONEMAPFILE:
             if self.alarm == 1: self.message = str(input_properties[str(self.parameter)]['Name'])+" Trouble Restore"
             elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
-            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+            elif self.alarm == 3: 
+                self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+                ACFail = False
             elif self.alarm == 4: self.message = "Phone Trouble"+" Restore"
             elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)+" Restore"
             elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
@@ -900,7 +920,9 @@ class ComfortARSystemAlarmReport(object):
         else:
             if self.alarm == 1: self.message = "Zone "+str(self.parameter)+" Trouble"+" Restore"
             elif self.alarm == 2: self.message = "Low Battery - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
-            elif self.alarm == 3: self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+            elif self.alarm == 3: 
+                self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])+" Restore"
+                ACFail = False
             elif self.alarm == 4: self.message = "Phone Trouble"+" Restore"
             elif self.alarm == 10: self.message = "Tamper "+str(self.parameter)+" Restore"
             elif self.alarm == 14: self.message = "Siren Tamper"+" Restore"
@@ -974,6 +996,7 @@ class Comfort_D_SystemVoltageReport(object):
         global ChargerVoltageList
         global BatterySlaveIDs
         global ChargerSlaveIDs
+        global ACFail
 
         if len(data) < 6:
             return
@@ -982,10 +1005,20 @@ class Comfort_D_SystemVoltageReport(object):
 
         for x in range(6, len(data), 2):
             value = int(data[x:x+2],16)
+
+            if query_type == 2 and value > 10:      # Set to a value larger than 0V to indicate AC Ok.
+                ACFail = False
+
             #voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Old Formula used for Batteries.
-            #voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for Chargers.
+            #voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC Supply voltage.
             if query_type == 1:
-                voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Old Formula used for Batteries.
+                #voltage = str(format(round(((value/255)*15.522),2), ".2f")) if value < 255 else '-1'  # Formula used for Batteries.
+                if ACFail == False:
+                    voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 - 0.75),2), ".2f")) if value < 255 else '-1'  # - testing.
+                else:
+                    voltage =  str(format(round(((value/255)*(3.3/2.7)*12.7 + 0.35),2), ".2f")) if value < 255 else '-1'  # - testing.
+
+                #voltage = str(format(round(((value/255)*15.5),2), ".2f")) if value < 255 else '-1'  # Formula used for Batteries.
                 if id == 0:
                     device_properties[BatteryVoltageNameList[(x-6)/2]] = voltage
                     BatteryVoltageList[(x-6)/2] = voltage
@@ -996,7 +1029,8 @@ class Comfort_D_SystemVoltageReport(object):
                 else:
                     return
             elif query_type == 2:
-                voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for Chargers.
+                #voltage = str(format(round(((value/255)*(3.3/2.71)*15),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC Supply voltage.
+                voltage =  str(format(round(((value/255)*(3.3/2.7)*14.9),2), ".2f")) if value < 255 else '-1'  # New Formula used for DC Supply voltage - testing.
                 if id == 0:
                     device_properties[ChargerVoltageNameList[(x-6)/2]] = voltage
                     ChargerVoltageList[(x-6)/2] = voltage
@@ -1038,13 +1072,13 @@ class Comfort_D_SystemVoltageReport(object):
         for voltage in voltages:
             if float(voltage) == -1:
                 index.append(0)
-            elif float(voltage) > 18:           # Critical Overcharge
+            elif float(voltage) > 18:           # Critical High Voltage
                 index.append(2)
-            elif float(voltage) > 17:           # Overcharge
+            elif float(voltage) > 17:           # High Voltage
                 index.append(1)
-            elif float(voltage) <= 7:           # Critical Low Charge or No Charge
+            elif float(voltage) <= 7:           # Critical Low or No Voltage output
                 index.append(2)
-            elif float(voltage) < 12:           # Low Charge
+            elif float(voltage) < 12:           # Low Voltage
                 index.append(1)
             else:
                 index.append(0)
@@ -1272,13 +1306,13 @@ class Comfort2(mqtt.Client):
                 #logger.info("ID: %s", ID)
                 if msgstr_cleaned == '0':
                     Command = "\x03D?0000\r"
-                    self.comfortsock.sendall(Command.encode()) # Battery Status Update
+                    self.comfortsock.sendall(Command.encode()) # Battery and DC Supply Status Update
                 else:
                     Command = "\x03D?" + ID + "01\r"
                     self.comfortsock.sendall(Command.encode()) # Battery Status Update
                     time.sleep(0.1)
                     Command = "\x03D?" + ID + "02\r"
-                    self.comfortsock.sendall(Command.encode()) # Charger Status Update
+                    self.comfortsock.sendall(Command.encode()) # DC Supply Status Update
                     time.sleep(0.1)
                 SAVEDTIME = datetime.now()
             else:
@@ -1420,8 +1454,54 @@ class Comfort2(mqtt.Client):
         if self.entryexitdelay >= 0:
             threading.Timer(1, self.entryexit_timer).start()
 
-    def readlines(self, recv_buffer=BUFFER_SIZE, delim='\r'):       # Correct string values terminate with 0x0d (CR)
+    def _send_keepalive_and_check(self, max_attempts=3, delay_between_attempts=2):
+        """
+        Send a keepalive (cc00) command and verify the socket is still alive.
+        Retry up to max_attempts times before declaring the socket dead.
+        """
+        #logger.debug("Starting keepalive health check (%d attempts allowed)", max_attempts)
 
+        for attempt in range(1, max_attempts + 1):
+            try:
+                #logger.debug("Keepalive attempt %d of %d", attempt, max_attempts)
+            
+                # Send keepalive command
+                self.SendCommand("cc00")
+                time.sleep(0.1)
+
+                # Temporarily shorten socket timeout to detect quick failure
+                original_timeout = self.comfortsock.gettimeout()
+                self.comfortsock.settimeout(5)
+
+                probe = self.comfortsock.recv(1)
+
+                if probe:
+                    #logger.info("Keepalive probe succeeded on attempt %d.", attempt)
+                    # Restore original timeout and exit successfully
+                    self.comfortsock.settimeout(original_timeout)
+                    return
+                else:
+                    logger.warning("Keepalive probe empty on attempt %d.", attempt)
+
+            except (socket.timeout, socket.error) as e:
+                #logger.warning("Keepalive probe failed on attempt %d: %s", attempt, e)
+                dummy_var = 1   # Not used, just to avoid unused variable error.
+
+            finally:
+                # Restore original timeout after each attempt
+                self.comfortsock.settimeout(original_timeout)
+
+            # If not last attempt, wait a little before retrying
+            if attempt < max_attempts:
+                #logger.debug("Waiting %d seconds before next keepalive attempt.", delay_between_attempts)
+                time.sleep(delay_between_attempts)
+
+        # If we reach here, all attempts failed
+        #logger.error("All %d keepalive attempts failed. Marking socket as dead.", max_attempts)
+        raise socket.error(f"Socket unresponsive after {max_attempts} keepalive attempts.")
+
+    def readlines(self, recv_buffer=BUFFER_SIZE, delim='\r'):
+        """Reads lines from the Comfort socket, sending cc00 Comfort keepalive on timeout."""
         global FIRST_LOGIN
         global SAVEDTIME
         global device_properties
@@ -1433,37 +1513,71 @@ class Comfort2(mqtt.Client):
             try:
                 data = self.comfortsock.recv(recv_buffer).decode()
             except socket.timeout as e:
-                err = e.args[0]
-                if err == 'timed out':
-                    self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive
-                    SAVEDTIME = datetime.now()
-                    time.sleep(0.1)
-                    continue
-                else:
-                    logger.error ("readlines() error %s", e)
-            except socket.error as e:
-                logger.debug("Unknown Comfort connection error %s", e)
+                #logger.debug("Socket timeout - sending keepalive...")
+
+                try:
+                    # # Send keepalive
+                    # self.SendCommand("cc00")
+                    # time.sleep(0.1)
+
+                    # # Temporarily set short timeout to quickly detect dead socket
+                    # self.comfortsock.settimeout(5)
+                    # probe = self.comfortsock.recv(1)
+
+                    # if not probe:
+                    #     logger.error("Keepalive failed: empty response, socket dead.")
+                    #     raise socket.error("Dead socket (empty probe).")
+
+                    # # Restore normal timeout
+                    # self.comfortsock.settimeout(TIMEOUT.seconds)
+
+                    self._send_keepalive_and_check()    # Send keepalive and check socket status
+
+                except (socket.timeout, socket.error) as err:
+                    logger.error("Keepalive check failed: %s", err)
+                    COMFORTCONNECTED = False
+                    FIRST_LOGIN = True
+                    raise
+                continue
+
+            except (socket.error, ConnectionResetError, BrokenPipeError, TimeoutError) as e:
+                logger.error("Comfort connection error during recv: %s", e)
                 COMFORTCONNECTED = False
                 FIRST_LOGIN = True
                 raise
+
             else:
                 if len(data) == 0:
-                    logger.debug('Comfort initiated disconnect (LU00).')
-                    self.comfortsock.sendall("\x03LI\r".encode()) # Try and gracefully logout if possible.
-                    SAVEDTIME = datetime.now()
+                    logger.debug('Comfort initiated disconnect (empty recv).')
+                    self.SendCommand("LI")
                     FIRST_LOGIN = True
                     COMFORTCONNECTED = False
+
                     if BROKERCONNECTED:
                         self.publish(ALARMCONNECTEDTOPIC, "1" if COMFORTCONNECTED else "0", qos=2, retain=False)
                         device_properties['BridgeConnected'] = 1
                 else:
-                    # got a message, process it.
+                    # Received normal data
                     buffer += data
 
                     while buffer.find(delim) != -1:
-                        line, buffer = buffer.split('\r', 1)
+                        line, buffer = buffer.split(delim, 1)
                         yield line
         return
+
+
+    def SendCommand(self, command):
+        global SAVEDTIME
+
+        try:
+            self.comfortsock.sendall(("\x03"+command+"\r").encode())
+            #self.comfortsock.sendall((command).encode())
+            SAVEDTIME = datetime.now()
+            #logger.debug("Sending Command %s", command)    # Debug sent command to Comfort.
+        except:
+            logger.error("Error sending command")
+            self.comfortsock.close()
+            raise
 
     def login(self):
         global SAVEDTIME
@@ -1608,7 +1722,7 @@ class Comfort2(mqtt.Client):
 
         discoverytopic = DOMAIN + "/alarm/battery_status"
         MQTT_MSG=json.dumps({"BatteryStatus": str(device_properties['BatteryStatus']),
-                             "ChargerStatus": str(device_properties['ChargerStatus']),
+                             "DCSupplyStatus": str(device_properties['ChargerStatus']),
                              "BatteryMain": str(device_properties['BatteryVoltageMain']),
                              "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
                              "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
@@ -1617,14 +1731,14 @@ class Comfort2(mqtt.Client):
                              "BatterySlave5": str(device_properties['BatteryVoltageSlave5']),
                              "BatterySlave6": str(device_properties['BatteryVoltageSlave6']),
                              "BatterySlave7": str(device_properties['BatteryVoltageSlave7']),
-                             "ChargerMain": str(device_properties['ChargeVoltageMain']),
-                             "ChargerSlave1": str(device_properties['ChargeVoltageSlave1']),
-                             "ChargerSlave2": str(device_properties['ChargeVoltageSlave2']),
-                             "ChargerSlave3": str(device_properties['ChargeVoltageSlave3']),
-                             "ChargerSlave4": str(device_properties['ChargeVoltageSlave4']),
-                             "ChargerSlave5": str(device_properties['ChargeVoltageSlave5']),
-                             "ChargerSlave6": str(device_properties['ChargeVoltageSlave6']),
-                             "ChargerSlave7": str(device_properties['ChargeVoltageSlave7']),
+                             "DCSupplyMain": str(device_properties['ChargeVoltageMain']),
+                             "DCSupplySlave1": str(device_properties['ChargeVoltageSlave1']),
+                             "DCSupplySlave2": str(device_properties['ChargeVoltageSlave2']),
+                             "DCSupplySlave3": str(device_properties['ChargeVoltageSlave3']),
+                             "DCSupplySlave4": str(device_properties['ChargeVoltageSlave4']),
+                             "DCSupplySlave5": str(device_properties['ChargeVoltageSlave5']),
+                             "DCSupplySlave6": str(device_properties['ChargeVoltageSlave6']),
+                             "DCSupplySlave7": str(device_properties['ChargeVoltageSlave7']),
                              "InstalledSlaves": int(device_properties['sem_id'])
                             })
         self.publish(discoverytopic, MQTT_MSG,qos=2,retain=False)
@@ -1808,7 +1922,7 @@ class Comfort2(mqtt.Client):
         time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/battery_status/config"
-        MQTT_MSG=json.dumps({"name": "Battery Status",
+        MQTT_MSG=json.dumps({"name": "Battery/Charger Status",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability_topic": ALARMAVAILABLETOPIC,
@@ -1844,21 +1958,21 @@ class Comfort2(mqtt.Client):
             time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/charger_status/config"
-        MQTT_MSG=json.dumps({"name": "Charger Status",
+        MQTT_MSG=json.dumps({"name": "DC Supply Status",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
                              "state_topic": DOMAIN+"/alarm/battery_status",
-                             "value_template": "{{ value_json.ChargerStatus }}",
+                             "value_template": "{{ value_json.DCSupplyStatus }}",
                              "json_attributes_topic": DOMAIN+"/alarm/battery_status",
                              "json_attributes_template": '''
                                 {% set data = value_json %}
                                 {% set slaves = data['InstalledSlaves'] %}
                                 {% set ns = namespace(dict_items='') %}
                                 {% for key, value in data.items() %}
-                                    {% if 'ChargerMain' in key or ('ChargerSlave' in key and key[-1:] | int <= slaves) %}
+                                    {% if 'DCSupplyMain' in key or ('DCSupplySlave' in key and key[-1:] | int <= slaves) %}
                                         {% if ns.dict_items %}
                                             {% set ns.dict_items = ns.dict_items + ', "' ~ key ~ '":"' ~ value ~ '"' %}
                                         {% else %}
@@ -1878,6 +1992,7 @@ class Comfort2(mqtt.Client):
         if device_properties['CPUType'] != "N/A":
             self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
             time.sleep(0.1)
+            #logging.debug(MQTT_MSG)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_bypass_zones/config"
         MQTT_MSG=json.dumps({"name": "Bypassed Zones",
@@ -2073,7 +2188,7 @@ class Comfort2(mqtt.Client):
 
             discoverytopic = DOMAIN + "/alarm/battery_status"
             MQTT_MSG=json.dumps({"BatteryStatus": str(device_properties['BatteryStatus']),
-                             "ChargerStatus": str(device_properties['ChargerStatus']),
+                             "DCSupplyStatus": str(device_properties['ChargerStatus']),
                              "BatteryMain": str(device_properties['BatteryVoltageMain']),
                              "BatterySlave1": str(device_properties['BatteryVoltageSlave1']),
                              "BatterySlave2": str(device_properties['BatteryVoltageSlave2']),
@@ -2082,14 +2197,14 @@ class Comfort2(mqtt.Client):
                              "BatterySlave5": str(device_properties['BatteryVoltageSlave5']),
                              "BatterySlave6": str(device_properties['BatteryVoltageSlave6']),
                              "BatterySlave7": str(device_properties['BatteryVoltageSlave7']),
-                             "ChargerMain": str(device_properties['ChargeVoltageMain']),
-                             "ChargerSlave1": str(device_properties['ChargeVoltageSlave1']),
-                             "ChargerSlave2": str(device_properties['ChargeVoltageSlave2']),
-                             "ChargerSlave3": str(device_properties['ChargeVoltageSlave3']),
-                             "ChargerSlave4": str(device_properties['ChargeVoltageSlave4']),
-                             "ChargerSlave5": str(device_properties['ChargeVoltageSlave5']),
-                             "ChargerSlave6": str(device_properties['ChargeVoltageSlave6']),
-                             "ChargerSlave7": str(device_properties['ChargeVoltageSlave7']),
+                             "DCSupplyMain": str(device_properties['ChargeVoltageMain']),
+                             "DCSupplySlave1": str(device_properties['ChargeVoltageSlave1']),
+                             "DCSupplySlave2": str(device_properties['ChargeVoltageSlave2']),
+                             "DCSupplySlave3": str(device_properties['ChargeVoltageSlave3']),
+                             "DCSupplySlave4": str(device_properties['ChargeVoltageSlave4']),
+                             "DCSupplySlave5": str(device_properties['ChargeVoltageSlave5']),
+                             "DCSupplySlave6": str(device_properties['ChargeVoltageSlave6']),
+                             "DCSupplySlave7": str(device_properties['ChargeVoltageSlave7']),
                              "InstalledSlaves": int(device_properties['sem_id'])
                             })
             infot = self.publish(discoverytopic, MQTT_MSG,qos=2,retain=False)
@@ -2451,12 +2566,20 @@ class Comfort2(mqtt.Client):
 
         try:
             while RUN:
+                self.comfortsock = None     # Added 29/4/2025
                 try:
                     self.comfortsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.comfortsock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                    self.comfortsock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 10)   # Start keepalive after 10s of inactivity
+                    self.comfortsock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 5)   # Interval between keepalive probes
+                    self.comfortsock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)     # Number of failed probes before disconnect
+
                     logger.info('Connecting to Comfort (%s) on port %s', self.comfort_ip, str(self.comfort_port) )
                     self.comfortsock.connect((self.comfort_ip, self.comfort_port))
                     self.comfortsock.settimeout(TIMEOUT.seconds)
                     self.login()
+
+                    SAVEDTIME = datetime.now()      # Added 29/4/2025
 
                     for line in self.readlines():
 
@@ -2670,7 +2793,7 @@ class Comfort2(mqtt.Client):
                                                 
                                 device_properties['CPUType'] = str(uMsg.cputype)
                                 if str(uMsg.cputype) != "N/A":
-                                    logging.debug("%s Mainboard CPU detected, Battery Monitoring Enabled.", str(device_properties['CPUType']))
+                                    logging.debug("%s Mainboard CPU detected. Battery Monitoring Enabled.", str(device_properties['CPUType']))
                                 else:   # Clear out battery voltages
                                     device_properties['BatteryVoltageMain'] = "-1"
                                     device_properties['BatteryVoltageSlave1'] = "-1"
@@ -2703,7 +2826,7 @@ class Comfort2(mqtt.Client):
                                 logging.debug("Hardware Model %s", str(device_properties['ComfortHardwareModel']))
                                 self.UpdateDeviceInfo(True)     # Update Device properties. Issue with no CCLX file and ComfortFileSyste, = Null.
 
-                            elif line[1:3] == "D?":       # Get Battery/Charge Voltage. ARM/Toshiba + CM-9001 Only.
+                            elif line[1:3] == "D?":       # Get Battery/Charge or DC Supply voltage. ARM/Toshiba + CM-9001 Only.
 
                                 # Determine Battery/Charge Voltage and Device ID. Save Values in Comfort_D_SystemVoltageReport
                                 DLMsg = Comfort_D_SystemVoltageReport(line[1:])     # Return value not used currently.
@@ -2726,7 +2849,7 @@ class Comfort2(mqtt.Client):
                                 ALARMSTATE = aMsg.SS         # Save Numerical state.
                                 self.publish(ALARMSTATUSTOPIC, aMsg.state, qos=2, retain=True)          
                                 if aMsg.type == 'LowBattery':
-                                    logging.warning("Low Battery %s", aMsg.battery)
+                                    logging.warning("Low Battery - %s", aMsg.battery)
                                 elif aMsg.type == 'PowerFail':
                                     logging.warning("AC Fail")      # Comfort doesn't yet report which unit fails.
                                 elif aMsg.type == 'Disarm':
@@ -2753,20 +2876,11 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "AM":    # AM/AR for Non-Detector alarms
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
-                                if amMsg.parameter <= int(COMFORT_INPUTS):
-                                    self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
-                                    #if amMsg.alarm == 0:
-                                    logging.warning(str(amMsg.message))
-                                    #elif amMsg.alarm == 1:
-                                    #    logging.warning("Zone Trouble Zone %s", str(amMsg.parameter))
-                                    #elif amMsg.alarm == 2:
-                                    #    logging.warning("Low Battery id %s", str(amMsg.parameter))
-                                    #elif amMsg.alarm == 3:
-                                    #    logging.warning("Power Fail %s", str(amMsg.parameter))
-                                    #elif amMsg.alarm == 10:
-                                    #    logging.warning("Tamper %s", str(amMsg.parameter))
-                                    if amMsg.triggered:
-                                        self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
+                                logging.warning(amMsg.message)
+                                #if amMsg.parameter <= int(COMFORT_INPUTS):
+                                self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
+                                if amMsg.triggered:
+                                    self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
 
                             #elif line[1:3] == "AL":     # Under development (Alarm Type Report)
                             #    alMsg = ComfortALSystemAlarmReport(line[1:])
@@ -2791,6 +2905,7 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "AR":
                                 arMsg = ComfortARSystemAlarmReport(line[1:])
                                 self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=2,retain=True)
+                                #logging.info(arMsg.message)        # Removed logging for AR as it duplicates messages.
 
                             elif line[1:3] == "EX":
                                 exMsg = ComfortEXEntryExitDelayStarted(line[1:])
@@ -3009,18 +3124,30 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "RS":
                                 #on rare occassions comfort ucm might get reset (RS11), our session is no longer valid, need to relogin
                                 logger.warning('Reset detected')
+                                FIRST_LOGIN = True  # Added 29/4/2025. Enable full refresh after reset.
                                 self.login()
                             else:
-                                if datetime.now() > (SAVEDTIME + TIMEOUT):  # If no command sent in 2 minutes then send keepalive.
+                                if datetime.now() > (SAVEDTIME + TIMEOUT):  # If no command sent in 30 seconds then send keepalive.
                                     self.comfortsock.sendall("\x03cc00\r".encode()) #echo command for keepalive. cc00
                                     SAVEDTIME = datetime.now()
                                     time.sleep(0.1)
                         else:
                             logger.warning("Invalid response received (%s)", line.encode())
 
-                except socket.error as v:
+                #except socket.error as v:
+                except (socket.error, ConnectionResetError, BrokenPipeError, TimeoutError) as v:
                     logger.error('Comfort Socket Error %s', str(v))
-                    COMFORTCONNECTED = False
+                finally:        # Added 29/4/2025
+                    if self.comfortsock:
+                        try:
+                            self.comfortsock.close()
+                        except Exception:
+                            pass
+                        self.comfortsock = None
+
+
+                COMFORTCONNECTED = False
+                FIRST_LOGIN = True  # Added 29/4/2025
                 logger.error('Lost connection to Comfort, reconnecting...')
                 if BROKERCONNECTED == True:      # MQTT Connected ??
                     self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
@@ -3034,7 +3161,10 @@ class Comfort2(mqtt.Client):
             self.exit_gracefully(1,1)
             if self.connected == True:
                 device_properties['BridgeConnected'] = 0
-                self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
+                try:
+                    self.comfortsock.sendall("\x03LI\r".encode()) #Logout command.
+                except:
+                    pass
             RUN = False
             self.loop_stop
         finally:
