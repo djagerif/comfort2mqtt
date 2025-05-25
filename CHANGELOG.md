@@ -1,7 +1,4 @@
-## [1.5.0] - Busy...
-
-Look at long filenames again.
-
+## [1.5.0] - 2025-05-25
 
 ### Added
  - Update DOCS.md to add explanation of Alarm Control Panel UI configuration options.
@@ -15,7 +12,7 @@ Look at long filenames again.
 - Minor syntax changes.
 - Reworked TCP and Application Keepalives. Now correctly indicates LAN status.
 
-*Note: Possible breaking change for CM-9001 ARM based boards only !!
+*Note: Possible breaking change for CM-9001 ARM based boards only.
 - Update `Battery Status` UI definition to `Battery/Charger Status`.
 - Update `Charger Status` UI definition to `DC Supply Status`.
 *Go to Settings -> Devices and services. Select MQTT and click on 'Devices. Click on `Comfort II ULTRA` and under `Device Info` select the three dots (...) which give the option to Download Diagnostics or Delete. Click on Delete. Now go back and restart the Addon from the Settings/Addon screen menu.
