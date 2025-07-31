@@ -1,3 +1,14 @@
+## [1.5.1]
+
+### Added
+ 
+### Changed
+- Update DOCS.md and changed MQTT `unique-id` to `object-id`
+
+### Fixed
+ 
+
+
 ## [1.5.0] - 2025-05-25
 
 ### Added
