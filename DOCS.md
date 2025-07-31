@@ -134,6 +134,7 @@ Sample object configurations are shown below.
 mqtt: 
   alarm_control_panel:
     - name: Comfort Alarm
+      unique_id: "comfort2_alarm_a46ee0"
       object_id: "comfort2_alarm_a46ee0"        # E.G. Use last six digits of UCM/Eth03 MAC address to make it unique
       code_arm_required: false
       qos: 2
@@ -154,6 +155,7 @@ mqtt:
       
   sensor:
     - name: Alarm Mode
+      unique_id: "comfort2_alarm_mode"
       object_id: "comfort2_alarm_mode"
       availability_topic: "comfort2mqtt/alarm/online"
       state_topic: "comfort2mqtt/alarm"
@@ -161,6 +163,7 @@ mqtt:
       payload_not_available: "0"
 
     - name: Alarm Message
+      unique_id: "comfort2_alarm_message"
       object_id: "comfort2_alarm_message"
       state_topic: "comfort2mqtt/alarm/message"
       availability_topic: "comfort2mqtt/alarm/online"
@@ -168,6 +171,7 @@ mqtt:
       payload_not_available: "0"
 
     - name: Main Bedroom Temperature
+      unique_id: "comfort2_counter244"
       object_id: "comfort2_counter244"
       state_topic: "comfort2mqtt/counter244"
       availability_topic: "comfort2mqtt/alarm/online"
@@ -182,6 +186,7 @@ mqtt:
 
   binary_sensor: 
     - name: Study PIR
+      unique_id: "comfort2_input35"
       object_id: "comfort2_input35"
       state_topic: "comfort2mqtt/input35"
       availability_topic: "comfort2mqtt/alarm/online"
@@ -196,6 +201,7 @@ mqtt:
 
   light:
     - name: Kitchen Light
+      unique_id: "comfort2_counter117"
       object_id: "comfort2_counter117"
       state_topic: "comfort2mqtt/counter117"
       state_value_template: '{{ value_json.State }}'
@@ -215,6 +221,7 @@ mqtt:
       on_command_type: "brightness"
 
     - name: Study Light
+      unique_id: "comfort2_counter201"
       object_id: "comfort2_counter201"
       state_topic: "comfort2mqtt/counter201"
       state_value_template: '{{ value_json.Value }}'
