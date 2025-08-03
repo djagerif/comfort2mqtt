@@ -3,7 +3,7 @@
 ### Added
  
 ### Changed
-- Update DOCS.md and added MQTT entity `object-id` to easier identify Comfort object used.
+- Updated DOCS.md and added the MQTT entity `object-id` to help identify the Comfort object used.
 
 ### Fixed
  
