@@ -505,7 +505,7 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 * [UCM/Eth01] - Obsolete/Untested
 
-* [UCM/Eth02] - Obsolete/Untested
+* [UCM/Eth02] - Obsolete. Does not work with Comfort to MQTT Addon.
 
 * [UCM/Wifi01] - Not Recommended (WiFi) - Firmware 7.176 or later.
 
