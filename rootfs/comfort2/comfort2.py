@@ -1459,6 +1459,8 @@ class Comfort2(mqtt.Client):
         Send a keepalive (cc00) command and verify the socket is still alive.
         Retry up to max_attempts times before declaring the socket dead.
         """
+        global TIMEOUT
+
         #logger.debug("Starting keepalive health check (%d attempts allowed)", max_attempts)
 
         for attempt in range(1, max_attempts + 1):
@@ -1489,7 +1491,8 @@ class Comfort2(mqtt.Client):
 
             finally:
                 # Restore original timeout after each attempt
-                self.comfortsock.settimeout(original_timeout)
+                #self.comfortsock.settimeout(original_timeout)
+                self.comfortsock.settimeout(TIMEOUT.seconds) # Update if gettimeout() fails.
 
             # If not last attempt, wait a little before retrying
             if attempt < max_attempts:
