@@ -6,7 +6,7 @@
 - Update DOCS.md and add MQTT entity `object-id` to simplify Comfort object identification.
 
 ### Fixed
- 
+- Keepalive timeout setting not set under error condition. 
 
 
 ## [1.5.0] - 2025-05-25
