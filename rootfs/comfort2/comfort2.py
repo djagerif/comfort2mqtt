@@ -3140,7 +3140,7 @@ class Comfort2(mqtt.Client):
 
                 #except socket.error as v:
                 except (socket.error, ConnectionResetError, BrokenPipeError, TimeoutError) as v:
-                    logger.error("Comfort Socket Error '%s'", str(v))
+                    logger.debug("Comfort Socket Error '%s'", str(v))
                 finally:        # Added 29/4/2025
                     if self.comfortsock:
                         try:
