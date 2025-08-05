@@ -1538,14 +1538,14 @@ class Comfort2(mqtt.Client):
                     self._send_keepalive_and_check()    # Send keepalive and check socket status
 
                 except (socket.timeout, socket.error) as err:
-                    logger.debug("Keepalive check failed: %s", err)
+                    logger.debug("Keepalive check failed: '%s'", err)
                     COMFORTCONNECTED = False
                     FIRST_LOGIN = True
                     raise
                 continue
 
             except (socket.error, ConnectionResetError, BrokenPipeError, TimeoutError) as e:
-                logger.debug("Comfort connection error during recv: %s", e)
+                logger.debug("Comfort connection error during recv: '%s'", e)
                 COMFORTCONNECTED = False
                 FIRST_LOGIN = True
                 raise
