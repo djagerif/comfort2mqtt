@@ -37,7 +37,7 @@ comfort2mqtt/alarm/refresh - Trigger a refresh of all objects. Used when a refre
 comfort2mqtt/alarm/connected - Status of LAN Connection to Comfort. '1' when connected and logged in.
 comfort2mqtt/alarm/doorbell - '0' for off/answered or '1' for on
 comfort2mqtt/alarm/mode - Integer values for current Alarm Mode. 0 - 4 (Off, Away, Night, Day, Vacation), See Comfort M? or MD documentation.
- comfort2mqtt/alarm/battery_status - ARM based systems support battery and dv 12v output sensors.
+comfort2mqtt/alarm/battery_status - ARM based systems support battery and dv 12v output sensors.
 
 comfort2mqtt/input<1 to 96> (Zone Input) have the following JSON attributes EG.
 {
