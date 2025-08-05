@@ -194,6 +194,7 @@ mqtt:
 
     - name: Sample Timer
       unique_id: "comfort2_timer63"
+      object_id: "comfort2_timer63"
       state_topic: "comfort2mqtt/timer63"
       availability_topic: "comfort2mqtt/alarm/online"
       value_template: "{{ value_json.Value | int(0) }}"
