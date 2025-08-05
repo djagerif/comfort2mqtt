@@ -1578,7 +1578,7 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             #logger.debug("Sending Command %s", command)    # Debug sent command to Comfort.
         except:
-            logger.error("Error sending command")
+            logger.error("Error sending command %s, closing socket.", command)
             self.comfortsock.close()
             raise
 
