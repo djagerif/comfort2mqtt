@@ -1493,7 +1493,7 @@ class Comfort2(mqtt.Client):
                 # Restore original timeout after each attempt
                 #self.comfortsock.settimeout(original_timeout)
                 self.comfortsock.settimeout(TIMEOUT.seconds) # Update if gettimeout() fails.
-                logger.debug("We are in the 'finally' section on line #1496")
+                #logger.debug("We are in the 'finally' section on line #1496")
 
             # If not last attempt, wait a little before retrying
             if attempt < max_attempts:
