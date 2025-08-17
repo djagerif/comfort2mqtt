@@ -527,7 +527,7 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 * [UCM/Eth01] - Obsolete/Untested
 
-* [UCM/Eth02] - Obsolete. Not recommended as Eth03 is the replacement of the Eth02 module.
+* [UCM/Eth02] - Obsolete/Not recommended. Not all functions work with this module.
 
 * [UCM/Wifi01] - Not Recommended (WiFi) - Firmware 7.176 or later.
 

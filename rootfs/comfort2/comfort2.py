@@ -1605,7 +1605,6 @@ class Comfort2(mqtt.Client):
                         yield line
         return
 
-
     def SendCommand(self, command):
         global SAVEDTIME
 
@@ -2571,6 +2570,40 @@ class Comfort2(mqtt.Client):
         #logging.debug("Sanitized Filename: %s", sanitized_filename)
         return sanitized_filename
 
+    def validate_hex_in_list(self, value, allow_spec):
+        """
+        value      : hex string (2 characters, e.g. '1F')
+        allow_spec : either a list of integers OR a string like '0,49-51,255'
+        returns    : True if value (as decimal) is in allowed list, else False
+        """
+
+        # If allow_spec is a string like "0,49-51,255", parse and expand it
+        if isinstance(allow_spec, str):
+            allowed = []
+            for part in allow_spec.split(","):
+                part = part.strip()
+                if "-" in part:
+                    try:
+                        start, end = map(int, part.split("-"))
+                        allowed.extend(range(start, end + 1))
+                    except ValueError:
+                        pass  # ignore malformed ranges
+                else:
+                    try:
+                        allowed.append(int(part))
+                    except ValueError:
+                        pass  # ignore invalid numbers
+        else:
+            # Already a list of integers
+            allowed = list(allow_spec)
+
+        try:
+            dec_value = int(value, 16)
+        except ValueError:
+            return False  # invalid hex string
+
+        return dec_value in allowed
+
     def run(self):
 
         global FIRST_LOGIN         # Used to track if Addon started up or not.
@@ -2997,20 +3030,23 @@ class Comfort2(mqtt.Client):
                                     self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
 
                             elif line[1:3] == "RP":
-                                if line[3:5] == "01":
+                                result = self.validate_hex_in_list(line[3:5], "0,1,255")
+                                if result and line[3:5] == "01":
                                     self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=2,retain=True)
-                                elif line[3:5] == "00":
+                                elif result and line[3:5] == "00":
                                     self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)   # Stopped Ringing
-                                elif line[3:5] == "FF":
+                                elif result and line[3:5] == "FF":
                                     self.publish(ALARMMESSAGETOPIC, "Phone Answer",qos=2,retain=True)
 
                             elif line[1:3] == "DB":
-                                if line[3:5] == "FF":
+                                result = self.validate_hex_in_list(line[3:5], "49-51,255")
+                                if result and line[3:5] == "FF":
                                     self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)
                                     self.publish(ALARMDOORBELLTOPIC, 0,qos=2,retain=True)
-                                else:
+                                elif result:
                                     self.publish(ALARMDOORBELLTOPIC, 1, qos=2,retain=True)
-                                    self.publish(ALARMMESSAGETOPIC, "Door Bell",qos=2,retain=True)
+                                    message_topic = "Doorbell "+str(int(line[3:5], 16) - 48)
+                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=2, retain=True)
 
                             elif line[1:3] == "OP" and CacheState:
                                 ipMsg = ComfortOPOutputActivationReport(line[1:])
