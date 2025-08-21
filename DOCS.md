@@ -85,14 +85,6 @@ comfort2mqtt/sensor<0 to 31> have the following JSON attributes EG.
   "Value": 0
 }
 
-comfort2mqtt/timer<1 to 64> have the following JSON attributes EG.
-{
-  "Time": "2024-06-12T15:12:49",
-  "Name": "Timer01",
-  "Value": 0,
-  "State": 0
-}
-
 comfort2mqtt/counter<0 to 254> have the following JSON attributes EG.
 {
   "Time": "2024-06-12T15:12:49",
@@ -189,20 +181,6 @@ mqtt:
       device_class: temperature
       state_class: measurement
       unit_of_measurement: °C
-      payload_available: "1"
-      payload_not_available: "0"
-
-    - name: Sample Timer
-      unique_id: "comfort2_timer63"
-      object_id: "comfort2_timer63"
-      state_topic: "comfort2mqtt/timer63"
-      availability_topic: "comfort2mqtt/alarm/online"
-      value_template: "{{ value_json.Value | int(0) }}"
-      json_attributes_template: "{{ value_json | tojson }}"
-      json_attributes_topic: "comfort2mqtt/timer63"
-      device_class: duration
-      state_class: measurement
-      unit_of_measurement: "s"
       payload_available: "1"
       payload_not_available: "0"
 
