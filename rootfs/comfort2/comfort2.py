@@ -2799,7 +2799,7 @@ class Comfort2(mqtt.Client):
                                                     })
                                 self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
 
-                            elif line[1:3] == "TR":
+                            elif line[1:3] == "TR":     # Timer Reports 'TR' is not fully supported as Comfort stops the reports after a while.
                                 ipMsgTR = ComfortTRReport(line[1:])
                                 _time = datetime.now().replace(microsecond=0).isoformat()
                                 _name = timer_properties[str(ipMsgTR.timer)] if TIMERMAPFILE else "timer" + str(ipMsgTR.timer)
@@ -2808,8 +2808,8 @@ class Comfort2(mqtt.Client):
                                                      "Value": ipMsgTR.value,
                                                      "State": ipMsgTR.state
                                                     })
-                                self.publish(COMFORTTIMERSTOPIC % ipMsgTR.timer, MQTT_MSG,qos=2,retain=False)
-                                time.sleep(0.01)
+                               # self.publish(COMFORTTIMERSTOPIC % ipMsgTR.timer, MQTT_MSG,qos=2,retain=False)
+                               # time.sleep(0.01)
                                 
                             elif line[1:3] == "Z?":                             # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])

@@ -1,7 +1,6 @@
 ## [1.5.1]
 
 ### Added
-- Timer Reports (1 - 64) - Beta
  
 ### Changed
 - Update DOCS.md and add MQTT entity `object-id` to simplify Comfort object identification.
