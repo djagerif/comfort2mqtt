@@ -37,7 +37,7 @@ comfort2mqtt/alarm/refresh - Trigger a refresh of all objects. Used when a refre
 comfort2mqtt/alarm/connected - Status of LAN Connection to Comfort. '1' when connected and logged in.
 comfort2mqtt/alarm/doorbell - '0' for off/answered or '1' for on
 comfort2mqtt/alarm/mode - Integer values for current Alarm Mode. 0 - 4 (Off, Away, Night, Day, Vacation), See Comfort M? or MD documentation.
- comfort2mqtt/alarm/battery_status - ARM based systems support battery and dv 12v output sensors.
+comfort2mqtt/alarm/battery_status - ARM based systems support battery and dv 12v output sensors.
 
 comfort2mqtt/input<1 to 96> (Zone Input) have the following JSON attributes EG.
 {
@@ -134,7 +134,8 @@ Sample object configurations are shown below.
 mqtt: 
   alarm_control_panel:
     - name: Comfort Alarm
-      unique_id: "comfort2_alarm_a46ee0"        # E.G. Use last six digits of UCM/Eth03 MAC address to make it unique
+      unique_id: "comfort2_alarm_a46ee0"
+      object_id: "comfort2_alarm_a46ee0"        # E.G. Use last six digits of UCM/Eth03 MAC address to make it unique
       code_arm_required: false
       qos: 2
       supported_features:
@@ -155,6 +156,7 @@ mqtt:
   sensor:
     - name: Alarm Mode
       unique_id: "comfort2_alarm_mode"
+      object_id: "comfort2_alarm_mode"
       availability_topic: "comfort2mqtt/alarm/online"
       state_topic: "comfort2mqtt/alarm"
       payload_available: "1"
@@ -162,6 +164,7 @@ mqtt:
 
     - name: Alarm Message
       unique_id: "comfort2_alarm_message"
+      object_id: "comfort2_alarm_message"
       state_topic: "comfort2mqtt/alarm/message"
       availability_topic: "comfort2mqtt/alarm/online"
       payload_available: "1"
@@ -169,6 +172,7 @@ mqtt:
 
     - name: Main Bedroom Temperature
       unique_id: "comfort2_counter244"
+      object_id: "comfort2_counter244"
       state_topic: "comfort2mqtt/counter244"
       availability_topic: "comfort2mqtt/alarm/online"
       value_template: "{{ value_json.Value }}"
@@ -183,6 +187,7 @@ mqtt:
   binary_sensor: 
     - name: Study PIR
       unique_id: "comfort2_input35"
+      object_id: "comfort2_input35"
       state_topic: "comfort2mqtt/input35"
       availability_topic: "comfort2mqtt/alarm/online"
       value_template: '{{ value_json.State }}'
@@ -197,6 +202,7 @@ mqtt:
   light:
     - name: Kitchen Light
       unique_id: "comfort2_counter117"
+      object_id: "comfort2_counter117"
       state_topic: "comfort2mqtt/counter117"
       state_value_template: '{{ value_json.State }}'
       command_topic: "comfort2mqtt/counter117/set"
@@ -216,6 +222,7 @@ mqtt:
 
     - name: Study Light
       unique_id: "comfort2_counter201"
+      object_id: "comfort2_counter201"
       state_topic: "comfort2mqtt/counter201"
       state_value_template: '{{ value_json.Value }}'
       command_topic: "comfort2mqtt/counter201/set"
@@ -498,7 +505,7 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 * [UCM/Eth01] - Obsolete/Untested
 
-* [UCM/Eth02] - Obsolete/Untested
+* [UCM/Eth02] - Obsolete/Not recommended. Not all functions work with this module.
 
 * [UCM/Wifi01] - Not Recommended (WiFi) - Firmware 7.176 or later.
 

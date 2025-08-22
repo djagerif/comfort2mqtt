@@ -1,3 +1,17 @@
+## [1.5.1]
+
+### Added
+ 
+### Changed
+- Update DOCS.md and add MQTT entity `object-id` to simplify Comfort object identification.
+- Reclasify some ERROR messages to DEBUG status.
+- Update RP and DB command responses and checks. DB now reports which Doorbell was pressed.
+- Changed 'Door Bell' to 'Doorbell'.
+
+### Fixed
+- Keepalive timeout setting not set under certain error conditions.
+
+
 ## [1.5.0] - 2025-05-25
 
 ### Added

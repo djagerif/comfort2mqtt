@@ -87,6 +87,7 @@ SENSORMAPFILE = False
 FLAGMAPFILE = False
 DEVICEMAPFILE = False
 USERMAPFILE = False
+TIMERMAPFILE = False
 device_properties = {}
 file_exists  = False
 ACFail = False              # Indicates ACFail status.
@@ -413,6 +414,7 @@ COMFORT_TIME=str(option.comfort_time)
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs) if validate_port(option.alarm_rio_inputs,0,120) else 0
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs) if validate_port(option.alarm_rio_outputs,0,120) else 0
 COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update) if int(option.comfort_battery_update) in [0,1]+list(range(33,40)) else 1
+COMFORT_TIMERS = 64                                     # Default number of timers supported by Comfort II. Max 64.
 
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 if COMFORT_INPUTS < 8:
@@ -464,6 +466,8 @@ ALARMSENSORCOMMANDTOPIC = DOMAIN+"/sensor%d/set"        #sensor0,sensor1,...sens
 ALARMNUMBEROFCOUNTERS = 255                             # Hardcoded to 255
 ALARMCOUNTERINPUTRANGE = DOMAIN+"/counter%d"            # each counter represents a value EG. light level
 ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set"      # set the counter to a value for between 0 (off) to 255 (full on) or any signed 16-bit value.
+
+COMFORTTIMERSTOPIC = DOMAIN+"/timer%d"                  #timer1,timer2,...sensor64
 
 logger.info('Completed importing addon configuration options')
 
@@ -550,6 +554,38 @@ class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (coun
         # Convert back to hex string, remove the leading '0x' and return 16-bit number.
         return hex(swapped_value)
 
+class ComfortTRReport(object):
+    def __init__(self, datastr="", timer=1, value=0, state=0):
+        if datastr:
+            self.timer = int(datastr[2:4], 16)    #Integer value 3
+            self.value = self.ComfortSigned16(int("%s%s" % (datastr[6:8], datastr[4:6]),16))            # Use new 16-bit format
+            self.state = 1 if (int(self.value) > 0) else 0                          
+        else:
+            self.timer = timer
+            self.value = value
+            self.state = state
+
+    def ComfortSigned16(self,value):                                            # Returns signed 16-bit value where required.
+        return -(value & 0x8000) | (value & 0x7fff)
+    
+    ### Byte-Swap code below ###
+    def HexToSigned16Decimal(self,value):                                       # Returns Signed Decimal value from HEX string EG. FFFF = -1
+        return -(int(value,16) & 0x8000) | (int(value,16) & 0x7fff)
+
+    def byte_swap_16_bit(self, hex_string):
+        # Ensure the string is prefixed with '0x' for hex conversion            # Trying to cleanup strings.
+        if not hex_string.startswith('0x'):
+            hex_string = '0x' + hex_string
+    
+        # Convert hex string to integer
+        value = int(hex_string, 16)
+    
+        # Perform byte swapping
+        swapped_value = ((value << 8) & 0xFF00) | ((value >> 8) & 0x00FF)
+    
+        # Convert back to hex string, remove the leading '0x' and return 16-bit number.
+        return hex(swapped_value)
+    
 class ComfortOPOutputActivationReport(object):
     def __init__(self, datastr="", output=0, state=0):
         if datastr:
@@ -1459,6 +1495,8 @@ class Comfort2(mqtt.Client):
         Send a keepalive (cc00) command and verify the socket is still alive.
         Retry up to max_attempts times before declaring the socket dead.
         """
+        global TIMEOUT
+
         #logger.debug("Starting keepalive health check (%d attempts allowed)", max_attempts)
 
         for attempt in range(1, max_attempts + 1):
@@ -1489,7 +1527,9 @@ class Comfort2(mqtt.Client):
 
             finally:
                 # Restore original timeout after each attempt
-                self.comfortsock.settimeout(original_timeout)
+                #self.comfortsock.settimeout(original_timeout)
+                self.comfortsock.settimeout(TIMEOUT.seconds) # Update if gettimeout() fails.
+                #logger.debug("We are in the 'finally' section on line #1496")
 
             # If not last attempt, wait a little before retrying
             if attempt < max_attempts:
@@ -1534,14 +1574,14 @@ class Comfort2(mqtt.Client):
                     self._send_keepalive_and_check()    # Send keepalive and check socket status
 
                 except (socket.timeout, socket.error) as err:
-                    logger.error("Keepalive check failed: %s", err)
+                    logger.debug("Keepalive check failed: '%s'", err)
                     COMFORTCONNECTED = False
                     FIRST_LOGIN = True
                     raise
                 continue
 
             except (socket.error, ConnectionResetError, BrokenPipeError, TimeoutError) as e:
-                logger.error("Comfort connection error during recv: %s", e)
+                logger.debug("Comfort connection error during recv: '%s'", e)
                 COMFORTCONNECTED = False
                 FIRST_LOGIN = True
                 raise
@@ -1565,7 +1605,6 @@ class Comfort2(mqtt.Client):
                         yield line
         return
 
-
     def SendCommand(self, command):
         global SAVEDTIME
 
@@ -1575,7 +1614,7 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             #logger.debug("Sending Command %s", command)    # Debug sent command to Comfort.
         except:
-            logger.error("Error sending command")
+            logger.error("Error sending command '%s', closing socket.", command)
             self.comfortsock.close()
             raise
 
@@ -2223,6 +2262,7 @@ class Comfort2(mqtt.Client):
         global SCSRIOMAPFILE
         global DEVICEMAPFILE
         global USERMAPFILE
+        global TIMERMAPFILE
 
         global input_properties
         global counter_properties
@@ -2232,6 +2272,7 @@ class Comfort2(mqtt.Client):
         global scsrio_properties
         global device_properties
         global user_properties
+        global timer_properties
         
         if file.is_file():
             file_stats = os.stat(file)
@@ -2246,6 +2287,7 @@ class Comfort2(mqtt.Client):
             sensor_properties = {}
             scsrio_properties = {}
             user_properties = {}
+            timer_properties = {}
 
             for entry in root.iter('ConfigInfo'):
                 CustomerName = None
@@ -2408,6 +2450,30 @@ class Comfort2(mqtt.Client):
                 # Add the truncated value to the dictionary
                 sensor_properties[number] = name
 
+            for timer in root.iter('Timer'):
+                name = ''
+                number = ''
+                name = timer.attrib.get('Name')[:16] if timer.attrib.get('Name') else ''
+                number = timer.attrib.get('Number')[:3] if timer.attrib.get('Number') else ''
+
+                if self.CheckIndexNumberFormat(number):
+                    TIMERMAPFILE = True               
+                else:
+                    number = ''
+                    logger.error("Invalid Timer Number detected in '%s'.", file)
+                    TIMERMAPFILE = False
+                    break
+                if self.CheckZoneNameFormat(name): 
+                    TIMERMAPFILE = True              
+                else:
+                    name = ''
+                    logger.error("Invalid Timer Name detected in '%s'.", file)
+                    TIMERMAPFILE = False             
+                    break
+
+                # Add the truncated value to the dictionary
+                timer_properties[number] = name
+                
             for scsrio in root.iter('ScsRioResponse'):
                 name = ''
                 number = ''
@@ -2504,6 +2570,40 @@ class Comfort2(mqtt.Client):
         #logging.debug("Sanitized Filename: %s", sanitized_filename)
         return sanitized_filename
 
+    def validate_hex_in_list(self, value, allow_spec):
+        """
+        value      : hex string (2 characters, e.g. '1F')
+        allow_spec : either a list of integers OR a string like '0,49-51,255'
+        returns    : True if value (as decimal) is in allowed list, else False
+        """
+
+        # If allow_spec is a string like "0,49-51,255", parse and expand it
+        if isinstance(allow_spec, str):
+            allowed = []
+            for part in allow_spec.split(","):
+                part = part.strip()
+                if "-" in part:
+                    try:
+                        start, end = map(int, part.split("-"))
+                        allowed.extend(range(start, end + 1))
+                    except ValueError:
+                        pass  # ignore malformed ranges
+                else:
+                    try:
+                        allowed.append(int(part))
+                    except ValueError:
+                        pass  # ignore invalid numbers
+        else:
+            # Already a list of integers
+            allowed = list(allow_spec)
+
+        try:
+            dec_value = int(value, 16)
+        except ValueError:
+            return False  # invalid hex string
+
+        return dec_value in allowed
+
     def run(self):
 
         global FIRST_LOGIN         # Used to track if Addon started up or not.
@@ -2532,6 +2632,7 @@ class Comfort2(mqtt.Client):
         global scsrio_properties
         global device_properties
         global user_properties
+        global timer_properties
 
         global ZoneCache
         global BypassCache
@@ -2698,6 +2799,18 @@ class Comfort2(mqtt.Client):
                                                     })
                                 self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
 
+                            elif line[1:3] == "TR":     # Timer Reports 'TR' is not fully supported as Comfort stops the reports after a while.
+                                ipMsgTR = ComfortTRReport(line[1:])
+                                _time = datetime.now().replace(microsecond=0).isoformat()
+                                _name = timer_properties[str(ipMsgTR.timer)] if TIMERMAPFILE else "timer" + str(ipMsgTR.timer)
+                                MQTT_MSG=json.dumps({"Time": _time, 
+                                                     "Name": _name, 
+                                                     "Value": ipMsgTR.value,
+                                                     "State": ipMsgTR.state
+                                                    })
+                               # self.publish(COMFORTTIMERSTOPIC % ipMsgTR.timer, MQTT_MSG,qos=2,retain=False)
+                               # time.sleep(0.01)
+                                
                             elif line[1:3] == "Z?":                             # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
@@ -2917,20 +3030,23 @@ class Comfort2(mqtt.Client):
                                     self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
 
                             elif line[1:3] == "RP":
-                                if line[3:5] == "01":
+                                result = self.validate_hex_in_list(line[3:5], "0,1,255")
+                                if result and line[3:5] == "01":
                                     self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=2,retain=True)
-                                elif line[3:5] == "00":
+                                elif result and line[3:5] == "00":
                                     self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)   # Stopped Ringing
-                                elif line[3:5] == "FF":
+                                elif result and line[3:5] == "FF":
                                     self.publish(ALARMMESSAGETOPIC, "Phone Answer",qos=2,retain=True)
 
                             elif line[1:3] == "DB":
-                                if line[3:5] == "FF":
+                                result = self.validate_hex_in_list(line[3:5], "49-51,255")
+                                if result and line[3:5] == "FF":
                                     self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)
                                     self.publish(ALARMDOORBELLTOPIC, 0,qos=2,retain=True)
-                                else:
+                                elif result:
                                     self.publish(ALARMDOORBELLTOPIC, 1, qos=2,retain=True)
-                                    self.publish(ALARMMESSAGETOPIC, "Door Bell",qos=2,retain=True)
+                                    message_topic = "Doorbell "+str(int(line[3:5], 16) - 48)
+                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=2, retain=True)
 
                             elif line[1:3] == "OP" and CacheState:
                                 ipMsg = ComfortOPOutputActivationReport(line[1:])
@@ -3136,7 +3252,7 @@ class Comfort2(mqtt.Client):
 
                 #except socket.error as v:
                 except (socket.error, ConnectionResetError, BrokenPipeError, TimeoutError) as v:
-                    logger.error('Comfort Socket Error %s', str(v))
+                    logger.debug("Comfort Socket Error '%s'", str(v))
                 finally:        # Added 29/4/2025
                     if self.comfortsock:
                         try:
