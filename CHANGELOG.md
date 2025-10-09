@@ -1,12 +1,13 @@
 ## [1.5.2]
 
 ### Added
+ - LR Login Reports. Logs Login Reports from Local/Remote Phones, Keypads and UCM's.
  
 ### Changed
  - Change object_id to default_entity_id.
 
 ### Fixed
-
+ - Incomplete object_id's. Correctly set default_entity_id properties for system created objects.
 
 ## [1.5.1]- 2025-08-22
 
