@@ -510,6 +510,13 @@ class ComfortLUUserLoggedIn(object):
     def __init__(self, datastr="", user=1):             
         if datastr:
             self.user = int(datastr[2:4], 16)
+            if len(datastr) == 6:
+                _method = int(datastr[4:6], 16)
+                self.method = "Local Phone" if _method == 1 else \
+                              "Remote Phone" if _method == 2 else \
+                             f"Keypad {_method - 64}" if 65 <= _method <= 72 else \
+                             f"UCM {_method - 16}" if 17 <= _method <= 24 else \
+                              "Unknown"
         else:
             self.user = int(user)
 
@@ -2810,7 +2817,12 @@ class Comfort2(mqtt.Client):
                                                     })
                                # self.publish(COMFORTTIMERSTOPIC % ipMsgTR.timer, MQTT_MSG,qos=2,retain=False)
                                # time.sleep(0.01)
-                                
+                            
+                            elif line[1:3] == "LR":
+                                luMsg = ComfortLUUserLoggedIn(line[1:])
+                                if luMsg.user != 0:
+                                    logger.info('Comfort %s Login Ok - %s', luMsg.method, f"User {luMsg.user}" if luMsg.user != 254 else "Engineer")
+
                             elif line[1:3] == "Z?":                             # Zones/Inputs
                                 zMsg = ComfortZ_ReportAllZones(line[1:])
                                 for ipMsgZ in zMsg.inputs:
