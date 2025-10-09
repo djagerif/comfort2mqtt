@@ -512,7 +512,10 @@ class ComfortLUUserLoggedIn(object):
             self.user = int(datastr[2:4], 16)
             self.method = "Unknown"
             if len(datastr) == 6:
-                _method = int(datastr[4:6], 16)
+                try:
+                    _method = int(datastr[4:6], 16)
+                except ValueError:
+                    _method = 0
                 self.method = "Local Phone" if _method == 1 else \
                               "Remote Phone" if _method == 2 else \
                              f"Keypad {_method - 64}" if 65 <= _method <= 72 else \
@@ -1644,7 +1647,7 @@ class Comfort2(mqtt.Client):
         
         if self.connected == True:
 
-            device_properties['CPUType'] = 'N/A'                    # Reset CPU type to default
+            device_properties['CPUType'] = 'N/A'                  # Reset CPU type to default
 
             #get Bypassed Zones
             self.comfortsock.sendall("\x03b?00\r".encode())       # b?00 Bypassed Zones first
@@ -1847,7 +1850,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/binary_sensor/" + DOMAIN + "/bridge_status/config"
         MQTT_MSG=json.dumps({"name": "Bridge MQTT Status",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "default_entity_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "state_topic": DOMAIN,
                              "value_template": "{{ value_json.BridgeConnected }}",
                              "qos": "2",
@@ -1875,7 +1878,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/button/comfort2mqtt/refresh/config"
         MQTT_MSG=json.dumps({"name": "Refresh",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "default_entity_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability": availability,
                              "availability_mode": "all",
                              "command_topic": REFRESHTOPIC,
@@ -1892,7 +1895,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/button/comfort2mqtt/battery_update/config"
         MQTT_MSG=json.dumps({"name": "Battery Update",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "default_entity_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability": availability,
                              "availability_mode": "all",
                              "command_topic": BATTERYREFRESHTOPIC,
@@ -1920,7 +1923,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_state/config"
         MQTT_MSG=json.dumps({"name": "State",
                              "unique_id": discoverytopic.split('/')[3],
-                             "object_id": discoverytopic.split('/')[3],
+                             "default_entity_id": discoverytopic.split('/')[3],
                              "state_topic": ALARMSTATUSTOPIC,
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
@@ -1936,7 +1939,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_firmware/config"
         MQTT_MSG=json.dumps({"name": "Firmware",
                              "unique_id": discoverytopic.split('/')[3],
-                             "object_id": discoverytopic.split('/')[3],
+                             "default_entity_id": discoverytopic.split('/')[3],
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1954,7 +1957,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_filesystem/config"
         MQTT_MSG=json.dumps({"name": "FileSystem",
                              "unique_id": discoverytopic.split('/')[3],
-                             "object_id": discoverytopic.split('/')[3],
+                             "default_entity_id": discoverytopic.split('/')[3],
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -1972,7 +1975,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/battery_status/config"
         MQTT_MSG=json.dumps({"name": "Battery/Charger Status",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "default_entity_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -2008,7 +2011,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/charger_status/config"
         MQTT_MSG=json.dumps({"name": "DC Supply Status",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "default_entity_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -2045,7 +2048,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_bypass_zones/config"
         MQTT_MSG=json.dumps({"name": "Bypassed Zones",
                              "unique_id": discoverytopic.split('/')[3],
-                             "object_id": discoverytopic.split('/')[3],
+                             "default_entity_id": discoverytopic.split('/')[3],
                              "state_topic": ALARMBYPASSTOPIC,
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
@@ -2062,7 +2065,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_mode/config"
         MQTT_MSG=json.dumps({"name": "Mode",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "object_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "default_entity_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -2076,7 +2079,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_customername/config"
         MQTT_MSG=json.dumps({"name": "Customer Name",
                              "unique_id": discoverytopic.split('/')[3],
-                             "object_id": discoverytopic.split('/')[3],
+                             "default_entity_id": discoverytopic.split('/')[3],
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -2094,7 +2097,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_reference/config"
         MQTT_MSG=json.dumps({"name": "Reference",
                              "unique_id": discoverytopic.split('/')[3],
-                             "object_id": discoverytopic.split('/')[3],
+                             "default_entity_id": discoverytopic.split('/')[3],
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -2112,7 +2115,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_serial_number/config"
         MQTT_MSG=json.dumps({"name": "Serial Number",
                              "unique_id": discoverytopic.split('/')[3],
-                             "object_id": discoverytopic.split('/')[3],
+                             "default_entity_id": discoverytopic.split('/')[3],
                              "availability_topic": ALARMAVAILABLETOPIC,
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -2130,7 +2133,7 @@ class Comfort2(mqtt.Client):
 
         discoverytopic = "homeassistant/binary_sensor/comfort2mqtt/comfort_connection_state/config"
         MQTT_MSG=json.dumps({"name": "LAN Status",
-                             "object_id": discoverytopic.split('/')[3],
+                             "default_entity_id": discoverytopic.split('/')[3],
                              "unique_id": discoverytopic.split('/')[3],
                              "state_topic": ALARMCONNECTEDTOPIC,
                              "device_class": "connectivity",
