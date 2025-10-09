@@ -510,6 +510,7 @@ class ComfortLUUserLoggedIn(object):
     def __init__(self, datastr="", user=1):             
         if datastr:
             self.user = int(datastr[2:4], 16)
+            self.method = "Unknown"
             if len(datastr) == 6:
                 _method = int(datastr[4:6], 16)
                 self.method = "Local Phone" if _method == 1 else \
@@ -519,6 +520,7 @@ class ComfortLUUserLoggedIn(object):
                               "Unknown"
         else:
             self.user = int(user)
+            self.method = "Unknown"
 
 class ComfortIPInputActivationReport(object):
     def __init__(self, datastr="", input=0, state=0):
