@@ -2826,8 +2826,8 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "LR":
                                 luMsg = ComfortLUUserLoggedIn(line[1:])
                                 if luMsg.user != 0:
-                                    logger.info("%s Login - %s", luMsg.method, f"User {luMsg.user}" if luMsg.user != 254 else "Engineer")
-                                    message_topic = f"{luMsg.method} Login - {f'User {luMsg.user}' if luMsg.user != 254 else 'Engineer'}"
+                                    logger.info("Comfort %s Login - %s", luMsg.method, f"User {luMsg.user}" if luMsg.user != 254 else "Engineer")
+                                    message_topic = f"Comfort {luMsg.method} Login - {f'User {luMsg.user}' if luMsg.user != 254 else 'Engineer'}"
                                     self.publish(ALARMMESSAGETOPIC, message_topic, qos=2, retain=False)
 
                             elif line[1:3] == "Z?":                             # Zones/Inputs

@@ -1,4 +1,4 @@
-## [1.5.2]
+## [1.6.0] - 2025-10-11
 
 ### Added
  - LR Login Reports. Logs Login Reports from Local/Remote Phones, Keypads and UCM's.
@@ -9,7 +9,7 @@
 ### Fixed
  - Incomplete object_id's. Correctly set default_entity_id properties for system created objects.
 
-## [1.5.1]- 2025-08-22
+## [1.5.1] - 2025-08-22
 
 ### Added
  
