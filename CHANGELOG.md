@@ -1,3 +1,13 @@
+## [1.6.1]
+
+### Added
+ 
+### Changed
+ - MQTT Login Message, removed 'Comfort' string.
+
+### Fixed
+ 
+
 ## [1.6.0] - 2025-10-11
 
 ### Added
