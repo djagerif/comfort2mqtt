@@ -6,8 +6,8 @@
 ### Changed
  - Change object_id to default_entity_id.
 
-### Fixed
- - Incomplete object_id's. Correctly set default_entity_id properties for system created objects.
+### Fixed (BREAKING)
+ - Incomplete object_id's. Correctly set default_entity_id properties for some system created objects. This will register new objects with the same name, please delete reference to the old objects.
 
 ## [1.5.1] - 2025-08-22
 
