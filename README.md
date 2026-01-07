@@ -43,4 +43,4 @@ The following objects are supported:
 
 ⚠️ This Add-on was specifically developed for Home Assistant OS and Comfort II ULTRA Alarm System with File System type `34`. As tested firmware is `7.201` on model CM9000-ULT. Home Assistant Container and Core have not been tested and is not supported at present.
 
-Copyright 2025 Ingo de Jager. Licensed under Apache-2.0. For more details see the `LICENCE` file.
+Copyright 2026 Ingo de Jager. Licensed under Apache-2.0. For more details see the `LICENCE` file.

@@ -1,9 +1,11 @@
-## [1.6.1] - Busy...
+## [1.6.2] - Busy...
 
 ### Added
  
 ### Changed
+ - Update Copyright date.
  - MQTT Login Message, removed 'Comfort' string.
+ - Possible removal of i386, armhf and armv7 bases.
 
 ### Fixed
  
