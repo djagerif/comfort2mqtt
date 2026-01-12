@@ -5,7 +5,7 @@
 ### Changed
  - Update Copyright date.
  - MQTT Login Message, removed 'Comfort' string.
- - Possible removal of i386, armhf and armv7 bases.
+ - Removal support for i386, armhf and armv7 bases as per Home Assistant documentation.
 
 ### Fixed
  
