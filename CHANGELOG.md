@@ -1,11 +1,14 @@
 ## [1.6.1] - Busy...
 
 ### Added
- 
+
+### Breaking Changes ###
+ - Remove support for i386, armhf and armv7 bases as per Home Assistant base image removal.
+
 ### Changed
  - Update Copyright date.
  - MQTT Login Message, removed 'Comfort' string.
- - Removal support for i386, armhf and armv7 bases as per Home Assistant documentation.
+ - Removed codenotary from docker configuration as per Home Assistant OS update 17.
 
 ### Fixed
  
