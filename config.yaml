@@ -6,7 +6,6 @@ init: false
 startup: application
 apparmor: true
 panel_icon: "mdi:alarm-panel-outline"
-#codenotary: notary@home-assistant.io
 url: https://github.com/djagerif/comfort2mqtt
 hassio_api: true
 arch:
