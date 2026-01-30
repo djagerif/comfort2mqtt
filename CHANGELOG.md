@@ -1,6 +1,7 @@
 ## [1.6.1] - Busy...
 
 ### Added
+ - Updated DOCS.md to include refresh key value when `SN01` command fails.
 
 ### Breaking Changes ###
  - Remove support for i386, armhf and armv7 bases as per Home Assistant base image removal.

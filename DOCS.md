@@ -366,6 +366,8 @@ mode: single
 ```
 ⚠️ **Note:** When Comfort to MQTT starts up it will print the KEY value to be used for Refresh function authentication. Incorrect key values will be ignored.
 
+⚠️ **Note:** If for some reason the 'SN01' command fails the refresh key will be `00000000` as the key is derived from the SN01 command response.
+
 `2024-06-12 17:45:27 INFO     Refresh Key: 000F8EC8`
 
 
