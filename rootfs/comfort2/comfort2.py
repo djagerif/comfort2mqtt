@@ -523,14 +523,8 @@ class HAEventLogger:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         logger.debug("[{timestamp}] %s", {message})
     
-    def on_ping(self, ws, message):
-        logger.debug("Received ping: %s", {message})
-
-    def on_pong(self, ws, message):
-        logger.debug("Received pong: %s", {message})
-
     def on_message(self, ws, message):
-        logger.debug("<<< RECEIVED: %s", {message})
+        logger.debug(f"<<< RECEIVED: {message}")  # Log the raw message as a string, not in a set
     
         try:
             data = json.loads(message)
@@ -558,18 +552,18 @@ class HAEventLogger:
                 logger.debug("Subscribed to events")
         
             elif msg_type == 'auth_invalid':
-                logger.debug("AUTH FAILED: %s", {data})
+                logger.error(f"AUTH FAILED: {data}")
         
             elif msg_type == 'result':
-                logger.debug("Result: %s", {data})
+                logger.debug(f"Subscription result: {data}")
         
             elif msg_type == 'event':
                 event = data.get('event', {})
                 event_type = event.get('event_type')
-                logger.debug("*** EVENT: %s", {event_type})
+                logger.info(f"*** EVENT DETECTED: {event_type} ***")
     
         except Exception as e:
-            logger.debug("Parse error: %s", {e})
+            logger.error(f"Parse error: {e}")
     
     def on_error(self, ws, error):
         logger.debug("WebSocket error: %s", {error})
@@ -594,9 +588,7 @@ class HAEventLogger:
                         on_open=self.on_open,
                         on_message=self.on_message,
                         on_error=self.on_error,
-                        on_close=self.on_close,
-                        on_ping=self.on_ping,
-                        on_pong=self.on_pong
+                        on_close=self.on_close
                     )
                     self.ws.run_forever()
                     
