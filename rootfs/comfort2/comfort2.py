@@ -517,12 +517,10 @@ class HAEventLogger:
         self.ws = None
         self.monitor_thread = None
         self.authenticated = False
-#        logger.debug("HAEventLogger_init")
         
     def log(self, message):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         print(f"[{timestamp}] {message}")
-#        logger.debug("HAEventLogger_log")
     
     def on_message(self, ws, message):
         self.log(f"Received message: {message}")
@@ -586,8 +584,6 @@ class HAEventLogger:
     def start_monitoring(self):
         """Start the WebSocket monitoring in a separate thread"""
         logger.debug("Starting HA event monitoring")
-        
-        websocket.enableTrace(True)
         
         def run_monitor():
             while True:
