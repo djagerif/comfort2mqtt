@@ -522,6 +522,12 @@ class HAEventLogger:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         print(f"[{timestamp}] {message}")
     
+    def on_ping(self, ws, message):
+        self.log(f"Received ping: {message}")
+
+    def on_pong(self, ws, message):
+        self.log(f"Received pong: {message}")
+
     def on_message(self, ws, message):
         self.log(f"Received message: {message}")
         data = json.loads(message)
