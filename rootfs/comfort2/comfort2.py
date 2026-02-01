@@ -514,7 +514,7 @@ class HAEventLogger:
     def __init__(self):
         self.supervisor_token = TOKEN
         #self.ws_url = 'ws://supervisor/core/websocket'
-        self.ws_url = 'ws://supervisor/core/api/websocket'
+        self.ws_url = 'ws://homeassistant:8123/api/websocket'
         self.ws = None
         self.monitor_thread = None
         self.authenticated = False
