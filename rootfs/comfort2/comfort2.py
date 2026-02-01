@@ -39,6 +39,10 @@ import secrets
 import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
+import websocket
+
+
+
 DOMAIN = "comfort2mqtt"
 ADDON_SLUG = ''
 ADDON_VERSION = "N/A"
@@ -505,6 +509,90 @@ PINCODE = COMFORT_LOGIN_ID
 BUFFER_SIZE = 4096
 TIMEOUT = timedelta(seconds=30)                         #Comfort will disconnect if idle for 120 secs, so make sure this is less than that
 RETRY = timedelta(seconds=10)
+
+class HAEventLogger:
+    def __init__(self):
+        self.supervisor_token = TOKEN
+        self.ws_url = 'ws://supervisor/core/websocket'
+        self.ws = None
+        self.monitor_thread = None
+        
+    def log(self, message):
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        print(f"[{timestamp}] {message}")
+    
+    def on_message(self, ws, message):
+        data = json.loads(message)
+        if data.get('type') == 'event':
+            event = data.get('event', {})
+            event_type = event.get('event_type')
+            if event_type in ['homeassistant_start', 'homeassistant_started']:
+                self.log(f"EVENT DETECTED: {event_type}")
+    
+    def on_error(self, ws, error):
+        self.log(f"WebSocket error: {error}")
+    
+    def on_close(self, ws, close_status_code, close_msg):
+        self.log("WebSocket connection closed")
+    
+    def on_open(self, ws):
+        self.log("WebSocket connected")
+        
+        def auth_and_subscribe():
+            # Wait for auth_required message (it comes automatically)
+            # Then send auth
+            ws.send(json.dumps({
+                'type': 'auth',
+                'access_token': self.supervisor_token
+            }))
+            
+            # Subscribe to events after a short delay to allow auth to complete
+            import time
+            time.sleep(0.5)
+            
+            ws.send(json.dumps({
+                'id': 1,
+                'type': 'subscribe_events',
+                'event_type': 'homeassistant_start'
+            }))
+            
+            ws.send(json.dumps({
+                'id': 2,
+                'type': 'subscribe_events',
+                'event_type': 'homeassistant_started'
+            }))
+            
+            self.log("Subscribed to homeassistant_start and homeassistant_started events")
+        
+        # Run auth in a separate thread to not block
+        threading.Thread(target=auth_and_subscribe, daemon=True).start()
+    
+    def start_monitoring(self):
+        """Start the WebSocket monitoring in a separate thread"""
+        self.log("Starting HA event monitoring")
+        
+        def run_monitor():
+            while True:
+                try:
+                    self.ws = websocket.WebSocketApp(
+                        self.ws_url,
+                        on_open=self.on_open,
+                        on_message=self.on_message,
+                        on_error=self.on_error,
+                        on_close=self.on_close
+                    )
+                    self.ws.run_forever()
+                    
+                except Exception as e:
+                    self.log(f"Monitor error: {e}")
+                
+                self.log("Reconnecting in 5 seconds...")
+                import time
+                time.sleep(5)
+        
+        self.monitor_thread = threading.Thread(target=run_monitor, daemon=True)
+        self.monitor_thread.start()
+        self.log("Monitor thread started")
 
 class ComfortLUUserLoggedIn(object):
     def __init__(self, datastr="", user=1):             
@@ -1179,6 +1267,7 @@ class Comfort2(mqtt.Client):
         self.connected = False
         self.username_pw_set(mqtt_username, mqtt_password)
         self.version = mqtt_version
+        self.ha_monitor = HAEventLogger()
 
     def handler(self, signum, frame):                 # Ctrl-Z Keyboard Interrupt
         logger.debug('SIGTSTP (Ctrl-Z) intercepted')
@@ -2674,6 +2763,8 @@ class Comfort2(mqtt.Client):
             device_properties['BridgeConnected'] = 1
             self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
             self.will_set(ALARMLWTTOPIC, payload="Offline", qos=2, retain=True)
+
+            self.handler.start_monitoring()   # Start Home Assistant Supervisor Event Monitor
 
         self.loop_start()   
 
