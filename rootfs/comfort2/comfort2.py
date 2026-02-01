@@ -517,20 +517,20 @@ class HAEventLogger:
         self.ws = None
         self.monitor_thread = None
         self.authenticated = False
-        logger.debug("Token preview: {self.supervisor_token[:20]}...")
+        logger.debug("Token preview: %s", {self.supervisor_token[:20]})
         
     def log(self, message):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        logger.debug("[{timestamp}] {message}")
+        logger.debug("[{timestamp}] %s", {message})
     
     def on_ping(self, ws, message):
-        logger.debug("Received ping: {message}")
+        logger.debug("Received ping: %s", {message})
 
     def on_pong(self, ws, message):
-        logger.debug("Received pong: {message}")
+        logger.debug("Received pong: %s", {message})
 
     def on_message(self, ws, message):
-        logger.debug("<<< RECEIVED: {message}")
+        logger.debug("<<< RECEIVED: %s", {message})
     
         try:
             data = json.loads(message)
@@ -558,21 +558,21 @@ class HAEventLogger:
                 logger.debug("Subscribed to events")
         
             elif msg_type == 'auth_invalid':
-                logger.debug("AUTH FAILED: {data}")
+                logger.debug("AUTH FAILED: %s", {data})
         
             elif msg_type == 'result':
-                logger.debug("Result: {data}")
+                logger.debug("Result: %s", {data})
         
             elif msg_type == 'event':
                 event = data.get('event', {})
                 event_type = event.get('event_type')
-                logger.debug("*** EVENT: {event_type} ***")
+                logger.debug("*** EVENT: %s", {event_type})
     
         except Exception as e:
-            logger.debug("Parse error: {e}")
+            logger.debug("Parse error: %s", {e})
     
     def on_error(self, ws, error):
-        logger.debug("WebSocket error: {error}")
+        logger.debug("WebSocket error: %s", {error})
     
     def on_close(self, ws, close_status_code, close_msg):
         logger.debug("WebSocket connection closed")
@@ -601,7 +601,7 @@ class HAEventLogger:
                     self.ws.run_forever()
                     
                 except Exception as e:
-                    logger.debug("Monitor error: {e}")
+                    logger.debug("Monitor error: %s", {e})
                 
                 logger.debug("Reconnecting in 5 seconds...")
                 import time
