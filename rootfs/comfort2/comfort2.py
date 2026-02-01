@@ -561,7 +561,7 @@ class HAEventLogger:
     
     def on_error(self, ws, error):
         # Suppress expected restart errors unless in DEBUG mode
-        if logger.level > logging.DEBUG:
+        if logger.getEffectiveLevel() > logging.DEBUG:
             error_str = str(error)
             if any(x in error_str for x in ['502', 'Bad Gateway', 'opcode=8', 'fin=1']):
                 return  # Silently ignore in INFO/WARNING mode
