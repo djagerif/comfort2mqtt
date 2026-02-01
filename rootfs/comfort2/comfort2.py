@@ -517,90 +517,65 @@ class HAEventLogger:
         self.ws = None
         self.monitor_thread = None
         self.authenticated = False
-        logger.debug("Token preview: %s", {self.supervisor_token[:20]})
         
-    def log(self, message):
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        logger.debug("[{timestamp}] %s", {message})
-    
     def on_message(self, ws, message):
-        logger.debug(f"<<< RECEIVED: {message}")  # Log the raw message as a string, not in a set
-    
         try:
             data = json.loads(message)
             msg_type = data.get('type')
-        
+            
             if msg_type == 'auth_required':
-                logger.debug("Sending supervisor token for auth")
                 ws.send(json.dumps({
                     'type': 'auth',
                     'access_token': self.supervisor_token
                 }))
-        
+            
             elif msg_type == 'auth_ok':
-                logger.debug("AUTH SUCCESS!")
-
-   
-        # Subscribe to ALL events temporarily to see what fires
+                # Subscribe to call_service events
                 ws.send(json.dumps({
                     'id': 1,
-                    'type': 'subscribe_events'  # No event_type = subscribe to everything
+                    'type': 'subscribe_events',
+                    'event_type': 'call_service'
                 }))
-                logger.debug("Subscribed to ALL events")
-
-                #ws.send(json.dumps({
-                #    'id': 1,
-                #    'type': 'subscribe_events',
-                #    'event_type': 'homeassistant_start'
-                #}))
-                #ws.send(json.dumps({
-                #    'id': 2,
-                #    'type': 'subscribe_events',
-                #    'event_type': 'homeassistant_started'
-                #}))
-                logger.debug("Subscribed to events")
-        
-            elif msg_type == 'auth_invalid':
-                logger.error(f"AUTH FAILED: {data}")
-        
-            elif msg_type == 'result':
-                result_data = data.get('result')
-                success = data.get('success')
-                req_id = data.get('id')
-    
-                if success:
-                    logger.debug(f"Subscription #{req_id} confirmed successfully")
-        
-                    # After successful subscription, we're now listening
-                    # The event will only fire on the NEXT restart
-                    if req_id == 2:  # Both subscriptions done
-                        logger.info("Ready to detect HA restarts (will catch NEXT restart)")
-                else:
-                    logger.error(f"Subscription #{req_id} failed: {result_data}")
-
+                
+                # If we were waiting for HA to come back online
+                if self.restart_pending:
+                    logger.info("Home Assistant is ready - reloading entities")
+                    self.on_ha_ready()
+                    self.restart_pending = False
+            
             elif msg_type == 'event':
                 event = data.get('event', {})
                 event_type = event.get('event_type')
-                logger.info(f"*** EVENT DETECTED: {event_type} ***")
-                logger.info(f"Full event data: {event}")
-    
+                
+                if event_type == 'call_service':
+                    event_data = event.get('data', {})
+                    domain = event_data.get('domain')
+                    service = event_data.get('service')
+                    
+                    if domain == 'homeassistant' and service == 'restart':
+                        logger.info("Home Assistant restart detected")
+                        self.restart_pending = True
+                        
         except Exception as e:
-            logger.error(f"Parse error: {e}")
+            logger.error(f"Error processing WebSocket message: {e}")
     
     def on_error(self, ws, error):
-        logger.debug("WebSocket error: %s", {error})
+        if not isinstance(error, Exception) or '502' not in str(error):
+            logger.error(f"WebSocket error: {error}")
     
     def on_close(self, ws, close_status_code, close_msg):
-        logger.debug("WebSocket connection closed")
-        self.authenticated = False
+        pass
     
     def on_open(self, ws):
-        logger.debug("WebSocket connected - waiting for auth_required")
+        logger.info("Connected to Home Assistant WebSocket")
         
+    def on_ha_ready(self):
+        """Called when HA is ready after a restart"""
+        # Entity reload logic here. Still to be done !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        pass
    
     def start_monitoring(self):
         """Start the WebSocket monitoring in a separate thread"""
-        logger.debug("Starting HA event monitoring")
         
         def run_monitor():
             while True:
@@ -615,15 +590,14 @@ class HAEventLogger:
                     self.ws.run_forever()
                     
                 except Exception as e:
-                    logger.debug("Monitor error: %s", {e})
-                
-                logger.debug("Reconnecting in 5 seconds...")
-                import time
+                    if '502' not in str(e):
+                        logger.error(f"WebSocket connection error: {e}")
+
                 time.sleep(5)
         
         self.monitor_thread = threading.Thread(target=run_monitor, daemon=True)
         self.monitor_thread.start()
-        logger.debug("Monitor thread started")
+        logger.info("Home Assistant Event Monitor started")
 
 class ComfortLUUserLoggedIn(object):
     def __init__(self, datastr="", user=1):             
