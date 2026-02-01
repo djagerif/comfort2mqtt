@@ -527,16 +527,16 @@ class HAEventLogger:
             event = data.get('event', {})
             event_type = event.get('event_type')
             if event_type in ['homeassistant_start', 'homeassistant_started']:
-                self.log(f"EVENT DETECTED: {event_type}")
+                logger.debug("EVENT DETECTED: {event_type}")
     
     def on_error(self, ws, error):
-        self.log(f"WebSocket error: {error}")
+        logger.debug("WebSocket error: {error}")
     
     def on_close(self, ws, close_status_code, close_msg):
-        self.log("WebSocket connection closed")
+        logger.debug("WebSocket connection closed")
     
     def on_open(self, ws):
-        self.log("WebSocket connected")
+        logger.debug("WebSocket connected")
         
         def auth_and_subscribe():
             # Wait for auth_required message (it comes automatically)
@@ -547,7 +547,7 @@ class HAEventLogger:
             }))
             
             # Subscribe to events after a short delay to allow auth to complete
-            import time
+            #import time
             time.sleep(0.5)
             
             ws.send(json.dumps({
@@ -562,14 +562,14 @@ class HAEventLogger:
                 'event_type': 'homeassistant_started'
             }))
             
-            self.log("Subscribed to homeassistant_start and homeassistant_started events")
+            logger.debug("Subscribed to homeassistant_start and homeassistant_started events")
         
         # Run auth in a separate thread to not block
         threading.Thread(target=auth_and_subscribe, daemon=True).start()
     
     def start_monitoring(self):
         """Start the WebSocket monitoring in a separate thread"""
-        self.log("Starting HA event monitoring")
+        logger.debug("Starting HA event monitoring")
         
         def run_monitor():
             while True:
@@ -584,15 +584,15 @@ class HAEventLogger:
                     self.ws.run_forever()
                     
                 except Exception as e:
-                    self.log(f"Monitor error: {e}")
+                    logger.debug("Monitor error: {e}")
                 
-                self.log("Reconnecting in 5 seconds...")
+                logger.debug("Reconnecting in 5 seconds...")
                 import time
                 time.sleep(5)
         
         self.monitor_thread = threading.Thread(target=run_monitor, daemon=True)
         self.monitor_thread.start()
-        self.log("Monitor thread started")
+        logger.debug("Monitor thread started")
 
 class ComfortLUUserLoggedIn(object):
     def __init__(self, datastr="", user=1):             
