@@ -539,16 +539,25 @@ class HAEventLogger:
         
             elif msg_type == 'auth_ok':
                 logger.debug("AUTH SUCCESS!")
+
+   
+        # Subscribe to ALL events temporarily to see what fires
                 ws.send(json.dumps({
                     'id': 1,
-                    'type': 'subscribe_events',
-                    'event_type': 'homeassistant_start'
+                    'type': 'subscribe_events'  # No event_type = subscribe to everything
                 }))
-                ws.send(json.dumps({
-                    'id': 2,
-                    'type': 'subscribe_events',
-                    'event_type': 'homeassistant_started'
-                }))
+                logger.debug("Subscribed to ALL events")
+
+                #ws.send(json.dumps({
+                #    'id': 1,
+                #    'type': 'subscribe_events',
+                #    'event_type': 'homeassistant_start'
+                #}))
+                #ws.send(json.dumps({
+                #    'id': 2,
+                #    'type': 'subscribe_events',
+                #    'event_type': 'homeassistant_started'
+                #}))
                 logger.debug("Subscribed to events")
         
             elif msg_type == 'auth_invalid':
