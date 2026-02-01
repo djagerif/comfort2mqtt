@@ -587,6 +587,8 @@ class HAEventLogger:
         """Start the WebSocket monitoring in a separate thread"""
         logger.debug("Starting HA event monitoring")
         
+        websocket.enableTrace(True)
+        
         def run_monitor():
             while True:
                 try:
