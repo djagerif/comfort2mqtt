@@ -362,6 +362,7 @@ else:
         logger.error("Failed to get Addon Info: Error Code %s, %s", response.status_code, response.reason)
 
 logger.info('Importing the add-on configuration options')
+logger.debug("TOKEN: %s", TOKEN)
 
 MQTT_USER=option.broker_username
 MQTT_PASSWORD=option.broker_password
