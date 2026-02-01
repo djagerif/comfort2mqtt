@@ -599,7 +599,9 @@ class HAEventLogger:
                         on_open=self.on_open,
                         on_message=self.on_message,
                         on_error=self.on_error,
-                        on_close=self.on_close
+                        on_close=self.on_close,
+                        on_ping=self.on_ping,
+                        on_pong=self.on_pong
                     )
                     self.ws.run_forever()
                     
