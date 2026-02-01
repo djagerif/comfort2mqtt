@@ -516,7 +516,7 @@ class HAEventLogger:
         self.ws_url = 'ws://supervisor/core/api/websocket'
         self.ws = None
         self.monitor_thread = None
-        self.authenticated = False
+        self.restart_pending = False
         
     def on_message(self, ws, message):
         try:
