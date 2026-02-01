@@ -517,34 +517,34 @@ class HAEventLogger:
         self.ws = None
         self.monitor_thread = None
         self.authenticated = False
-        self.log(f"Token preview: {self.supervisor_token[:20]}...")
+        logger.debug("Token preview: {self.supervisor_token[:20]}...")
         
     def log(self, message):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print(f"[{timestamp}] {message}")
+        logger.debug("[{timestamp}] {message}")
     
     def on_ping(self, ws, message):
-        self.log(f"Received ping: {message}")
+        logger.debug("Received ping: {message}")
 
     def on_pong(self, ws, message):
-        self.log(f"Received pong: {message}")
+        logger.debug("Received pong: {message}")
 
     def on_message(self, ws, message):
-        self.log(f"<<< RECEIVED: {message}")
+        logger.debug("<<< RECEIVED: {message}")
     
         try:
             data = json.loads(message)
             msg_type = data.get('type')
         
             if msg_type == 'auth_required':
-                self.log("Sending supervisor token for auth")
+                logger.debug("Sending supervisor token for auth")
                 ws.send(json.dumps({
                     'type': 'auth',
                     'access_token': self.supervisor_token
                 }))
         
             elif msg_type == 'auth_ok':
-                self.log("AUTH SUCCESS!")
+                logger.debug("AUTH SUCCESS!")
                 ws.send(json.dumps({
                     'id': 1,
                     'type': 'subscribe_events',
@@ -555,21 +555,21 @@ class HAEventLogger:
                     'type': 'subscribe_events',
                     'event_type': 'homeassistant_started'
                 }))
-                self.log("Subscribed to events")
+                logger.debug("Subscribed to events")
         
             elif msg_type == 'auth_invalid':
-                self.log(f"AUTH FAILED: {data}")
+                logger.debug("AUTH FAILED: {data}")
         
             elif msg_type == 'result':
-                self.log(f"Result: {data}")
+                logger.debug("Result: {data}")
         
             elif msg_type == 'event':
                 event = data.get('event', {})
                 event_type = event.get('event_type')
-                self.log(f"*** EVENT: {event_type} ***")
+                logger.debug("*** EVENT: {event_type} ***")
     
         except Exception as e:
-            self.log(f"Parse error: {e}")
+            logger.debug("Parse error: {e}")
     
     def on_error(self, ws, error):
         logger.debug("WebSocket error: {error}")
