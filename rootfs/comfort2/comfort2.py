@@ -555,12 +555,25 @@ class HAEventLogger:
                 logger.error(f"AUTH FAILED: {data}")
         
             elif msg_type == 'result':
-                logger.debug(f"Subscription result: {data}")
+                result_data = data.get('result')
+                success = data.get('success')
+                req_id = data.get('id')
+    
+                if success:
+                    logger.debug(f"Subscription #{req_id} confirmed successfully")
         
+                    # After successful subscription, we're now listening
+                    # The event will only fire on the NEXT restart
+                    if req_id == 2:  # Both subscriptions done
+                        logger.info("Ready to detect HA restarts (will catch NEXT restart)")
+                else:
+                    logger.error(f"Subscription #{req_id} failed: {result_data}")
+
             elif msg_type == 'event':
                 event = data.get('event', {})
                 event_type = event.get('event_type')
                 logger.info(f"*** EVENT DETECTED: {event_type} ***")
+                logger.info(f"Full event data: {event}")
     
         except Exception as e:
             logger.error(f"Parse error: {e}")
