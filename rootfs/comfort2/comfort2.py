@@ -513,8 +513,7 @@ RETRY = timedelta(seconds=10)
 class HAEventLogger:
     def __init__(self):
         self.supervisor_token = TOKEN
-        #self.ws_url = 'ws://supervisor/core/websocket'
-        self.ws_url = 'ws://homeassistant:8123/api/websocket'
+        self.ws_url = 'ws://supervisor/core/api/websocket'
         self.ws = None
         self.monitor_thread = None
         self.authenticated = False
@@ -530,52 +529,46 @@ class HAEventLogger:
         self.log(f"Received pong: {message}")
 
     def on_message(self, ws, message):
-        self.log(f"Received message: {message}")
-        data = json.loads(message)
-        msg_type = data.get('type')
+        self.log(f"<<< RECEIVED: {message}")
+    
+        try:
+            data = json.loads(message)
+            msg_type = data.get('type')
         
-        # Handle auth_required
-        if msg_type == 'auth_required':
-            self.log("Auth required - sending token")
-            ws.send(json.dumps({
-                'type': 'auth',
-                'access_token': self.supervisor_token
-            }))
+            if msg_type == 'auth_required':
+                self.log("Sending supervisor token for auth")
+                ws.send(json.dumps({
+                    'type': 'auth',
+                    'access_token': self.supervisor_token
+                }))
         
-        # Handle auth_ok
-        elif msg_type == 'auth_ok':
-            self.log("Authentication successful")
-            self.authenticated = True
-            
-            # Now subscribe to events
-            ws.send(json.dumps({
-                'id': 1,
-                'type': 'subscribe_events',
-                'event_type': 'homeassistant_start'
-            }))
-            
-            ws.send(json.dumps({
-                'id': 2,
-                'type': 'subscribe_events',
-                'event_type': 'homeassistant_started'
-            }))
-            
-            self.log("Subscribed to homeassistant_start and homeassistant_started events")
+            elif msg_type == 'auth_ok':
+                self.log("AUTH SUCCESS!")
+                ws.send(json.dumps({
+                    'id': 1,
+                    'type': 'subscribe_events',
+                    'event_type': 'homeassistant_start'
+                }))
+                ws.send(json.dumps({
+                    'id': 2,
+                    'type': 'subscribe_events',
+                    'event_type': 'homeassistant_started'
+                }))
+                self.log("Subscribed to events")
         
-        # Handle auth_invalid
-        elif msg_type == 'auth_invalid':
-            self.log(f"Authentication failed: {data}")
+            elif msg_type == 'auth_invalid':
+                self.log(f"AUTH FAILED: {data}")
         
-        # Handle result messages (subscription confirmations)
-        elif msg_type == 'result':
-            self.log(f"Subscription result: {data}")
+            elif msg_type == 'result':
+                self.log(f"Result: {data}")
         
-        # Handle events
-        elif msg_type == 'event':
-            event = data.get('event', {})
-            event_type = event.get('event_type')
-            if event_type in ['homeassistant_start', 'homeassistant_started']:
-                self.log(f"*** EVENT DETECTED: {event_type} ***")
+            elif msg_type == 'event':
+                event = data.get('event', {})
+                event_type = event.get('event_type')
+                self.log(f"*** EVENT: {event_type} ***")
+    
+        except Exception as e:
+            self.log(f"Parse error: {e}")
     
     def on_error(self, ws, error):
         logger.debug("WebSocket error: {error}")
