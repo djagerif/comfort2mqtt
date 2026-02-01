@@ -560,8 +560,12 @@ class HAEventLogger:
             logger.error(f"Error processing WebSocket message: {e}")
     
     def on_error(self, ws, error):
-        if not isinstance(error, Exception) or '502' not in str(error):
-            logger.error(f"WebSocket error: {error}")
+        # Suppress expected restart errors unless in DEBUG mode
+        if logger.level > logging.DEBUG:
+            error_str = str(error)
+            if any(x in error_str for x in ['502', 'Bad Gateway', 'opcode=8', 'fin=1']):
+                return  # Silently ignore in INFO/WARNING mode
+        logger.error(f"WebSocket error: {error}")
     
     def on_close(self, ws, close_status_code, close_msg):
         pass
@@ -576,6 +580,9 @@ class HAEventLogger:
    
     def start_monitoring(self):
         """Start the WebSocket monitoring in a separate thread"""
+        current_level = logging.getLogger().getEffectiveLevel()  # Get the effective logging level
+        if current_level > logging.DEBUG:
+            logging.getLogger('websocket').setLevel(logging.WARNING)
         
         def run_monitor():
             while True:
