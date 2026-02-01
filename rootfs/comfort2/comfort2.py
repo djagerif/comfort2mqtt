@@ -517,6 +517,7 @@ class HAEventLogger:
         self.ws = None
         self.monitor_thread = None
         self.authenticated = False
+        self.log(f"Token preview: {self.supervisor_token[:20]}...")
         
     def log(self, message):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
