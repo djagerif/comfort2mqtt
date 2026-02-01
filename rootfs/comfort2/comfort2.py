@@ -516,43 +516,33 @@ class HAEventLogger:
         self.ws_url = 'ws://supervisor/core/websocket'
         self.ws = None
         self.monitor_thread = None
-        logger.debug("HAEventLogger_init")
+        self.authenticated = False
+#        logger.debug("HAEventLogger_init")
         
     def log(self, message):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         print(f"[{timestamp}] {message}")
-        logger.debug("HAEventLogger_log")
+#        logger.debug("HAEventLogger_log")
     
     def on_message(self, ws, message):
+        self.log(f"Received message: {message}")
         data = json.loads(message)
-        logger.debug("HAEventLogger_on_message")
-        if data.get('type') == 'event':
-            event = data.get('event', {})
-            event_type = event.get('event_type')
-            if event_type in ['homeassistant_start', 'homeassistant_started']:
-                logger.debug("EVENT DETECTED: {event_type}")
-    
-    def on_error(self, ws, error):
-        logger.debug("WebSocket error: {error}")
-    
-    def on_close(self, ws, close_status_code, close_msg):
-        logger.debug("WebSocket connection closed")
-    
-    def on_open(self, ws):
-        logger.debug("WebSocket connected")
+        msg_type = data.get('type')
         
-        def auth_and_subscribe():
-            # Wait for auth_required message (it comes automatically)
-            # Then send auth
+        # Handle auth_required
+        if msg_type == 'auth_required':
+            self.log("Auth required - sending token")
             ws.send(json.dumps({
                 'type': 'auth',
                 'access_token': self.supervisor_token
             }))
+        
+        # Handle auth_ok
+        elif msg_type == 'auth_ok':
+            self.log("Authentication successful")
+            self.authenticated = True
             
-            # Subscribe to events after a short delay to allow auth to complete
-            #import time
-            time.sleep(0.5)
-            
+            # Now subscribe to events
             ws.send(json.dumps({
                 'id': 1,
                 'type': 'subscribe_events',
@@ -565,11 +555,34 @@ class HAEventLogger:
                 'event_type': 'homeassistant_started'
             }))
             
-            logger.debug("Subscribed to homeassistant_start and homeassistant_started events")
+            self.log("Subscribed to homeassistant_start and homeassistant_started events")
         
-        # Run auth in a separate thread to not block
-        threading.Thread(target=auth_and_subscribe, daemon=True).start()
+        # Handle auth_invalid
+        elif msg_type == 'auth_invalid':
+            self.log(f"Authentication failed: {data}")
+        
+        # Handle result messages (subscription confirmations)
+        elif msg_type == 'result':
+            self.log(f"Subscription result: {data}")
+        
+        # Handle events
+        elif msg_type == 'event':
+            event = data.get('event', {})
+            event_type = event.get('event_type')
+            if event_type in ['homeassistant_start', 'homeassistant_started']:
+                self.log(f"*** EVENT DETECTED: {event_type} ***")
     
+    def on_error(self, ws, error):
+        logger.debug("WebSocket error: {error}")
+    
+    def on_close(self, ws, close_status_code, close_msg):
+        logger.debug("WebSocket connection closed")
+        self.authenticated = False
+    
+    def on_open(self, ws):
+        logger.debug("WebSocket connected - waiting for auth_required")
+        
+   
     def start_monitoring(self):
         """Start the WebSocket monitoring in a separate thread"""
         logger.debug("Starting HA event monitoring")
