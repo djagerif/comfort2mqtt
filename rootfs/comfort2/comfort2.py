@@ -362,7 +362,6 @@ else:
         logger.error("Failed to get Addon Info: Error Code %s, %s", response.status_code, response.reason)
 
 logger.info('Importing the add-on configuration options')
-logger.debug("TOKEN: %s", TOKEN)
 
 MQTT_USER=option.broker_username
 MQTT_PASSWORD=option.broker_password
@@ -517,13 +516,16 @@ class HAEventLogger:
         self.ws_url = 'ws://supervisor/core/websocket'
         self.ws = None
         self.monitor_thread = None
+        logger.debug("HAEventLogger_init")
         
     def log(self, message):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         print(f"[{timestamp}] {message}")
+        logger.debug("HAEventLogger_log")
     
     def on_message(self, ws, message):
         data = json.loads(message)
+        logger.debug("HAEventLogger_on_message")
         if data.get('type') == 'event':
             event = data.get('event', {})
             event_type = event.get('event_type')
@@ -2747,7 +2749,9 @@ class Comfort2(mqtt.Client):
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         if os.name != 'nt':
             signal.signal(signal.SIGQUIT, self.exit_gracefully)
-           
+
+        self.handler.start_monitoring()   # Start Home Assistant Supervisor Event Monitor
+
         if COMFORT_CCLX_FILE != None:
             config_filename = self.sanitize_filename(COMFORT_CCLX_FILE,'cclx')
             if config_filename:
@@ -2764,8 +2768,6 @@ class Comfort2(mqtt.Client):
             device_properties['BridgeConnected'] = 1
             self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
             self.will_set(ALARMLWTTOPIC, payload="Offline", qos=2, retain=True)
-
-            self.handler.start_monitoring()   # Start Home Assistant Supervisor Event Monitor
 
         self.loop_start()   
 
