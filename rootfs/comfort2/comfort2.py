@@ -2750,7 +2750,7 @@ class Comfort2(mqtt.Client):
         if os.name != 'nt':
             signal.signal(signal.SIGQUIT, self.exit_gracefully)
 
-        self.handler.start_monitoring()   # Start Home Assistant Supervisor Event Monitor
+        self.ha_monitor.start_monitoring()   # Start Home Assistant Supervisor Event Monitor
 
         if COMFORT_CCLX_FILE != None:
             config_filename = self.sanitize_filename(COMFORT_CCLX_FILE,'cclx')
