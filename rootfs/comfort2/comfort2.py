@@ -580,11 +580,11 @@ class HAEventLogger:
    
     def start_monitoring(self):
         """Start the WebSocket monitoring in a separate thread"""
-        current_level = logging.getLogger().getEffectiveLevel()  # Get the effective logging level
-        if current_level > logging.DEBUG:
-            logging.getLogger('websocket').setLevel(logging.CRITICAL)  # Suppress websocket logs unless in DEBUG mode
-        else:
-            logging.getLogger('websocket').setLevel(logging.DEBUG)      # Enable websocket logs in DEBUG mode
+        #current_level = logging.getLogger().getEffectiveLevel()  # Get the effective logging level
+        #if current_level > logging.DEBUG:
+        logging.getLogger('websocket').setLevel(logging.CRITICAL)  # Suppress websocket logs to CRITICAL
+        #else:
+        #    logging.getLogger('websocket').setLevel(logging.DEBUG)      # Enable websocket logs in DEBUG mode
         
         def run_monitor():
             while True:
