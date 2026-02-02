@@ -584,7 +584,7 @@ class HAEventLogger:
         logger.info("LOGGER: %s", logger.getEffectiveLevel())
         logger.info("LOGGING.DEBUG: %s", logging.DEBUG)
         if current_level > logging.DEBUG:
-            logging.getLogger('websocket').setLevel(logging.WARNING)
+            logging.getLogger('websocket').setLevel(logging.CRITICAL)  # Suppress websocket logs unless in DEBUG mode
         
         def run_monitor():
             while True:
