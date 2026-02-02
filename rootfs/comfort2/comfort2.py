@@ -539,7 +539,7 @@ class HAEventLogger:
                 
                 # If we were waiting for HA to come back online
                 if self.restart_pending:
-                    logger.info("Home Assistant is ready - reloading entities")
+                    logger.info("Home Assistant is Ready")      # Ready to do Addon sync - see on_ha_ready()
                     self.on_ha_ready()
                     self.restart_pending = False
             
