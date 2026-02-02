@@ -560,12 +560,13 @@ class HAEventLogger:
             logger.error(f"Error processing WebSocket message: {e}")
     
     def on_error(self, ws, error):
-        # Suppress expected restart errors unless in DEBUG mode
-        if logger.getEffectiveLevel() > logging.DEBUG:
+        # Only log in DEBUG mode
+        if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
             error_str = str(error)
-            if any(x in error_str for x in ['502', 'Bad Gateway', 'opcode=8', 'fin=1']):
-                return  # Silently ignore in INFO/WARNING mode
-        logger.error(f"WebSocket error: {error}")
+        
+            # Clean up: take only the part before -+-+-
+            clean_msg = error_str.split('-+-+-')[0].strip()
+            logger.error(f"WebSocket error: {clean_msg}")
     
     def on_close(self, ws, close_status_code, close_msg):
         pass
