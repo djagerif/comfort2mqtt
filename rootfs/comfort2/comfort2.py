@@ -553,7 +553,7 @@ class HAEventLogger:
                     service = event_data.get('service')
                     
                     if domain == 'homeassistant' and service == 'restart':
-                        logger.info("Home Assistant restart detected")
+                        logger.info("Home Assistant Restart detected")
                         self.restart_pending = True
                         
         except Exception as e:
@@ -581,10 +581,10 @@ class HAEventLogger:
     def start_monitoring(self):
         """Start the WebSocket monitoring in a separate thread"""
         current_level = logging.getLogger().getEffectiveLevel()  # Get the effective logging level
-        logger.info("LOGGER: %s", logger.getEffectiveLevel())
-        logger.info("LOGGING.DEBUG: %s", logging.DEBUG)
         if current_level > logging.DEBUG:
             logging.getLogger('websocket').setLevel(logging.CRITICAL)  # Suppress websocket logs unless in DEBUG mode
+        else:
+            logging.getLogger('websocket').setLevel(logging.DEBUG)      # Enable websocket logs in DEBUG mode
         
         def run_monitor():
             while True:
