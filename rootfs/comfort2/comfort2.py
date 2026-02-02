@@ -561,8 +561,6 @@ class HAEventLogger:
     
     def on_error(self, ws, error):
         # Suppress expected restart errors unless in DEBUG mode
-        logger.info("LOGGER: %s", logger.getEffectiveLevel())
-        logger.info("LOGGING.DEBUG: %s", logging.DEBUG)
         if logger.getEffectiveLevel() > logging.DEBUG:
             error_str = str(error)
             if any(x in error_str for x in ['502', 'Bad Gateway', 'opcode=8', 'fin=1']):
@@ -583,6 +581,8 @@ class HAEventLogger:
     def start_monitoring(self):
         """Start the WebSocket monitoring in a separate thread"""
         current_level = logging.getLogger().getEffectiveLevel()  # Get the effective logging level
+        logger.info("LOGGER: %s", logger.getEffectiveLevel())
+        logger.info("LOGGING.DEBUG: %s", logging.DEBUG)
         if current_level > logging.DEBUG:
             logging.getLogger('websocket').setLevel(logging.WARNING)
         
