@@ -10,6 +10,7 @@
  - Update Copyright date.
  - MQTT Login Message, removed 'Comfort' string.
  - Removed codenotary from docker configuration as per Home Assistant OS update 17.
+ - Changed Addon to App as per latest Home Assistant 2026.2.0 definition. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! still to do !!!!!!
 
 ### Fixed
  

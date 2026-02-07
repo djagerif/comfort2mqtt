@@ -359,9 +359,9 @@ else:
         ADDON_SLUG = addon_info['data']['slug']
         ADDON_VERSION = addon_info['data']['version']
     else:
-        logger.error("Failed to get Addon Info: Error Code %s, %s", response.status_code, response.reason)
+        logger.error("Failed to get App Info: Error Code %s, %s", response.status_code, response.reason)
 
-logger.info('Importing the add-on configuration options')
+logger.info('Importing the App configuration options')
 
 MQTT_USER=option.broker_username
 MQTT_PASSWORD=option.broker_password
@@ -473,7 +473,7 @@ ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set"      # set the counter to a v
 
 COMFORTTIMERSTOPIC = DOMAIN+"/timer%d"                  #timer1,timer2,...sensor64
 
-logger.info('Completed importing addon configuration options')
+logger.info('Completed importing App configuration options')
 
 # The following variables values were passed through via the Home Assistant add on configuration options
 logger.debug('The following variable values were passed through via Home Assistant')

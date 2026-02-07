@@ -1,4 +1,4 @@
-# Home Assistant Add-on: Comfort to MQTT
+# Home Assistant App: Comfort to MQTT
 Cytech Comfort to MQTT bridge for Home Assistant.
 
 ![Supports aarch64 Architecture][aarch64-shield] ![Supports amd64 Architecture][amd64-shield]
@@ -12,7 +12,7 @@ Cytech Comfort to MQTT bridge for Home Assistant.
 
 For more information about Cytech Comfort systems, please see the [Cytech Technology Pte Ltd.][cytech] website.
 
-If you find this Add-on useful.  
+If you find this App useful.  
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/ingodejager)
 
@@ -20,7 +20,7 @@ If you find this Add-on useful.
 [cytech]: http://www.cytech.biz/index.html
 
 ## About
-This Addon is used to bridge an IP connected Cytech Comfort II ULTRA Alarm system to MQTT for use in Home Assistant. Other Comfort systems are partially supported but has not been tested.
+This App is used to bridge an IP connected Cytech Comfort II ULTRA Alarm system to MQTT for use in Home Assistant. Other Comfort systems are partially supported but has not been tested.
 
 ⚠️ This software is neither certified nor endorsed by Cytech Technology Pte Ltd.
 
@@ -41,6 +41,6 @@ The following objects are supported:
 
 <div style="text-align:center"> <img src="https://github.com/djagerif/comfort2mqtt/assets/5621764/64abe350-6b37-4b79-8fea-12fa5e89353a" alt="Comfort II ULTRA Keypad"/> </div>
 
-⚠️ This Add-on was specifically developed for Home Assistant OS and Comfort II ULTRA Alarm System with File System type `34`. As tested firmware is `7.201` on model CM9000-ULT. Home Assistant Container and Core have not been tested and is not supported at present.
+⚠️ This App was specifically developed for Home Assistant OS and Comfort II ULTRA Alarm System with File System type `34`. As tested firmware is `7.201` on model CM9000-ULT. Home Assistant Container and Core have not been tested and is not supported at present.
 
 Copyright 2026 Ingo de Jager. Licensed under Apache-2.0. For more details see the `LICENCE` file.

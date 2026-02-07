@@ -1,6 +1,6 @@
 #!/usr/bin/with-contenv bashio
 
-# Import the add-on configuration options as environment variables
+# Import the App configuration options as environment variables
 
 MQTT_USER=$(bashio::config 'mqtt_user')
 MQTT_PASSWORD=$(bashio::config 'mqtt_password')
