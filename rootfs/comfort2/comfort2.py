@@ -473,7 +473,7 @@ ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set"      # set the counter to a v
 
 COMFORTTIMERSTOPIC = DOMAIN+"/timer%d"                  #timer1,timer2,...sensor64
 
-logger.info('Completed importing App configuration options')
+logger.info('Completed importing the App configuration options')
 
 # The following variables values were passed through via the Home Assistant add on configuration options
 logger.debug('The following variable values were passed through via Home Assistant')

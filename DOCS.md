@@ -545,7 +545,7 @@ If your network is segmented using a firewall, or any other similar device, you 
 
 ### Option: `MQTT Transport Protocol` (Optional)
 
-  The MQTT Transport Protocol between the Add-on and MQTT Broker can either be `TCP` or `WebSockets`. The default is `TCP`.
+  The MQTT Transport Protocol between this App and MQTT Broker can either be `TCP` or `WebSockets`. The default is `TCP`.
 
 ### Option: `MQTT Transport Encryption` (Optional)
 
