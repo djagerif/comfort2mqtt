@@ -1,4 +1,4 @@
-## [1.6.1] - Busy...
+## [1.6.1] - 2026-02-19
 
 ### Added
  - Updated DOCS.md to include refresh key value when `SN01` command fails.
