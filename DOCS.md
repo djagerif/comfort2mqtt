@@ -1,25 +1,25 @@
-# Home Assistant Add-on: Comfort to MQTT
+# Home Assistant App: Comfort to MQTT
 
 ## Installation
 
-The installation of this add-on is pretty straightforward and no different in comparison to other manually installed Home Assistant add-ons.
+The installation of this App is pretty straightforward and no different in comparison to other manually installed Home Assistant Apps.
 
-1. In Home Assistant, go to `Settings` -> `Add-ons` and click the `ADD-ON STORE` button.
+1. In Home Assistant, go to `Settings` -> `Apps` and click the `Install app` button.
 
-2. Once in the ADD-ON STORE, click the three dots `...` in the top-right corner and select `Repositories`
+2. Once in the App Store, click the three dots `...` in the top-right corner and select `Repositories`
 
 3. Paste the ```https://github.com/djagerif/comfort2mqtt``` URL on the line provided and click `ADD`.
 
-4. When the Add-on URL is successfully loaded you can click `Close`.
+4. When the App URL is successfully loaded you can click `Close`.
 
-  After a few seconds you should now see the following Add-on. If not, navigate back to `Settings`, go to `Add-ons` -> `Add-on Store` once again.
+  After a few seconds you should now see the following App. If not, navigate back to `Settings`, go to `Apps` -> `Install app` once again.
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/181c6e31-8210-4fb1-9e30-f69a3a416e20)
 
 
 Even though this is a mostly Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Alpine Linux with other platforms remaining untested and it's unclear if it will work or not.
 
-⚠️ This Add-on requires initial configuration to connect with Home Assistant and your Comfort systems.
+⚠️ This App requires initial configuration to connect with Home Assistant and your Comfort systems.
 
 
 ## MQTT
@@ -124,7 +124,7 @@ comfort2mqtt/sensor<0 to 31>/set - 16-bit value
 
 ## Home Assistant Configuration
 
-Manual Sensor creation is required in your `configuration.yaml` file before this Add-on can start. 
+Manual Sensor creation is required in your `configuration.yaml` file before this App can start. 
 
 ![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) It must be noted that Comfort requires the `#` key during arming to acknowledge and bypass any open zones. Because the `Home Assistant Alarm Control Panel` does not have a native `#` key, the `CUSTOM BYPASS` key is utilised for that purpose and send the appropriate `#` keycode (`KD1A`) to Comfort.
 
@@ -149,8 +149,8 @@ mqtt:
       availability_topic: "comfort2mqtt/alarm/online"
       payload_available: 1
       payload_not_available: 0
-      code: "1234"  # Code can be different from Comfort's. This code is for the Add-on while the Comfort code is to login to Comfort itself.
-                    # Note: If the Comfort User Code does not allow Disarm then the Add-on will not be able to Disarm.
+      code: "1234"  # Code can be different from Comfort's. This code is for the App itself while the Comfort code is to login to Comfort itself.
+                    # Note: If the Comfort User Code does not allow Disarm then the App will not be able to Disarm.
                     # Secrets can be used EG. "code: !secret comfort_pin
       
   sensor:
@@ -250,7 +250,7 @@ Because `Counters` can be used for other uses other than Lights, the `Kitchen Li
 
 ### Auto-Discovered Objects
 
-When the Add-on is fully configured and running, there will be two new MQTT Devices with several System Entities auto-discovered as per below. The values for these entities are retrieved from both the Comfort system as well as the alarm configuration `CCLX` file. If the `CCLX` file is not present then no object enrichment will be done and default names will be used for entities, especially ZoneWord strings and Object Descriptions as per the `CCLX` file.
+When the App is fully configured and running, there will be two new MQTT Devices with several System Entities auto-discovered as per below. The values for these entities are retrieved from both the Comfort system as well as the alarm configuration `CCLX` file. If the `CCLX` file is not present then no object enrichment will be done and default names will be used for entities, especially ZoneWord strings and Object Descriptions as per the `CCLX` file.
 
 ![image](https://github.com/user-attachments/assets/faeaa08b-c8f6-43db-a946-46ee9762b35b)
 
@@ -276,7 +276,7 @@ tap_action:
     entity_id: alarm_control_panel.comfort_alarm
 ```
 
-![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) The `Comfort to MQTT` Add-on changes the behaviour of the `Custom bypass` arm function and uses it to send the `#` key code instead. Please unselect the `Custom bypass` option when creating the `Alarm Control Panel` card.
+![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) The `Comfort to MQTT` App changes the behaviour of the `Custom bypass` arm function and uses it to send the `#` key code instead. Please unselect the `Custom bypass` option when creating the `Alarm Control Panel` card.
 
 
 ## Home Assistant - Alarm State Colours (Optional)
@@ -321,7 +321,7 @@ alarm:
 
 ## Home Assistant - 'Refresh' Automation (Optional)
 
-When Home Assistant Restarts (Not Reload), it only restarts Home Assistant itself, all Add-on's remain running which could lead to some entities displaying an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to Restart, or better yet, Refresh the `Comfort to MQTT` Add-on when Home Assistant restarts or when the configuration.yaml file is reloaded from `Developer tools` -> `YAML` -> `YAML configuration reloading`.
+When Home Assistant Restarts (Not Reload), it only restarts Home Assistant itself, all Apps remain running which could lead to some entities displaying an `Unknown` status. This status will update on the next change but for Alarm sensors that is not acceptable. A workaround to the problem is to Restart, or better yet, Refresh the `Comfort to MQTT` App when Home Assistant restarts or when the configuration.yaml file is reloaded from `Settings` -> `Developer tools` -> `YAML` -> `YAML configuration reloading`.
 
 To automate this, you need to enable this hidden entity created by the `Home Assistant Supervisor`.
 
@@ -331,12 +331,12 @@ To automate this, you need to enable this hidden entity created by the `Home Ass
 
 Next you need to create an Automation that triggers on MQTT entry changes in the configuration.yaml file as per below.
 
-To find your Add-on name for `service: hassio._restart` you can do a `ha ` query from the commandline interface and look for the `slug:` keyword or, after starting the Add-on, note the `Hostname` from the Add-on `Info` tab.
+To find your App name for `service: hassio._restart` you can do a `ha ` query from the commandline interface and look for the `slug:` keyword or, after starting the App, note the `Hostname` from the App `Info` tab.
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/0b30bded-fe82-4c1d-a278-2c2789a4ef1f)
 
 ```
-alias: Refresh Comfort to MQTT Add-on
+alias: Refresh Comfort to MQTT App
 description: >-
   When Home Assistant MQTT Configuration changes then refresh Comfort to MQTT entities.
 trigger:
@@ -354,17 +354,19 @@ action:
   - service: notify.persistent_notification
     metadata: {}
     data:
-      message: Home Assistant Add-on Refresh requested
-      title: Comfort to MQTT Add-on
-  - alias: Request a Refresh of all MQTT entities without a full Add-on reload
+      message: Home Assistant App Refresh requested
+      title: Comfort to MQTT App
+  - alias: Request a Refresh of all MQTT entities without a full App reload
     service: mqtt.publish
     data:
       topic: comfort2mqtt/alarm/refresh
-      payload: 000F8EC8 <- Provide your unique KEY value here. "Refresh Key:" can be found on startup in the Add-on log file. 
+      payload: 000F8EC8 <- Provide your unique KEY value here. "Refresh Key:" can be found on startup in the App log file. 
       qos: "2"
 mode: single
 ```
 ⚠️ **Note:** When Comfort to MQTT starts up it will print the KEY value to be used for Refresh function authentication. Incorrect key values will be ignored.
+
+⚠️ **Note:** If for some reason the 'SN01' command fails the refresh key will be `00000000` as the key is derived from the SN01 command response.
 
 `2024-06-12 17:45:27 INFO     Refresh Key: 000F8EC8`
 
@@ -423,7 +425,7 @@ mode: single
 
 The latest Comfort ARM-powered boards can report individual Battery/Charge and DC Supply voltages. Below is an automation you can use to query Comfort every minute for these values. You can safely extend the interval to 15 minutes or more as voltages don't usually change abruptly in a mostly-floating voltage device operation.
 
-⚠️ **Note:** If you try this on a non-ARM powered mainboard then a warning message will be displayed in the Addon log as shown below.
+⚠️ **Note:** If you try this on a non-ARM powered mainboard then a warning message will be displayed in the App log as shown below.
 
 `2024-08-08 19:05:22 WARNING  Unsupported MQTT Battery Update query received for ID: <UCMID>.`  
 `2024-08-08 19:05:22 WARNING  Valid ID's: [0,1,33-39] with ARM-powered Comfort is required.`
@@ -499,7 +501,7 @@ mode: single
 
 ## Hardware and Interface support
 
-This Add-on was specifically developed for the Comfort II ULTRA range of Alarm Systems with File System type `34`. Comfort II ULTRA firmware as tested is `7.201`. If any other Comfort system, model or firmware lower than `7.201`, is used then results may be unexpected.
+This App was specifically developed for the Comfort II ULTRA range of Alarm Systems with File System type `34`. Comfort II ULTRA firmware as tested is `7.201`. If any other Comfort system, model or firmware lower than `7.201`, is used then results may be unexpected.
 
 The following Cytech Universal Communications Modules (UCM) Ethernet modules are supported:
 
@@ -522,16 +524,16 @@ If your network is segmented using a firewall, or any other similar device, you 
 [mosquitto]: https://mosquitto.org/
 
 
-## Add-on Configuration
+## App Configuration
 
 
 ### Option: `MQTT Broker Address` (Optional)
 
-  The `MQTT Broker Address` is the Hostname, or IP address, of the MQTT Broker used by both Home Assistant and the Comfort to MQTT Add-on. By default the hostname is `core-mosquitto`. If another MQTT Broker is used then this needs to reflect the IP address or Hostname of that instance.
+  The `MQTT Broker Address` is the Hostname, or IP address, of the MQTT Broker used by both Home Assistant and the Comfort to MQTT App. By default the hostname is `core-mosquitto`. If another MQTT Broker is used then this needs to reflect the IP address or Hostname of that instance.
 
 ### Option: `MQTT Broker Username`
 
-  The Username with Read/Write priveledges in MQTT that will be used for connection authentication. For more information on Users and Rights, please refer to the Home Assistant Mosquitto Add-on documentation or the Mosquitto [Homepage][mosquitto].
+  The Username with Read/Write priveledges in MQTT that will be used for connection authentication. For more information on Users and Rights, please refer to the Home Assistant Mosquitto App documentation or the Mosquitto [Homepage][mosquitto].
 
 ### Option: `MQTT Broker Password`
 
@@ -543,7 +545,7 @@ If your network is segmented using a firewall, or any other similar device, you 
 
 ### Option: `MQTT Transport Protocol` (Optional)
 
-  The MQTT Transport Protocol between the Add-on and MQTT Broker can either be `TCP` or `WebSockets`. The default is `TCP`.
+  The MQTT Transport Protocol between this App and MQTT Broker can either be `TCP` or `WebSockets`. The default is `TCP`.
 
 ### Option: `MQTT Transport Encryption` (Optional)
 
@@ -583,7 +585,7 @@ If your network is segmented using a firewall, or any other similar device, you 
 
   Comfort Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc. Place this file in the Home Assistant `addon_configs/<comfort2mqtt slug>` folder. If no file is specified then the default `comfigurator.cclx` will be used.
 
-  To upload a file to the `addon_configs` directory you could use something like [Samba share][samba] Add-on or similar allowing filesystem access to selected directories on Home Assistant.
+  To upload a file to the `addon_configs` directory you could use something like [Samba share][samba] App or similar allowing filesystem access to selected directories on Home Assistant.
 
   ⚠️ **Note:** The CCLX filename cannot contain spaces.
 
@@ -591,7 +593,7 @@ If your network is segmented using a firewall, or any other similar device, you 
       
 ### Option: `Global Log Verbosity` (Optional)
 
-  This option controls the level of log output by the Add-on and can be changed to be more or less verbose, which might be useful when you are dealing with an unknown issue. Possible values are:
+  This option controls the level of log output by the App and can be changed to be more or less verbose, which might be useful when you are dealing with an unknown issue. Possible values are:
 
 - `DEBUG`:   Shows detailed debug information.
 - `ERROR`:   Runtime errors that do not require immediate action.
@@ -618,7 +620,7 @@ If your network is segmented using a firewall, or any other similar device, you 
 
 ### Option: `Comfort Responses` (Optional)
 
-  This sets the number of Responses that the Add-on subscribes to. Valid range values are from 0 - 1024. If you subscribe to the first 100 responses and trigger a response number EG. 200, then it will not be sent to Comfort for execution. Only subscribed responses are executed. The Default value is `0`.
+  This sets the number of Responses that the App subscribes to. Valid range values are from 0 - 1024. If you subscribe to the first 100 responses and trigger a response number EG. 200, then it will not be sent to Comfort for execution. Only subscribed responses are executed. The Default value is `0`.
 
 ### Option: `Comfort MQTT Bridge Battery Update Target ID` (Optional)
 
@@ -626,7 +628,7 @@ If your network is segmented using a firewall, or any other similar device, you 
 
 ### Option: `Set Comfort Time and Date` (Optional)
 
-  Set Comfort Time and Date when the Add-on logs in and automatically every day at midnight. The default value is `False`.
+  Set Comfort Time and Date when the App logs in and automatically every day at midnight. The default value is `False`.
 
 
 ## Support
@@ -638,11 +640,11 @@ Got questions?
 
 ## Authors & Contributors
 
-The original source for this project was done by [koocyrat][koochyrat]. This project is a modified, and slightly extended version, of the same source project and adapted to a native Home Assistant Add-on. Among several posts, various Comfort forum members also had good suggestions which, in part, contributed to this project as inspiration.
+The original source for this project was done by [koocyrat][koochyrat]. This project is a modified, and slightly extended version, of the same source project and adapted to a native Home Assistant App. Among several posts, various Comfort forum members also had good suggestions which, in part, contributed to this project as inspiration.
 
 ## Disclaimer
 
-Not being a fulltime programmer, but rather just a tinkerer, I try and keep things working but changes to Comfort firmware and features might not always work with this Add-on. I will try and update this Add-on as time and skill allow. A full disclaimer of warranty is included in the Apache licence terms and conditions for use below.
+Not being a fulltime programmer, but rather just a tinkerer, I try and keep things working but changes to Comfort firmware and features might not always work with this App. I will try and update this App as time and skill allow. A full disclaimer of warranty is included in the Apache licence terms and conditions for use below.
 
 
 ## License

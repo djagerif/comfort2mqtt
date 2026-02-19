@@ -39,6 +39,10 @@ import secrets
 import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
+import websocket
+
+
+
 DOMAIN = "comfort2mqtt"
 ADDON_SLUG = ''
 ADDON_VERSION = "N/A"
@@ -355,9 +359,9 @@ else:
         ADDON_SLUG = addon_info['data']['slug']
         ADDON_VERSION = addon_info['data']['version']
     else:
-        logger.error("Failed to get Addon Info: Error Code %s, %s", response.status_code, response.reason)
+        logger.error("Failed to get App Info: Error Code %s, %s", response.status_code, response.reason)
 
-logger.info('Importing the add-on configuration options')
+logger.info('Importing the App configuration options')
 
 MQTT_USER=option.broker_username
 MQTT_PASSWORD=option.broker_password
@@ -469,7 +473,7 @@ ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set"      # set the counter to a v
 
 COMFORTTIMERSTOPIC = DOMAIN+"/timer%d"                  #timer1,timer2,...sensor64
 
-logger.info('Completed importing addon configuration options')
+logger.info('Completed importing the App configuration options')
 
 # The following variables values were passed through via the Home Assistant add on configuration options
 logger.debug('The following variable values were passed through via Home Assistant')
@@ -505,6 +509,105 @@ PINCODE = COMFORT_LOGIN_ID
 BUFFER_SIZE = 4096
 TIMEOUT = timedelta(seconds=30)                         #Comfort will disconnect if idle for 120 secs, so make sure this is less than that
 RETRY = timedelta(seconds=10)
+
+class HAEventLogger:
+    def __init__(self):
+        self.supervisor_token = TOKEN
+        self.ws_url = 'ws://supervisor/core/api/websocket'
+        self.ws = None
+        self.monitor_thread = None
+        self.restart_pending = False
+        
+    def on_message(self, ws, message):
+        try:
+            data = json.loads(message)
+            msg_type = data.get('type')
+            
+            if msg_type == 'auth_required':
+                ws.send(json.dumps({
+                    'type': 'auth',
+                    'access_token': self.supervisor_token
+                }))
+            
+            elif msg_type == 'auth_ok':
+                # Subscribe to call_service events
+                ws.send(json.dumps({
+                    'id': 1,
+                    'type': 'subscribe_events',
+                    'event_type': 'call_service'
+                }))
+                
+                # If we were waiting for HA to come back online
+                if self.restart_pending:
+                    logger.info("Home Assistant is Ready")      # Ready to do Addon sync - see on_ha_ready()
+                    self.on_ha_ready()
+                    self.restart_pending = False
+            
+            elif msg_type == 'event':
+                event = data.get('event', {})
+                event_type = event.get('event_type')
+                
+                if event_type == 'call_service':
+                    event_data = event.get('data', {})
+                    domain = event_data.get('domain')
+                    service = event_data.get('service')
+                    
+                    if domain == 'homeassistant' and service == 'restart':
+                        logger.info("Home Assistant Restart detected")
+                        self.restart_pending = True
+                        
+        except Exception as e:
+            logger.error(f"Error processing WebSocket message: {e}")
+    
+    def on_error(self, ws, error):
+        # Only log in DEBUG mode
+        if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+            error_str = str(error)
+        
+            # Clean up: take only the part before -+-+-
+            clean_msg = error_str.split('-+-+-')[0].strip()
+            logger.error(f"WebSocket error: {clean_msg}")
+    
+    def on_close(self, ws, close_status_code, close_msg):
+        pass
+    
+    def on_open(self, ws):
+        logger.info("Connected to Home Assistant WebSocket")
+        
+    def on_ha_ready(self):
+        """Called when HA is ready after a restart"""
+        # Entity reload logic here. Still to be done !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        pass
+   
+    def start_monitoring(self):
+        """Start the WebSocket monitoring in a separate thread"""
+        #current_level = logging.getLogger().getEffectiveLevel()  # Get the effective logging level
+        #if current_level > logging.DEBUG:
+        logging.getLogger('websocket').setLevel(logging.CRITICAL)  # Suppress websocket logs to CRITICAL
+        #else:
+        #    logging.getLogger('websocket').setLevel(logging.DEBUG)      # Enable websocket logs in DEBUG mode
+        
+        def run_monitor():
+            while True:
+                try:
+                    self.ws = websocket.WebSocketApp(
+                        self.ws_url,
+                        on_open=self.on_open,
+                        on_message=self.on_message,
+                        on_error=self.on_error,
+                        on_close=self.on_close
+                    )
+                    self.ws.run_forever()
+                    
+                except Exception as e:
+                    if '502' not in str(e):
+                        logger.error(f"WebSocket connection error: {e}")
+
+                time.sleep(5)
+        
+        self.monitor_thread = threading.Thread(target=run_monitor, daemon=True)
+        self.monitor_thread.start()
+        logger.info("Home Assistant Event Monitor started")
 
 class ComfortLUUserLoggedIn(object):
     def __init__(self, datastr="", user=1):             
@@ -1179,6 +1282,7 @@ class Comfort2(mqtt.Client):
         self.connected = False
         self.username_pw_set(mqtt_username, mqtt_password)
         self.version = mqtt_version
+        self.ha_monitor = HAEventLogger()
 
     def handler(self, signum, frame):                 # Ctrl-Z Keyboard Interrupt
         logger.debug('SIGTSTP (Ctrl-Z) intercepted')
@@ -2657,7 +2761,9 @@ class Comfort2(mqtt.Client):
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         if os.name != 'nt':
             signal.signal(signal.SIGQUIT, self.exit_gracefully)
-           
+
+        self.ha_monitor.start_monitoring()   # Start Home Assistant Supervisor Event Monitor
+
         if COMFORT_CCLX_FILE != None:
             config_filename = self.sanitize_filename(COMFORT_CCLX_FILE,'cclx')
             if config_filename:
@@ -2827,7 +2933,7 @@ class Comfort2(mqtt.Client):
                                 luMsg = ComfortLUUserLoggedIn(line[1:])
                                 if luMsg.user != 0:
                                     logger.info("Comfort %s Login - %s", luMsg.method, f"User {luMsg.user}" if luMsg.user != 254 else "Engineer")
-                                    message_topic = f"Comfort {luMsg.method} Login - {f'User {luMsg.user}' if luMsg.user != 254 else 'Engineer'}"
+                                    message_topic = f"{luMsg.method} Login - {f'User {luMsg.user}' if luMsg.user != 254 else 'Engineer'}"
                                     self.publish(ALARMMESSAGETOPIC, message_topic, qos=2, retain=False)
 
                             elif line[1:3] == "Z?":                             # Zones/Inputs

@@ -1,3 +1,20 @@
+## [1.6.1] - Busy...
+
+### Added
+ - Updated DOCS.md to include refresh key value when `SN01` command fails.
+
+### Breaking Changes ###
+ - Remove support for i386, armhf and armv7 bases as per Home Assistant base image removal.
+
+### Changed
+ - Update Copyright date.
+ - MQTT Login Message, removed 'Comfort' string.
+ - Removed codenotary from docker configuration as per Home Assistant OS update 17.
+ - Rename Add-ons to Apps as per latest Home Assistant 2026.2.0 definition.
+
+### Fixed
+ 
+
 ## [1.6.0] - 2025-10-11
 
 ### Added
