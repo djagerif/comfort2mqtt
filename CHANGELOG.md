@@ -5,6 +5,7 @@
 ### Breaking Changes ###
  
 ### Changed
+ - Update DOCS.md.
  
 ### Fixed
 
