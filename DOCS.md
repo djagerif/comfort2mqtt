@@ -19,7 +19,7 @@ The installation of this App is pretty straightforward and no different in compa
 
 Even though this is a mostly Python implementation, it's currently only tested on an amd64 platform. It has been developed on 64-bit Alpine Linux with other platforms remaining untested and it's unclear if it will work or not.
 
-⚠️ This App requires initial configuration to connect with Home Assistant and your Comfort systems.
+⚠️ This App requires initial configuration to connect with Home Assistant and your Comfort system.
 
 
 ## MQTT
