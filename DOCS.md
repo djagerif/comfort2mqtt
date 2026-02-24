@@ -587,7 +587,7 @@ If your network is segmented using a firewall, or any other similar device, you 
 
   To upload a file to the `addon_configs` directory you could use something like [Samba share][samba] App or similar allowing filesystem access to selected directories on Home Assistant.
 
-  ⚠️ **Note:** The CCLX filename cannot contain spaces.
+  ⚠️ **Note:** The CCLX filename cannot contain spaces or any special characters.
 
   [samba]:https://github.com/home-assistant/addons/tree/master/samba
       
