@@ -598,7 +598,7 @@ If your network is segmented using a firewall, or any other similar device, you 
 - `DEBUG`:   Shows detailed debug information.
 - `ERROR`:   Runtime errors that do not require immediate action.
 - `WARNING`: Exceptional occurrences that are not errors.
-- `INFO`:    Normal, usually, interesting events (`DEFAULT`).
+- `INFO`:    Normal, usually interesting events (`DEFAULT`).
 
   Please note that each level automatically includes log messages from a more severe level, e.g. `DEBUG` also shows `INFO` messages. By default, the `log_level` is set to `INFO`, which is the recommended setting unless you are troubleshooting.
 
