@@ -3485,8 +3485,12 @@ else:
             logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
             tls_args = {}
             tls_args['ca_certs'] = ca_cert
-            mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)
-            #mqttc.tls_insecure_set(True)
+            #mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)    # Deprecated in Python 3.12, replaced with SSLContext. Minimum TLS version set to 1.2 to ensure compatibility with older MQTT brokers.
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            context.minimum_version = ssl.TLSVersion.TLSv1_2
+            context.load_verify_locations(ca_cert)
+            tls_args.pop('ca_certs', None)  # Already loaded into context
+            mqttc.tls_set(ssl_context=context)
             mqttc.tls_insecure_set(False)
 
         case _:
