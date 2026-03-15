@@ -3419,7 +3419,7 @@ class Comfort2(mqtt.Client):
 def validate_certificate(certificate):
     # Check Valid Certificate file and Valid Dates. NotBefore and NotAfter must be within datetime.now()
 
-    if not os.path.isfile(certificate):
+    if certificate is None or not os.path.isfile(certificate):
         return 2    # Missing certificate
     # Open the certificate file in binary mode
     with open(certificate, 'rb') as cert_file:
@@ -3457,9 +3457,12 @@ certs: str = "/config/certificates"                 # Certificates directory dir
 if MQTT_ENCRYPTION and not os.path.isdir(certs):    # Display warning if Encryption is enabled but certificates directory is not found.
     logging.debug('"/config/certificates" directory not found.')
 
-if((MQTT_CA_CERT and MQTT_CA_CERT.strip())): ca_cert = os.sep.join([certs, MQTT_CA_CERT])
-if((MQTT_CLIENT_CERT and MQTT_CLIENT_CERT.strip())): client_cert = os.sep.join([certs, MQTT_CLIENT_CERT])
-if((MQTT_CLIENT_KEY and MQTT_CLIENT_KEY.strip())): client_key = os.sep.join([certs, MQTT_CLIENT_KEY])
+#if((MQTT_CA_CERT and MQTT_CA_CERT.strip())): ca_cert = os.sep.join([certs, MQTT_CA_CERT])
+#if((MQTT_CLIENT_CERT and MQTT_CLIENT_CERT.strip())): client_cert = os.sep.join([certs, MQTT_CLIENT_CERT])
+#if((MQTT_CLIENT_KEY and MQTT_CLIENT_KEY.strip())): client_key = os.sep.join([certs, MQTT_CLIENT_KEY])
+ca_cert = os.sep.join([certs, MQTT_CA_CERT]) if (MQTT_CA_CERT and MQTT_CA_CERT.strip()) else None
+client_cert = os.sep.join([certs, MQTT_CLIENT_CERT]) if (MQTT_CLIENT_CERT and MQTT_CLIENT_CERT.strip()) else None
+client_key = os.sep.join([certs, MQTT_CLIENT_KEY]) if (MQTT_CLIENT_KEY and MQTT_CLIENT_KEY.strip()) else None
 
 if not MQTT_ENCRYPTION:
     logging.warning('MQTT Transport Layer Security disabled.')
@@ -3490,7 +3493,6 @@ else:
             context.minimum_version = ssl.TLSVersion.TLSv1_2
             context.load_verify_locations(ca_cert)
             tls_args.pop('ca_certs', None)  # Already loaded into context
-            #mqttc.tls_set(ssl_context=context)
             mqttc.tls_set_context(context)
             mqttc.tls_insecure_set(False)
 
