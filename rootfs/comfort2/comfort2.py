@@ -3490,7 +3490,8 @@ else:
             context.minimum_version = ssl.TLSVersion.TLSv1_2
             context.load_verify_locations(ca_cert)
             tls_args.pop('ca_certs', None)  # Already loaded into context
-            mqttc.tls_set(ssl_context=context)
+            #mqttc.tls_set(ssl_context=context)
+            mqttc.tls_set_context(context)
             mqttc.tls_insecure_set(False)
 
         case _:
