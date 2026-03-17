@@ -513,7 +513,7 @@ RETRY = timedelta(seconds=10)
 class HAEventLogger:
     def __init__(self):
         self.supervisor_token = TOKEN
-        self.ws_url = 'ws://supervisor/core/api/websocket'
+        self.ws_url = 'wss://supervisor/core/api/websocket'
         self.ws = None
         self.monitor_thread = None
         self.restart_pending = False

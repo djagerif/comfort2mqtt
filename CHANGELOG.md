@@ -6,6 +6,7 @@
  
 ### Changed
  - Update DOCS.md.
+ - Updated TLS to minimum v1.2 and enable v1.3.
  
 ### Fixed
 
