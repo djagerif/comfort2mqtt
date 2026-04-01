@@ -19,9 +19,13 @@
 # Notes:
 #
 #
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from cryptography.exceptions import UnsupportedAlgorithm
+
 import defusedxml.ElementTree as ET
 import ssl
-from OpenSSL import crypto
+#from OpenSSL import crypto
 import os
 import requests
 import json
@@ -34,14 +38,12 @@ import time
 import datetime
 import threading
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
 import websocket
-
-
 
 DOMAIN = "comfort2mqtt"
 ADDON_SLUG = ''
@@ -3416,7 +3418,7 @@ class Comfort2(mqtt.Client):
                 self.loop_stop
 
 
-def validate_certificate(certificate):
+""" def validate_certificate(certificate):
     # Check Valid Certificate file and Valid Dates. NotBefore and NotAfter must be within datetime.now()
 
     if certificate is None or not os.path.isfile(certificate):
@@ -3449,6 +3451,28 @@ def validate_certificate(certificate):
         else:
             return 1    # Expired certificate
     except crypto.Error as e:
+        raise ValueError(f"Error loading certificate: {e}")
+ """
+def validate_certificate(certificate):
+    # Check Valid Certificate file and Valid Dates. NotBefore and NotAfter must be within datetime.now()
+    if certificate is None or not os.path.isfile(certificate):
+        return 2    # Missing certificate
+    # Open the certificate file in binary mode
+    with open(certificate, 'rb') as cert_file:
+        cert_data = cert_file.read()
+    try:
+        # Load the certificate using the binary data
+        cert = x509.load_pem_x509_certificate(cert_data, default_backend())
+        # Check the 'notAfter' and 'notBefore' attributes
+        ValidTo = cert.not_valid_after_utc
+        ValidFrom = cert.not_valid_before_utc
+
+        now = datetime.now(timezone.utc)
+        if (now >= ValidFrom) and (now < ValidTo):
+            return 0    # Valid certificate
+        else:
+            return 1    # Expired certificate
+    except (ValueError, UnsupportedAlgorithm) as e:
         raise ValueError(f"Error loading certificate: {e}")
 
 mqttc = Comfort2(callback_api_version = mqtt.CallbackAPIVersion.VERSION2, client_id=mqtt_client_id, protocol=mqtt.MQTTv5, transport=MQTT_PROTOCOL)
