@@ -9,6 +9,8 @@ FROM $BUILD_FROM
 #RUN pip install paho-mqtt pyopenssl requests defusedxml
 #RUN pip install websocket-client
 
+COPY requirements.txt .
+
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
