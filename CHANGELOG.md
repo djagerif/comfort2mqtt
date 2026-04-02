@@ -8,6 +8,7 @@
  - Update DOCS.md.
  - Updated TLS to minimum v1.2 and enable v1.3 support.
  - Migrate from pyopenssl to native cryptography library.
+ - Updated copyright date to 2026.
  
 ### Fixed
 

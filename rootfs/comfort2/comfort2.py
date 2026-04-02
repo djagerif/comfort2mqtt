@@ -1,8 +1,8 @@
 # Copyright(c) 2018 Khor Chin Heong (koochyrat@gmail.com) for original project code and additional 
-# copyright(c) 2025 Ingo de Jager (ingodejager@gmail.com) for modifications done 
+# copyright(c) 2026 Ingo de Jager (ingodejager@gmail.com) for modifications done 
 # to the original project sources contained in this project.
 #
-# Modified by Ingo de Jager 2025 (ingodejager@gmail.com)
+# Modified by Ingo de Jager 2026 (ingodejager@gmail.com)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -480,7 +480,7 @@ logger.info('Completed importing the App configuration options')
 # The following variables values were passed through via the Home Assistant add on configuration options
 logger.debug('The following variable values were passed through via Home Assistant')
 logger.debug('MQTT_USER = %s', MQTT_USER)
-logger.debug('MQTT_PASSWORD = ******')
+logger.debug('MQTT_PASSWORD = **REDACTED**')
 logger.debug('MQTT_SERVER = %s', MQTT_SERVER)
 
 if not MQTT_ENCRYPTION: logger.debug('MQTT_PROTOCOL = %s/%s (Unsecure)', MQTT_PROTOCOL, MQTT_PORT)
@@ -488,7 +488,7 @@ else: logger.debug('MQTT_PROTOCOL = %s/%s (Encrypted)', MQTT_PROTOCOL, MQTT_PORT
 
 logger.debug('COMFORT_ADDRESS = %s', COMFORT_ADDRESS)
 logger.debug('COMFORT_PORT = %s', COMFORT_PORT)
-logger.debug('COMFORT_LOGIN_ID = ******')
+logger.debug('COMFORT_LOGIN_ID = **REDACTED**')
 logger.debug('COMFORT_CCLX_FILE = %s', COMFORT_CCLX_FILE)
 logger.debug('COMFORT_BATTERY_STATUS_ID = %s', str(COMFORT_BATTERY_STATUS_ID))
 logger.debug('MQTT_CA_CERT = %s', MQTT_CA_CERT)          
