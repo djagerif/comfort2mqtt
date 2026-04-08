@@ -1,6 +1,8 @@
 ## [1.6.2] - Busy...
 
 ### Added
+ - Add SS status response processing. Work in progress.
+ - Add UCM detection from comfigurator.cclx file. Required for SS status response processing.
  
 ### Breaking Changes ###
  

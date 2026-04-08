@@ -80,6 +80,8 @@ ALARMMESSAGETOPIC = DOMAIN+"/alarm/message"
 ALARMTIMERTOPIC = DOMAIN+"/alarm/timer"
 ALARMDOORBELLTOPIC = DOMAIN+"/alarm/doorbell"
 
+MODULESTATUSTOPIC = DOMAIN+"/alarm/module_status"       # Future expansion for module status reporting.
+
 FIRST_LOGIN = False         # Don't scan Comfort until MQTT connection is made.
 RUN = True
 BYPASSEDZONES = []          # Global list of Bypassed Zones
@@ -649,6 +651,17 @@ class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (coun
             self.counter = counter
             self.value = value
             self.state = state
+
+#class ComfortSSActivationReport(object): # in format SS1EFF00 ie SS (counter) 1E = 30; state 001D = 29
+#    def __init__(self, datastr="", type=0, value=0, state=0):
+#        if datastr:
+#            self.type = int(datastr[2:4], 16)    #Integer value 3
+#            self.value = self.ComfortSigned16(int("%s%s" % (datastr[6:8], datastr[4:6]),16))            # Use new 16-bit format
+#            self.state = self.state = 1 if (int(datastr[4:6],16) > 0) else 0                            # 8-bit value used for state
+#        else:
+#            self.type = type
+#            self.value = value
+#            self.state = state
 
     def ComfortSigned16(self,value):                                            # Returns signed 16-bit value where required.
         return -(value & 0x8000) | (value & 0x7fff)
@@ -2639,6 +2652,27 @@ class Comfort2(mqtt.Client):
 
                 # Add the truncated value to the dictionary
                 user_properties[number] = name
+
+            for ucm in root.iter('UCM'):
+                name = ''
+                type = ''
+                producttype = ''
+                name = ucm.attrib.get('Name')[:16] if ucm.attrib.get('Name') else ''
+                type = ucm.attrib.get('Type')[:32] if ucm.attrib.get('Type') else ''
+                producttype = ucm.attrib.get('ProductType')[:2] if ucm.attrib.get('ProductType') else ''
+
+                if self.CheckZoneNameFormat(type) and self.CheckZoneNameFormat(producttype) and self.CheckZoneNameFormat(name): 
+                    logger.debug("UCM/%s (%s) detected in '%s'.", type, name, COMFORT_CCLX_FILE)            
+                else:
+                    type = ''
+                    name = ''
+                    producttype = ''
+                    logger.error("Invalid or Unknown UCM/%s (%s), ProductType %s detected in '%s'.", type, name, producttype, COMFORT_CCLX_FILE)
+                    break
+
+                # Add the truncated value to the dictionary
+                #user_properties[number] = name
+
         else:
             device_properties['CustomerName'] = None
             device_properties['Reference'] = None
@@ -2918,6 +2952,16 @@ class Comfort2(mqtt.Client):
                                                      "Value": ipMsgSR.value
                                                     })
                                 self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
+
+                            #elif line[1:3] == "SS" and CacheState:             # Future decoding of Status Messages.
+                            #    ipMsgSS = ComfortSSActivationReport(line[1:])
+                            #    _time = datetime.now().replace(microsecond=0).isoformat()
+                            #    _name = sensor_properties[str(ipMsgSS.type)] if SENSORMAPFILE else "Sensor" + "{:02d}".format(ipMsgSS.type)
+                            #    MQTT_MSG=json.dumps({"Time": _time, 
+                            #                         "Name": _name,
+                            #                         "Value": ipMsgSS.value
+                            #                        })
+                            #    self.publish(ALARMSENSORTOPIC % ipMsgSS.counter, MQTT_MSG,qos=2,retain=False)    # 08/4/2026 Command added
 
                             elif line[1:3] == "TR":     # Timer Reports 'TR' is not fully supported as Comfort stops the reports after a while.
                                 ipMsgTR = ComfortTRReport(line[1:])
