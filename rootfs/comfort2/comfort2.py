@@ -22,6 +22,8 @@
 #from ast import pattern
 
 #from anyio import value
+from sys import modules
+
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -656,12 +658,12 @@ class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (coun
 
 class ComfortSSActivationReport(object): # in format SS1EFF00 ie SS (counter) 1E = 30; state 001D = 29
     def __init__(self, datastr="", type=0, value=0):
-        if datastr:
+        if len(datastr) == 8:
             self.type = int(datastr[2:4], 16)           #Integer value 3
             self.value = int(datastr[4:8],16)           # Use new 16-bit format
         else:
-            self.type = type
-            self.value = value
+            self.type = None
+            self.value = None
 
     def ComfortSigned16(self,value):                                            # Returns signed 16-bit value where required.
         return -(value & 0x8000) | (value & 0x7fff)
@@ -1576,7 +1578,7 @@ class Comfort2(mqtt.Client):
     
     def CheckIndexNumberFormat(self,value,max_index = 1024,min_index = 0):      # Checks CSV file Zone Number to only contain valid characters. Return False if it fails else True
         pattern = r'^[0-9]+$'
-        if re.match(pattern, value):
+        if re.match(pattern, str(value)):
             return min_index <= int(value) <= max_index
         else:
             return False
@@ -2654,8 +2656,8 @@ class Comfort2(mqtt.Client):
                 # number = ''
                 name = ucm.attrib.get('Name')[:16] if ucm.attrib.get('Name') else ''
                 module_type = ucm.attrib.get('Type')[:32] if ucm.attrib.get('Type') else ''
-                producttype = ucm.attrib.get('ProductType')[:3] if ucm.attrib.get('ProductType') else ''
-                number = ucm.attrib.get('Number')[:2] if ucm.attrib.get('Number') else ''
+                producttype = int(ucm.attrib.get('ProductType')[:3]) if ucm.attrib.get('ProductType') else ''
+                number = int(ucm.attrib.get('Number')[:2]) if ucm.attrib.get('Number') else ''
 
                 if self.CheckZoneNameFormat(module_type) and self.CheckIndexNumberFormat(producttype, 254) and self.CheckZoneNameFormat(name) and self.CheckIndexNumberFormat(number, 8, 1) and COMFORT_CCLX_FILE != None:
                     logger.debug("UCM/%s (%s) at ID# %s in '%s'.", module_type, name, number,  COMFORT_CCLX_FILE)
@@ -2783,6 +2785,12 @@ class Comfort2(mqtt.Client):
             return False  # invalid hex string
 
         return dec_value in allowed
+
+    def find_by_producttype(self,modules, producttype):
+        return {k: v for k, v in modules.items() if v["producttype"] == producttype}
+
+    def find_one_by_producttype(self,modules, producttype):
+        return next((v for v in modules.values() if v["producttype"] == producttype), None)
 
     def run(self):
 
@@ -2993,15 +3001,17 @@ class Comfort2(mqtt.Client):
                                 # Check if idstatus.cfg is loaded and if so load error message from file, otherwise ignore message.
 
 
-                                if IDSTATUSFILE:            # Boolean flag indicates if idstatus.cfg file loaded successfully or not.
-                                    pass
+                                if IDSTATUSFILE and ipMsgSS.type in id_status and ipMsgSS.value in id_status[ipMsgSS.type]:            # Boolean flag indicates if idstatus.cfg file loaded successfully or not.
                                     # Build MQTT message here
-                                    #_name = module_properties[str(ipMsgSS.type)] if IDSTATUSFILE else "Sensor" + "{:02d}".format(ipMsgSS.type)
-                            #    MQTT_MSG=json.dumps({"Time": _time, 
-                            #                         "Name": _name,
-                            #                         "Value": ipMsgSS.value
-                            #                        })
-                            #    self.publish(ALARMSENSORTOPIC % ipMsgSS.counter, MQTT_MSG,qos=2,retain=False)    # 08/4/2026 Command added
+                                    _name = self.find_one_by_producttype(module_properties, ipMsgSS.type)
+                                    if _name != None:                # ID not found in idstatus.cfg then skip.           
+                                        MQTT_MSG=json.dumps({"Time": _time, 
+                                                             "Name": "UCM/" + _name['module_type'] + " (" + _name['name'] + ")",
+                                                             "Value": id_status[ipMsgSS.type][ipMsgSS.value]
+                                                            })
+                                
+                                        logger.info("Comfort Module Status - %s", MQTT_MSG)
+                                        #    self.publish(ALARMSENSORTOPIC % ipMsgSS.counter, MQTT_MSG,qos=2,retain=False)    # 08/4/2026 Command added
 
                             elif line[1:3] == "TR":     # Timer Reports 'TR' is not fully supported as Comfort stops the reports after a while.
                                 ipMsgTR = ComfortTRReport(line[1:])
