@@ -19,9 +19,9 @@
 # Notes:
 #
 #
-from ast import pattern
+#from ast import pattern
 
-from anyio import value
+#from anyio import value
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm
