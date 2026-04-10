@@ -99,8 +99,10 @@ FLAGMAPFILE = False
 DEVICEMAPFILE = False
 USERMAPFILE = False
 TIMERMAPFILE = False
+IDSTATUSFILE = False        # idstatus.cfg file present or not.
 device_properties = {}
-module_properties = {}
+module_properties = {}      # Dictionary to hold module properties from CCLX file.
+id_status = {}              # Dictionary to hold idstatus properties from idstatus.cfg
 file_exists  = False
 ACFail = False              # Indicates ACFail status.
 
@@ -652,16 +654,14 @@ class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (coun
             self.value = value
             self.state = state
 
-#class ComfortSSActivationReport(object): # in format SS1EFF00 ie SS (counter) 1E = 30; state 001D = 29
-#    def __init__(self, datastr="", type=0, value=0, state=0):
-#        if datastr:
-#            self.type = int(datastr[2:4], 16)    #Integer value 3
-#            self.value = self.ComfortSigned16(int("%s%s" % (datastr[6:8], datastr[4:6]),16))            # Use new 16-bit format
-#            self.state = self.state = 1 if (int(datastr[4:6],16) > 0) else 0                            # 8-bit value used for state
-#        else:
-#            self.type = type
-#            self.value = value
-#            self.state = state
+class ComfortSSActivationReport(object): # in format SS1EFF00 ie SS (counter) 1E = 30; state 001D = 29
+    def __init__(self, datastr="", type=0, value=0):
+        if datastr:
+            self.type = int(datastr[2:4], 16)           #Integer value 3
+            self.value = int(datastr[4:8],16)           # Use new 16-bit format
+        else:
+            self.type = type
+            self.value = value
 
     def ComfortSigned16(self,value):                                            # Returns signed 16-bit value where required.
         return -(value & 0x8000) | (value & 0x7fff)
@@ -909,7 +909,6 @@ class Comfortf_ReportAllFlags(object):
                     flags[flag_name] = int(segment[8 - j],2)
                     self.flags.append(ComfortFLFlagActivationReport("", int(start_flag + j - 1),int(segment[8 - j],2) & 1))
             
-
 #mode = { 00=Off, 01=Away, 02=Night, 03=Day, 04=Vacation }
 class ComfortM_SecurityModeReport(object):
     def __init__(self, data={}):
@@ -1096,7 +1095,6 @@ class ComfortARSystemAlarmReport(object):
             elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
             else: self.message = "Unknown("+str(self.alarm)+")"
 
-
 class ComfortV_SystemTypeReport(object):
     def __init__(self, data={}):
         self.filesystem = int(data[8:10],16)    # 34 for Ultra II
@@ -1120,7 +1118,6 @@ class Comfort_U_SystemCPUTypeReport(object):
                 self.cputype = "ARM"
             elif identifier == 0:
                 self.cputype = "Toshiba"
-
 
 class Comfort_EL_HardwareModelReport(object):
     def __init__(self, data={}):
@@ -2391,7 +2388,7 @@ class Comfort2(mqtt.Client):
         global DEVICEMAPFILE
         global USERMAPFILE
         global TIMERMAPFILE
-
+        
         global input_properties
         global counter_properties
         global flag_properties
@@ -2657,11 +2654,11 @@ class Comfort2(mqtt.Client):
                 # number = ''
                 name = ucm.attrib.get('Name')[:16] if ucm.attrib.get('Name') else ''
                 module_type = ucm.attrib.get('Type')[:32] if ucm.attrib.get('Type') else ''
-                producttype = ucm.attrib.get('ProductType')[:2] if ucm.attrib.get('ProductType') else ''
+                producttype = ucm.attrib.get('ProductType')[:3] if ucm.attrib.get('ProductType') else ''
                 number = ucm.attrib.get('Number')[:2] if ucm.attrib.get('Number') else ''
 
-                if self.CheckZoneNameFormat(module_type) and self.CheckIndexNumberFormat(producttype, 254) and self.CheckZoneNameFormat(name) and self.CheckIndexNumberFormat(number, 8, 1): 
-                    logger.debug("UCM/%s (%s) at ID# %s in '%s'.", module_type, name, number, COMFORT_CCLX_FILE)
+                if self.CheckZoneNameFormat(module_type) and self.CheckIndexNumberFormat(producttype, 254) and self.CheckZoneNameFormat(name) and self.CheckIndexNumberFormat(number, 8, 1) and COMFORT_CCLX_FILE != None:
+                    logger.debug("UCM/%s (%s) at ID# %s in '%s'.", module_type, name, number,  COMFORT_CCLX_FILE)
 
                     # Add modules to dictionary here.
                     module_properties[number] = {
@@ -2670,7 +2667,7 @@ class Comfort2(mqtt.Client):
                         "name": name,
                         "producttype": producttype
                     }
-                else:
+                elif COMFORT_CCLX_FILE != None:
                     # Skip any invalid UCM entries
                     logger.error("Invalid or Unknown UCM/%s (%s) at ID# %s, ProductType %s detected in '%s'.", module_type, name, number, producttype, COMFORT_CCLX_FILE)
 
@@ -2687,6 +2684,36 @@ class Comfort2(mqtt.Client):
 
         return file
     
+    def add_idstatus(self, file):            # Load idstatus.cfg if available
+
+        global IDSTATUSFILE
+        global id_status
+        
+        if file.is_file():
+            file_stats = os.stat(file)
+            logger.info ("idstatus.cfg file detected, %s Bytes", file_stats.st_size)
+            tree = ET.parse(file)
+            root = tree.getroot()
+
+            for type_elem in root.iter('Type'):
+                type_number = int(type_elem.attrib.get('Number')) if type_elem.attrib.get('Number') else None
+    
+                if type_number is not None:
+                    id_status[type_number] = {}
+        
+                    for status in type_elem.iter('Status'):
+                        status_number = int(status.attrib.get('Number')) if status.attrib.get('Number') else None
+                        status_text  = status.attrib.get('Text', '')
+            
+                        if status_number is not None:
+                            id_status[type_number][status_number] = status_text
+            IDSTATUSFILE = True
+        else:
+            logger.info ("idstatus.cfg file Not Found")
+            IDSTATUSFILE = False
+            id_status.clear()
+        return file
+
     def sanitize_filename(self, input_string, valid_extensions=None):     # Thanks ChatGPT :-)
         """
         Sanitize the input filename string to ensure it is a valid filename with an extension,
@@ -2776,6 +2803,7 @@ class Comfort2(mqtt.Client):
         global SCSRIOMAPFILE
         global DEVICEMAPFILE
         global USERMAPFILE
+        global IDSTATUSFILE
 
         global input_properties
         global counter_properties
@@ -2786,6 +2814,7 @@ class Comfort2(mqtt.Client):
         global device_properties
         global user_properties
         global timer_properties
+        global idstatus
 
         global ZoneCache
         global BypassCache
@@ -2811,6 +2840,10 @@ class Comfort2(mqtt.Client):
         else:
             logging.info("No Comfigurator CCLX file found, no enrichment will be loaded.")
         
+        # Load idstatus.cfg file here if it exists.
+        self.add_idstatus(Path("/config/idstatus.cfg"))
+
+
         self.connect_async(self.mqtt_ip, self.mqtt_port, 60)
         if self.connected == True:
             BROKERCONNECTED = True
@@ -2954,10 +2987,16 @@ class Comfort2(mqtt.Client):
                                                     })
                                 self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
 
-                            #elif line[1:3] == "SS" and CacheState:             # Future decoding of Status Messages.
-                            #    ipMsgSS = ComfortSSActivationReport(line[1:])
-                            #    _time = datetime.now().replace(microsecond=0).isoformat()
-                            #    _name = sensor_properties[str(ipMsgSS.type)] if SENSORMAPFILE else "Sensor" + "{:02d}".format(ipMsgSS.type)
+                            elif line[1:3] == "SS" and CacheState:             # Future decoding of Status Messages.
+                                ipMsgSS = ComfortSSActivationReport(line[1:])
+                                _time = datetime.now().replace(microsecond=0).isoformat()
+                                # Check if idstatus.cfg is loaded and if so load error message from file, otherwise ignore message.
+
+
+                                if IDSTATUSFILE:            # Boolean flag indicates if idstatus.cfg file loaded successfully or not.
+                                    pass
+                                    # Build MQTT message here
+                                    #_name = module_properties[str(ipMsgSS.type)] if IDSTATUSFILE else "Sensor" + "{:02d}".format(ipMsgSS.type)
                             #    MQTT_MSG=json.dumps({"Time": _time, 
                             #                         "Name": _name,
                             #                         "Value": ipMsgSS.value
