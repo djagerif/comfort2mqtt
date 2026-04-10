@@ -19,6 +19,9 @@
 # Notes:
 #
 #
+from ast import pattern
+
+from anyio import value
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -97,6 +100,7 @@ DEVICEMAPFILE = False
 USERMAPFILE = False
 TIMERMAPFILE = False
 device_properties = {}
+module_properties = {}
 file_exists  = False
 ACFail = False              # Indicates ACFail status.
 
@@ -204,7 +208,6 @@ ChargerVoltageList = {0:"-1",
 }
 
 ZoneCache = {}              # Zone Cache dictionary.
-#BypassCache = {}            # Zone Bypass Cache dictionary.
 BypassCache = {i: 0 for i in range(1,MAX_ZONES + 1)}   # generate empty bypass cache for all zones. (Up to MAX_ZONES)
 CacheState = False          # Initial Cache state. False when not in sync with Bypass Zones (b?). True, when in Sync.
 
@@ -214,10 +217,7 @@ def boolean_string(s):
 
     if s.lower() == 'true':
         return True
-    #elif s.lower() == 'false':
-    #    return False
     else:
-        #raise ValueError("Not a valid boolean string. Set to either 'True' or 'False'.")
         return False
     
 parser = ArgumentParser()
@@ -1577,13 +1577,10 @@ class Comfort2(mqtt.Client):
         pattern = r'^(?![ ]{1,}).{1}[a-zA-Z0-9_ -/]+$'
         return bool(re.match(pattern, value))
     
-    def CheckIndexNumberFormat(self,value,max_index = 1024):      # Checks CSV file Zone Number to only contain valid characters. Return False if it fails else True
+    def CheckIndexNumberFormat(self,value,max_index = 1024,min_index = 0):      # Checks CSV file Zone Number to only contain valid characters. Return False if it fails else True
         pattern = r'^[0-9]+$'
-        if bool(re.match(pattern, value)):
-            if value.isnumeric() & (int(value) <= max_index):
-                return True
-            else:
-                return False
+        if re.match(pattern, value):
+            return min_index <= int(value) <= max_index
         else:
             return False
     
@@ -2654,24 +2651,28 @@ class Comfort2(mqtt.Client):
                 user_properties[number] = name
 
             for ucm in root.iter('UCM'):
-                name = ''
-                type = ''
-                producttype = ''
+                # name = ''
+                # module_type = ''
+                # producttype = ''
+                # number = ''
                 name = ucm.attrib.get('Name')[:16] if ucm.attrib.get('Name') else ''
-                type = ucm.attrib.get('Type')[:32] if ucm.attrib.get('Type') else ''
+                module_type = ucm.attrib.get('Type')[:32] if ucm.attrib.get('Type') else ''
                 producttype = ucm.attrib.get('ProductType')[:2] if ucm.attrib.get('ProductType') else ''
+                number = ucm.attrib.get('Number')[:2] if ucm.attrib.get('Number') else ''
 
-                if self.CheckZoneNameFormat(type) and self.CheckZoneNameFormat(producttype) and self.CheckZoneNameFormat(name): 
-                    logger.debug("UCM/%s (%s) detected in '%s'.", type, name, COMFORT_CCLX_FILE)            
+                if self.CheckZoneNameFormat(module_type) and self.CheckIndexNumberFormat(producttype, 254) and self.CheckZoneNameFormat(name) and self.CheckIndexNumberFormat(number, 8, 1): 
+                    logger.debug("UCM/%s (%s) at ID# %s in '%s'.", module_type, name, number, COMFORT_CCLX_FILE)
+
+                    # Add modules to dictionary here.
+                    module_properties[number] = {
+                        "number": number,
+                        "module_type": module_type,
+                        "name": name,
+                        "producttype": producttype
+                    }
                 else:
-                    type = ''
-                    name = ''
-                    producttype = ''
-                    logger.error("Invalid or Unknown UCM/%s (%s), ProductType %s detected in '%s'.", type, name, producttype, COMFORT_CCLX_FILE)
-                    break
-
-                # Add the truncated value to the dictionary
-                #user_properties[number] = name
+                    # Skip any invalid UCM entries
+                    logger.error("Invalid or Unknown UCM/%s (%s) at ID# %s, ProductType %s detected in '%s'.", module_type, name, number, producttype, COMFORT_CCLX_FILE)
 
         else:
             device_properties['CustomerName'] = None

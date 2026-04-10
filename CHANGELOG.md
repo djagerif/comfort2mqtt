@@ -1,15 +1,15 @@
 ## [1.6.2] - Busy...
 
 ### Added
- - Add SS status response processing. Work in progress.
- - Add UCM detection from comfigurator.cclx file. Required for SS status response processing.
+ - Add SS module status response processing. Work in progress.
+ - Add UCM detection from comfigurator.cclx file. Required for SS module status response processing.
  
 ### Breaking Changes ###
  
 ### Changed
  - Update DOCS.md.
  - Updated TLS to minimum v1.2 and enable v1.3 support.
- - Migrate from pyopenssl to native cryptography library.
+ - Migrate from pyopenssl to cryptography library.
  - Updated copyright date to 2026.
  
 ### Fixed
