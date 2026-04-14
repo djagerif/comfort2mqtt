@@ -3506,14 +3506,30 @@ else:
             logging.warning('Client Key or Certificate Expired or Invalid')
 
         case 0:     # Valid Certificate
-            logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
-            tls_args = {}
-            tls_args['ca_certs'] = ca_cert
-            #mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)    # Deprecated in Python 3.12, replaced with SSLContext. Minimum TLS version set to 1.2 to ensure compatibility with older MQTT brokers.
+            #logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
+            #tls_args = {}
+            #tls_args['ca_certs'] = ca_cert
+            ##mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)    # Deprecated in Python 3.12, replaced with SSLContext. Minimum TLS version set to 1.2 to ensure compatibility with older MQTT brokers.
+            #context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            #context.minimum_version = ssl.TLSVersion.TLSv1_2
+            #context.load_verify_locations(ca_cert)
+            #tls_args.pop('ca_certs', None)  # Already loaded into context
+            #mqttc.tls_set_context(context)
+            #mqttc.tls_insecure_set(False)
+
+            logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert)
             context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
             context.minimum_version = ssl.TLSVersion.TLSv1_2
             context.load_verify_locations(ca_cert)
-            tls_args.pop('ca_certs', None)  # Already loaded into context
+    
+            # Load client cert and key if provided
+            if client_cert and client_key:
+                if os.path.isfile(client_cert) and os.path.isfile(client_key):
+                    context.load_cert_chain(certfile=client_cert, keyfile=client_key)
+                    logging.debug('Client certificate loaded (%s)', client_cert)
+                else:
+                    logging.warning('Client cert or key file not found, connecting without client auth')
+    
             mqttc.tls_set_context(context)
             mqttc.tls_insecure_set(False)
 
