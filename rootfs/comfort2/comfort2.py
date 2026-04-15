@@ -417,7 +417,6 @@ def validate_port(_port, min=1, max=65535):
     
 # Check to see if it's a Hostname.domain or IPv4 address. Resolve Hostname to IP.
 COMFORT_ADDRESS=get_ip_address(option.comfort_address)
-#MQTT_SERVER=get_ip_address(option.broker_address)
 MQTT_SERVER=option.broker_address
 
 COMFORT_PORT=int(option.comfort_port) if validate_port(option.comfort_port) else 1002
@@ -511,7 +510,7 @@ logger.debug('COMFORT_TIME= %s', COMFORT_TIME)
 
 # Map HA variables to internal variables.
 
-MQTTBROKERIP = MQTT_SERVER
+#MQTTBROKERIP = MQTT_SERVER     # Not needed anymore.
 MQTTBROKERPORT = int(MQTT_PORT)
 MQTTUSERNAME = MQTT_USER
 MQTTPASSWORD = MQTT_PASSWORD
@@ -1260,7 +1259,7 @@ class Comfort2(mqtt.Client):
     global RUN
 
     def init(self, mqtt_ip, mqtt_port, mqtt_username, mqtt_password, comfort_ip, comfort_port, comfort_pincode, mqtt_version):
-        self.mqtt_ip = mqtt_ip
+        self.mqtt_ip = mqtt_ip          # Using either ip address or hostname for MQTT Broker connection.
         self.mqtt_port = mqtt_port
         self.comfort_ip = comfort_ip
         self.comfort_port = comfort_port
@@ -1293,10 +1292,19 @@ class Comfort2(mqtt.Client):
         
         if rc == 'Success':
 
+            transport = client.socket()
+            if hasattr(transport, 'version'):
+                tls_version = transport.version()
+                cipher = transport.cipher()
+                #logging.info('MQTT Connected securely - TLS: %s, Cipher: %s', tls_version, cipher[0] if cipher else 'Unknown')
+                logger.info('MQTT Broker Connection %s - TLS: %s, Cipher: %s', str(rc), tls_version, cipher[0] if cipher else 'Unknown')
+            else:
+                logging.info('MQTT Broker Connection %s (no TLS info available or Unsecured Connection)', str(rc))
+
             BROKERCONNECTED = True
             device_properties['BridgeConnected'] = 1
 
-            logger.info('MQTT Broker Connection %s', str(rc))
+            #logger.info('MQTT Broker Connection %s - TLS: %s, Cipher: %s', str(rc), tls_version, cipher[0] if cipher else 'Unknown')
 
             time.sleep(0.25)    # Short wait for MQTT to be ready to accept commands.
 
@@ -3540,10 +3548,10 @@ else:
                 else:
                     logging.warning('Client cert or key file not found, connecting without client auth')
     
-            logging.debug('CA cert path: %s exists: %s', ca_cert, os.path.isfile(ca_cert))
-            logging.debug('Client cert path: %s exists: %s', client_cert, os.path.isfile(client_cert))
-            logging.debug('Client key path: %s exists: %s', client_key, os.path.isfile(client_key))
-            logging.debug('Connecting to: %s:%s', MQTTBROKERIP, MQTTBROKERPORT)
+            #logging.debug('CA cert path: %s exists: %s', ca_cert, os.path.isfile(ca_cert))
+            #logging.debug('Client cert path: %s exists: %s', client_cert, os.path.isfile(client_cert))
+            #logging.debug('Client key path: %s exists: %s', client_key, os.path.isfile(client_key))
+            #logging.debug('Connecting to: %s:%s', MQTT_SERVER, MQTTBROKERPORT)
 
             mqttc.tls_set_context(context)
             mqttc.tls_insecure_set(False)
@@ -3552,14 +3560,5 @@ else:
             # Default
             pass
 
-mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE, mqtt.MQTTv5)
-#mqttc.run()
-try:
-    mqttc.run()
-except ssl.SSLError as e:
-    logging.error('SSL Error: %s', e)
-    logging.error('SSL reason: %s', e.reason)
-except Exception as e:
-    logging.error('Connection failed: %s', str(e))
-    logging.error('Exception type: %s', type(e).__name__)
-
+mqttc.init(MQTT_SERVER, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE, mqtt.MQTTv5)
+mqttc.run()
