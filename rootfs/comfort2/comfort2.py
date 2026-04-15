@@ -417,7 +417,8 @@ def validate_port(_port, min=1, max=65535):
     
 # Check to see if it's a Hostname.domain or IPv4 address. Resolve Hostname to IP.
 COMFORT_ADDRESS=get_ip_address(option.comfort_address)
-MQTT_SERVER=get_ip_address(option.broker_address)
+#MQTT_SERVER=get_ip_address(option.broker_address)
+MQTT_SERVER=option.broker_address
 
 COMFORT_PORT=int(option.comfort_port) if validate_port(option.comfort_port) else 1002
 COMFORT_LOGIN_ID=option.comfort_login_id
