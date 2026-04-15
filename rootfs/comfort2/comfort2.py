@@ -30,8 +30,14 @@ from cryptography.exceptions import UnsupportedAlgorithm
 
 import defusedxml.ElementTree as ET
 import ssl
+
+ssl.SSLContext.set_servername_callback  # just to confirm ssl is loaded
+
 #from OpenSSL import crypto
 import os
+
+os.environ['PYTHONWARNINGS'] = 'always'
+
 import requests
 import json
 from pathlib import Path
@@ -3525,11 +3531,19 @@ else:
             # Load client cert and key if provided
             if client_cert and client_key:
                 if os.path.isfile(client_cert) and os.path.isfile(client_key):
-                    context.load_cert_chain(certfile=client_cert, keyfile=client_key)
-                    logging.debug('Client certificate loaded (%s)', client_cert)
+                    try:
+                        context.load_cert_chain(certfile=client_cert, keyfile=client_key)
+                        logging.debug('Client certificate loaded (%s)', client_cert)
+                    except ssl.SSLError as e:
+                        logging.error('Failed to load client cert chain: %s', e)
                 else:
                     logging.warning('Client cert or key file not found, connecting without client auth')
     
+            logging.debug('CA cert path: %s exists: %s', ca_cert, os.path.isfile(ca_cert))
+            logging.debug('Client cert path: %s exists: %s', client_cert, os.path.isfile(client_cert))
+            logging.debug('Client key path: %s exists: %s', client_key, os.path.isfile(client_key))
+            logging.debug('Connecting to: %s:%s', MQTTBROKERIP, MQTTBROKERPORT)
+
             mqttc.tls_set_context(context)
             mqttc.tls_insecure_set(False)
 
@@ -3538,4 +3552,13 @@ else:
             pass
 
 mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE, mqtt.MQTTv5)
-mqttc.run()
+#mqttc.run()
+try:
+    mqttc.run()
+except ssl.SSLError as e:
+    logging.error('SSL Error: %s', e)
+    logging.error('SSL reason: %s', e.reason)
+except Exception as e:
+    logging.error('Connection failed: %s', str(e))
+    logging.error('Exception type: %s', type(e).__name__)
+
