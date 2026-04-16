@@ -27,6 +27,7 @@
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm
+from cryptography.hazmat.primitives import serialization
 
 import defusedxml.ElementTree as ET
 import ssl
@@ -3484,6 +3485,31 @@ def validate_certificate(certificate):
     except (ValueError, UnsupportedAlgorithm) as e:
         raise ValueError(f"Error loading certificate: {e}")
 
+def validate_key_matches_cert(certificate, key):
+    # Verify the private key matches the certificate public key
+    try:
+        from cryptography.hazmat.primitives.serialization import load_pem_private_key
+        
+        with open(key, 'rb') as key_file:
+            private_key = load_pem_private_key(key_file.read(), password=None, backend=default_backend())
+        
+        with open(certificate, 'rb') as cert_file:
+            cert = x509.load_pem_x509_certificate(cert_file.read(), default_backend())
+        
+        # Compare public keys
+        cert_public_key = cert.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        key_public_key = private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        return cert_public_key == key_public_key
+    except Exception as e:
+        logging.error('Error validating key/cert match: %s', e)
+        return False
+
 mqttc = Comfort2(callback_api_version = mqtt.CallbackAPIVersion.VERSION2, client_id=mqtt_client_id, protocol=mqtt.MQTTv5, transport=MQTT_PROTOCOL)
 
 certs: str = "/config/certificates"                 # Certificates directory directly off the root.
@@ -3518,40 +3544,70 @@ else:
             logging.warning('Client Key or Certificate Expired or Invalid')
 
         case 0:     # Valid Certificate
-            #logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
-            #tls_args = {}
-            #tls_args['ca_certs'] = ca_cert
-            ##mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)    # Deprecated in Python 3.12, replaced with SSLContext. Minimum TLS version set to 1.2 to ensure compatibility with older MQTT brokers.
-            #context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-            #context.minimum_version = ssl.TLSVersion.TLSv1_2
-            #context.load_verify_locations(ca_cert)
-            #tls_args.pop('ca_certs', None)  # Already loaded into context
-            #mqttc.tls_set_context(context)
-            #mqttc.tls_insecure_set(False)
-
             logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert)
+
+            # Validate client cert if provided
+            if client_cert and client_key:
+                cert_valid = validate_certificate(client_cert)
+                match cert_valid:
+                    case 1:
+                        logging.warning('Client Certificate Expired or not Valid (%s)', client_cert)
+                        logging.warning('Connecting without client certificate')
+                        client_cert = None
+                        client_key = None
+                    case 2:
+                        logging.warning('Client Certificate not found (%s)', client_cert)
+                        logging.warning('Connecting without client certificate')
+                        client_cert = None
+                        client_key = None
+                    case 0:
+                        logging.debug('Valid Client Certificate found (%s)', client_cert)
+                        # Now validate the key file exists and matches the cert
+                        if not os.path.isfile(client_key):
+                            logging.warning('Client Key not found (%s)', client_key)
+                            client_cert = None
+                            client_key = None
+                        else:
+                            # Verify key matches certificate
+                            if not validate_key_matches_cert(client_cert, client_key):
+                                logging.warning('Client Key does not match Certificate')
+                                client_cert = None
+                                client_key = None
+                            else:
+                                logging.debug('Valid Client Key found (%s)', client_key)
+
             context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
             context.minimum_version = ssl.TLSVersion.TLSv1_2
             context.load_verify_locations(ca_cert)
-    
-            # Load client cert and key if provided
+
             if client_cert and client_key:
-                if os.path.isfile(client_cert) and os.path.isfile(client_key):
-                    try:
-                        context.load_cert_chain(certfile=client_cert, keyfile=client_key)
-                        logging.debug('Client certificate loaded (%s)', client_cert)
-                    except ssl.SSLError as e:
-                        logging.error('Failed to load client cert chain: %s', e)
-                else:
-                    logging.warning('Client cert or key file not found, connecting without client auth')
-    
-            #logging.debug('CA cert path: %s exists: %s', ca_cert, os.path.isfile(ca_cert))
-            #logging.debug('Client cert path: %s exists: %s', client_cert, os.path.isfile(client_cert))
-            #logging.debug('Client key path: %s exists: %s', client_key, os.path.isfile(client_key))
-            #logging.debug('Connecting to: %s:%s', MQTT_SERVER, MQTTBROKERPORT)
+                try:
+                    context.load_cert_chain(certfile=client_cert, keyfile=client_key)
+                    logging.debug('Client certificate loaded (%s)', client_cert)
+                except ssl.SSLError as e:
+                    logging.error('Failed to load client cert chain: %s', e)
 
             mqttc.tls_set_context(context)
             mqttc.tls_insecure_set(False)
+
+
+#            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+#            context.minimum_version = ssl.TLSVersion.TLSv1_2
+#            context.load_verify_locations(ca_cert)
+#    
+#            # Load client cert and key if provided
+#            if client_cert and client_key:
+#                if os.path.isfile(client_cert) and os.path.isfile(client_key):
+#                    try:
+#                        context.load_cert_chain(certfile=client_cert, keyfile=client_key)
+#                        logging.debug('Client certificate loaded (%s)', client_cert)
+#                    except ssl.SSLError as e:
+#                        logging.error('Failed to load client cert chain: %s', e)
+#                else:
+#                    logging.warning('Client cert or key file not found, connecting without client auth')
+#
+#            mqttc.tls_set_context(context)
+#            mqttc.tls_insecure_set(False)
 
         case _:
             # Default
