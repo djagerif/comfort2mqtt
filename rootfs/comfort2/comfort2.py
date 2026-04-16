@@ -3483,7 +3483,8 @@ def validate_certificate(certificate):
         else:
             return 1    # Expired certificate
     except (ValueError, UnsupportedAlgorithm) as e:
-        raise ValueError(f"Error loading certificate: {e}")
+        #logging.error('Certificate is corrupt or invalid (%s): %s', certificate, e)
+        return 3    # Corrupt or invalid certificate
 
 def validate_key_matches_cert(certificate, key):
     # Verify the private key matches the certificate public key
@@ -3516,9 +3517,6 @@ certs: str = "/config/certificates"                 # Certificates directory dir
 if MQTT_ENCRYPTION and not os.path.isdir(certs):    # Display warning if Encryption is enabled but certificates directory is not found.
     logging.debug('"/config/certificates" directory not found.')
 
-#if((MQTT_CA_CERT and MQTT_CA_CERT.strip())): ca_cert = os.sep.join([certs, MQTT_CA_CERT])
-#if((MQTT_CLIENT_CERT and MQTT_CLIENT_CERT.strip())): client_cert = os.sep.join([certs, MQTT_CLIENT_CERT])
-#if((MQTT_CLIENT_KEY and MQTT_CLIENT_KEY.strip())): client_key = os.sep.join([certs, MQTT_CLIENT_KEY])
 ca_cert = os.sep.join([certs, MQTT_CA_CERT]) if (MQTT_CA_CERT and MQTT_CA_CERT.strip()) else None
 client_cert = os.sep.join([certs, MQTT_CLIENT_CERT]) if (MQTT_CLIENT_CERT and MQTT_CLIENT_CERT.strip()) else None
 client_key = os.sep.join([certs, MQTT_CLIENT_KEY]) if (MQTT_CLIENT_KEY and MQTT_CLIENT_KEY.strip()) else None
@@ -3529,19 +3527,22 @@ else:
     ### Check some certificate validity here ###
     match  validate_certificate(ca_cert):
         case 1:     # Invalid CA Certificate
-            logging.warning('MQTT TLS CA Certificate Expired or not Valid (%s)', ca_cert )
+            logging.warning('MQTT TLS CA Certificate Expired or Invalid (%s)', ca_cert )
             logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
             MQTTBROKERPORT = 1883
             MQTT_ENCRYPTION = False
 
         case 2:     # Certificate not found
             logging.warning('No MQTT TLS CA Certificate found, disabling TLS')
-            logging.warning("Reverting MQTT Port to default '1883'")
+            logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
             MQTTBROKERPORT = 1883
             MQTT_ENCRYPTION = False
 
         case 3:     # Invalid Client Certificate or Key
-            logging.warning('Client Key or Certificate Expired or Invalid')
+            logging.warning('MQTT TLS CA Certificate Expired or Invalid (%s)', ca_cert )
+            logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
+            MQTTBROKERPORT = 1883
+            MQTT_ENCRYPTION = False
 
         case 0:     # Valid Certificate
             logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert)
@@ -3552,14 +3553,23 @@ else:
                 match cert_valid:
                     case 1:
                         logging.warning('Client Certificate Expired or not Valid (%s)', client_cert)
-                        logging.warning('Connecting without client certificate')
+                        logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
                         client_cert = None
                         client_key = None
                     case 2:
                         logging.warning('Client Certificate not found (%s)', client_cert)
-                        logging.warning('Connecting without client certificate')
+                        logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
                         client_cert = None
                         client_key = None
+                        client_cert = None
+                        client_key = None
+                    case 3:
+                        logging.warning('Client Certificate is corrupt or invalid (%s)', client_cert)
+                        logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
+                        client_cert = None
+                        client_key = None
+                        MQTT_ENCRYPTION = False
+                        MQTTBROKERPORT = 1883
                     case 0:
                         logging.debug('Valid Client Certificate found (%s)', client_cert)
                         # Now validate the key file exists and matches the cert
@@ -3571,24 +3581,32 @@ else:
                             # Verify key matches certificate
                             if not validate_key_matches_cert(client_cert, client_key):
                                 logging.warning('Client Key does not match Certificate')
+                                logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
                                 client_cert = None
                                 client_key = None
+                                MQTTBROKERPORT = 1883
+                                MQTT_ENCRYPTION = False
                             else:
                                 logging.debug('Valid Client Key found (%s)', client_key)
+                if MQTT_ENCRYPTION:    # Only set TLS if encryption is still enabled after cert checks
+                    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                    context.minimum_version = ssl.TLSVersion.TLSv1_2
+                    context.load_verify_locations(ca_cert)
 
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-            context.minimum_version = ssl.TLSVersion.TLSv1_2
-            context.load_verify_locations(ca_cert)
+                if client_cert and client_key:
+                    try:
+                        context.load_cert_chain(certfile=client_cert, keyfile=client_key)
+                        logging.debug('Client certificate loaded (%s)', client_cert)
+                    except ssl.SSLError as e:
+                        logging.error('Failed to load client cert chain: %s', e)
+                        logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
+                        client_cert = None
+                        client_key = None
+                        MQTTBROKERPORT = 1883
+                        MQTT_ENCRYPTION = False
 
-            if client_cert and client_key:
-                try:
-                    context.load_cert_chain(certfile=client_cert, keyfile=client_key)
-                    logging.debug('Client certificate loaded (%s)', client_cert)
-                except ssl.SSLError as e:
-                    logging.error('Failed to load client cert chain: %s', e)
-
-            mqttc.tls_set_context(context)
-            mqttc.tls_insecure_set(False)
+                    mqttc.tls_set_context(context)
+                    mqttc.tls_insecure_set(False)
 
 
 #            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
