@@ -265,6 +265,11 @@ group.add_argument(
     help="Use MQTT TLS encryption, 'True'|'False'. [default: 'False']")
 
 group.add_argument(
+    '--broker-require-certificate',
+    type=boolean_string, default='false',
+    help="Required for MQTT Mutual-TLS certificate authentication, 'True'|'False'. [default: 'False']")
+
+group.add_argument(
     '--broker-ca',
     help='Filename of CA certificate to trust.')
 group.add_argument(
@@ -380,7 +385,8 @@ MQTT_USER=option.broker_username
 MQTT_PASSWORD=option.broker_password
 MQTT_PORT=option.broker_port
 MQTT_PROTOCOL=option.broker_protocol
-MQTT_ENCRYPTION=option.broker_encryption    
+MQTT_ENCRYPTION=option.broker_encryption
+MQTT_MUTUAL_TLS=option.broker_require_certificate    
 MQTT_CA_CERT=option.broker_ca               
 MQTT_CLIENT_CERT=option.broker_client_cert  
 MQTT_CLIENT_KEY=option.broker_client_key    
@@ -502,7 +508,10 @@ logger.debug('COMFORT_PORT = %s', COMFORT_PORT)
 logger.debug('COMFORT_LOGIN_ID = **REDACTED**')
 logger.debug('COMFORT_CCLX_FILE = %s', COMFORT_CCLX_FILE)
 logger.debug('COMFORT_BATTERY_STATUS_ID = %s', str(COMFORT_BATTERY_STATUS_ID))
-logger.debug('MQTT_CA_CERT = %s', MQTT_CA_CERT)          
+
+logger.debug('MQTT_MUTUAL_TLS = %s', str(MQTT_MUTUAL_TLS))
+
+logger.debug('MQTT_CA_CERT = %s', MQTT_CA_CERT) 
 logger.debug('MQTT_CLIENT_CERT = %s', MQTT_CLIENT_CERT)  
 logger.debug('MQTT_CLIENT_KEY = %s', MQTT_CLIENT_KEY)    
 
@@ -3430,42 +3439,6 @@ class Comfort2(mqtt.Client):
                 infot.wait_for_publish(1)
                 self.loop_stop
 
-
-""" def validate_certificate(certificate):
-    # Check Valid Certificate file and Valid Dates. NotBefore and NotAfter must be within datetime.now()
-
-    if certificate is None or not os.path.isfile(certificate):
-        return 2    # Missing certificate
-    # Open the certificate file in binary mode
-    with open(certificate, 'rb') as cert_file:
-        cert_data = cert_file.read()
-
-    try:
-        # Load the certificate using the binary data
-        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
-
-        # Check the 'notAfter' attribute
-        not_after = x509.get_notAfter()
-        not_before = x509.get_notBefore() 
-        if not_after:
-            ValidTo = not_after.decode()
-        if not_before:
-            ValidFrom = not_before.decode()
-
-        # Define the format of the datetime strings
-        datetime_format = "%Y%m%d%H%M%SZ"
-
-        # Convert the strings to datetime objects
-        ValidTo = datetime.strptime(ValidTo, datetime_format)
-        ValidFrom = datetime.strptime(ValidFrom, datetime_format)
-    
-        if (datetime.now() >= ValidFrom) and (datetime.now() < ValidTo):
-            return 0    # Valid certificate
-        else:
-            return 1    # Expired certificate
-    except crypto.Error as e:
-        raise ValueError(f"Error loading certificate: {e}")
- """
 def validate_certificate(certificate):
     # Check Valid Certificate file and Valid Dates. NotBefore and NotAfter must be within datetime.now()
     if certificate is None or not os.path.isfile(certificate):
@@ -3551,7 +3524,7 @@ else:
             logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert)
 
             # Validate client cert if provided
-            if client_cert and client_key:
+            if MQTT_MUTUAL_TLS and client_cert and client_key:
                 cert_valid = validate_certificate(client_cert)
                 match cert_valid:
                     case 1:
@@ -3600,6 +3573,7 @@ else:
                     try:
                         context.load_cert_chain(certfile=client_cert, keyfile=client_key)
                         logging.debug('Client certificate loaded (%s)', client_cert)
+                        logging.debug('Mutual TLS enabled.')
                     except ssl.SSLError as e:
                         logging.error('Failed to load client cert chain: %s', e)
                         logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
@@ -3610,25 +3584,15 @@ else:
 
                     mqttc.tls_set_context(context)
                     mqttc.tls_insecure_set(False)
-
-
-#            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-#            context.minimum_version = ssl.TLSVersion.TLSv1_2
-#            context.load_verify_locations(ca_cert)
-#    
-#            # Load client cert and key if provided
-#            if client_cert and client_key:
-#                if os.path.isfile(client_cert) and os.path.isfile(client_key):
-#                    try:
-#                        context.load_cert_chain(certfile=client_cert, keyfile=client_key)
-#                        logging.debug('Client certificate loaded (%s)', client_cert)
-#                    except ssl.SSLError as e:
-#                        logging.error('Failed to load client cert chain: %s', e)
-#                else:
-#                    logging.warning('Client cert or key file not found, connecting without client auth')
-#
-#            mqttc.tls_set_context(context)
-#            mqttc.tls_insecure_set(False)
+            else:
+                logging.debug('One-Way/Server-Side TLS enabled.')
+                client_cert = None
+                client_key = None
+                context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                context.minimum_version = ssl.TLSVersion.TLSv1_2
+                context.load_verify_locations(ca_cert)
+                mqttc.tls_set_context(context)
+                mqttc.tls_insecure_set(False)
 
         case _:
             # Default
