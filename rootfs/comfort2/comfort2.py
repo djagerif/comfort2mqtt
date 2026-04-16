@@ -1296,15 +1296,12 @@ class Comfort2(mqtt.Client):
             if hasattr(transport, 'version'):
                 tls_version = transport.version()
                 cipher = transport.cipher()
-                #logging.info('MQTT Connected securely - TLS: %s, Cipher: %s', tls_version, cipher[0] if cipher else 'Unknown')
                 logger.info('MQTT Broker Connection %s - TLS: %s, Cipher: %s', str(rc), tls_version, cipher[0] if cipher else 'Unknown')
             else:
                 logging.info('MQTT Broker Connection %s (no TLS info available or Unsecured Connection)', str(rc))
 
             BROKERCONNECTED = True
             device_properties['BridgeConnected'] = 1
-
-            #logger.info('MQTT Broker Connection %s - TLS: %s, Cipher: %s', str(rc), tls_version, cipher[0] if cipher else 'Unknown')
 
             time.sleep(0.25)    # Short wait for MQTT to be ready to accept commands.
 
