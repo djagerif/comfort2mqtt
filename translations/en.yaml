@@ -33,7 +33,7 @@ configuration:
   require_certificate:
     name: Require Certificate Authentication
     description: >-
-      If enabled, authentication will be enabled using the mandatory Client
+      If enabled, mutual TLS authentication will be enabled using the mandatory Client
       Certificate and Client Key file options.
   broker_client_cert:
     name: Client Certificate File
