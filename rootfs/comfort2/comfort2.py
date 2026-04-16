@@ -660,7 +660,10 @@ class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (coun
             self.counter = counter
             self.value = value
             self.state = state
-
+    
+    def ComfortSigned16(self,value):                                            # Returns signed 16-bit value where required.
+        return -(value & 0x8000) | (value & 0x7fff)
+    
 class ComfortTRReport(object):
     def __init__(self, datastr="", timer=1, value=0, state=0):
         if datastr:
