@@ -11,6 +11,7 @@
  - Updated copyright date to 2026.
  
 ### Fixed
+ - Fix corrupt certificate throwing an unhandled exception.
 
 
 ## [1.6.1] - 2026-02-19

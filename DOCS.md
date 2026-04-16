@@ -246,11 +246,11 @@ The `Kitchen Light` is an example of a Dimmable light and the `Study Light` is a
 
 ![image](https://github.com/djagerif/comfort2mqtt/assets/5621764/1d16931d-1cfd-4f55-83c0-16be5a90e777)
 
-Because `Counters` can be used for other uses other than Lights, the `Kitchen Light` in the example follows the [Brightness Without On Commands][ha-mqtt] chapter in the Home Assistant MQTT Light documentation, with a few small tweaks.
+Because `Counters` can be used for use cases other than Lights, the `Kitchen Light` in the example follows the [Brightness Without On Commands][ha-mqtt] chapter in the Home Assistant MQTT Light documentation, with a few small tweaks.
 
 ### Auto-Discovered Objects
 
-When the App is fully configured and running, there will be two new MQTT Devices with several System Entities auto-discovered as per below. The values for these entities are retrieved from both the Comfort system as well as the alarm configuration `CCLX` file. If the `CCLX` file is not present then no object enrichment will be done and default names will be used for entities, especially ZoneWord strings and Object Descriptions as per the `CCLX` file.
+When the App is fully configured and running, there will be two new MQTT Devices with several System Entities auto-discovered as per below. The values for these entities are retrieved from both the Comfort system as well as the alarm configuration `CCLX` file. If the `CCLX` file is not present then no object enrichment will be done and default names will be used for entities, especially ZoneWord strings and Object Descriptions. With a valid `CCLX` file loaded these will be used instead.
 
 ![image](https://github.com/user-attachments/assets/faeaa08b-c8f6-43db-a946-46ee9762b35b)
 
@@ -377,7 +377,7 @@ Local arming Comfort to AWAY mode requires the Entry/Exit door to activate. Ther
 
 If you want to trigger a Remote AWAY_ARM condition you can send the `REM_AWAY_ARM` string to the `comfort2mqtt/alarm/set` topic. Below is a quick Automation you can use to arm to REM_ARM_AWAY.
 
-⚠️ **Note:** Never disarm your security system using insecure MQTT or other insecure connectivity methods. Make sure you use a trusted VPN to connect from the Internet and use MQTT encryption on your local network.
+⚠️ **Note:** Never disarm your security system using insecure MQTT or any other insecure connectivity method. Make sure you use a trusted VPN to connect from the Internet and use MQTT encryption on your local network.
 
 I've used an input_boolean as my test button below. Note that both the MQTT and native Alarm Control Panel methods are shown. The Alarm Control Panel method is shown as optional, without the ability to Remote Away Arm. They are disabled in the Automation.
 
@@ -583,7 +583,7 @@ If your network is segmented using a firewall, or any other similar device, you 
 
 ### Option: `Comfort Configuration file` (Optional)
 
-  Comfort Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc. Place this file in the Home Assistant `addon_configs/<comfort2mqtt slug>` folder. If no file is specified then the default `comfigurator.cclx` will be used.
+  Comfort Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc. Place this file in the Home Assistant `addon_configs/<comfort2mqtt slug>` folder. If no filename is specified then the default `comfigurator.cclx` filename will be used.
 
   To upload a file to the `addon_configs` directory you could use something like [Samba share][samba] App or similar allowing filesystem access to selected directories on Home Assistant.
 
@@ -624,11 +624,11 @@ If your network is segmented using a firewall, or any other similar device, you 
 
 ### Option: `Comfort MQTT Bridge Battery Update Target ID` (Optional)
 
-  This sets the ID to be queried by the `Battery Update` Bridge Control button. Valid range values are [0,1,33 - 39]. The Default value is `1`. `0` is used on a yet to be released ARM firmware that queries all batteries and chargers so you can monitor all of them with a single query.
+  This sets the ID to be queried by the `Battery Update` Bridge Control button. Valid range values are [0,1,33 - 39]. The Default value is `1`. `0` is used on Comfort ARM firmware release 8.031 or later to query all batteries and chargers so you can monitor all of them with a single query.
 
 ### Option: `Set Comfort Time and Date` (Optional)
 
-  Set Comfort Time and Date when the App logs in and automatically every day at midnight. The default value is `False`.
+  Comfort Time and Date are updated automatically when you log in and at midnight every day. The default value is `False`.
 
 
 ## Support
