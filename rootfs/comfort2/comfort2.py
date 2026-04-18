@@ -24,6 +24,8 @@
 #from anyio import value
 #from sys import modules
 
+from xmlrpc import client
+
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -1305,14 +1307,36 @@ class Comfort2(mqtt.Client):
         
         if rc == 'Success':
 
+#            transport = client.socket()
+#            if hasattr(transport, 'version'):
+#                tls_version = transport.version()
+#                cipher = transport.cipher()
+#                logger.info('MQTT Broker Connection %s - TLS: %s, Cipher: %s', str(rc), tls_version, cipher[0] if cipher else 'Unknown')
+#            else:
+#                logging.info('MQTT Broker Connection %s (no TLS info available or Unsecured Connection)', str(rc))
+
+
+            # Note: _socket is a private attribute of Paho's _WebsocketWrapper (verified with Paho 2.x)
+            # This may break if Paho internals change in future versions
+
             transport = client.socket()
-            if hasattr(transport, 'version'):
-                tls_version = transport.version()
-                cipher = transport.cipher()
-                logger.info('MQTT Broker Connection %s - TLS: %s, Cipher: %s', str(rc), tls_version, cipher[0] if cipher else 'Unknown')
+
+            # Determine the actual SSL socket based on transport type
+            if type(transport).__name__ == '_WebsocketWrapper':
+                ssl_socket = transport._socket   # _ssl is just a bool flag, _socket is the actual SSLSocket
+            else:
+                ssl_socket = transport           # Plain TCP, already the SSL socket
+
+            if hasattr(ssl_socket, 'version') and callable(ssl_socket.version):
+                tls_version = ssl_socket.version()
+                cipher = ssl_socket.cipher()
+                if tls_version:
+                    logging.info('MQTT Broker Connection %s - TLS: %s, Cipher: %s', str(rc), tls_version, cipher[0] if cipher else 'Unknown')
+                else:
+                    logging.info('MQTT Broker Connection %s - Unsecured Connection', str(rc))
             else:
                 logging.info('MQTT Broker Connection %s (no TLS info available or Unsecured Connection)', str(rc))
-
+    
             BROKERCONNECTED = True
             device_properties['BridgeConnected'] = 1
 
