@@ -1,14 +1,14 @@
-## [1.6.2] - Busy...
+## [1.6.2]
 
 ### Added
  
 ### Breaking Changes ###
  
 ### Changed
- - Update DOCS.md.
+ - Minor DOCS.md updates.
  - Updated minimum TLS version to v1.2 and enable v1.3 support.
- - Migrate from pyopenssl to cryptography library.
- 
+ - Migrate from pyopenssl to cryptography library and rework SSL encryption.
+  
 ### Fixed
  - Fix corrupt certificate throwing an unhandled exception.
 
