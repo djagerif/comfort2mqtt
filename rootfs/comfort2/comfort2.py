@@ -19,11 +19,6 @@
 # Notes:
 #
 #
-#from ast import pattern
-
-#from anyio import value
-#from sys import modules
-
 from xmlrpc import client
 
 from cryptography import x509
