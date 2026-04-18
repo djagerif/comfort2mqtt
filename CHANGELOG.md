@@ -6,7 +6,7 @@
  
 ### Changed
  - Update DOCS.md.
- - Updated TLS to minimum v1.2 and enable v1.3 support.
+ - Updated minimum TLS version to v1.2 and enable v1.3 support.
  - Migrate from pyopenssl to cryptography library.
  - Updated copyright date to 2026.
  
