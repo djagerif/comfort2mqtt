@@ -1307,15 +1307,6 @@ class Comfort2(mqtt.Client):
         
         if rc == 'Success':
 
-#            transport = client.socket()
-#            if hasattr(transport, 'version'):
-#                tls_version = transport.version()
-#                cipher = transport.cipher()
-#                logger.info('MQTT Broker Connection %s - TLS: %s, Cipher: %s', str(rc), tls_version, cipher[0] if cipher else 'Unknown')
-#            else:
-#                logging.info('MQTT Broker Connection %s (no TLS info available or Unsecured Connection)', str(rc))
-
-
             # Note: _socket is a private attribute of Paho's _WebsocketWrapper (verified with Paho 2.x)
             # This may break if Paho internals change in future versions
 
