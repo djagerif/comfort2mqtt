@@ -4,10 +4,15 @@ FROM $BUILD_FROM
 # Install most Python deps here, because that way we don't need to include build tools in the
 # final image.
 
-RUN apk update --no-cache && apk upgrade --no-cache
+#RUN apk update --no-cache && apk upgrade --no-cache
+#RUN pip install --no-cache-dir --upgrade pip
+#RUN pip install paho-mqtt pyopenssl requests defusedxml
+#RUN pip install websocket-client
+
+COPY requirements.txt .
+
 RUN pip install --no-cache-dir --upgrade pip
-RUN pip install paho-mqtt pyopenssl requests defusedxml
-RUN pip install websocket-client
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy root filesystem
 COPY rootfs /

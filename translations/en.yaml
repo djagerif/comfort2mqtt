@@ -33,8 +33,8 @@ configuration:
   require_certificate:
     name: Require Certificate Authentication
     description: >-
-      If enabled, authentication will be enabled using the mandatory Client
-      Certificate and Client Key file options.
+      Enable Mutual-TLS authentication using the mandatory Client Certificate and Client Key
+      file options. Remember to also set 'require_certificate = true' on the Broker (Default False).
   broker_client_cert:
     name: Client Certificate File
     description: >-

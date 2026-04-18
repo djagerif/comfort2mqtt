@@ -1,0 +1,5 @@
+paho-mqtt
+cryptography
+requests
+defusedxml
+websocket-client

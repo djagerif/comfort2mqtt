@@ -1,8 +1,8 @@
 # Copyright(c) 2018 Khor Chin Heong (koochyrat@gmail.com) for original project code and additional 
-# copyright(c) 2025 Ingo de Jager (ingodejager@gmail.com) for modifications done 
+# copyright(c) 2026 Ingo de Jager (ingodejager@gmail.com) for modifications done 
 # to the original project sources contained in this project.
 #
-# Modified by Ingo de Jager 2025 (ingodejager@gmail.com)
+# Modified by Ingo de Jager 2026 (ingodejager@gmail.com)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,10 +19,23 @@
 # Notes:
 #
 #
+from xmlrpc import client
+
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from cryptography.exceptions import UnsupportedAlgorithm
+from cryptography.hazmat.primitives import serialization
+
 import defusedxml.ElementTree as ET
 import ssl
-from OpenSSL import crypto
+
+ssl.SSLContext.set_servername_callback  # just to confirm ssl is loaded
+
+#from OpenSSL import crypto
 import os
+
+os.environ['PYTHONWARNINGS'] = 'always'
+
 import requests
 import json
 from pathlib import Path
@@ -34,14 +47,12 @@ import time
 import datetime
 import threading
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 
 import websocket
-
-
 
 DOMAIN = "comfort2mqtt"
 ADDON_SLUG = ''
@@ -78,6 +89,8 @@ ALARMMESSAGETOPIC = DOMAIN+"/alarm/message"
 ALARMTIMERTOPIC = DOMAIN+"/alarm/timer"
 ALARMDOORBELLTOPIC = DOMAIN+"/alarm/doorbell"
 
+MODULESTATUSTOPIC = DOMAIN+"/alarm/module_status"       # Future expansion for module status reporting.
+
 FIRST_LOGIN = False         # Don't scan Comfort until MQTT connection is made.
 RUN = True
 BYPASSEDZONES = []          # Global list of Bypassed Zones
@@ -93,6 +106,7 @@ DEVICEMAPFILE = False
 USERMAPFILE = False
 TIMERMAPFILE = False
 device_properties = {}
+module_properties = {}
 file_exists  = False
 ACFail = False              # Indicates ACFail status.
 
@@ -200,7 +214,6 @@ ChargerVoltageList = {0:"-1",
 }
 
 ZoneCache = {}              # Zone Cache dictionary.
-#BypassCache = {}            # Zone Bypass Cache dictionary.
 BypassCache = {i: 0 for i in range(1,MAX_ZONES + 1)}   # generate empty bypass cache for all zones. (Up to MAX_ZONES)
 CacheState = False          # Initial Cache state. False when not in sync with Bypass Zones (b?). True, when in Sync.
 
@@ -210,10 +223,7 @@ def boolean_string(s):
 
     if s.lower() == 'true':
         return True
-    #elif s.lower() == 'false':
-    #    return False
     else:
-        #raise ValueError("Not a valid boolean string. Set to either 'True' or 'False'.")
         return False
     
 parser = ArgumentParser()
@@ -250,6 +260,11 @@ group.add_argument(
     '--broker-encryption',
     type=boolean_string, default='false',
     help="Use MQTT TLS encryption, 'True'|'False'. [default: 'False']")
+
+group.add_argument(
+    '--broker-require-certificate',
+    type=boolean_string, default='false',
+    help="Required for MQTT Mutual-TLS certificate authentication, 'True'|'False'. [default: 'False']")
 
 group.add_argument(
     '--broker-ca',
@@ -367,7 +382,8 @@ MQTT_USER=option.broker_username
 MQTT_PASSWORD=option.broker_password
 MQTT_PORT=option.broker_port
 MQTT_PROTOCOL=option.broker_protocol
-MQTT_ENCRYPTION=option.broker_encryption    
+MQTT_ENCRYPTION=option.broker_encryption
+MQTT_MUTUAL_TLS=option.broker_require_certificate    
 MQTT_CA_CERT=option.broker_ca               
 MQTT_CLIENT_CERT=option.broker_client_cert  
 MQTT_CLIENT_KEY=option.broker_client_key    
@@ -405,7 +421,7 @@ def validate_port(_port, min=1, max=65535):
     
 # Check to see if it's a Hostname.domain or IPv4 address. Resolve Hostname to IP.
 COMFORT_ADDRESS=get_ip_address(option.comfort_address)
-MQTT_SERVER=get_ip_address(option.broker_address)
+MQTT_SERVER=option.broker_address
 
 COMFORT_PORT=int(option.comfort_port) if validate_port(option.comfort_port) else 1002
 COMFORT_LOGIN_ID=option.comfort_login_id
@@ -478,7 +494,7 @@ logger.info('Completed importing the App configuration options')
 # The following variables values were passed through via the Home Assistant add on configuration options
 logger.debug('The following variable values were passed through via Home Assistant')
 logger.debug('MQTT_USER = %s', MQTT_USER)
-logger.debug('MQTT_PASSWORD = ******')
+logger.debug('MQTT_PASSWORD = **REDACTED**')
 logger.debug('MQTT_SERVER = %s', MQTT_SERVER)
 
 if not MQTT_ENCRYPTION: logger.debug('MQTT_PROTOCOL = %s/%s (Unsecure)', MQTT_PROTOCOL, MQTT_PORT)
@@ -486,10 +502,13 @@ else: logger.debug('MQTT_PROTOCOL = %s/%s (Encrypted)', MQTT_PROTOCOL, MQTT_PORT
 
 logger.debug('COMFORT_ADDRESS = %s', COMFORT_ADDRESS)
 logger.debug('COMFORT_PORT = %s', COMFORT_PORT)
-logger.debug('COMFORT_LOGIN_ID = ******')
+logger.debug('COMFORT_LOGIN_ID = **REDACTED**')
 logger.debug('COMFORT_CCLX_FILE = %s', COMFORT_CCLX_FILE)
 logger.debug('COMFORT_BATTERY_STATUS_ID = %s', str(COMFORT_BATTERY_STATUS_ID))
-logger.debug('MQTT_CA_CERT = %s', MQTT_CA_CERT)          
+
+logger.debug('MQTT_MUTUAL_TLS = %s', str(MQTT_MUTUAL_TLS))
+
+logger.debug('MQTT_CA_CERT = %s', MQTT_CA_CERT) 
 logger.debug('MQTT_CLIENT_CERT = %s', MQTT_CLIENT_CERT)  
 logger.debug('MQTT_CLIENT_KEY = %s', MQTT_CLIENT_KEY)    
 
@@ -498,7 +517,7 @@ logger.debug('COMFORT_TIME= %s', COMFORT_TIME)
 
 # Map HA variables to internal variables.
 
-MQTTBROKERIP = MQTT_SERVER
+#MQTTBROKERIP = MQTT_SERVER     # Not needed anymore.
 MQTTBROKERPORT = int(MQTT_PORT)
 MQTTUSERNAME = MQTT_USER
 MQTTPASSWORD = MQTT_PASSWORD
@@ -647,28 +666,10 @@ class ComfortCTCounterActivationReport(object): # in format CT1EFF00 ie CT (coun
             self.counter = counter
             self.value = value
             self.state = state
-
+    
     def ComfortSigned16(self,value):                                            # Returns signed 16-bit value where required.
         return -(value & 0x8000) | (value & 0x7fff)
     
-    ### Byte-Swap code below ###
-    def HexToSigned16Decimal(self,value):                                       # Returns Signed Decimal value from HEX string EG. FFFF = -1
-        return -(int(value,16) & 0x8000) | (int(value,16) & 0x7fff)
-
-    def byte_swap_16_bit(self, hex_string):
-        # Ensure the string is prefixed with '0x' for hex conversion            # Trying to cleanup strings.
-        if not hex_string.startswith('0x'):
-            hex_string = '0x' + hex_string
-    
-        # Convert hex string to integer
-        value = int(hex_string, 16)
-    
-        # Perform byte swapping
-        swapped_value = ((value << 8) & 0xFF00) | ((value >> 8) & 0x00FF)
-    
-        # Convert back to hex string, remove the leading '0x' and return 16-bit number.
-        return hex(swapped_value)
-
 class ComfortTRReport(object):
     def __init__(self, datastr="", timer=1, value=0, state=0):
         if datastr:
@@ -774,7 +775,6 @@ class Comfort_Z_ReportAllZones(object):     #SCS/RIO z?
             for j in range(0,8): 
                 self.inputs.append(ComfortIPInputActivationReport("", 128+8*(i-1)+1+j,(inputbits>>j) & 1))
 
-
 class Comfort_RSensorActivationReport(object):
     def __init__(self, datastr="", sensor=0, state=0):
         if datastr:
@@ -811,7 +811,6 @@ class Comfort_R_ReportAllSensors(object):
     
     def ComfortSigned16(self,value):     # Returns signed 16-bit value from HEX value.
         return -(value & 0x8000) | (value & 0x7fff)
-
 
 class ComfortY_ReportAllOutputs(object):
     def __init__(self, data={}):
@@ -894,7 +893,6 @@ class Comfortf_ReportAllFlags(object):
                     flags[flag_name] = int(segment[8 - j],2)
                     self.flags.append(ComfortFLFlagActivationReport("", int(start_flag + j - 1),int(segment[8 - j],2) & 1))
             
-
 #mode = { 00=Off, 01=Away, 02=Night, 03=Day, 04=Vacation }
 class ComfortM_SecurityModeReport(object):
     def __init__(self, data={}):
@@ -1011,7 +1009,6 @@ class ComfortALSystemAlarmReport(object):
         elif self.state == 0:
             ALARMSTATE = 0
 
-
 class Comfort_A_SecurityInformationReport(object):      #  For future development !!!
     #a?000000000000000000
     def __init__(self, data={}):
@@ -1081,7 +1078,6 @@ class ComfortARSystemAlarmReport(object):
             elif self.alarm == 25: self.message = "Comms Failure RS485 id"+str(self.parameter)+" Restore"
             else: self.message = "Unknown("+str(self.alarm)+")"
 
-
 class ComfortV_SystemTypeReport(object):
     def __init__(self, data={}):
         self.filesystem = int(data[8:10],16)    # 34 for Ultra II
@@ -1105,7 +1101,6 @@ class Comfort_U_SystemCPUTypeReport(object):
                 self.cputype = "ARM"
             elif identifier == 0:
                 self.cputype = "Toshiba"
-
 
 class Comfort_EL_HardwareModelReport(object):
     def __init__(self, data={}):
@@ -1274,7 +1269,7 @@ class Comfort2(mqtt.Client):
     global RUN
 
     def init(self, mqtt_ip, mqtt_port, mqtt_username, mqtt_password, comfort_ip, comfort_port, comfort_pincode, mqtt_version):
-        self.mqtt_ip = mqtt_ip
+        self.mqtt_ip = mqtt_ip          # Using either ip address or hostname for MQTT Broker connection.
         self.mqtt_port = mqtt_port
         self.comfort_ip = comfort_ip
         self.comfort_port = comfort_port
@@ -1307,10 +1302,29 @@ class Comfort2(mqtt.Client):
         
         if rc == 'Success':
 
+            # Note: _socket is a private attribute of Paho's _WebsocketWrapper (verified with Paho 2.x)
+            # This may break if Paho internals change in future versions
+
+            transport = client.socket()
+
+            # Determine the actual SSL socket based on transport type
+            if type(transport).__name__ == '_WebsocketWrapper':
+                ssl_socket = transport._socket   # _ssl is just a bool flag, _socket is the actual SSLSocket
+            else:
+                ssl_socket = transport           # Plain TCP, already the SSL socket
+
+            if hasattr(ssl_socket, 'version') and callable(ssl_socket.version):
+                tls_version = ssl_socket.version()
+                cipher = ssl_socket.cipher()
+                if tls_version:
+                    logging.info('MQTT Broker Connection %s - TLS: %s, Cipher: %s', str(rc), tls_version, cipher[0] if cipher else 'Unknown')
+                else:
+                    logging.info('MQTT Broker Connection %s - Unsecured Connection', str(rc))
+            else:
+                logging.info('MQTT Broker Connection %s (no TLS info available or Unsecured Connection)', str(rc))
+    
             BROKERCONNECTED = True
             device_properties['BridgeConnected'] = 1
-
-            logger.info('MQTT Broker Connection %s', str(rc))
 
             time.sleep(0.25)    # Short wait for MQTT to be ready to accept commands.
 
@@ -1562,13 +1576,10 @@ class Comfort2(mqtt.Client):
         pattern = r'^(?![ ]{1,}).{1}[a-zA-Z0-9_ -/]+$'
         return bool(re.match(pattern, value))
     
-    def CheckIndexNumberFormat(self,value,max_index = 1024):      # Checks CSV file Zone Number to only contain valid characters. Return False if it fails else True
+    def CheckIndexNumberFormat(self,value,max_index = 1024,min_index = 0):      # Checks CSV file Zone Number to only contain valid characters. Return False if it fails else True
         pattern = r'^[0-9]+$'
-        if bool(re.match(pattern, value)):
-            if value.isnumeric() & (int(value) <= max_index):
-                return True
-            else:
-                return False
+        if re.match(pattern, str(value)):
+            return min_index <= int(value) <= max_index
         else:
             return False
     
@@ -2379,7 +2390,7 @@ class Comfort2(mqtt.Client):
         global DEVICEMAPFILE
         global USERMAPFILE
         global TIMERMAPFILE
-
+        
         global input_properties
         global counter_properties
         global flag_properties
@@ -2389,6 +2400,7 @@ class Comfort2(mqtt.Client):
         global device_properties
         global user_properties
         global timer_properties
+        global module_properties
         
         if file.is_file():
             file_stats = os.stat(file)
@@ -2637,6 +2649,28 @@ class Comfort2(mqtt.Client):
 
                 # Add the truncated value to the dictionary
                 user_properties[number] = name
+
+            for ucm in root.iter('UCM'):
+                name = ucm.attrib.get('Name')[:16] if ucm.attrib.get('Name') else ''
+                module_type = ucm.attrib.get('Type')[:32] if ucm.attrib.get('Type') else ''
+                producttype = int(ucm.attrib.get('ProductType')[:3]) if ucm.attrib.get('ProductType') else ''
+                number = int(ucm.attrib.get('Number')[:2]) if ucm.attrib.get('Number') else ''
+
+                if self.CheckZoneNameFormat(module_type) and self.CheckIndexNumberFormat(producttype, 254) and self.CheckZoneNameFormat(name) and self.CheckIndexNumberFormat(number, 8, 1) and COMFORT_CCLX_FILE != None:
+                    # logger.debug("UCM/%s (%s) at ID# %s in '%s'.", module_type, name, number,  COMFORT_CCLX_FILE)
+
+                    # Add modules to dictionary here.
+                    module_properties[number] = {
+                        "number": number,
+                        "module_type": module_type,
+                        "name": name,
+                        "producttype": producttype
+                    }
+                elif COMFORT_CCLX_FILE != None:
+                    pass
+                    # Skip any invalid UCM entries in CCLX file.
+                    # logger.error("Invalid or Unknown UCM/%s (%s) at ID# %s, ProductType %s detected in '%s'.", module_type, name, number, producttype, COMFORT_CCLX_FILE)
+
         else:
             device_properties['CustomerName'] = None
             device_properties['Reference'] = None
@@ -3415,41 +3449,53 @@ class Comfort2(mqtt.Client):
                 infot.wait_for_publish(1)
                 self.loop_stop
 
-
 def validate_certificate(certificate):
     # Check Valid Certificate file and Valid Dates. NotBefore and NotAfter must be within datetime.now()
-
-    if not os.path.isfile(certificate):
+    if certificate is None or not os.path.isfile(certificate):
         return 2    # Missing certificate
     # Open the certificate file in binary mode
     with open(certificate, 'rb') as cert_file:
         cert_data = cert_file.read()
-
     try:
         # Load the certificate using the binary data
-        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
+        cert = x509.load_pem_x509_certificate(cert_data, default_backend())
+        # Check the 'notAfter' and 'notBefore' attributes
+        ValidTo = cert.not_valid_after_utc
+        ValidFrom = cert.not_valid_before_utc
 
-        # Check the 'notAfter' attribute
-        not_after = x509.get_notAfter()
-        not_before = x509.get_notBefore() 
-        if not_after:
-            ValidTo = not_after.decode()
-        if not_before:
-            ValidFrom = not_before.decode()
-
-        # Define the format of the datetime strings
-        datetime_format = "%Y%m%d%H%M%SZ"
-
-        # Convert the strings to datetime objects
-        ValidTo = datetime.strptime(ValidTo, datetime_format)
-        ValidFrom = datetime.strptime(ValidFrom, datetime_format)
-    
-        if (datetime.now() >= ValidFrom) and (datetime.now() < ValidTo):
+        now = datetime.now(timezone.utc)
+        if (now >= ValidFrom) and (now < ValidTo):
             return 0    # Valid certificate
         else:
             return 1    # Expired certificate
-    except crypto.Error as e:
-        raise ValueError(f"Error loading certificate: {e}")
+    except (ValueError, UnsupportedAlgorithm) as e:
+        #logging.error('Certificate is corrupt or invalid (%s): %s', certificate, e)
+        return 3    # Corrupt or invalid certificate
+
+def validate_key_matches_cert(certificate, key):
+    # Verify the private key matches the certificate public key
+    try:
+        from cryptography.hazmat.primitives.serialization import load_pem_private_key
+        
+        with open(key, 'rb') as key_file:
+            private_key = load_pem_private_key(key_file.read(), password=None, backend=default_backend())
+        
+        with open(certificate, 'rb') as cert_file:
+            cert = x509.load_pem_x509_certificate(cert_file.read(), default_backend())
+        
+        # Compare public keys
+        cert_public_key = cert.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        key_public_key = private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        return cert_public_key == key_public_key
+    except Exception as e:
+        logging.error('Error validating key/cert match: %s', e)
+        return False
 
 mqttc = Comfort2(callback_api_version = mqtt.CallbackAPIVersion.VERSION2, client_id=mqtt_client_id, protocol=mqtt.MQTTv5, transport=MQTT_PROTOCOL)
 
@@ -3457,9 +3503,9 @@ certs: str = "/config/certificates"                 # Certificates directory dir
 if MQTT_ENCRYPTION and not os.path.isdir(certs):    # Display warning if Encryption is enabled but certificates directory is not found.
     logging.debug('"/config/certificates" directory not found.')
 
-if((MQTT_CA_CERT and MQTT_CA_CERT.strip())): ca_cert = os.sep.join([certs, MQTT_CA_CERT])
-if((MQTT_CLIENT_CERT and MQTT_CLIENT_CERT.strip())): client_cert = os.sep.join([certs, MQTT_CLIENT_CERT])
-if((MQTT_CLIENT_KEY and MQTT_CLIENT_KEY.strip())): client_key = os.sep.join([certs, MQTT_CLIENT_KEY])
+ca_cert = os.sep.join([certs, MQTT_CA_CERT]) if (MQTT_CA_CERT and MQTT_CA_CERT.strip()) else None
+client_cert = os.sep.join([certs, MQTT_CLIENT_CERT]) if (MQTT_CLIENT_CERT and MQTT_CLIENT_CERT.strip()) else None
+client_key = os.sep.join([certs, MQTT_CLIENT_KEY]) if (MQTT_CLIENT_KEY and MQTT_CLIENT_KEY.strip()) else None
 
 if not MQTT_ENCRYPTION:
     logging.warning('MQTT Transport Layer Security disabled.')
@@ -3467,31 +3513,100 @@ else:
     ### Check some certificate validity here ###
     match  validate_certificate(ca_cert):
         case 1:     # Invalid CA Certificate
-            logging.warning('MQTT TLS CA Certificate Expired or not Valid (%s)', ca_cert )
+            logging.warning('MQTT TLS CA Certificate Expired or Invalid (%s)', ca_cert )
             logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
             MQTTBROKERPORT = 1883
             MQTT_ENCRYPTION = False
 
         case 2:     # Certificate not found
             logging.warning('No MQTT TLS CA Certificate found, disabling TLS')
-            logging.warning("Reverting MQTT Port to default '1883'")
+            logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
             MQTTBROKERPORT = 1883
             MQTT_ENCRYPTION = False
 
         case 3:     # Invalid Client Certificate or Key
-            logging.warning('Client Key or Certificate Expired or Invalid')
+            logging.warning('MQTT TLS CA Certificate Expired or Invalid (%s)', ca_cert )
+            logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
+            MQTTBROKERPORT = 1883
+            MQTT_ENCRYPTION = False
 
         case 0:     # Valid Certificate
-            logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert )
-            tls_args = {}
-            tls_args['ca_certs'] = ca_cert
-            mqttc.tls_set(**tls_args, tls_version=ssl.PROTOCOL_TLSv1_2)
-            #mqttc.tls_insecure_set(True)
-            mqttc.tls_insecure_set(False)
+            logging.debug('Valid MQTT TLS CA Certificate found (%s)', ca_cert)
+
+            # Validate client cert if provided
+            if MQTT_MUTUAL_TLS and client_cert and client_key:
+                cert_valid = validate_certificate(client_cert)
+                match cert_valid:
+                    case 1:
+                        logging.warning('Client Certificate Expired or not Valid (%s)', client_cert)
+                        logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
+                        client_cert = None
+                        client_key = None
+                    case 2:
+                        logging.warning('Client Certificate not found (%s)', client_cert)
+                        logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
+                        client_cert = None
+                        client_key = None
+                        client_cert = None
+                        client_key = None
+                    case 3:
+                        logging.warning('Client Certificate is corrupt or invalid (%s)', client_cert)
+                        logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
+                        client_cert = None
+                        client_key = None
+                        MQTT_ENCRYPTION = False
+                        MQTTBROKERPORT = 1883
+                    case 0:
+                        logging.debug('Valid Client Certificate found (%s)', client_cert)
+                        # Now validate the key file exists and matches the cert
+                        if not os.path.isfile(client_key):
+                            logging.warning('Client Key not found (%s)', client_key)
+                            client_cert = None
+                            client_key = None
+                        else:
+                            # Verify key matches certificate
+                            if not validate_key_matches_cert(client_cert, client_key):
+                                logging.warning('Client Key does not match Certificate')
+                                logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
+                                client_cert = None
+                                client_key = None
+                                MQTTBROKERPORT = 1883
+                                MQTT_ENCRYPTION = False
+                            else:
+                                logging.debug('Valid Client Key found (%s)', client_key)
+                if MQTT_ENCRYPTION:    # Only set TLS if encryption is still enabled after cert checks
+                    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                    context.minimum_version = ssl.TLSVersion.TLSv1_2
+                    context.load_verify_locations(ca_cert)
+
+                if client_cert and client_key:
+                    try:
+                        context.load_cert_chain(certfile=client_cert, keyfile=client_key)
+                        logging.debug('Client certificate loaded (%s)', client_cert)
+                        logging.debug('Mutual TLS enabled.')
+                    except ssl.SSLError as e:
+                        logging.error('Failed to load client cert chain: %s', e)
+                        logging.warning("Reverting MQTT Port to default '1883' (Unencrypted)")
+                        client_cert = None
+                        client_key = None
+                        MQTTBROKERPORT = 1883
+                        MQTT_ENCRYPTION = False
+
+                    mqttc.tls_set_context(context)
+                    mqttc.tls_insecure_set(False)
+            else:
+                logging.debug('One-Way/Server-Side TLS enabled.')
+                client_cert = None
+                client_key = None
+                context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                context.minimum_version = ssl.TLSVersion.TLSv1_2
+                context.load_verify_locations(ca_cert)
+                mqttc.tls_set_context(context)
+                mqttc.tls_insecure_set(False)
 
         case _:
             # Default
             pass
 
-mqttc.init(MQTTBROKERIP, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE, mqtt.MQTTv5)
+mqttc.init(MQTT_SERVER, MQTTBROKERPORT, MQTTUSERNAME, MQTTPASSWORD, COMFORTIP, COMFORTPORT, PINCODE, mqtt.MQTTv5)
 mqttc.run()
