@@ -19,7 +19,7 @@
 # Notes:
 #
 #
-from xmlrpc import client
+# from xmlrpc import client
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -27,9 +27,9 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives import serialization
 
 import defusedxml.ElementTree as ET
-import ssl
+#import ssl
 
-ssl.SSLContext.set_servername_callback  # just to confirm ssl is loaded
+#ssl.SSLContext.set_servername_callback  # just to confirm ssl is loaded
 
 #from OpenSSL import crypto
 import os
