@@ -27,11 +27,10 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives import serialization
 
 import defusedxml.ElementTree as ET
-#import ssl
+import ssl
 
-#ssl.SSLContext.set_servername_callback  # just to confirm ssl is loaded
+ssl.SSLContext.set_servername_callback = lambda self, servername, sslctx: None    # Workaround for SSLContext bug in Python 3.11+ when using MQTT over TLS with SNI and Mutual TLS. See https://bugs.python.org/issue43290 and
 
-#from OpenSSL import crypto
 import os
 
 os.environ['PYTHONWARNINGS'] = 'always'
