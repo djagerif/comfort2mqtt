@@ -1611,7 +1611,7 @@ class Comfort2(mqtt.Client):
         pass
 
     def entryexit_timer(self):
-        self.publish(ALARMTIMERTOPIC, self.entryexitdelay,qos=2,retain=True)
+        self.publish(ALARMTIMERTOPIC, self.entryexitdelay,qos=1,retain=True)
         self.entryexitdelay -= 1
         if self.entryexitdelay >= 0:
             threading.Timer(1, self.entryexit_timer).start()
@@ -1750,7 +1750,7 @@ class Comfort2(mqtt.Client):
         self.comfortsock.sendall(("\x03LI"+self.comfort_pincode+"\r").encode())
         COMFORTCONNECTED = True
         if BROKERCONNECTED:         # Check to see if Broker is connected. Is not always at this point in the startup.
-            self.publish(ALARMCONNECTEDTOPIC, 1, qos=2, retain=True)
+            self.publish(ALARMCONNECTEDTOPIC, 1, qos=1, retain=True)
         SAVEDTIME = datetime.now()
 
     def readcurrentstate(self):
@@ -1851,11 +1851,12 @@ class Comfort2(mqtt.Client):
                 SAVEDTIME = datetime.now()
                 time.sleep(0.1)
             
-            self.publish(ALARMAVAILABLETOPIC, 1,qos=2,retain=True)
+            self.publish(ALARMAVAILABLETOPIC, 1,qos=1,retain=True)
             time.sleep(0.1)
-            self.publish(ALARMLWTTOPIC, 'Online',qos=2,retain=True)
+
+            self.publish(ALARMLWTTOPIC, 'Online',qos=1,retain=True)
             time.sleep(0.1)
-            self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)       # Emptry string removes topic.
+            self.publish(ALARMMESSAGETOPIC, "",qos=1,retain=True)       # Emptry string removes topic.
             time.sleep(0.1)
 
             device_properties['BatteryVoltageMain'] = "-1"
@@ -1878,7 +1879,7 @@ class Comfort2(mqtt.Client):
             device_properties['BatteryStatus'] = "N/A"
 
             if BROKERCONNECTED and COMFORTCONNECTED:
-                self.publish(ALARMCONNECTEDTOPIC, 1,qos=2,retain=True)
+                self.publish(ALARMCONNECTEDTOPIC, 1,qos=1,retain=True)
                 time.sleep(0.1)
                 self.UpdateBatteryStatus()
 
@@ -1958,7 +1959,7 @@ class Comfort2(mqtt.Client):
                              "device": MQTT_DEVICE
                             })
 
-        self.publish(DOMAIN, MQTT_MSG,qos=2,retain=True)
+        self.publish(DOMAIN, MQTT_MSG,qos=1,retain=True)
         time.sleep(0.1)
 
         discoverytopic = "homeassistant/binary_sensor/" + DOMAIN + "/bridge_status/config"
@@ -1973,7 +1974,7 @@ class Comfort2(mqtt.Client):
                              "payload_off": "0",
                              "device": MQTT_DEVICE
                             })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
+        self.publish(discoverytopic, MQTT_MSG, qos=1, retain=True)
         time.sleep(0.1)
 
         availability =  [
@@ -2047,7 +2048,7 @@ class Comfort2(mqtt.Client):
                              "native_value": "string",
                              "device": MQTT_DEVICE
                             })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
+        self.publish(discoverytopic, MQTT_MSG, qos=1, retain=True)
         time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_firmware/config"
@@ -2187,7 +2188,7 @@ class Comfort2(mqtt.Client):
                              "icon":"mdi:home",
                              "device": MQTT_DEVICE
                         })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
+        self.publish(discoverytopic, MQTT_MSG, qos=1, retain=True)
         time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_customername/config"
@@ -2257,7 +2258,7 @@ class Comfort2(mqtt.Client):
                              "qos": "2",
                              "device": MQTT_DEVICE
                             })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
+        self.publish(discoverytopic, MQTT_MSG, qos=1, retain=True)
         time.sleep(0.1)
 
     def BatteryStatus(*voltages):  # Tuple of all voltages
@@ -2312,9 +2313,12 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             self.connected = False
         if BROKERCONNECTED == True:      # MQTT Connected
-            infot = self.publish(ALARMCONNECTEDTOPIC, 0,qos=2,retain=True)
-            infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
-            infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
+            infot = self.publish(ALARMCONNECTEDTOPIC, 0,qos=1,retain=True)
+            infot.wait_for_publish()
+            infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=1,retain=True)
+            infot.wait_for_publish()
+            infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=1,retain=True)
+            infot.wait_for_publish()
 
             if ADDON_SLUG.strip() == "":
                 MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
@@ -2811,8 +2815,8 @@ class Comfort2(mqtt.Client):
         if self.connected == True:
             BROKERCONNECTED = True
             device_properties['BridgeConnected'] = 1
-            self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
-            self.will_set(ALARMLWTTOPIC, payload="Offline", qos=2, retain=True)
+            self.publish(ALARMAVAILABLETOPIC, 0,qos=1,retain=True)
+            self.will_set(ALARMLWTTOPIC, payload="Offline", qos=1, retain=True)
 
         self.loop_start()   
 
@@ -2870,9 +2874,9 @@ class Comfort2(mqtt.Client):
                                         logger.info("Waiting for MQTT Broker to come Online...")
 
                                     self.connected = True  
-                                    self.publish(ALARMCOMMANDTOPIC, "comm test", qos=2,retain=True)
+                                    self.publish(ALARMCOMMANDTOPIC, "comm test", qos=1,retain=True)
                                     time.sleep(0.01)
-                                    self.publish(REFRESHTOPIC, "", qos=2,retain=True)               # Clear Refresh Key
+                                    self.publish(REFRESHTOPIC, "", qos=1,retain=True)               # Clear Refresh Key
                                     time.sleep(0.01)
 
                                     self.setdatetime()      # Set Date/Time if Option is enabled
@@ -2885,8 +2889,8 @@ class Comfort2(mqtt.Client):
                                     FIRST_LOGIN = True
                                     COMFORTCONNECTED = False
                                     if BROKERCONNECTED == True:      # MQTT Connected ??
-                                        self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
-                                        self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
+                                        self.publish(ALARMAVAILABLETOPIC, 0,qos=1,retain=True)
+                                        self.publish(ALARMLWTTOPIC, 'Offline',qos=1,retain=True)
                                         self.publish(ALARMCONNECTEDTOPIC, "0", qos=2, retain=False)
                                     break
 
@@ -3028,14 +3032,14 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "M?" or line[1:3] == "MD":
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
-                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=2,retain=True)      #Disarmed, Day etc
-                                self.publish(ALARMMODETOPIC, mMsg.mode,qos=2,retain=True)
+                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=1,retain=True)      #Disarmed, Day etc
+                                self.publish(ALARMMODETOPIC, mMsg.mode,qos=1,retain=True)
                                 ALARMSTATE = mMsg.mode         # Save Numerical state.
                                 self.entryexitdelay = 0                         #zero out the countdown timer
 
                             elif line[1:3] == "S?":
                                 SMsg = ComfortS_SecurityModeReport(line[1:])
-                                self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=2,retain=True)     # Idle, Alert etc.
+                                self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=1,retain=True)     # Idle, Alert etc.
                                 ALARMSTATE = SMsg.mode         # Save Numerical state.
 
                             elif line[1:3] == "V?":
@@ -3118,7 +3122,7 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "a?":     # Not Fully Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
                                 ALARMSTATE = aMsg.SS         # Save Numerical state.
-                                self.publish(ALARMSTATUSTOPIC, aMsg.state, qos=2, retain=True)          
+                                self.publish(ALARMSTATUSTOPIC, aMsg.state, qos=1, retain=True)          
                                 if aMsg.type == 'LowBattery':
                                     logging.warning("Low Battery - %s", aMsg.battery)
                                 elif aMsg.type == 'PowerFail':
@@ -3138,7 +3142,7 @@ class Comfort2(mqtt.Client):
                                         message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
 
                                     #message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
-                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=2, retain=True)          # Empty string removes topic.
+                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=1, retain=True)          # Empty string removes topic.
                                 else:
                                     logging.info("Ready To Arm...")
                                     # Sending KD1A when receiving ER message confuses Comfort. When arming local to any mode it immediately goes into Arm Mode
@@ -3149,9 +3153,9 @@ class Comfort2(mqtt.Client):
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 logging.warning(amMsg.message)
                                 #if amMsg.parameter <= int(COMFORT_INPUTS):
-                                self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
+                                self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=1, retain=True)
                                 if amMsg.triggered:
-                                    self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
+                                    self.publish(ALARMSTATETOPIC, "triggered", qos=1, retain=False)     # Original message
 
                             #elif line[1:3] == "AL":     # Under development (Alarm Type Report)
                             #    alMsg = ComfortALSystemAlarmReport(line[1:])
@@ -3175,7 +3179,7 @@ class Comfort2(mqtt.Client):
                             
                             elif line[1:3] == "AR":
                                 arMsg = ComfortARSystemAlarmReport(line[1:])
-                                self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=2,retain=True)
+                                self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=1,retain=True)
                                 #logging.info(arMsg.message)        # Removed logging for AR as it duplicates messages.
 
                             elif line[1:3] == "EX":
@@ -3190,21 +3194,21 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "RP":
                                 result = self.validate_hex_in_list(line[3:5], "0,1,255")
                                 if result and line[3:5] == "01":
-                                    self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=2,retain=True)
+                                    self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=1,retain=True)
                                 elif result and line[3:5] == "00":
-                                    self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)   # Stopped Ringing
+                                    self.publish(ALARMMESSAGETOPIC, "",qos=1,retain=True)   # Stopped Ringing
                                 elif result and line[3:5] == "FF":
-                                    self.publish(ALARMMESSAGETOPIC, "Phone Answer",qos=2,retain=True)
+                                    self.publish(ALARMMESSAGETOPIC, "Phone Answer",qos=1,retain=True)
 
                             elif line[1:3] == "DB":
                                 result = self.validate_hex_in_list(line[3:5], "49-51,255")
                                 if result and line[3:5] == "FF":
-                                    self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)
-                                    self.publish(ALARMDOORBELLTOPIC, 0,qos=2,retain=True)
+                                    self.publish(ALARMMESSAGETOPIC, "",qos=1,retain=True)
+                                    self.publish(ALARMDOORBELLTOPIC, 0,qos=1,retain=True)
                                 elif result:
-                                    self.publish(ALARMDOORBELLTOPIC, 1, qos=2,retain=True)
+                                    self.publish(ALARMDOORBELLTOPIC, 1, qos=1,retain=True)
                                     message_topic = "Doorbell "+str(int(line[3:5], 16) - 48)
-                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=2, retain=True)
+                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=1, retain=True)
 
                             elif line[1:3] == "OP" and CacheState:
                                 ipMsg = ComfortOPOutputActivationReport(line[1:])
@@ -3326,10 +3330,10 @@ class Comfort2(mqtt.Client):
                                 bMsg = ComfortB_ReportAllBypassZones(line[1:])
                                 if bMsg.value == 0:
                                     logger.debug("Zones Bypassed: <None>")
-                                    self.publish(ALARMBYPASSTOPIC, 0, qos=2, retain=True)
+                                    self.publish(ALARMBYPASSTOPIC, 0, qos=1, retain=True)
                                 else:
                                     logger.debug("Zones Bypassed: %s", bMsg.value)
-                                    self.publish(ALARMBYPASSTOPIC, bMsg.value, qos=2,retain=True)
+                                    self.publish(ALARMBYPASSTOPIC, bMsg.value, qos=1,retain=True)
 
                             elif (line[1:9] == "DL7FF904"):
                                 if len(line[1:]) == 18:
@@ -3392,7 +3396,7 @@ class Comfort2(mqtt.Client):
                                     self.publish(ALARMINPUTTOPIC % byMsg.zone, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
                                     time.sleep(0.01)    # 10mS delay between commands
 
-                                    self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=2,retain=True)  # Add Zone to list of zones.
+                                    self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=1,retain=True)  # Add Zone to list of zones.
                                     time.sleep(0.01)    # 10mS delay between commands
 
                             elif line[1:3] == "RS":
@@ -3424,8 +3428,8 @@ class Comfort2(mqtt.Client):
                 FIRST_LOGIN = True  # Added 29/4/2025
                 logger.error('Lost connection to Comfort, reconnecting...')
                 if BROKERCONNECTED == True:      # MQTT Connected ??
-                    self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
-                    self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
+                    self.publish(ALARMAVAILABLETOPIC, 0,qos=1,retain=True)
+                    self.publish(ALARMLWTTOPIC, 'Offline',qos=1,retain=True)
                     self.publish(ALARMCONNECTEDTOPIC, "1" if COMFORTCONNECTED else "0", qos=2, retain=False)
                     
                 time.sleep(RETRY.seconds)
@@ -3443,8 +3447,8 @@ class Comfort2(mqtt.Client):
             self.loop_stop
         finally:
             if BROKERCONNECTED == True:      # MQTT Connected ??
-                infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
-                infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
+                infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=1,retain=True)
+                infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=1,retain=True)
                 infot.wait_for_publish(1)
                 self.loop_stop
 
