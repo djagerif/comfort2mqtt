@@ -1741,6 +1741,9 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             #logger.debug("Sending Command %s", command)    # Debug sent command to Comfort.
         except:
+            if command == "cc00":
+                logger.warning("Keepalive command 'cc00' failed to send - ignoring to maintain connection.")
+                return
             logger.error("Error sending command '%s', closing socket.", command)
             self.comfortsock.close()
             raise
