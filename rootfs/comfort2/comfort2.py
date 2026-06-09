@@ -104,6 +104,9 @@ FLAGMAPFILE = False
 DEVICEMAPFILE = False
 USERMAPFILE = False
 TIMERMAPFILE = False
+
+INT16_RANGE = range(-32768, 32768)
+
 device_properties = {}
 module_properties = {}
 file_exists  = False
@@ -1409,6 +1412,30 @@ class Comfort2(mqtt.Client):
             logger.error('MQTT Broker Connection Failed (%s). Check Network or MQTT Broker connection settings', str(reasonCode))
             FIRST_LOGIN = True
 
+    
+    def clean(self, value, allowed=None):
+    
+    #Validates that value is an integer, and optionally checks against an allowed list.
+    #Args:
+    #value:   The input to validate (typically a string from msgstr)
+    #    allowed: Optional list of permitted integer values e.g. [0, 1, 2, 3, 4]
+    #Returns:
+    #    True if valid (and in allowed list if provided), False otherwise
+    
+        try:
+            int_value = int(value)
+        except (ValueError, TypeError):
+            return False
+
+        if allowed is not None:
+            return int_value in allowed
+
+        return True
+
+    def truncate(self, value, length=8):
+        s = str(value)
+        return s[:length] + ("..." if len(s) > length else "")
+
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):    #=0
 
@@ -1497,16 +1524,30 @@ class Comfort2(mqtt.Client):
                 logger.info("Home Assistant Status: %s", msgstr)
 
         elif msg.topic.startswith(DOMAIN+"/output") and msg.topic.endswith("/set"):
+            # Sanitize the msgstr output number from the topic. Only allow numbers within the output range specified.
             output = int(msg.topic.split("/")[1][6:])
-            try:
-                state = int(msgstr)
-            except ValueError:
-                logger.debug("Invalid 'output%s/set' value '%s'. Only Integers allowed.", output, msgstr)
+            if not self.clean(msgstr):
+                logger.debug("Invalid 'output%s/set' value '%s'. Only integers allowed.", output, self.truncate(msgstr))
                 return
+            state = int(msgstr)
+
             if self.connected:
-                if state >= 0 and state < 5:
+                if self.clean(msgstr, allowed=list(range(5))):   # allowed values are 0 to 4 for state of output
                     self.comfortsock.sendall(("\x03O!%02X%02X\r" % (output, state)).encode())
                     SAVEDTIME = datetime.now()
+                else:
+                    logger.debug("Invalid 'output%s/set' value '%s'. Must be 0 to 4.", output, self.truncate(msgstr))
+
+            #output = int(msg.topic.split("/")[1][6:])
+            #try:
+            #    state = int(msgstr)
+            #except ValueError:
+            #    logger.debug("Invalid 'output%s/set' value '%s'. Only Integers allowed.", output, msgstr)
+            #    return
+            #if self.connected:
+            #    if state >= 0 and state < 5:
+            #        self.comfortsock.sendall(("\x03O!%02X%02X\r" % (output, state)).encode())
+            #        SAVEDTIME = datetime.now()
         elif msg.topic.startswith(DOMAIN+"/response") and msg.topic.endswith("/set"):
             response = int(msg.topic.split("/")[1][8:])
             if self.connected:
@@ -1519,25 +1560,45 @@ class Comfort2(mqtt.Client):
                     SAVEDTIME = datetime.now()
                 logger.debug("Activating Response %d",response )
         elif msg.topic.startswith(DOMAIN+"/input") and msg.topic.endswith("/set"):                          # Can only set the State, the Bypass, Name and Time cannot be changed.
+            # Sanitize the msgstr input number from the topic. Only allow numbers within the input range specified.
             virtualinput = int(msg.topic.split("/")[1][5:])
-            try:
-                state = int(msgstr)
-            except ValueError:
-                logger.debug("Invalid 'input%s/set' value '%s'. Only Integers allowed.", virtualinput, msgstr)
+            if not self.clean(msgstr):
+                logger.debug("Invalid 'input%s/set' value '%s'. Only integers allowed.", virtualinput, self.truncate(msgstr))
                 return
+            state = int(msgstr)
+
             if self.connected:
-                self.comfortsock.sendall(("\x03I!%02X%02X\r" % (virtualinput, state)).encode())
-                SAVEDTIME = datetime.now()
+                if self.clean(msgstr, allowed=list(range(2))):   # allowed values are 0 and 1 for state of virtual input
+                    self.comfortsock.sendall(("\x03I!%02X%02X\r" % (virtualinput, state)).encode())
+                    SAVEDTIME = datetime.now()
+                else:
+                    logger.debug("Invalid 'input%s/set' value '%s'. Must be 0 or 1.", virtualinput, self.truncate(msgstr))
+
         elif msg.topic.startswith(DOMAIN+"/flag") and msg.topic.endswith("/set"):
+            # Sanitize the msgstr flag number from the topic. Only allow numbers within the flag range specified.
             flag = int(msg.topic.split("/")[1][4:])
-            try:
-                state = int(msgstr)
-            except ValueError:
-                logger.debug("Invalid 'flag%s/set' value '%s'. Only Integers allowed.", flag, msgstr)
+            if not self.clean(msgstr):
+                logger.debug("Invalid 'flag%s/set' value '%s'. Only integers allowed.", flag, self.truncate(msgstr))
                 return
+            state = int(msgstr)
+
             if self.connected:
-                self.comfortsock.sendall(("\x03F!%02X%02X\r" % (flag, state)).encode()) #was F!
-                SAVEDTIME = datetime.now()
+                if self.clean(msgstr, allowed=list(range(2))):   # allowed values are 0 and 1 for state of flags
+                    self.comfortsock.sendall(("\x03F!%02X%02X\r" % (flag, state)).encode())
+                    SAVEDTIME = datetime.now()
+                else:
+                    logger.debug("Invalid 'flag%s/set' value '%s'. Must be 0 or 1.", flag, self.truncate(msgstr))
+
+
+            #flag = int(msg.topic.split("/")[1][4:])
+            #try:
+            #    state = int(msgstr)
+            #except ValueError:
+            #    logger.debug("Invalid 'flag%s/set' value '%s'. Only Integers allowed.", flag, self.truncate(msgstr))
+            #    return
+            #if self.connected:
+            #    self.comfortsock.sendall(("\x03F!%02X%02X\r" % (flag, state)).encode()) #was F!
+            #    SAVEDTIME = datetime.now()
         elif msg.topic.startswith(DOMAIN+"/counter") and msg.topic.endswith("/set"): # counter set
             counter = int(msg.topic.split("/")[1][7:])
             if not msgstr.isnumeric() and not msgstr == "ON" and not msgstr == "OFF":
@@ -1554,19 +1615,36 @@ class Comfort2(mqtt.Client):
                     SAVEDTIME = datetime.now()
             else:
                 state = int(msgstr)
-                if self.connected:
+                if self.connected and self.clean(msgstr, INT16_RANGE):
                     self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
                     SAVEDTIME = datetime.now()
+                else:
+                    logger.debug("Invalid 'counter%s/set' value '%s'. Must be 16-bit signed integer.", counter, self.truncate(msgstr))
         elif msg.topic.startswith(DOMAIN+"/sensor") and msg.topic.endswith("/set"): # sensor set
+            # Sanitize the msgstr sensor number from the topic. Only allow numbers within the sensor range specified.
             sensor = int(msg.topic.split("/")[1][6:])
-            try:
-                state = int(msgstr)
-            except ValueError:
-                logger.debug("Invalid 'sensor%s/set' value '%s'. Only Integers allowed.", sensor, msgstr)
+            if not self.clean(msgstr):
+                logger.debug("Invalid 'sensor%s/set' value '%s'. Only 16-bit signed integers allowed.", sensor, self.truncate(msgstr))
                 return
+            state = int(msgstr)
+
             if self.connected:
-                self.comfortsock.sendall(("\x03s!%02X%s\r" % (sensor, self.DecimalToSigned16(state))).encode()) # sensor needs 16 bit signed number
-                SAVEDTIME = datetime.now()
+                if self.clean(msgstr, INT16_RANGE):   # allowed values are 16-bit signed integer values
+                    self.comfortsock.sendall(("\x03s!%02X%s\r" % (sensor, self.DecimalToSigned16(state))).encode()) # sensor needs 16 bit signed number
+                    SAVEDTIME = datetime.now()
+                else:
+                    logger.debug("Invalid 'sensor%s/set' value '%s'. Must be 16-bit signed integer.", sensor, self.truncate(msgstr))
+
+
+            #sensor = int(msg.topic.split("/")[1][6:])
+            #try:
+            #    state = int(msgstr)
+            #except ValueError:
+            #    logger.debug("Invalid 'sensor%s/set' value '%s'. Only Integers allowed.", sensor, self.truncate(msgstr))
+            #    return
+            #if self.connected:
+            #    self.comfortsock.sendall(("\x03s!%02X%s\r" % (sensor, self.DecimalToSigned16(state))).encode()) # sensor needs 16 bit signed number
+            #    SAVEDTIME = datetime.now()
 
     def DecimalToSigned16(self,value):      # Returns Comfort corrected HEX string value from signed 16-bit decimal value.
         return ('{:04X}'.format((int((value & 0xff) * 0x100 + (value & 0xff00) / 0x100))) )
