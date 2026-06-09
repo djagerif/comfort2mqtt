@@ -1601,7 +1601,7 @@ class Comfort2(mqtt.Client):
             #    SAVEDTIME = datetime.now()
         elif msg.topic.startswith(DOMAIN+"/counter") and msg.topic.endswith("/set"): # counter set
             counter = int(msg.topic.split("/")[1][7:])
-            if not msgstr.isnumeric() and not msgstr == "ON" and not msgstr == "OFF":
+            if not self.clean(msgstr, INT16_RANGE) and not msgstr == "ON" and not msgstr == "OFF":
                 logger.debug("Invalid Counter%s Set value detected ('%s'), only 'ON', 'OFF' and Integer values allowed", str(counter), str(msgstr))
             elif msgstr == "ON":
                 state = 255
