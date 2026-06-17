@@ -1,14 +1,13 @@
 ## [1.6.3] - Busy...
 
 ### Added
- - Better MQTT input validation on Virtual Input, Output, Flag, Sensor and Counter 'set' values.
+ - Better MQTT input validation on Virtual Input, Output, Flag, Sensor and Counter 'set' values from MQTT.
 
  
 ### Breaking Changes ###
  
 ### Changed
  - Updated DOCS.md for ARM based system Battery Update/Refresh for future Slaves on ID 38 and 39.
- - Updated DOCS.md to make it clear that the Eth01 and Eth02 modules are not supported.
  - Updated DOCS.md to better explain Zone count setting when using Virtual Zones.
    
 ### Fixed
