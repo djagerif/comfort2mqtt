@@ -61,8 +61,8 @@ COMFORT_KEY = "00000000"          # Default Refresh Key.
 
 SupportedFirmware = float(7.201)  # Minimum Supported firmware.
 
-MAX_ZONES = 96                    # Configurable for future expansion
-MAX_OUTPUTS = 96                  # Configurable for future expansion
+MAX_ZONES = 128                   # Configurable for future expansion. Expanded by Cytech.
+MAX_OUTPUTS = 128                 # Configurable for future expansion. Expanded by Cytech.
 MAX_RESPONSES = 1024              # Configurable for future expansion
 
 lower = 268435456
@@ -1934,7 +1934,7 @@ class Comfort2(mqtt.Client):
 
             self.publish(ALARMLWTTOPIC, 'Online',qos=1,retain=True)
             time.sleep(0.1)
-            self.publish(ALARMMESSAGETOPIC, "",qos=1,retain=True)       # Emptry string removes topic.
+            self.publish(ALARMMESSAGETOPIC, "",qos=1,retain=True)       # Emptry string clears topic.
             time.sleep(0.1)
 
             device_properties['BatteryVoltageMain'] = "-1"
@@ -3077,7 +3077,7 @@ class Comfort2(mqtt.Client):
                                     if ipMsgZ.input <= int(COMFORT_INPUTS):
                                         self.publish(ALARMINPUTTOPIC % ipMsgZ.input, MQTT_MSG,qos=2,retain=False)
                                     else:
-                                        self.publish(ALARMINPUTTOPIC % ipMsgZ.input, "",qos=2,retain=False)
+                                        self.publish(ALARMINPUTTOPIC % ipMsgZ.input, None,qos=1,retain=False)   #Remove any previously created objects
                                     time.sleep(0.01)    # 10mS delay between commands
                                 logger.debug("Max. Reported Zones/Inputs: %d", zMsg.max_zones)
                                 if zMsg.max_zones < int(COMFORT_INPUTS):
@@ -3100,10 +3100,10 @@ class Comfort2(mqtt.Client):
                                                          "State": ipMsgZ.state,
                                                          "Bypass": None
                                                         })
-                                    if ipMsgZ.input <= 128 + int(COMFORT_RIO_INPUTS):
+                                    if ipMsgZ.input <= 128 + int(COMFORT_RIO_INPUTS):       # test 128 change to 16
                                         self.publish(ALARMINPUTTOPIC % ipMsgZ.input, MQTT_MSG,qos=2,retain=False)
                                     else:
-                                        self.publish(ALARMINPUTTOPIC % ipMsgZ.input, "",qos=2,retain=False)     # Remove any previously created objects
+                                        self.publish(ALARMINPUTTOPIC % ipMsgZ.input, None, qos=1, retain=False)     # Remove any previously created objects
                                     time.sleep(0.01)    # 10mS delay between commands
 
                                 logger.debug("Max. Reported SCS/RIO Inputs: %d", zMsg.max_zones)
@@ -3328,7 +3328,7 @@ class Comfort2(mqtt.Client):
                                     if opMsgY.output <= int(COMFORT_OUTPUTS):
                                         self.publish(ALARMOUTPUTTOPIC % opMsgY.output, MQTT_MSG,qos=2,retain=False)
                                     else:
-                                        self.publish(ALARMOUTPUTTOPIC % opMsgY.output, "",qos=2,retain=False)     # Remove any previously created objects
+                                        self.publish(ALARMOUTPUTTOPIC % opMsgY.output, None,qos=1,retain=True)     # Remove any previously created objects if ever create with retain = True
                                     time.sleep(0.01)    # 10mS delay between commands
                                 logger.debug("Max. Reported Outputs: %d", yMsg.max_zones)
                                 if yMsg.max_zones < int(COMFORT_OUTPUTS):
@@ -3351,7 +3351,7 @@ class Comfort2(mqtt.Client):
                                     if opMsgY.output <= 128 + int(COMFORT_RIO_OUTPUTS):
                                         self.publish(ALARMOUTPUTTOPIC % opMsgY.output, MQTT_MSG,qos=2,retain=False)
                                     else:
-                                        self.publish(ALARMOUTPUTTOPIC % opMsgY.output, "",qos=2,retain=False)     # Remove any previously created objects
+                                        self.publish(ALARMOUTPUTTOPIC % opMsgY.output, None,qos=1,retain=True)     # Remove any previously created objects
                                     time.sleep(0.01)    # 10mS delay between commands 
 
                                 logger.debug("Max. Reported SCS/RIO Outputs: %d", yMsg.max_zones)
