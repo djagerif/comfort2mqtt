@@ -9,6 +9,7 @@
  - Updated DOCS.md for ARM based system Battery Update/Refresh for future Slaves on ID 38 and 39.
  - Updated DOCS.md to better explain Zone count setting when using Virtual Zones.
  - Increased Max. Zone Count from 96 to 128 for future expansion by Cytech.
+ - Trigger rebuild using latest Alpine base image.
    
 ### Fixed
  - MQTT topic removal when Comfort Zones changed.

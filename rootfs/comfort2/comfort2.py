@@ -46,6 +46,7 @@ import time
 import datetime
 import threading
 import logging
+from logging.handlers import RotatingFileHandler
 from datetime import datetime, timedelta, timezone
 import secrets
 import paho.mqtt.client as mqtt
@@ -349,11 +350,33 @@ group.add_argument(
 
 option = parser.parse_args()
 
-logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    level=option.log_verbosity,
+#logging.basicConfig(
+#    format='%(asctime)s %(levelname)-8s %(message)s',
+#    level=option.log_verbosity,
+#    datefmt='%Y-%m-%d %H:%M:%S'
+#)
+
+log_formatter = logging.Formatter(
+    fmt='%(asctime)s %(levelname)-8s %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+
+root_logger = logging.getLogger()
+root_logger.setLevel(option.log_verbosity)
+
+# Keep stdout/stderr output so `docker logs` / HA's Add-on Log tab still work
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(log_formatter)
+root_logger.addHandler(console_handler)
+
+# Add bounded, rotating file output
+file_handler = RotatingFileHandler(
+    '/config/comfort2mqtt.log',
+    maxBytes=5 * 1024 * 1024,  # 5MB
+    backupCount=3,
+)
+file_handler.setFormatter(log_formatter)
+root_logger.addHandler(file_handler)
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
 ALPINE_VERSION = "N/A" if os.getenv('ALPINE_VERSION') == None else os.getenv('ALPINE_VERSION')
