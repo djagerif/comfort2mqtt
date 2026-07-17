@@ -10,6 +10,7 @@
  - Updated DOCS.md to better explain Zone count setting when using Virtual Zones.
  - Increased Max. Zone Count from 96 to 128 for future expansion by Cytech.
  - Trigger rebuild using latest Alpine base image.
+ - Changed logging from Unlimited to Rotating logs. Keeping 3 files of 5MB each as maximum.
    
 ### Fixed
  - MQTT topic removal when Comfort Zones changed.

@@ -2858,6 +2858,16 @@ class Comfort2(mqtt.Client):
 
         return dec_value in allowed
 
+    def log_data_dir_size(self):
+        total = 0
+        for f in os.listdir('/data'):
+            path = os.path.join('/data', f)
+            if os.path.isfile(path):
+                size = os.path.getsize(path)
+                total += size
+                logger.debug('File: %s, Size: %.2f KB', f, size / 1024)
+        logger.info('Total /data size: %.2f KB', total / 1024)
+
     def run(self):
 
         global FIRST_LOGIN         # Used to track if Addon started up or not.
@@ -2918,6 +2928,8 @@ class Comfort2(mqtt.Client):
             device_properties['BridgeConnected'] = 1
             self.publish(ALARMAVAILABLETOPIC, 0,qos=1,retain=True)
             self.will_set(ALARMLWTTOPIC, payload="Offline", qos=1, retain=True)
+
+        self.log_data_dir_size()  # Log the size of the /data directory
 
         self.loop_start()   
 
