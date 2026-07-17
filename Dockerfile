@@ -1,5 +1,6 @@
-ARG BUILD_FROM
-FROM $BUILD_FROM
+#ARG BUILD_FROM
+#FROM $BUILD_FROM
+FROM ghcr.io/home-assistant/base-python:latest
 
 # Install most Python deps here, because that way we don't need to include build tools in the
 # final image.
