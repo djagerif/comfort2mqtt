@@ -371,7 +371,7 @@ root_logger.addHandler(console_handler)
 
 # Add bounded, rotating file output
 file_handler = RotatingFileHandler(
-    '/data/logs/comfort2mqtt.log',
+    '/data/comfort2mqtt.log',
     maxBytes=5 * 1024 * 1024,  # 5MB
     backupCount=3,
 )
