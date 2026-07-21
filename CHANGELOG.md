@@ -1,3 +1,17 @@
+## [1.6.4] - Busy
+
+### Added
+ - Look into seperate logging and/or memory only DEBUG logging. Saves on disk space. 
+ 
+### Breaking Changes ###
+ 
+### Changed
+  
+### Fixed
+ 
+ 
+
+
 ## [1.6.3] - 2026-07-21
 
 ### Added
