@@ -1,4 +1,4 @@
-## [1.6.3] - Busy...
+## [1.6.3] - 2026-07-21
 
 ### Added
  - Better MQTT input validation on Virtual Input, Output, Flag, Sensor and Counter 'set' values from MQTT.
@@ -17,7 +17,7 @@
  - MQTT topic removal when Comfort Zones changed.
 
 
-## [1.6.2]
+## [1.6.2] - 2026-04-18
 
 ### Added
  
