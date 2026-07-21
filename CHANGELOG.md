@@ -11,7 +11,7 @@
  - Increased Max. Zone Count from 96 to 128 for future expansion by Cytech.
  - Trigger rebuild using latest Alpine base image.
  - Changed logging to Rotating logs. Keeping 3 files of 5MB each as maximum.
- - Update Build changes to use Dockerfile only instead of the Build.yaml file for multi-platform manifest images.
+ - Docker Build changes to use only Dockerfile for multi-platform manifest images instead of the Build.yaml file.
    
 ### Fixed
  - MQTT topic removal when Comfort Zones changed.
