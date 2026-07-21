@@ -104,7 +104,7 @@ comfort2mqtt/alarm/set - sent from Home Assistant, DISARM, ARM_HOME, ARM_NIGHT, 
                          ARM_CUSTOM_BYPASS is a special case and is used to send the # key instead.
 comfort2mqtt/alarm/refresh - sent from Home Assistant, <Key> triggers a complete object refresh
 comfort2mqtt/alarm/battery_update - sent from Home Assistant, <id> triggers a battery update query 'D?id01 and D?id02
-                                    id's 0,1,33-37 are supported for Main and Slaves when ARM CPU is detected. 0 for bulk if supported.
+                                    id's 0,1,33-39 are supported for Main and Slaves when ARM CPU is detected. 0 for bulk if supported.
 
 comfort2mqtt/input<1 to 96>/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input
 comfort2mqtt/input<129 to 248>/set
@@ -505,9 +505,9 @@ This App was specifically developed for the Comfort II ULTRA range of Alarm Syst
 
 The following Cytech Universal Communications Modules (UCM) Ethernet modules are supported:
 
-* [UCM/Eth01] - Obsolete/Untested
+* [UCM/Eth01 (Tibbo EM100)] - Obsolete/Does not work due to the limited TCP stack that does not have all the required functions.
 
-* [UCM/Eth02] - Obsolete/Not recommended. Not all functions work with this module.
+* [UCM/Eth02] - Obsolete/Does not work. Not all functions work with this module.
 
 * [UCM/Wifi01] - Not Recommended (WiFi) - Firmware 7.176 or later.
 
@@ -604,7 +604,7 @@ If your network is segmented using a firewall, or any other similar device, you 
 
 ### Option: `Comfort Zone Inputs` (Optional)
 
-  Select number of Published Comfort Inputs/Zones starting from Zone 1. Published Zones is a single contiguous block from 1 to <Value>. Default 8, Max. 96
+  Select number of Published Comfort Inputs/Zones starting from Zone 1. Published Zones is a single contiguous block from 1 to <Value>. If you have any Virtual Zones in use then select the next boundary after the last Virtual-Zone. EG. Physical Zones 1 - 16 + Virtual Zone 17 then select 24 zones in the dropdown. Default 8, Max. 96
 
 ### Option: `Comfort Zone Outputs` (Optional)
 

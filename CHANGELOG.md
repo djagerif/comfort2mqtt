@@ -1,3 +1,22 @@
+## [1.6.3] - 2026-07-21
+
+### Added
+ - Better MQTT input validation on Virtual Input, Output, Flag, Sensor and Counter 'set' values from MQTT.
+ 
+### Breaking Changes ###
+ 
+### Changed
+ - Updated DOCS.md for ARM based system Battery Update/Refresh for future Slaves on ID 38 and 39.
+ - Updated DOCS.md to better explain Zone count setting when using Virtual Zones.
+ - Increased Max. Zone Count from 96 to 128 for future expansion by Cytech.
+ - Trigger rebuild using latest Alpine base image.
+ - Changed logging to Rotating logs. Keeping 3 files of 5MB each as maximum.
+ - Docker Build changes to use only Dockerfile for multi-platform manifest images instead of the Build.yaml file.
+   
+### Fixed
+ - MQTT topic removal when Comfort Zones changed.
+
+
 ## [1.6.2] - 2026-04-18
 
 ### Added

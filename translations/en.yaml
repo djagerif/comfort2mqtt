@@ -73,7 +73,7 @@ configuration:
   alarm_inputs:
     name: Comfort Zone Inputs (In multiples of 8).
     description: >-
-      Cytech Comfort Zone Inputs installed on your system. Range from 8 - 96 (Default is 8).
+      Cytech Comfort Zone Inputs installed on your system (including Virtual Zones). Range from 8 - 96 (Default is 8).
   alarm_outputs:
     name: Comfort Zone Outputs (In multiples of 8).
     description: >-

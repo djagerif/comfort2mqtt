@@ -19,7 +19,7 @@
 # Notes:
 #
 #
-from xmlrpc import client
+# from xmlrpc import client
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -29,9 +29,8 @@ from cryptography.hazmat.primitives import serialization
 import defusedxml.ElementTree as ET
 import ssl
 
-ssl.SSLContext.set_servername_callback  # just to confirm ssl is loaded
+ssl.SSLContext.set_servername_callback = lambda self, servername, sslctx: None    # Workaround for SSLContext bug in Python 3.11+ when using MQTT over TLS with SNI and Mutual TLS. See https://bugs.python.org/issue43290 and
 
-#from OpenSSL import crypto
 import os
 
 os.environ['PYTHONWARNINGS'] = 'always'
@@ -47,6 +46,7 @@ import time
 import datetime
 import threading
 import logging
+from logging.handlers import RotatingFileHandler
 from datetime import datetime, timedelta, timezone
 import secrets
 import paho.mqtt.client as mqtt
@@ -62,8 +62,8 @@ COMFORT_KEY = "00000000"          # Default Refresh Key.
 
 SupportedFirmware = float(7.201)  # Minimum Supported firmware.
 
-MAX_ZONES = 96                    # Configurable for future expansion
-MAX_OUTPUTS = 96                  # Configurable for future expansion
+MAX_ZONES = 128                   # Configurable for future expansion. Expanded by Cytech.
+MAX_OUTPUTS = 128                 # Configurable for future expansion. Expanded by Cytech.
 MAX_RESPONSES = 1024              # Configurable for future expansion
 
 lower = 268435456
@@ -105,6 +105,9 @@ FLAGMAPFILE = False
 DEVICEMAPFILE = False
 USERMAPFILE = False
 TIMERMAPFILE = False
+
+INT16_RANGE = range(-32768, 32768)
+
 device_properties = {}
 module_properties = {}
 file_exists  = False
@@ -347,11 +350,33 @@ group.add_argument(
 
 option = parser.parse_args()
 
-logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    level=option.log_verbosity,
+#logging.basicConfig(
+#    format='%(asctime)s %(levelname)-8s %(message)s',
+#    level=option.log_verbosity,
+#    datefmt='%Y-%m-%d %H:%M:%S'
+#)
+
+log_formatter = logging.Formatter(
+    fmt='%(asctime)s %(levelname)-8s %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+
+root_logger = logging.getLogger()
+root_logger.setLevel(option.log_verbosity)
+
+# Keep stdout/stderr output so `docker logs` / HA's Add-on Log tab still work
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(log_formatter)
+root_logger.addHandler(console_handler)
+
+# Add bounded, rotating file output
+file_handler = RotatingFileHandler(
+    '/data/comfort2mqtt.log',
+    maxBytes=5 * 1024 * 1024,  # 5MB
+    backupCount=3,
+)
+file_handler.setFormatter(log_formatter)
+root_logger.addHandler(file_handler)
 
 TOKEN = os.getenv('SUPERVISOR_TOKEN')
 ALPINE_VERSION = "N/A" if os.getenv('ALPINE_VERSION') == None else os.getenv('ALPINE_VERSION')
@@ -1410,6 +1435,30 @@ class Comfort2(mqtt.Client):
             logger.error('MQTT Broker Connection Failed (%s). Check Network or MQTT Broker connection settings', str(reasonCode))
             FIRST_LOGIN = True
 
+    
+    def clean(self, value, allowed=None):
+    
+    #Validates that value is an integer, and optionally checks against an allowed list.
+    #Args:
+    #value:   The input to validate (typically a string from msgstr)
+    #    allowed: Optional list of permitted integer values e.g. [0, 1, 2, 3, 4]
+    #Returns:
+    #    True if valid (and in allowed list if provided), False otherwise
+    
+        try:
+            int_value = int(value)
+        except (ValueError, TypeError):
+            return False
+
+        if allowed is not None:
+            return int_value in allowed
+
+        return True
+
+    def truncate(self, value, length=8):
+        s = str(value)
+        return s[:length] + ("..." if len(s) > length else "")
+
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):    #=0
 
@@ -1498,16 +1547,30 @@ class Comfort2(mqtt.Client):
                 logger.info("Home Assistant Status: %s", msgstr)
 
         elif msg.topic.startswith(DOMAIN+"/output") and msg.topic.endswith("/set"):
+            # Sanitize the msgstr output number from the topic. Only allow numbers within the output range specified.
             output = int(msg.topic.split("/")[1][6:])
-            try:
-                state = int(msgstr)
-            except ValueError:
-                logger.debug("Invalid 'output%s/set' value '%s'. Only Integers allowed.", output, msgstr)
+            if not self.clean(msgstr):
+                logger.debug("Invalid 'output%s/set' value '%s'. Only integers allowed.", output, self.truncate(msgstr))
                 return
+            state = int(msgstr)
+
             if self.connected:
-                if state >= 0 and state < 5:
+                if self.clean(msgstr, allowed=list(range(5))):   # allowed values are 0 to 4 for state of output
                     self.comfortsock.sendall(("\x03O!%02X%02X\r" % (output, state)).encode())
                     SAVEDTIME = datetime.now()
+                else:
+                    logger.debug("Invalid 'output%s/set' value '%s'. Must be 0 to 4.", output, self.truncate(msgstr))
+
+            #output = int(msg.topic.split("/")[1][6:])
+            #try:
+            #    state = int(msgstr)
+            #except ValueError:
+            #    logger.debug("Invalid 'output%s/set' value '%s'. Only Integers allowed.", output, msgstr)
+            #    return
+            #if self.connected:
+            #    if state >= 0 and state < 5:
+            #        self.comfortsock.sendall(("\x03O!%02X%02X\r" % (output, state)).encode())
+            #        SAVEDTIME = datetime.now()
         elif msg.topic.startswith(DOMAIN+"/response") and msg.topic.endswith("/set"):
             response = int(msg.topic.split("/")[1][8:])
             if self.connected:
@@ -1520,28 +1583,48 @@ class Comfort2(mqtt.Client):
                     SAVEDTIME = datetime.now()
                 logger.debug("Activating Response %d",response )
         elif msg.topic.startswith(DOMAIN+"/input") and msg.topic.endswith("/set"):                          # Can only set the State, the Bypass, Name and Time cannot be changed.
+            # Sanitize the msgstr input number from the topic. Only allow numbers within the input range specified.
             virtualinput = int(msg.topic.split("/")[1][5:])
-            try:
-                state = int(msgstr)
-            except ValueError:
-                logger.debug("Invalid 'input%s/set' value '%s'. Only Integers allowed.", virtualinput, msgstr)
+            if not self.clean(msgstr):
+                logger.debug("Invalid 'input%s/set' value '%s'. Only integers allowed.", virtualinput, self.truncate(msgstr))
                 return
+            state = int(msgstr)
+
             if self.connected:
-                self.comfortsock.sendall(("\x03I!%02X%02X\r" % (virtualinput, state)).encode())
-                SAVEDTIME = datetime.now()
+                if self.clean(msgstr, allowed=list(range(2))):   # allowed values are 0 and 1 for state of virtual input
+                    self.comfortsock.sendall(("\x03I!%02X%02X\r" % (virtualinput, state)).encode())
+                    SAVEDTIME = datetime.now()
+                else:
+                    logger.debug("Invalid 'input%s/set' value '%s'. Must be 0 or 1.", virtualinput, self.truncate(msgstr))
+
         elif msg.topic.startswith(DOMAIN+"/flag") and msg.topic.endswith("/set"):
+            # Sanitize the msgstr flag number from the topic. Only allow numbers within the flag range specified.
             flag = int(msg.topic.split("/")[1][4:])
-            try:
-                state = int(msgstr)
-            except ValueError:
-                logger.debug("Invalid 'flag%s/set' value '%s'. Only Integers allowed.", flag, msgstr)
+            if not self.clean(msgstr):
+                logger.debug("Invalid 'flag%s/set' value '%s'. Only integers allowed.", flag, self.truncate(msgstr))
                 return
+            state = int(msgstr)
+
             if self.connected:
-                self.comfortsock.sendall(("\x03F!%02X%02X\r" % (flag, state)).encode()) #was F!
-                SAVEDTIME = datetime.now()
+                if self.clean(msgstr, allowed=list(range(2))):   # allowed values are 0 and 1 for state of flags
+                    self.comfortsock.sendall(("\x03F!%02X%02X\r" % (flag, state)).encode())
+                    SAVEDTIME = datetime.now()
+                else:
+                    logger.debug("Invalid 'flag%s/set' value '%s'. Must be 0 or 1.", flag, self.truncate(msgstr))
+
+
+            #flag = int(msg.topic.split("/")[1][4:])
+            #try:
+            #    state = int(msgstr)
+            #except ValueError:
+            #    logger.debug("Invalid 'flag%s/set' value '%s'. Only Integers allowed.", flag, self.truncate(msgstr))
+            #    return
+            #if self.connected:
+            #    self.comfortsock.sendall(("\x03F!%02X%02X\r" % (flag, state)).encode()) #was F!
+            #    SAVEDTIME = datetime.now()
         elif msg.topic.startswith(DOMAIN+"/counter") and msg.topic.endswith("/set"): # counter set
             counter = int(msg.topic.split("/")[1][7:])
-            if not msgstr.isnumeric() and not msgstr == "ON" and not msgstr == "OFF":
+            if not self.clean(msgstr, INT16_RANGE) and not msgstr == "ON" and not msgstr == "OFF":
                 logger.debug("Invalid Counter%s Set value detected ('%s'), only 'ON', 'OFF' and Integer values allowed", str(counter), str(msgstr))
             elif msgstr == "ON":
                 state = 255
@@ -1555,19 +1638,36 @@ class Comfort2(mqtt.Client):
                     SAVEDTIME = datetime.now()
             else:
                 state = int(msgstr)
-                if self.connected:
+                if self.connected and self.clean(msgstr, INT16_RANGE):
                     self.comfortsock.sendall(("\x03C!%02X%s\r" % (counter, self.DecimalToSigned16(state))).encode()) # counter needs 16 bit signed number
                     SAVEDTIME = datetime.now()
+                else:
+                    logger.debug("Invalid 'counter%s/set' value '%s'. Must be 16-bit signed integer.", counter, self.truncate(msgstr))
         elif msg.topic.startswith(DOMAIN+"/sensor") and msg.topic.endswith("/set"): # sensor set
+            # Sanitize the msgstr sensor number from the topic. Only allow numbers within the sensor range specified.
             sensor = int(msg.topic.split("/")[1][6:])
-            try:
-                state = int(msgstr)
-            except ValueError:
-                logger.debug("Invalid 'sensor%s/set' value '%s'. Only Integers allowed.", sensor, msgstr)
+            if not self.clean(msgstr):
+                logger.debug("Invalid 'sensor%s/set' value '%s'. Only 16-bit signed integers allowed.", sensor, self.truncate(msgstr))
                 return
+            state = int(msgstr)
+
             if self.connected:
-                self.comfortsock.sendall(("\x03s!%02X%s\r" % (sensor, self.DecimalToSigned16(state))).encode()) # sensor needs 16 bit signed number
-                SAVEDTIME = datetime.now()
+                if self.clean(msgstr, INT16_RANGE):   # allowed values are 16-bit signed integer values
+                    self.comfortsock.sendall(("\x03s!%02X%s\r" % (sensor, self.DecimalToSigned16(state))).encode()) # sensor needs 16 bit signed number
+                    SAVEDTIME = datetime.now()
+                else:
+                    logger.debug("Invalid 'sensor%s/set' value '%s'. Must be 16-bit signed integer.", sensor, self.truncate(msgstr))
+
+
+            #sensor = int(msg.topic.split("/")[1][6:])
+            #try:
+            #    state = int(msgstr)
+            #except ValueError:
+            #    logger.debug("Invalid 'sensor%s/set' value '%s'. Only Integers allowed.", sensor, self.truncate(msgstr))
+            #    return
+            #if self.connected:
+            #    self.comfortsock.sendall(("\x03s!%02X%s\r" % (sensor, self.DecimalToSigned16(state))).encode()) # sensor needs 16 bit signed number
+            #    SAVEDTIME = datetime.now()
 
     def DecimalToSigned16(self,value):      # Returns Comfort corrected HEX string value from signed 16-bit decimal value.
         return ('{:04X}'.format((int((value & 0xff) * 0x100 + (value & 0xff00) / 0x100))) )
@@ -1612,7 +1712,7 @@ class Comfort2(mqtt.Client):
         pass
 
     def entryexit_timer(self):
-        self.publish(ALARMTIMERTOPIC, self.entryexitdelay,qos=2,retain=True)
+        self.publish(ALARMTIMERTOPIC, self.entryexitdelay,qos=1,retain=True)
         self.entryexitdelay -= 1
         if self.entryexitdelay >= 0:
             threading.Timer(1, self.entryexit_timer).start()
@@ -1751,7 +1851,7 @@ class Comfort2(mqtt.Client):
         self.comfortsock.sendall(("\x03LI"+self.comfort_pincode+"\r").encode())
         COMFORTCONNECTED = True
         if BROKERCONNECTED:         # Check to see if Broker is connected. Is not always at this point in the startup.
-            self.publish(ALARMCONNECTEDTOPIC, 1, qos=2, retain=True)
+            self.publish(ALARMCONNECTEDTOPIC, 1, qos=1, retain=True)
         SAVEDTIME = datetime.now()
 
     def readcurrentstate(self):
@@ -1852,11 +1952,12 @@ class Comfort2(mqtt.Client):
                 SAVEDTIME = datetime.now()
                 time.sleep(0.1)
             
-            self.publish(ALARMAVAILABLETOPIC, 1,qos=2,retain=True)
+            self.publish(ALARMAVAILABLETOPIC, 1,qos=1,retain=True)
             time.sleep(0.1)
-            self.publish(ALARMLWTTOPIC, 'Online',qos=2,retain=True)
+
+            self.publish(ALARMLWTTOPIC, 'Online',qos=1,retain=True)
             time.sleep(0.1)
-            self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)       # Emptry string removes topic.
+            self.publish(ALARMMESSAGETOPIC, "",qos=1,retain=True)       # Emptry string clears topic.
             time.sleep(0.1)
 
             device_properties['BatteryVoltageMain'] = "-1"
@@ -1879,7 +1980,7 @@ class Comfort2(mqtt.Client):
             device_properties['BatteryStatus'] = "N/A"
 
             if BROKERCONNECTED and COMFORTCONNECTED:
-                self.publish(ALARMCONNECTEDTOPIC, 1,qos=2,retain=True)
+                self.publish(ALARMCONNECTEDTOPIC, 1,qos=1,retain=True)
                 time.sleep(0.1)
                 self.UpdateBatteryStatus()
 
@@ -1959,7 +2060,7 @@ class Comfort2(mqtt.Client):
                              "device": MQTT_DEVICE
                             })
 
-        self.publish(DOMAIN, MQTT_MSG,qos=2,retain=True)
+        self.publish(DOMAIN, MQTT_MSG,qos=1,retain=True)
         time.sleep(0.1)
 
         discoverytopic = "homeassistant/binary_sensor/" + DOMAIN + "/bridge_status/config"
@@ -1974,7 +2075,7 @@ class Comfort2(mqtt.Client):
                              "payload_off": "0",
                              "device": MQTT_DEVICE
                             })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
+        self.publish(discoverytopic, MQTT_MSG, qos=1, retain=True)
         time.sleep(0.1)
 
         availability =  [
@@ -2048,7 +2149,7 @@ class Comfort2(mqtt.Client):
                              "native_value": "string",
                              "device": MQTT_DEVICE
                             })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
+        self.publish(discoverytopic, MQTT_MSG, qos=1, retain=True)
         time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_firmware/config"
@@ -2188,7 +2289,7 @@ class Comfort2(mqtt.Client):
                              "icon":"mdi:home",
                              "device": MQTT_DEVICE
                         })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
+        self.publish(discoverytopic, MQTT_MSG, qos=1, retain=True)
         time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_customername/config"
@@ -2258,7 +2359,7 @@ class Comfort2(mqtt.Client):
                              "qos": "2",
                              "device": MQTT_DEVICE
                             })
-        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)
+        self.publish(discoverytopic, MQTT_MSG, qos=1, retain=True)
         time.sleep(0.1)
 
     def BatteryStatus(*voltages):  # Tuple of all voltages
@@ -2313,9 +2414,12 @@ class Comfort2(mqtt.Client):
             SAVEDTIME = datetime.now()
             self.connected = False
         if BROKERCONNECTED == True:      # MQTT Connected
-            infot = self.publish(ALARMCONNECTEDTOPIC, 0,qos=2,retain=True)
-            infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
-            infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
+            infot = self.publish(ALARMCONNECTEDTOPIC, 0,qos=1,retain=True)
+            infot.wait_for_publish()
+            infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=1,retain=True)
+            infot.wait_for_publish()
+            infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=1,retain=True)
+            infot.wait_for_publish()
 
             if ADDON_SLUG.strip() == "":
                 MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
@@ -2754,6 +2858,16 @@ class Comfort2(mqtt.Client):
 
         return dec_value in allowed
 
+    def log_data_dir_size(self):
+        total = 0
+        for f in os.listdir('/data'):
+            path = os.path.join('/data', f)
+            if os.path.isfile(path):
+                size = os.path.getsize(path)
+                total += size
+                logger.debug('File: %s, Size: %.2f KB', f, size / 1024)
+        logger.info('Total /data size: %.2f KB', total / 1024)
+
     def run(self):
 
         global FIRST_LOGIN         # Used to track if Addon started up or not.
@@ -2812,8 +2926,10 @@ class Comfort2(mqtt.Client):
         if self.connected == True:
             BROKERCONNECTED = True
             device_properties['BridgeConnected'] = 1
-            self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
-            self.will_set(ALARMLWTTOPIC, payload="Offline", qos=2, retain=True)
+            self.publish(ALARMAVAILABLETOPIC, 0,qos=1,retain=True)
+            self.will_set(ALARMLWTTOPIC, payload="Offline", qos=1, retain=True)
+
+        self.log_data_dir_size()  # Log the size of the /data directory
 
         self.loop_start()   
 
@@ -2871,9 +2987,9 @@ class Comfort2(mqtt.Client):
                                         logger.info("Waiting for MQTT Broker to come Online...")
 
                                     self.connected = True  
-                                    self.publish(ALARMCOMMANDTOPIC, "comm test", qos=2,retain=True)
+                                    self.publish(ALARMCOMMANDTOPIC, "comm test", qos=1,retain=True)
                                     time.sleep(0.01)
-                                    self.publish(REFRESHTOPIC, "", qos=2,retain=True)               # Clear Refresh Key
+                                    self.publish(REFRESHTOPIC, "", qos=1,retain=True)               # Clear Refresh Key
                                     time.sleep(0.01)
 
                                     self.setdatetime()      # Set Date/Time if Option is enabled
@@ -2886,8 +3002,8 @@ class Comfort2(mqtt.Client):
                                     FIRST_LOGIN = True
                                     COMFORTCONNECTED = False
                                     if BROKERCONNECTED == True:      # MQTT Connected ??
-                                        self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
-                                        self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
+                                        self.publish(ALARMAVAILABLETOPIC, 0,qos=1,retain=True)
+                                        self.publish(ALARMLWTTOPIC, 'Offline',qos=1,retain=True)
                                         self.publish(ALARMCONNECTEDTOPIC, "0", qos=2, retain=False)
                                     break
 
@@ -2996,7 +3112,7 @@ class Comfort2(mqtt.Client):
                                     if ipMsgZ.input <= int(COMFORT_INPUTS):
                                         self.publish(ALARMINPUTTOPIC % ipMsgZ.input, MQTT_MSG,qos=2,retain=False)
                                     else:
-                                        self.publish(ALARMINPUTTOPIC % ipMsgZ.input, "",qos=2,retain=False)
+                                        self.publish(ALARMINPUTTOPIC % ipMsgZ.input, None,qos=1,retain=False)   #Remove any previously created objects
                                     time.sleep(0.01)    # 10mS delay between commands
                                 logger.debug("Max. Reported Zones/Inputs: %d", zMsg.max_zones)
                                 if zMsg.max_zones < int(COMFORT_INPUTS):
@@ -3019,24 +3135,24 @@ class Comfort2(mqtt.Client):
                                                          "State": ipMsgZ.state,
                                                          "Bypass": None
                                                         })
-                                    if ipMsgZ.input <= 128 + int(COMFORT_RIO_INPUTS):
+                                    if ipMsgZ.input <= 128 + int(COMFORT_RIO_INPUTS):       # test 128 change to 16
                                         self.publish(ALARMINPUTTOPIC % ipMsgZ.input, MQTT_MSG,qos=2,retain=False)
                                     else:
-                                        self.publish(ALARMINPUTTOPIC % ipMsgZ.input, "",qos=2,retain=False)     # Remove any previously created objects
+                                        self.publish(ALARMINPUTTOPIC % ipMsgZ.input, None, qos=1, retain=False)     # Remove any previously created objects
                                     time.sleep(0.01)    # 10mS delay between commands
 
                                 logger.debug("Max. Reported SCS/RIO Inputs: %d", zMsg.max_zones)
 
                             elif line[1:3] == "M?" or line[1:3] == "MD":
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
-                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=2,retain=True)      #Disarmed, Day etc
-                                self.publish(ALARMMODETOPIC, mMsg.mode,qos=2,retain=True)
+                                self.publish(ALARMSTATETOPIC, mMsg.modename,qos=1,retain=True)      #Disarmed, Day etc
+                                self.publish(ALARMMODETOPIC, mMsg.mode,qos=1,retain=True)
                                 ALARMSTATE = mMsg.mode         # Save Numerical state.
                                 self.entryexitdelay = 0                         #zero out the countdown timer
 
                             elif line[1:3] == "S?":
                                 SMsg = ComfortS_SecurityModeReport(line[1:])
-                                self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=2,retain=True)     # Idle, Alert etc.
+                                self.publish(ALARMSTATUSTOPIC, SMsg.modename,qos=1,retain=True)     # Idle, Alert etc.
                                 ALARMSTATE = SMsg.mode         # Save Numerical state.
 
                             elif line[1:3] == "V?":
@@ -3119,7 +3235,7 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "a?":     # Not Fully Implemented. For Future Development !!!
                                 aMsg = Comfort_A_SecurityInformationReport(line[1:])
                                 ALARMSTATE = aMsg.SS         # Save Numerical state.
-                                self.publish(ALARMSTATUSTOPIC, aMsg.state, qos=2, retain=True)          
+                                self.publish(ALARMSTATUSTOPIC, aMsg.state, qos=1, retain=True)          
                                 if aMsg.type == 'LowBattery':
                                     logging.warning("Low Battery - %s", aMsg.battery)
                                 elif aMsg.type == 'PowerFail':
@@ -3139,7 +3255,7 @@ class Comfort2(mqtt.Client):
                                         message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
 
                                     #message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
-                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=2, retain=True)          # Empty string removes topic.
+                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=1, retain=True)          # Empty string removes topic.
                                 else:
                                     logging.info("Ready To Arm...")
                                     # Sending KD1A when receiving ER message confuses Comfort. When arming local to any mode it immediately goes into Arm Mode
@@ -3150,9 +3266,9 @@ class Comfort2(mqtt.Client):
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 logging.warning(amMsg.message)
                                 #if amMsg.parameter <= int(COMFORT_INPUTS):
-                                self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=2, retain=True)
+                                self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=1, retain=True)
                                 if amMsg.triggered:
-                                    self.publish(ALARMSTATETOPIC, "triggered", qos=2, retain=False)     # Original message
+                                    self.publish(ALARMSTATETOPIC, "triggered", qos=1, retain=False)     # Original message
 
                             #elif line[1:3] == "AL":     # Under development (Alarm Type Report)
                             #    alMsg = ComfortALSystemAlarmReport(line[1:])
@@ -3176,7 +3292,7 @@ class Comfort2(mqtt.Client):
                             
                             elif line[1:3] == "AR":
                                 arMsg = ComfortARSystemAlarmReport(line[1:])
-                                self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=2,retain=True)
+                                self.publish(ALARMMESSAGETOPIC, arMsg.message,qos=1,retain=True)
                                 #logging.info(arMsg.message)        # Removed logging for AR as it duplicates messages.
 
                             elif line[1:3] == "EX":
@@ -3191,21 +3307,21 @@ class Comfort2(mqtt.Client):
                             elif line[1:3] == "RP":
                                 result = self.validate_hex_in_list(line[3:5], "0,1,255")
                                 if result and line[3:5] == "01":
-                                    self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=2,retain=True)
+                                    self.publish(ALARMMESSAGETOPIC, "Phone Ring",qos=1,retain=True)
                                 elif result and line[3:5] == "00":
-                                    self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)   # Stopped Ringing
+                                    self.publish(ALARMMESSAGETOPIC, "",qos=1,retain=True)   # Stopped Ringing
                                 elif result and line[3:5] == "FF":
-                                    self.publish(ALARMMESSAGETOPIC, "Phone Answer",qos=2,retain=True)
+                                    self.publish(ALARMMESSAGETOPIC, "Phone Answer",qos=1,retain=True)
 
                             elif line[1:3] == "DB":
                                 result = self.validate_hex_in_list(line[3:5], "49-51,255")
                                 if result and line[3:5] == "FF":
-                                    self.publish(ALARMMESSAGETOPIC, "",qos=2,retain=True)
-                                    self.publish(ALARMDOORBELLTOPIC, 0,qos=2,retain=True)
+                                    self.publish(ALARMMESSAGETOPIC, "",qos=1,retain=True)
+                                    self.publish(ALARMDOORBELLTOPIC, 0,qos=1,retain=True)
                                 elif result:
-                                    self.publish(ALARMDOORBELLTOPIC, 1, qos=2,retain=True)
+                                    self.publish(ALARMDOORBELLTOPIC, 1, qos=1,retain=True)
                                     message_topic = "Doorbell "+str(int(line[3:5], 16) - 48)
-                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=2, retain=True)
+                                    self.publish(ALARMMESSAGETOPIC, message_topic, qos=1, retain=True)
 
                             elif line[1:3] == "OP" and CacheState:
                                 ipMsg = ComfortOPOutputActivationReport(line[1:])
@@ -3247,7 +3363,7 @@ class Comfort2(mqtt.Client):
                                     if opMsgY.output <= int(COMFORT_OUTPUTS):
                                         self.publish(ALARMOUTPUTTOPIC % opMsgY.output, MQTT_MSG,qos=2,retain=False)
                                     else:
-                                        self.publish(ALARMOUTPUTTOPIC % opMsgY.output, "",qos=2,retain=False)     # Remove any previously created objects
+                                        self.publish(ALARMOUTPUTTOPIC % opMsgY.output, None,qos=1,retain=True)     # Remove any previously created objects if ever create with retain = True
                                     time.sleep(0.01)    # 10mS delay between commands
                                 logger.debug("Max. Reported Outputs: %d", yMsg.max_zones)
                                 if yMsg.max_zones < int(COMFORT_OUTPUTS):
@@ -3270,7 +3386,7 @@ class Comfort2(mqtt.Client):
                                     if opMsgY.output <= 128 + int(COMFORT_RIO_OUTPUTS):
                                         self.publish(ALARMOUTPUTTOPIC % opMsgY.output, MQTT_MSG,qos=2,retain=False)
                                     else:
-                                        self.publish(ALARMOUTPUTTOPIC % opMsgY.output, "",qos=2,retain=False)     # Remove any previously created objects
+                                        self.publish(ALARMOUTPUTTOPIC % opMsgY.output, None,qos=1,retain=True)     # Remove any previously created objects
                                     time.sleep(0.01)    # 10mS delay between commands 
 
                                 logger.debug("Max. Reported SCS/RIO Outputs: %d", yMsg.max_zones)
@@ -3327,10 +3443,10 @@ class Comfort2(mqtt.Client):
                                 bMsg = ComfortB_ReportAllBypassZones(line[1:])
                                 if bMsg.value == 0:
                                     logger.debug("Zones Bypassed: <None>")
-                                    self.publish(ALARMBYPASSTOPIC, 0, qos=2, retain=True)
+                                    self.publish(ALARMBYPASSTOPIC, 0, qos=1, retain=True)
                                 else:
                                     logger.debug("Zones Bypassed: %s", bMsg.value)
-                                    self.publish(ALARMBYPASSTOPIC, bMsg.value, qos=2,retain=True)
+                                    self.publish(ALARMBYPASSTOPIC, bMsg.value, qos=1,retain=True)
 
                             elif (line[1:9] == "DL7FF904"):
                                 if len(line[1:]) == 18:
@@ -3393,7 +3509,7 @@ class Comfort2(mqtt.Client):
                                     self.publish(ALARMINPUTTOPIC % byMsg.zone, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
                                     time.sleep(0.01)    # 10mS delay between commands
 
-                                    self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=2,retain=True)  # Add Zone to list of zones.
+                                    self.publish(ALARMBYPASSTOPIC, byMsg.value, qos=1,retain=True)  # Add Zone to list of zones.
                                     time.sleep(0.01)    # 10mS delay between commands
 
                             elif line[1:3] == "RS":
@@ -3425,8 +3541,8 @@ class Comfort2(mqtt.Client):
                 FIRST_LOGIN = True  # Added 29/4/2025
                 logger.error('Lost connection to Comfort, reconnecting...')
                 if BROKERCONNECTED == True:      # MQTT Connected ??
-                    self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
-                    self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
+                    self.publish(ALARMAVAILABLETOPIC, 0,qos=1,retain=True)
+                    self.publish(ALARMLWTTOPIC, 'Offline',qos=1,retain=True)
                     self.publish(ALARMCONNECTEDTOPIC, "1" if COMFORTCONNECTED else "0", qos=2, retain=False)
                     
                 time.sleep(RETRY.seconds)
@@ -3444,8 +3560,8 @@ class Comfort2(mqtt.Client):
             self.loop_stop
         finally:
             if BROKERCONNECTED == True:      # MQTT Connected ??
-                infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=2,retain=True)
-                infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=2,retain=True)
+                infot = self.publish(ALARMAVAILABLETOPIC, 0,qos=1,retain=True)
+                infot = self.publish(ALARMLWTTOPIC, 'Offline',qos=1,retain=True)
                 infot.wait_for_publish(1)
                 self.loop_stop
 
