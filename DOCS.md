@@ -553,7 +553,7 @@ If your network is segmented using a firewall, or any other similar device, you 
 
 ### Option: `CA Certificate File` (Optional)
 
-  A file containing a CA certificate. Place this file in the Home Assistant `addon_configs/<comfort2mqtt slug>/certificates` folder.
+  A file containing a CA certificate. Place this file in the Home Assistant `app_configs/<comfort2mqtt slug>/certificates` folder.
   
 ### Option: `Require Certificate Authentication` (Optional)
   
@@ -561,11 +561,11 @@ If your network is segmented using a firewall, or any other similar device, you 
 
 ### Option: `Client Certificate File` (Optional)
 
-  A file containing a Client Certificate, including its chain. Place this file in the Home Assistant `addon_configs/<comfort2mqtt slug>/certificates` folder.
+  A file containing a Client Certificate, including its chain. Place this file in the Home Assistant `app_configs/<comfort2mqtt slug>/certificates` folder.
 
 ### Option: `Client Private Key File` (Optional)
 
-  A file containing the Client Private key. Place this file in the Home Assistant `addon_configs/<comfort2mqtt slug>/certificates` folder.
+  A file containing the Client Private key. Place this file in the Home Assistant `app_configs/<comfort2mqtt slug>/certificates` folder.
 
 ### Option: `Comfort TCP Port` (Optional)
 
@@ -583,9 +583,9 @@ If your network is segmented using a firewall, or any other similar device, you 
 
 ### Option: `Comfort Configuration file` (Optional)
 
-  Comfort Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc. Place this file in the Home Assistant `addon_configs/<comfort2mqtt slug>` folder. If no filename is specified then the default `comfigurator.cclx` filename will be used.
+  Comfort Configuration file, also referred to as the 'CCLX' file to be used for object enrichment EG. Zone Names etc. Place this file in the Home Assistant `app_configs/<comfort2mqtt slug>` folder. If no filename is specified then the default `comfigurator.cclx` filename will be used.
 
-  To upload a file to the `addon_configs` directory you could use something like [Samba share][samba] App or similar allowing filesystem access to selected directories on Home Assistant.
+  To upload a file to the `app_configs` directory you could use something like [Samba share][samba] App or similar allowing filesystem access to selected directories on Home Assistant.
 
   ⚠️ **Note:** The CCLX filename cannot contain spaces or any special characters.
 

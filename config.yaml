@@ -15,8 +15,11 @@ arch:
   - amd64
 services:
   - mqtt:need
+#map:
+#  - addon_config:ro
 map:
-  - addon_config:ro
+  - type: app_config
+    read_only: true
 options:
   mqtt_broker_address: core-mosquitto
   mqtt_user: null

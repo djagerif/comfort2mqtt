@@ -6,6 +6,7 @@
 ### Breaking Changes ###
  
 ### Changed
+ - Migrated from addon_config to app_config as per Home Assistant requirements. Updated DOCS.md.
   
 ### Fixed
  

@@ -29,7 +29,7 @@ configuration:
     name: CA Certificate File
     description: >-
       A file containing a CA certificate. Place this file in the Home
-      Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
+      Assistant `app_configs/<comfort2mqtt slug>/certificates` folder.
   require_certificate:
     name: Require Certificate Authentication
     description: >-
@@ -39,12 +39,12 @@ configuration:
     name: Client Certificate File
     description: >-
       A file containing a Client Certificate, including its chain. Place this file in the Home
-      Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
+      Assistant `app_configs/<comfort2mqtt slug>/certificates` folder.
   broker_client_key:
     name: Client Private Key File
     description: >-
       A file containing the Client Private key. Place this file in the Home
-      Assistant `addon_config/<comfort2mqtt slug>/certificates` folder.
+      Assistant `app_configs/<comfort2mqtt slug>/certificates` folder.
   comfort_port:
     name: Comfort TCP Port
     description: >-
