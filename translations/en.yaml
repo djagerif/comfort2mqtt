@@ -56,8 +56,9 @@ configuration:
   comfort_login_id:
     name: Comfort User Login ID
     description: >-
-      Cytech Comfort User Login ID with at least Read-Only access. Login ID has minimum 4 characters and 6 as maximum.
-      For full functionality you need Read/Write access as well as Disarm capabilities.
+      Cytech Comfort UserID PIN with at least Read-Only access. UserID PIN has minimum 4 and maximum 6 digits.
+      This UserID PIN should preferably not have Local/Remote Disarm capability. Disarm uses the Comfort UserID PIN with Disarm functionality.
+      This is a security risk if the Comfort Disarm User PIN is compromised. Make sure the LAN connection is on a trusted network and not exposed to the internet.
   comfort_cclx_file:
     name: Comfort Configuration file
     description: >-
