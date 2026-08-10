@@ -2,6 +2,7 @@
 
 ### Added
  - Look into seperate logging and/or memory only DEBUG logging. Saves on disk space. 
+ - Investigate HA Remote Arm feature to eliminate 'own pin' vs 'remote pin'.
  
 ### Breaking Changes ###
  
