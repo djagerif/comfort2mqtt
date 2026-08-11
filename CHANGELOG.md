@@ -4,7 +4,7 @@
  - Look into separate logging and/or memory only DEBUG logging. Saves on disk space. 
  - Use Home Assistant REMOTE_CODE as to no longer require a hard-coded PIN in Home Assistant. See breaking changes and DOCS.md for updated alarm_control_panel configuration.
  
-### Breaking Changes ###
+### Breaking Changes
  - Comfort Login PIN can now be set to a user without Disarm rights. The Disarm function now uses the actual Comfort PIN entered via the Home Assistant keypad. This enables usage of the Duress code if need be. You can remove the hardcoded PIN from the configuration.yaml file as per below.
  
       ```#code: !secret alarm_pin
@@ -12,7 +12,7 @@
       command_template: >
         {"action": "{{ action }}", "code": "{{ code }}"}```
  
- ###  *Note: ###
+ ###  *Note:
     The Comfort Disarm PIN is not stored in the App, it does however appear in the MQTT Broker. Make sure your MQTT Broker is secure and not accessible from the Internet. Use Secure MQTT where possible.
 
 ### Changed
