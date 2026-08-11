@@ -1,7 +1,6 @@
 ## [1.6.4] - Busy
 
 ### Added
- - Look into separate logging and/or memory only DEBUG logging. Saves on disk space. 
  - Use Home Assistant REMOTE_CODE as to no longer require a hard-coded PIN in Home Assistant. See breaking changes and DOCS.md for updated alarm_control_panel configuration.
  
 ### Breaking Changes
@@ -18,6 +17,7 @@ The Comfort Disarm PIN is not stored in the App, it does however appear in the M
 
 ### Changed
  - Migrated from addon_config to app_config as per Home Assistant requirements. Updated DOCS.md.
+ - Logging now saves only three 5M files. Old logs are deleted to prevent logs from filling up disk space.
   
 ### Fixed
 
