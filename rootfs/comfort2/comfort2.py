@@ -1475,8 +1475,8 @@ class Comfort2(mqtt.Client):
                 code = payload.get("code",)
             except (ValueError, json.JSONDecodeError):
                 # Not JSON - fall back to old plain-string behaviour
-                logger.error("Could not extract PIN code from Home Assistant, using Fallback PIN code.")
-                code = self.comfort_pincode  
+                logger.debug("Invalid JSON received in ALARMCOMMANDTOPIC.")
+                #code = self.comfort_pincode  
 
             if self.connected:
                 if msgstr == "ARM_VACATION":
@@ -2950,7 +2950,8 @@ class Comfort2(mqtt.Client):
                                         logger.info("Waiting for MQTT Broker to come Online...")
 
                                     self.connected = True  
-                                    self.publish(ALARMCOMMANDTOPIC, "comm test", qos=1,retain=True)
+                                    #self.publish(ALARMCOMMANDTOPIC, "comm test", qos=1,retain=True)
+                                    self.publish(ALARMCOMMANDTOPIC, json.dumps({"action": "comm test", "code": "0000"}), qos=1, retain=True) #Updated to now send JSON payload.
                                     time.sleep(0.01)
                                     self.publish(REFRESHTOPIC, "", qos=1,retain=True)               # Clear Refresh Key
                                     time.sleep(0.01)
