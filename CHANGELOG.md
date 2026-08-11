@@ -14,7 +14,7 @@
         {"action": "{{ action }}", "code": "{{ code }}"}
       ```
  
- ###  *Note:
+ ###  Note:
     The Comfort Disarm PIN is not stored in the App, it does however appear in the MQTT Broker. Make sure your MQTT Broker is secure and not accessible from the Internet. Use Secure MQTT where possible.
 
 ### Changed
