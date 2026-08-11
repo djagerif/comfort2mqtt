@@ -1506,6 +1506,8 @@ class Comfort2(mqtt.Client):
                     #self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #Local arm to 00. disarm mode.
                     self.comfortsock.sendall(("\x03m!00"+code+"\r").encode()) #Local arm to 00 using PIN entered via Home Assistant keypad.
                     SAVEDTIME = datetime.now()
+                elif msgstr == "comm test":
+                    logger.debug("Successful communication test. Comfort MQTT Bridge is online and connected to Comfort.")
 
         elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/refresh"):
             if msgstr == COMFORT_KEY:

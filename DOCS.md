@@ -149,9 +149,9 @@ mqtt:
       availability_topic: "comfort2mqtt/alarm/online"
       payload_available: 1
       payload_not_available: 0
-      code: "1234"  # Code can be different from Comfort's. This code is for the App itself while the Comfort code is to login to Comfort itself.
-                    # Note: If the Comfort User Code does not allow Disarm then the App will not be able to Disarm.
-                    # Secrets can be used EG. "code: !secret comfort_pin
+      code: REMOTE_CODE
+      command_template: >
+        {"action": "{{ action }}", "code": "{{ code }}"}
       
   sensor:
     - name: Alarm Mode
