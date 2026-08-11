@@ -7,10 +7,9 @@
 ### Breaking Changes ###
  - Comfort Login PIN can now be set to a user without Disarm rights. The Disarm function now uses the actual Comfort PIN entered via the Home Assistant keypad. This enables usage of the Duress code if need be. You can remove the hard-coded PIN from the configuration.yaml file as per below.
 
-  #code: !secret alarm_pin
-  code: REMOTE_CODE
-  command_template: >
-     {"action": "{{ action }}", "code": "{{ code }}"}
+      code: REMOTE_CODE
+      command_template: >
+        {"action": "{{ action }}", "code": "{{ code }}"}
   
     ### *Note: ###
     The Comfort Disarm PIN is not stored in the App, it does however appear in the MQTT Broker. Make sure your MQTT Broker is secure and not accessible from the Internet. Use Secure MQTT where possible.
