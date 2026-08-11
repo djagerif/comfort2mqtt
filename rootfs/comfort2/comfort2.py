@@ -2951,7 +2951,7 @@ class Comfort2(mqtt.Client):
 
                                     self.connected = True  
                                     #self.publish(ALARMCOMMANDTOPIC, "comm test", qos=1,retain=True)
-                                    self.publish(ALARMCOMMANDTOPIC, json.dumps({"action": "comm test", "code": "0000"}), qos=1, retain=True) #Updated to now send JSON payload.
+                                    self.publish(ALARMCOMMANDTOPIC, json.dumps({"action": "comm test", "code": "000000"}), qos=1, retain=True) #Updated to send JSON payload.
                                     time.sleep(0.01)
                                     self.publish(REFRESHTOPIC, "", qos=1,retain=True)               # Clear Refresh Key
                                     time.sleep(0.01)
