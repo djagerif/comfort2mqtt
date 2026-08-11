@@ -1466,7 +1466,18 @@ class Comfort2(mqtt.Client):
         global COMFORT_KEY
 
         msgstr = msg.payload.decode()
-        if msg.topic == ALARMCOMMANDTOPIC:      
+
+        if msg.topic == ALARMCOMMANDTOPIC:
+            try:
+                payload = json.loads(msg.payload.decode())
+                msgstr = payload.get("action")
+                #code = payload.get("code", self.comfort_pincode)  # fallback to local pincode if not sent. NB! Local PIN code cannot disarm remotely.
+                code = payload.get("code",)
+            except (ValueError, json.JSONDecodeError):
+                # Not JSON - fall back to old plain-string behaviour
+                logger.error("Could not extract PIN code from Home Assistant, using Fallback PIN code.")
+                code = self.comfort_pincode  
+
             if self.connected:
                 if msgstr == "ARM_VACATION":
                     self.comfortsock.sendall(("\x03m!04"+self.comfort_pincode+"\r").encode()) #Local arm to 04 vacation mode. Requires # for open zones
@@ -1492,7 +1503,8 @@ class Comfort2(mqtt.Client):
                     self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send '#' key code (KD1A)
                     SAVEDTIME = datetime.now()
                 elif msgstr == "DISARM":
-                    self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #Local arm to 00. disarm mode.
+                    #self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #Local arm to 00. disarm mode.
+                    self.comfortsock.sendall(("\x03m!00"+code+"\r").encode()) #Local arm to 00 using PIN entered via Home Assistant keypad.
                     SAVEDTIME = datetime.now()
 
         elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/refresh"):
@@ -1560,17 +1572,6 @@ class Comfort2(mqtt.Client):
                     SAVEDTIME = datetime.now()
                 else:
                     logger.debug("Invalid 'output%s/set' value '%s'. Must be 0 to 4.", output, self.truncate(msgstr))
-
-            #output = int(msg.topic.split("/")[1][6:])
-            #try:
-            #    state = int(msgstr)
-            #except ValueError:
-            #    logger.debug("Invalid 'output%s/set' value '%s'. Only Integers allowed.", output, msgstr)
-            #    return
-            #if self.connected:
-            #    if state >= 0 and state < 5:
-            #        self.comfortsock.sendall(("\x03O!%02X%02X\r" % (output, state)).encode())
-            #        SAVEDTIME = datetime.now()
         elif msg.topic.startswith(DOMAIN+"/response") and msg.topic.endswith("/set"):
             response = int(msg.topic.split("/")[1][8:])
             if self.connected:
@@ -1612,16 +1613,6 @@ class Comfort2(mqtt.Client):
                 else:
                     logger.debug("Invalid 'flag%s/set' value '%s'. Must be 0 or 1.", flag, self.truncate(msgstr))
 
-
-            #flag = int(msg.topic.split("/")[1][4:])
-            #try:
-            #    state = int(msgstr)
-            #except ValueError:
-            #    logger.debug("Invalid 'flag%s/set' value '%s'. Only Integers allowed.", flag, self.truncate(msgstr))
-            #    return
-            #if self.connected:
-            #    self.comfortsock.sendall(("\x03F!%02X%02X\r" % (flag, state)).encode()) #was F!
-            #    SAVEDTIME = datetime.now()
         elif msg.topic.startswith(DOMAIN+"/counter") and msg.topic.endswith("/set"): # counter set
             counter = int(msg.topic.split("/")[1][7:])
             if not self.clean(msgstr, INT16_RANGE) and not msgstr == "ON" and not msgstr == "OFF":
@@ -1657,17 +1648,6 @@ class Comfort2(mqtt.Client):
                     SAVEDTIME = datetime.now()
                 else:
                     logger.debug("Invalid 'sensor%s/set' value '%s'. Must be 16-bit signed integer.", sensor, self.truncate(msgstr))
-
-
-            #sensor = int(msg.topic.split("/")[1][6:])
-            #try:
-            #    state = int(msgstr)
-            #except ValueError:
-            #    logger.debug("Invalid 'sensor%s/set' value '%s'. Only Integers allowed.", sensor, self.truncate(msgstr))
-            #    return
-            #if self.connected:
-            #    self.comfortsock.sendall(("\x03s!%02X%s\r" % (sensor, self.DecimalToSigned16(state))).encode()) # sensor needs 16 bit signed number
-            #    SAVEDTIME = datetime.now()
 
     def DecimalToSigned16(self,value):      # Returns Comfort corrected HEX string value from signed 16-bit decimal value.
         return ('{:04X}'.format((int((value & 0xff) * 0x100 + (value & 0xff00) / 0x100))) )
@@ -1783,21 +1763,6 @@ class Comfort2(mqtt.Client):
                 #logger.debug("Socket timeout - sending keepalive...")
 
                 try:
-                    # # Send keepalive
-                    # self.SendCommand("cc00")
-                    # time.sleep(0.1)
-
-                    # # Temporarily set short timeout to quickly detect dead socket
-                    # self.comfortsock.settimeout(5)
-                    # probe = self.comfortsock.recv(1)
-
-                    # if not probe:
-                    #     logger.error("Keepalive failed: empty response, socket dead.")
-                    #     raise socket.error("Dead socket (empty probe).")
-
-                    # # Restore normal timeout
-                    # self.comfortsock.settimeout(TIMEOUT.seconds)
-
                     self._send_keepalive_and_check()    # Send keepalive and check socket status
 
                 except (socket.timeout, socket.error) as err:
@@ -1837,9 +1802,7 @@ class Comfort2(mqtt.Client):
 
         try:
             self.comfortsock.sendall(("\x03"+command+"\r").encode())
-            #self.comfortsock.sendall((command).encode())
             SAVEDTIME = datetime.now()
-            #logger.debug("Sending Command %s", command)    # Debug sent command to Comfort.
         except:
             logger.error("Error sending command '%s', closing socket.", command)
             self.comfortsock.close()
