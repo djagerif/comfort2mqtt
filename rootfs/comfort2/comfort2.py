@@ -29,8 +29,6 @@ from cryptography.hazmat.primitives import serialization
 import defusedxml.ElementTree as ET
 import ssl
 
-from securetar import _LOGGER
-
 ssl.SSLContext.set_servername_callback = lambda self, servername, sslctx: None    # Workaround for SSLContext bug in Python 3.11+ when using MQTT over TLS with SNI and Mutual TLS. See https://bugs.python.org/issue43290 and
 
 import os
