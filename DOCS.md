@@ -260,7 +260,7 @@ When the App is fully configured and running, there will be two new MQTT Devices
 
 The native Home Assistant `Alarm Control Panel` card does not include a `#` key for Forced Arming with open zones. A new button entity is automatically created that you can add to your view.
 
-![alt text](image-4.png)
+
 
 
 ## Home Assistant - Alarm State Colours (Optional)
