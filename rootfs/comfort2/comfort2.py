@@ -29,6 +29,8 @@ from cryptography.hazmat.primitives import serialization
 import defusedxml.ElementTree as ET
 import ssl
 
+from securetar import _LOGGER
+
 ssl.SSLContext.set_servername_callback = lambda self, servername, sslctx: None    # Workaround for SSLContext bug in Python 3.11+ when using MQTT over TLS with SNI and Mutual TLS. See https://bugs.python.org/issue43290 and
 
 import os
@@ -1522,10 +1524,12 @@ class Comfort2(mqtt.Client):
                 self.readcurrentstate()
 
         elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/bypass_open_zones"):
-            # Check if Alarm is in Arming state.
+            # Check if Alarm is in Arming state else ignore the '#' key.
+            msgstr_cleaned = msgstr[0] if msgstr else '1'
             if ALARMSTATUS == "pending":
-                logger.info("Bypass Open Zones key ('#') detected. Force Arming with Open Zones.")
-                self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send '#' key code (KD1A)
+                logger.info("Force Arming with Open Zones.")
+                self.comfortsock.sendall("\x03KD1A\r".encode())    #Send '#' key code (KD1A) when arming with open zones. This is required for Comfort to arm with open zones.
+                SAVEDTIME = datetime.now()
 
         elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/battery_update"):
 
@@ -3252,14 +3256,10 @@ class Comfort2(mqtt.Client):
                                         message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
 
                                     ALARMSTATUS = "pending"
-                                    #message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
                                     self.publish(ALARMMESSAGETOPIC, message_topic, qos=1, retain=True)          # Empty string removes topic.
                                 else:
                                     logging.info("Ready To Arm...")
                                     ALARMSTATUS = "ready"
-                                    # Sending KD1A when receiving ER message confuses Comfort. When arming local to any mode it immediately goes into Arm Mode
-                                    # Not all Zones are announced and it 'presses' the '#' key on your behalf.
-                                    # self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
 
                             elif line[1:3] == "AM":    # AM/AR for Non-Detector alarms
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
