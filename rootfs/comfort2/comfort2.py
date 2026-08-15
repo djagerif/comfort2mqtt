@@ -75,12 +75,14 @@ mqtt_client_id = DOMAIN+"-"+str(rand_hex_str[2:])       # Generate pseudo random
 REFRESHTOPIC = DOMAIN+"/alarm/refresh"                  # Use this topic to refresh objects. Not a full Reload but request Update-All from Addon. Use 'key' for auth.
 BATTERYREFRESHTOPIC = DOMAIN+"/alarm/battery_update"    # Used to request Battery and DC Supply voltage updates. To be used by HA Automation for periodic polling.
 BATTERYSTATUSTOPIC = DOMAIN+"/alarm/battery_status"     # List of Battery and DC Supply Output Status.
+BYPASSTOPIC = DOMAIN+"/alarm/bypass_open_zones"         # Set to send # key to bypass open zones.
 
 ALARMSTATETOPIC = DOMAIN+"/alarm"
 ALARMSTATUSTOPIC = DOMAIN+"/alarm/status"
 ALARMBYPASSTOPIC = DOMAIN+"/alarm/bypass"               # List of Bypassed Zones.
 ALARMCONNECTEDTOPIC = DOMAIN+"/alarm/connected"
 ALARMMODETOPIC = DOMAIN+"/alarm/mode"                   # Integer value of current Mode. See M? and MD.
+ALARMSTATUS = "ready"                                   # Alarm Status. ready, pending
 
 ALARMCOMMANDTOPIC = DOMAIN+"/alarm/set"
 ALARMAVAILABLETOPIC = DOMAIN+"/alarm/online"
@@ -1023,7 +1025,7 @@ class ComfortALSystemAlarmReport(object):
         self.alarm = int(data[2:4],16)
         self.triggered = True               # For Comfort Alarm State Alert, Trouble, Alarm
         self.state = int(data[6:8],16)
-        low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7']
+        low_battery = ['','Slave 1','Slave 2','Slave 3','Slave 4','Slave 5','Slave 6','Slave 7','Slave 8','Slave 9']
         alarm_types = ['No Alarm','Intruder Alarm','Duress','Phone Line Trouble','Arm Fail','Zone Trouble','Zone Alert','Low Battery',
                        'Power Fail','Panic','Entry Alert','Tamper','Fire','Gas','Family Care','Perimeter Alert','Bypass Zone','System Disarmed',
                        'CMS Test','System Armed','Alarm Abort','Entry Warning','Siren Trouble','Unused','RS485 Comms Fail','Doorbell','Homesafe',
@@ -1357,6 +1359,7 @@ class Comfort2(mqtt.Client):
             self.subscribe(ALARMCOMMANDTOPIC)
             self.subscribe(REFRESHTOPIC)
             self.subscribe(BATTERYREFRESHTOPIC)
+            self.subscribe(BYPASSTOPIC)
             self.subscribe(DOMAIN)
             self.subscribe("homeassistant/status")      # Track Status changes for Home Assistant via MQTT Broker.
 
@@ -1517,10 +1520,16 @@ class Comfort2(mqtt.Client):
                     if config_filename:
                         self.add_descriptions(Path("/config/" + config_filename))
                 self.readcurrentstate()
-        
+
+        elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/bypass_open_zones"):
+            # Check if Alarm is in Arming state.
+            if ALARMSTATUS == "pending":
+                logger.info("Bypass Open Zones key ('#') detected. Force Arming with Open Zones.")
+                self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send '#' key code (KD1A)
+
         elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/battery_update"):
 
-            Devices = ['0','1']        # Mainboard + Installed Slaves EG. ['0', '1','33','34','35' ti '39'].
+            Devices = ['0','1']        # Mainboard + Installed Slaves EG. ['0', '1','33','34','35' to '39'].
             for device in range(0, int(device_properties['sem_id'])):
                 Devices.append(str(device + 33))    # First Slave at address 33 DEC.
 
@@ -2134,6 +2143,25 @@ class Comfort2(mqtt.Client):
                         })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
+
+        # Testing creation of Bypass Open Zones button ('#')
+        discoverytopic = "homeassistant/button/comfort2mqtt/comfort_bypass/config"
+        MQTT_MSG=json.dumps({"name": "Bypass Open Zones",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "default_entity_id": "button."+DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "availability": availability,
+                             "availability_mode": "all",
+                             "command_topic": BYPASSTOPIC,
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "payload_press": "1",
+                             "icon":"mdi:button-pointer",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
+
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_filesystem/config"
         MQTT_MSG=json.dumps({"name": "FileSystem",
@@ -3209,7 +3237,10 @@ class Comfort2(mqtt.Client):
                                 elif aMsg.type == 'Disarm':
                                     logging.info("System Disarmed")
 
-                            elif line[1:3] == "ER" and CacheState:           
+                            elif line[1:3] == "ER" and CacheState: 
+
+                                global ALARMSTATUS      #Pending arming
+
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
                                 if not erMsg.zone == 0:
 
@@ -3220,10 +3251,12 @@ class Comfort2(mqtt.Client):
                                         logging.warning("Zone %s Not Ready", str(erMsg.zone))
                                         message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
 
+                                    ALARMSTATUS = "pending"
                                     #message_topic = "Zone "+str(erMsg.zone)+ " Not Ready"
                                     self.publish(ALARMMESSAGETOPIC, message_topic, qos=1, retain=True)          # Empty string removes topic.
                                 else:
                                     logging.info("Ready To Arm...")
+                                    ALARMSTATUS = "ready"
                                     # Sending KD1A when receiving ER message confuses Comfort. When arming local to any mode it immediately goes into Arm Mode
                                     # Not all Zones are announced and it 'presses' the '#' key on your behalf.
                                     # self.comfortsock.sendall("\x03KD1A\r".encode()) #Force Arm, acknowledge Open Zones and Bypasses them.
