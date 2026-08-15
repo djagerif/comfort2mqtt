@@ -105,6 +105,7 @@ comfort2mqtt/alarm/set - sent from Home Assistant, DISARM, ARM_HOME, ARM_NIGHT, 
 comfort2mqtt/alarm/refresh - sent from Home Assistant, <Key> triggers a complete object refresh
 comfort2mqtt/alarm/battery_update - sent from Home Assistant, <id> triggers a battery update query 'D?id01 and D?id02
                                     id's 0,1,33-39 are supported for Main and Slaves when ARM CPU is detected. 0 for bulk if supported.
+comfort2mqtt/alarm/bypass_open_zones - Used to send a '#' key to Comfort when arming with open zones.
 
 comfort2mqtt/input<1 to 96>/set - 1 for open/active, 0 for closed/inactive. Settable if zone is a Virtual input
 comfort2mqtt/input<129 to 248>/set
@@ -255,28 +256,11 @@ When the App is fully configured and running, there will be two new MQTT Devices
 ![image](https://github.com/user-attachments/assets/faeaa08b-c8f6-43db-a946-46ee9762b35b)
 
 
-## Home Assistant - Custom Card `#` (Optional)
+## Home Assistant - Bypass Open Zones `#` button
 
-The native `Alarm Control Panel` card does not include a `#` key for confirmation, you need to create a separate custom button card that can simulate the `#` key. One option is to install the Custom Button Card and then call 'arm_bypass' which is configured to send a `#` key code instead of arming into `Custom bypass` mode. The other option is to design your own card that incorporates this key. Below is the easiest option to follow.
+The native Home Assistant `Alarm Control Panel` card does not include a `#` key for Forced Arming with open zones. A new button entity is automatically created that you can add to your view.
 
-1. Download the `Custom Button Card` from https://github.com/custom-cards/button-card and install it according to whichever method you prefer. Refer to the repository documentation for installation and configuration instructions for either manual or HACS installation.
-
-2. Once installed, edit your dashboard and create new button using your newly installed custom button card. Below is a sample of the configuration that is required to make this button send a `#` key code to Comfort. Change the entity name to the one in your system.
-
-```
-type: custom:button-card
-name: 'Comfort # Key'
-icon: mdi:pound
-color: rgb(28, 128, 199)
-size: 10%
-tap_action:
-  action: call-service
-  service: alarm_control_panel.alarm_arm_custom_bypass
-  data:
-    entity_id: alarm_control_panel.comfort_alarm
-```
-
-![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) The `Comfort to MQTT` App changes the behaviour of the `Custom bypass` arm function and uses it to send the `#` key code instead. Please unselect the `Custom bypass` option when creating the `Alarm Control Panel` card.
+![alt text](image-4.png)
 
 
 ## Home Assistant - Alarm State Colours (Optional)
