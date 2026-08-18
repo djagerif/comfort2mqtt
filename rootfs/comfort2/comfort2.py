@@ -2186,7 +2186,6 @@ class Comfort2(mqtt.Client):
                              "code_disarm_required": "true",
                              "code": "REMOTE_CODE",
                              "qos": "2",
-                             "icon": "mdi:alarm-panel",
                              "device": MQTT_DEVICE
                             })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)

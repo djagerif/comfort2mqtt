@@ -493,7 +493,7 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 * [UCM/Eth02] - Obsolete/Does not work. Not all functions work with this module.
 
-* [UCM/Wifi01] - Not Recommended (WiFi) - Firmware 7.176 or later.
+* [UCM/Wifi01] - Does not work. UCM/WiFi does not handle Disarm with incorrect code correctly.
 
 * [UCM/Eth03 or Eth03 Mainboard Plug-in] - Recommended (LAN) - Firmware 7.176 or later.
 
