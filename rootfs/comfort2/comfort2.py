@@ -3267,7 +3267,7 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "ER" and CacheState: 
 
-                                global ALARMSTATUS      #Pending arming
+                                global ALARMSTATUS      #Arming status.
 
                                 erMsg = ComfortERArmReadyNotReady(line[1:])
                                 if not erMsg.zone == 0:
@@ -3283,7 +3283,7 @@ class Comfort2(mqtt.Client):
                                     self.publish(ALARMMESSAGETOPIC, message_topic, qos=1, retain=True)          # Empty string removes topic.
                                 else:
                                     logging.info("Ready To Arm...")
-                                    ALARMSTATUS = "ready"
+                                    ALARMSTATUS = "arming"       # changed from ready to arming
 
                             elif line[1:3] == "AM":    # AM/AR for Non-Detector alarms
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
@@ -3325,7 +3325,7 @@ class Comfort2(mqtt.Client):
                                 if exMsg.type == 1:         # Entry Delay
                                     self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)
                                 elif exMsg.type == 2:       # Exit Delay
-                                    self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
+                                    self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)      # Changed from 'arming' to 'pending'
 
                             elif line[1:3] == "RP":
                                 result = self.validate_hex_in_list(line[3:5], "0,1,255")
