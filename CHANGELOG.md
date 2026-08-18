@@ -2,10 +2,11 @@
 
 ### Added
  - Use Home Assistant REMOTE_CODE as to no longer require a hard-coded PIN in Home Assistant. See breaking changes and DOCS.md for updated alarm_control_panel configuration.
- - Automatic 'Bypass Open Zones' control button during discovery. This is the '#' key required to Force Arm with Open Zones. You no longer need a manual button creation in Home Assistant.
+ - Automatic creation of 'Bypass Open Zones' control button during discovery. This is the '#' key required to Force Arm with Open Zones. You no longer need a manual button creation in Home Assistant.
+ - Automatic creation of Alarm Control Panel using new REMOTE_CODE key setting - Testing...
  
 ### Breaking Changes
- - Comfort Login PIN can now be set to a user without Disarm rights. The Disarm function now uses the actual Comfort PIN entered via the Home Assistant keypad. This enables usage of the Duress code if need be. You can remove the hard-coded PIN from the configuration.yaml file as per below.
+ - Comfort Login PIN can now be set to a user without Disarm rights. The Disarm function now uses the actual Comfort PIN entered via the Home Assistant keypad. This enables usage of the Duress code if need be. You can remove the hard-coded PIN from the configuration.yaml file as per below or use the newly created Alarm Control Panel available by default.
  
       ```
       #code: !secret alarm_pin

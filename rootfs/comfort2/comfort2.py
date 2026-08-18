@@ -2146,7 +2146,6 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
-        # Testing creation of Bypass Open Zones button ('#')
         discoverytopic = "homeassistant/button/comfort2mqtt/comfort_bypass/config"
         MQTT_MSG=json.dumps({"name": "Bypass Open Zones",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
@@ -2164,6 +2163,32 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
+        discoverytopic = "homeassistant/alarm_control_panel/comfort2mqtt/config"
+        MQTT_MSG=json.dumps({"name": "Comfort II Alarm Control Panel",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "default_entity_id": "alarm_control_panel."+DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "availability": availability,
+                             "availability_mode": "all",
+                             "state_topic": ALARMSTATUSTOPIC,
+                             "command_template": "{\"action\": {{ action | tojson }}, \"code\": {{ (code or \"\") | tojson }}}",
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "payload_press": "1",
+                             "supported_features": [
+                                 "arm_home",
+                                 "arm_away",
+                                 "arm_night",
+                                 "arm_vacation",
+                                 "arm_custom_bypass"
+                                ],
+                             "code_arm_required": "false",
+                             "code_disarm_required": "true",
+                             "code": "REMOTE_CODE",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
 
         discoverytopic = "homeassistant/sensor/comfort2mqtt/comfort_filesystem/config"
         MQTT_MSG=json.dumps({"name": "FileSystem",
