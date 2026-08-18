@@ -1489,7 +1489,7 @@ class Comfort2(mqtt.Client):
                 elif msgstr == "ARM_HOME":
                     self.comfortsock.sendall(("\x03m!03"+self.comfort_pincode+"\r").encode()) #Local arm to 03 day mode. Requires # for open zones
                     SAVEDTIME = datetime.now()
-                    self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
+                    #self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
                 elif msgstr == "ARM_NIGHT":
                     self.comfortsock.sendall(("\x03m!02"+self.comfort_pincode+"\r").encode()) #Local arm to 02 night mode. Requires # for open zones
                     SAVEDTIME = datetime.now()
@@ -3285,6 +3285,8 @@ class Comfort2(mqtt.Client):
                                     logging.info("Ready To Arm...")
                                     ALARMSTATUS = "arming"       # changed from ready to arming
 
+                                self.publish(ALARMSTATETOPIC, ALARMSTATUS, qos=2, retain=False)
+
                             elif line[1:3] == "AM":    # AM/AR for Non-Detector alarms
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
                                 logging.warning(amMsg.message)
@@ -3323,9 +3325,9 @@ class Comfort2(mqtt.Client):
                                 self.entryexitdelay = exMsg.delay
                                 self.entryexit_timer()
                                 if exMsg.type == 1:         # Entry Delay
-                                    self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)
+                                    self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)      # Entry delay is 'pending'
                                 elif exMsg.type == 2:       # Exit Delay
-                                    self.publish(ALARMSTATETOPIC, "pending",qos=2,retain=False)      # Changed from 'arming' to 'pending'
+                                    self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)      # Exit delay is 'arming'
 
                             elif line[1:3] == "RP":
                                 result = self.validate_hex_in_list(line[3:5], "0,1,255")
