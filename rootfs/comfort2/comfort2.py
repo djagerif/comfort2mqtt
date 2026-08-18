@@ -2147,7 +2147,7 @@ class Comfort2(mqtt.Client):
         time.sleep(0.1)
 
         discoverytopic = "homeassistant/button/comfort2mqtt/comfort_bypass/config"
-        MQTT_MSG=json.dumps({"name": "Bypass Open Zones",
+        MQTT_MSG=json.dumps({"name": "Bypass Open Zones (# Key)",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "default_entity_id": "button."+DOMAIN+"_"+discoverytopic.split('/')[3],
                              "availability": availability,
@@ -2164,12 +2164,13 @@ class Comfort2(mqtt.Client):
         time.sleep(0.1)
 
         discoverytopic = "homeassistant/alarm_control_panel/comfort2mqtt/config"
-        MQTT_MSG=json.dumps({"name": "Comfort II Alarm Control Panel",
-                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "default_entity_id": "alarm_control_panel."+DOMAIN+"_"+discoverytopic.split('/')[3],
+        MQTT_MSG=json.dumps({"name": "Alarm Control Panel",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[1],
+                             "default_entity_id": "alarm_control_panel."+DOMAIN+"_"+discoverytopic.split('/')[1],
                              "availability": availability,
                              "availability_mode": "all",
-                             "state_topic": ALARMSTATUSTOPIC,
+                             "state_topic": ALARMSTATETOPIC,
+                             "command_topic": ALARMCOMMANDTOPIC,
                              "command_template": "{\"action\": {{ action | tojson }}, \"code\": {{ (code or \"\") | tojson }}}",
                              "payload_available": "1",
                              "payload_not_available": "0",
@@ -2185,6 +2186,7 @@ class Comfort2(mqtt.Client):
                              "code_disarm_required": "true",
                              "code": "REMOTE_CODE",
                              "qos": "2",
+                             "icon": "mdi:alarm-panel",
                              "device": MQTT_DEVICE
                             })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
