@@ -123,9 +123,9 @@ comfort2mqtt/sensor<0 to 31>/set - 16-bit value
 ```
 
 
-## Home Assistant Configuration
+## Home Assistant Configuration (Optional)
 
-Manual Sensor creation is required in your `configuration.yaml` file before this App can start. 
+The Comfort2MQTT App creates both the `Alarm Control Panel` and the `Bypass Open Zones` button automatically. Manual Sensor creation for these two entities are optional in your `configuration.yaml`.
 
 ![information](https://github.com/djagerif/comfort2mqtt/assets/5621764/2d0daafc-8499-4fc8-b93a-29505891087b) It must be noted that Comfort requires the `#` key during arming to acknowledge and bypass any open zones. Because the `Home Assistant Alarm Control Panel` does not have a native `#` key, the `CUSTOM BYPASS` key is utilised for that purpose and send the appropriate `#` keycode (`KD1A`) to Comfort.
 
@@ -143,7 +143,7 @@ mqtt:
         - arm_home
         - arm_away
         - arm_night
-        # - arm_vacation
+        - arm_vacation
         - arm_custom_bypass
       state_topic: "comfort2mqtt/alarm"
       command_topic: "comfort2mqtt/alarm/set"
@@ -258,7 +258,7 @@ When the App is fully configured and running, there will be two new MQTT Devices
 
 ## Home Assistant - Bypass Open Zones `#` button
 
-The native Home Assistant `Alarm Control Panel` card does not include a `#` key for Forced Arming with open zones. A new button entity is automatically created that you can add to your view.
+The native Home Assistant `Alarm Control Panel` card does not include a `#` key for Forced Arming with open zones. A new button entity is automatically created that you can add to your dashboard view.
 
 <img width="512" height="125" alt="image" src="https://github.com/user-attachments/assets/c3727058-e498-4b6f-8a72-4b7c28e8cc35" />
 

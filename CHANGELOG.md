@@ -1,15 +1,15 @@
 ## [1.6.4] - Busy
 
- - Investigate REM_ARM_AWAY mode. Used to have a seperate Alarm Control Panel' just for that function.
-
+ - Investiagte DURESS disarm messages. Might need to be hidden.
 
 ### Added
  - Use Home Assistant REMOTE_CODE feature to no longer require a hard-coded PIN in Home Assistant. See breaking changes and DOCS.md for updated alarm_control_panel configuration.
  - Automatic creation of 'Bypass Open Zones' control button during discovery. This is the '#' key required to Force Arm with Open Zones. You no longer need a manual button configuration in Home Assistant.
- - Automatic creation of 'Alarm Control Panel' using new REMOTE_CODE key setting during discovery. You no longer need a manual Alarm Control Panel configuration in Home Assistant.
+ - Automatic creation of 'Alarm Control Panel' using new REMOTE_CODE key setting during discovery. You no longer need a user-created Alarm Control Panel configuration in Home Assistant unless you have a custom Alarm Control Panel configured that suits your needs.
+ - Added `Remote AWAY Arm`, `Panic Alarm` and `Fire Alarm` buttons to auto-discovery.
  
 ### Breaking Changes
- - Comfort Login PIN can now be set to a user without Disarm rights (eg. User 02). The Disarm function now uses the actual Comfort PIN (from a user with Disarm rights eg. User 01) entered via the Home Assistant keypad. This also enables usage of the Duress code if need be. You can remove the hard-coded PIN from the configuration.yaml file as per below or use the newly created Alarm Control Panel available by default.
+ - Comfort Login PIN can now be set to a user without Disarm rights (eg. User 02). The Disarm function can now use a different Comfort PIN (from a user with Disarm rights) entered via the Home Assistant keypad. This also enables usage of the Duress code if need be. You can remove the hard-coded PIN, from the configuration.yaml file as per below, and replace it with "REMOTE_CODE" and the updated command_template. Alternatively, use the newly created Alarm Control Panel created automatically from 1.7.0 onwards.
  
       ```
       #code: !secret alarm_pin

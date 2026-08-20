@@ -21,6 +21,7 @@
 #
 # from xmlrpc import client
 
+from annotated_types import Len
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -1499,11 +1500,18 @@ class Comfort2(mqtt.Client):
                     SAVEDTIME = datetime.now()
                     self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
                 elif msgstr == "REM_ARM_AWAY":
-                    self.comfortsock.sendall(("\x03M!01"+self.comfort_pincode+"\r").encode()) #Remote arm to 01 away mode. Requires # for open zones
+                    self.comfortsock.sendall(("\x03KD12\r").encode())                          #Remote arm to Away mode, uses KD12 Hard Key. Requires # for open zones
+                    #self.comfortsock.sendall(("\x03M!01"+self.comfort_pincode+"\r").encode()) #Remote arm to 01 away mode. Requires # for open zones. Deperecated.
                     SAVEDTIME = datetime.now()
                     self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
+                elif msgstr == "PANIC":
+                    self.comfortsock.sendall(("\x03KD10\r").encode())                          #Instant PANIC Alarm
+                    SAVEDTIME = datetime.now()
+                elif msgstr == "FIRE":
+                    self.comfortsock.sendall(("\x03KD11\r").encode())                          #Instant FIRE Alarm
+                    SAVEDTIME = datetime.now()
                 elif msgstr == "ARM_CUSTOM_BYPASS":
-                    self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send 'ENT' key code (KD1A) to bypass open zones.
+                    self.comfortsock.sendall("\x03KD1A\r".encode())                            #Send 'ENT' key code (KD1A) to bypass open zones.
                     SAVEDTIME = datetime.now()
 #                elif msgstr == "DISARM":
 #                    #self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #Local arm to 00. disarm mode.
@@ -2166,6 +2174,57 @@ class Comfort2(mqtt.Client):
                              "payload_not_available": "0",
                              "payload_press": "1",
                              "icon":"mdi:button-pointer",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
+
+        discoverytopic = "homeassistant/button/comfort2mqtt/remote_arm_away/config"
+        MQTT_MSG=json.dumps({"name": "Remote ARM Away",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "default_entity_id": "button."+DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "availability": availability,
+                             "availability_mode": "all",
+                             "command_topic": ALARMCOMMANDTOPIC,
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "payload_press": "REM_ARM_AWAY",
+                             "icon":"mdi:button-pointer",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
+
+        discoverytopic = "homeassistant/button/comfort2mqtt/panic_alarm/config"
+        MQTT_MSG=json.dumps({"name": "Panic Alarm",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "default_entity_id": "button."+DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "availability": availability,
+                             "availability_mode": "all",
+                             "command_topic": ALARMCOMMANDTOPIC,
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "payload_press": "PANIC",
+                             "icon":"mdi:alert",
+                             "qos": "2",
+                             "device": MQTT_DEVICE
+                            })
+        self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+        time.sleep(0.1)
+
+        discoverytopic = "homeassistant/button/comfort2mqtt/fire_alarm/config"
+        MQTT_MSG=json.dumps({"name": "Fire Alarm",
+                             "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "default_entity_id": "button."+DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "availability": availability,
+                             "availability_mode": "all",
+                             "command_topic": ALARMCOMMANDTOPIC,
+                             "payload_available": "1",
+                             "payload_not_available": "0",
+                             "payload_press": "FIRE",
+                             "icon":"mdi:fire-circle",
                              "qos": "2",
                              "device": MQTT_DEVICE
                             })
