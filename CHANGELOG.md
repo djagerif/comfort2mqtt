@@ -1,16 +1,15 @@
 ## [1.6.4] - Busy
 
- - Bug: Investigate wrong disarm code disconnects App from Comfort. This happens with new REMOTE_CODE auto keypad. Wait feedback from Cytech re: m! command.
+ - Investigate REM_ARM_AWAY mode. Used to have a seperate Alarm Control Panel' just for that function.
 
 
 ### Added
  - Use Home Assistant REMOTE_CODE feature to no longer require a hard-coded PIN in Home Assistant. See breaking changes and DOCS.md for updated alarm_control_panel configuration.
  - Automatic creation of 'Bypass Open Zones' control button during discovery. This is the '#' key required to Force Arm with Open Zones. You no longer need a manual button configuration in Home Assistant.
- - Automatic creation of Alarm Control Panel using new REMOTE_CODE key setting during discovery - Busy Testing... UCM/WiFi fails Disarm with incorrect code. You no longer need a manual Alarm Control Panel configuration in Home Assistant.
+ - Automatic creation of 'Alarm Control Panel' using new REMOTE_CODE key setting during discovery. You no longer need a manual Alarm Control Panel configuration in Home Assistant.
  
 ### Breaking Changes
- - UCM/WiFi status change from `Not Recommended` to `Does Not Work` due to handling of Disarm using incorrect code.
- - Comfort Login PIN can now be set to a user without Disarm rights. The Disarm function now uses the actual Comfort PIN entered via the Home Assistant keypad. This enables usage of the Duress code if need be. You can remove the hard-coded PIN from the configuration.yaml file as per below or use the newly created Alarm Control Panel available by default.
+ - Comfort Login PIN can now be set to a user without Disarm rights (eg. User 02). The Disarm function now uses the actual Comfort PIN (from a user with Disarm rights eg. User 01) entered via the Home Assistant keypad. This also enables usage of the Duress code if need be. You can remove the hard-coded PIN from the configuration.yaml file as per below or use the newly created Alarm Control Panel available by default.
  
       ```
       #code: !secret alarm_pin
@@ -19,12 +18,13 @@
         {"action": "{{ action }}", "code": "{{ code }}"}
       ```
 ###  Note:
-The Comfort Disarm PIN is not stored in the App, it does however appear in the MQTT Broker. Make sure your MQTT Broker is secure and not accessible from the Internet. Use Secure MQTT where possible.
+The Comfort Disarm PIN is not stored in the App, it does however appear in the MQTT Broker and can be decoded when captured on the LAN. Make sure your MQTT Broker is secure and not accessible from the Internet and use Secure MQTT transport where possible. Comfort unfortunately does not have encryption capabilities between Home Assistant and the UCM/Eth03 LAN interface.
 
 ### Changed
  - Migrated from addon_config to app_config as per Home Assistant requirements. Updated DOCS.md.
  - Logging now saves only three 5M files. Old logs are deleted to prevent logs from filling up disk space.
  - Updated DOCS.md to include the new Force Arm '#' key topic in MQTT.
+ - DISARM method changed from m!00 to sending individual PIN code digits individually. This was due to UCM/WiFi not handling the m!00 command correctly. UCM/Eth03 is still the recommended connectivity method.
   
 ### Fixed
 

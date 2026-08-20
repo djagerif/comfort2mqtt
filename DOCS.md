@@ -493,13 +493,13 @@ The following Cytech Universal Communications Modules (UCM) Ethernet modules are
 
 * [UCM/Eth02] - Obsolete/Does not work. Not all functions work with this module.
 
-* [UCM/Wifi01] - Does not work. UCM/WiFi does not handle Disarm with incorrect code correctly.
+* [UCM/Wifi01] - Not Recommended (WiFi) - Firmware 7.176 or later.
 
 * [UCM/Eth03 or Eth03 Mainboard Plug-in] - Recommended (LAN) - Firmware 7.176 or later.
 
 This software _requires_ a fully functional Comfort Ethernet or Wifi configuration with inactivity timeout set to the default value of 2 minutes. The UCM/Wifi is not recommended due to possible connectivity issues that could arise from switching between different AP's or other possible sources of RF noise. For best performance it is recommended to use either the UCM/Eth03 or the onboard Eth03 Plug-in module on the newer CM9001 Comfort Ultra models. Use a good quality CAT5e or better cable between Comfort and your network device.
 
-If your network is segmented using a firewall, or any other similar device, you must ensure all applicable ports are allowed between Home Assistant and Comfort. The default port for the UCM/Eth03 is TCP/1002 which is Port #2 of a UCMEth03.
+If your network is segmented using a firewall, or any other similar device, you must ensure all applicable ports are allowed between Home Assistant and Comfort. The default port for the UCM/Eth03 is TCP/1002 which is Port #2 of a UCM/Eth03.
   
 ⚠️ The UCM/WiFi uses port TCP/3000 as the default port. Any port may be used as long as there are no overlaps with existing services on the network.
 
