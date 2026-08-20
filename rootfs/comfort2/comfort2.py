@@ -1503,22 +1503,20 @@ class Comfort2(mqtt.Client):
                     SAVEDTIME = datetime.now()
                     self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
                 elif msgstr == "ARM_CUSTOM_BYPASS":
-                    self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send 'ENT' key code (KD1A)
+                    self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send 'ENT' key code (KD1A) to bypass open zones.
                     SAVEDTIME = datetime.now()
-                elif msgstr == "DISARM":
-                    #self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #Local arm to 00. disarm mode.
+#                elif msgstr == "DISARM":
+#                    #self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #Local arm to 00. disarm mode.
 #                    self.comfortsock.sendall(("\x03m!00"+code+"\r").encode()) #Local arm to 00 using PIN entered via Home Assistant keypad.
-
-                    self.comfortsock.sendall("\x03KD01\r".encode())                           #Send '1' key code (KD01)
-                    time.sleep(0.5)
-                    self.comfortsock.sendall("\x03KD01\r".encode())                           #Send '1' key code (KD01)
-                    time.sleep(0.5)
-                    self.comfortsock.sendall("\x03KD01\r".encode())                           #Send '1' key code (KD01)
-                    time.sleep(0.5)
-                    self.comfortsock.sendall("\x03KD01\r".encode())                           #Send '1' key code (KD01)
-                    time.sleep(0.5)
-                    self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send 'ENT' key code (KD1A)
-
+                elif msgstr == "DISARM":
+                    # Loop through each digit in 'code' and send corresponding KD0x commands.
+                    if len(code) < 4 or len(code) > 6 or not code.isdigit():
+                        logger.debug("Invalid PIN Code received for DISARM command. Must be 4 to 6 digits.")
+                    else:
+                        for digit in code:
+                            self.comfortsock.sendall((f"\x03KD0{digit}\r").encode())  # Send digit key code (KD0x)
+                            time.sleep(0.25)
+                        self.comfortsock.sendall("\x03KD1A\r".encode())  # Send 'ENT' key code (KD1A)
                     SAVEDTIME = datetime.now()
                 elif msgstr == "comm test":
                     logger.debug("Successful communication test. Comfort MQTT Bridge is online and connected to Comfort.")
