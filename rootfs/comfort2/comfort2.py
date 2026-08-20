@@ -1503,11 +1503,22 @@ class Comfort2(mqtt.Client):
                     SAVEDTIME = datetime.now()
                     self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
                 elif msgstr == "ARM_CUSTOM_BYPASS":
-                    self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send '#' key code (KD1A)
+                    self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send 'ENT' key code (KD1A)
                     SAVEDTIME = datetime.now()
                 elif msgstr == "DISARM":
                     #self.comfortsock.sendall(("\x03m!00"+self.comfort_pincode+"\r").encode()) #Local arm to 00. disarm mode.
-                    self.comfortsock.sendall(("\x03m!00"+code+"\r").encode()) #Local arm to 00 using PIN entered via Home Assistant keypad.
+#                    self.comfortsock.sendall(("\x03m!00"+code+"\r").encode()) #Local arm to 00 using PIN entered via Home Assistant keypad.
+
+                    self.comfortsock.sendall("\x03KD01\r".encode())                           #Send '1' key code (KD01)
+                    time.sleep(0.5)
+                    self.comfortsock.sendall("\x03KD01\r".encode())                           #Send '1' key code (KD01)
+                    time.sleep(0.5)
+                    self.comfortsock.sendall("\x03KD01\r".encode())                           #Send '1' key code (KD01)
+                    time.sleep(0.5)
+                    self.comfortsock.sendall("\x03KD01\r".encode())                           #Send '1' key code (KD01)
+                    time.sleep(0.5)
+                    self.comfortsock.sendall("\x03KD1A\r".encode())                           #Send 'ENT' key code (KD1A)
+
                     SAVEDTIME = datetime.now()
                 elif msgstr == "comm test":
                     logger.debug("Successful communication test. Comfort MQTT Bridge is online and connected to Comfort.")
@@ -1526,7 +1537,7 @@ class Comfort2(mqtt.Client):
             msgstr_cleaned = msgstr[0] if msgstr else '1'
             if ALARMSTATUS == "pending":
                 logger.info("Force Arming with Open Zones.")
-                self.comfortsock.sendall("\x03KD1A\r".encode())    #Send '#' key code (KD1A) when arming with open zones. This is required for Comfort to arm with open zones.
+                self.comfortsock.sendall("\x03KD1A\r".encode())    #Send 'ENT' key code (KD1A) when arming with open zones. This is required for Comfort to arm with open zones.
                 SAVEDTIME = datetime.now()
 
         elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/battery_update"):
