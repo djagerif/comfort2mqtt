@@ -1,15 +1,15 @@
 ---
 configuration:
   mqtt_broker_address:
-    name: MQTT Broker Address (required)*
+    name: MQTT Broker Address (required)
     description: >-
       The MQTT Broker Hostname or IP address in IPV4 format or use the default local Home Assistant 'core-mosquitto' broker.
   mqtt_user:
-    name: MQTT Broker Username (required)*
+    name: MQTT Broker Username (required)
     description: >-
       The MQTT Broker Username used for authentication.
   mqtt_password:
-    name: MQTT Broker Password (required)*
+    name: MQTT Broker Password (required)
     description: >-
       The MQTT Broker Password.
   mqtt_broker_port:
@@ -50,11 +50,11 @@ configuration:
     description: >-
       Cytech Comfort UCM/Ethernet TCP Port. Range from 1 - 65535 (Default is 1002).
   comfort_address:
-    name: Comfort IP address (required)*
+    name: Comfort IP address (required)
     description: >-
       Cytech Comfort IP Address in IPV4 format or DNS resolvable host FQDN.
   comfort_login_id:
-    name: Comfort User Login ID (required)*
+    name: Comfort User Login ID (required)
     description: >-
       Cytech Comfort UserID PIN with at least Read-Only access. UserID PIN has minimum 4 and maximum 6 digits.
       This UserID PIN should preferably not have Local/Remote Disarm capability. Disarm uses the Comfort UserID PIN with Disarm functionality.
