@@ -2376,6 +2376,7 @@ class Comfort2(mqtt.Client):
                              "qos": "2",
                              "native_value": "string",
                              "unit_of_measurement": "s",
+                             "icon":"mdi:timer-outline",
                              "device": MQTT_DEVICE
                             })
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
