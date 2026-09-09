@@ -3233,7 +3233,7 @@ class Comfort2(mqtt.Client):
 
                                 logger.debug("Max. Reported SCS/RIO Inputs: %d", zMsg.max_zones)
 
-                            elif line[1:3] == "M?" or line[1:3] == "MD":
+                            elif (line[1:3] == "M?" or line[1:3] == "MD") and len(line[1:]) == 6:
                                 mMsg = ComfortM_SecurityModeReport(line[1:])
                                 self.publish(ALARMSTATETOPIC, mMsg.modename,qos=1,retain=True)      #Disarmed, Day etc
                                 self.publish(ALARMMODETOPIC, mMsg.mode,qos=1,retain=True)

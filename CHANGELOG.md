@@ -25,6 +25,7 @@ The Comfort Disarm PIN is not stored in the App, it does however appear in the M
  - Logging now saves only three 5M files. Old logs are deleted to prevent logs from filling up disk space.
  - Updated DOCS.md to include the new Force Arm '#' key topic in MQTT.
  - DISARM method changed from m!00 to sending individual PIN code digits individually. This was due to UCM/WiFi not handling the m!00 command correctly. UCM/Eth03 is still the recommended connectivity method.
+ - Update Configuration option names to include `(required)` for options that must be set by the user.
   
 ### Fixed
 
