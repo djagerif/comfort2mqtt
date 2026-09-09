@@ -1499,8 +1499,8 @@ class Comfort2(mqtt.Client):
                     SAVEDTIME = datetime.now()
                     self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
                 elif msgstr == "REM_ARM_AWAY":
-                    self.comfortsock.sendall(("\x03M!01\r").encode())                          #Remote arm to Away mode, uses KD12 Hard Key. Waits for exit time. M! arms immediate. Requires # for open zones
-                    #self.comfortsock.sendall(("\x03M!01"+self.comfort_pincode+"\r").encode()) #Remote arm to 01 away mode. Requires # for open zones. Deperecated.
+                    #self.comfortsock.sendall(("\x03M!01\r").encode())                          #Remote arm to Away mode, uses KD12 Hard Key. Waits for exit time. M! arms immediate. Requires # for open zones
+                    self.comfortsock.sendall(("\x03M!01"+self.comfort_pincode+"\r").encode()) #Remote arm to 01 away mode. Requires # for open zones. Deperecated.
                     SAVEDTIME = datetime.now()
                     self.publish(ALARMSTATETOPIC, "arming",qos=2,retain=False)
                 elif msgstr == "PANIC":
