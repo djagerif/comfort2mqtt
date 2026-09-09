@@ -2365,7 +2365,7 @@ class Comfort2(mqtt.Client):
         self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
         time.sleep(0.1)
 
-        discoverytopic = "homeassistant/sensor/comfort2mqtt/entry_exit/config"
+        discoverytopic = "homeassistant/sensor/comfort2mqtt/entry_exit_timer/config"
         MQTT_MSG=json.dumps({"name": "Entry/Exit Timer",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                              "default_entity_id": "sensor."+DOMAIN+"_"+discoverytopic.split('/')[3],
