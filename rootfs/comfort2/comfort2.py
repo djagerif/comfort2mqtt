@@ -21,7 +21,6 @@
 #
 # from xmlrpc import client
 
-from annotated_types import Len
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm
