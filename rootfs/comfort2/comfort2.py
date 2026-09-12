@@ -219,6 +219,7 @@ ChargerVoltageList = {0:"-1",
 }
 
 ZoneCache = {}              # Zone Cache dictionary.
+
 BypassCache = {i: 0 for i in range(1,MAX_ZONES + 1)}   # generate empty bypass cache for all zones. (Up to MAX_ZONES)
 CacheState = False          # Initial Cache state. False when not in sync with Bypass Zones (b?). True, when in Sync.
 
@@ -3199,7 +3200,7 @@ class Comfort2(mqtt.Client):
                                     try:
                                         _name = input_properties[str(ipMsgZ.input)]['Name'] if ZONEMAPFILE else "Zone" + str(ipMsgZ.input)
                                     except KeyError as e:
-                                        # Only print error is zone is in configured range
+                                        # Only print error if zone is in configured range
                                         if int(e.args[0]) <= ALARMNUMBEROFOUTPUTS:
                                             logging.debug ("Zone %s not in CCLX file, ignoring CCLX 'Name' and 'ZoneWord' enrichment", str(e))
                                         _name = "Zone" + str(ipMsgZ.input)
