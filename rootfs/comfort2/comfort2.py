@@ -3256,6 +3256,8 @@ class Comfort2(mqtt.Client):
                                 self.publish(ALARMMODETOPIC, mMsg.mode,qos=1,retain=True)
                                 ALARMSTATE = mMsg.mode         # Save Numerical state.
                                 self.entryexitdelay = 0                         #zero out the countdown timer
+                                if mMsg.mode == 0:
+                                    self.publish(BYPASSTOPIC, 0,qos=1,retain=True)      # Clear BypassOpenZones on Disarm
 
                             elif line[1:3] == "S?":
                                 SMsg = ComfortS_SecurityModeReport(line[1:])
