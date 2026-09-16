@@ -966,7 +966,7 @@ class ComfortAMSystemAlarmReport(object):
                 self.message = "Power Failure - "+('Main' if self.parameter == 1 else low_battery[(self.parameter - 32)])
                 ACFail = True
             elif self.alarm == 4: self.message = "Phone Trouble"
-            elif self.alarm == 5: self.message = "Duress"
+            elif self.alarm == 5: self.message = "Duress"       # Hide this message from the user. Only for Comfort to know.
             elif self.alarm == 6: self.message = "Arm Failure"
             elif self.alarm == 7: self.message = "Family Care"
             elif self.alarm == 8: self.message = "Security Off, User "+str(self.parameter); self.triggered = False
@@ -2034,7 +2034,7 @@ class Comfort2(mqtt.Client):
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
                             "hw_version": "Alpine Linux " + ALPINE_VERSION,
-                            "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
+                            "configuration_url": "homeassistant://navigate/config/app/" + ADDON_SLUG + "/info",
                             "model": "Comfort MQTT Bridge"
                         }
         
@@ -2541,9 +2541,11 @@ class Comfort2(mqtt.Client):
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
                             "hw_version": "Alpine Linux " + ALPINE_VERSION,
-                            "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
+                            "configuration_url": "homeassistant://navigate/config/app/" + ADDON_SLUG + "/info",
                             "model": "Comfort MQTT Bridge"
                         }
+
+                            #"configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
 
             MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
                              "support_url": "https://www.cytech.biz",
