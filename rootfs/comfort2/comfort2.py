@@ -2541,7 +2541,7 @@ class Comfort2(mqtt.Client):
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
                             "hw_version": "Alpine Linux " + ALPINE_VERSION,
-                            "configuration_url": "homeassistant://config/app/" + ADDON_SLUG + "/info",
+                            "configuration_url": "homeassistant://hassio/app/" + ADDON_SLUG + "/info",
                             "model": "Comfort MQTT Bridge"
                         }
 
