@@ -2034,10 +2034,10 @@ class Comfort2(mqtt.Client):
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
                             "hw_version": "Alpine Linux " + ALPINE_VERSION,
-                            "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG,
+                            "configuration_url": "/config/addon_details/" + ADDON_SLUG,
                             "model": "Comfort MQTT Bridge"
                         }
-        
+        # "configuration_url": "/config/addon_details/b52674f1_comfort2mqtt",
         MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
                              "support_url": "https://www.cytech.biz",
                              "Reference": device_properties['Reference'] if file_exists else None,
@@ -2541,7 +2541,7 @@ class Comfort2(mqtt.Client):
                             "manufacturer": "Ingo de Jager",
                             "sw_version": ADDON_VERSION,
                             "hw_version": "Alpine Linux " + ALPINE_VERSION,
-                            "configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG,
+                            "configuration_url": "/config/addon_details/" + ADDON_SLUG,
                             "model": "Comfort MQTT Bridge"
                         }
 
