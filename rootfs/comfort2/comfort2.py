@@ -2545,8 +2545,6 @@ class Comfort2(mqtt.Client):
                             "model": "Comfort MQTT Bridge"
                         }
 
-                            #"configuration_url": "homeassistant://hassio/addon/" + ADDON_SLUG + "/info",
-
             MQTT_MSG=json.dumps({"CustomerName": device_properties['CustomerName'] if file_exists else None,
                              "support_url": "https://www.cytech.biz",
                              "Reference": device_properties['Reference'] if file_exists else None,
