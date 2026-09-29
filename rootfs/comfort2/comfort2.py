@@ -3183,8 +3183,8 @@ class Comfort2(mqtt.Client):
                                                      "Value": ipMsgTR.value,
                                                      "State": ipMsgTR.state
                                                     })
-                               # self.publish(COMFORTTIMERSTOPIC % ipMsgTR.timer, MQTT_MSG,qos=2,retain=False)
-                               # time.sleep(0.01)
+                                self.publish(COMFORTTIMERSTOPIC % ipMsgTR.timer, MQTT_MSG,qos=2,retain=False)
+                                time.sleep(0.01)
                             
                             elif line[1:3] == "LR":
                                 luMsg = ComfortLUUserLoggedIn(line[1:])
