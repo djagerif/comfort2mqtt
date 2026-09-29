@@ -1,6 +1,7 @@
 ## [1.6.4] - Busy
 
  - Investiagte DURESS disarm messages. Might need to be hidden. Search for all entries called "Duress" and rename or block log entry to Disarmed.
+ - Add Timer Reports again. Generate Home Assistant config entries for all of them.
 
 ### Added
  - Use Home Assistant REMOTE_CODE feature to no longer require a hard-coded PIN in Home Assistant. See breaking changes and DOCS.md for updated alarm_control_panel configuration.

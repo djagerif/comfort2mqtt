@@ -93,6 +93,10 @@ configuration:
     name: Comfort Responses
     description: >-
       The number of Cytech Comfort Responses that can be activated. Range from 0 - 1024 (Default is 0).
+  auto_timers:
+    name: Generate Timer Report entities and topics.
+    description: >-
+      Enable automatic Timer Report (TR) sensor entity creation (Default is False).
   comfort_time:
     name: Set Comfort Time and Date.
     description: >-

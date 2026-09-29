@@ -318,6 +318,11 @@ group.add_argument(
     type=boolean_string, default='false',
     help="Set Comfort Date and Time flag, 'True'|'False'. [default: 'False']")
 
+group.add_argument(
+    '--auto-timers',
+    type=boolean_string, default='false',
+    help="Generate Timer Report entities and topics, 'True'|'False'. [default: 'False']")
+
 group = parser.add_argument_group('Comfort Alarm options')
 group.add_argument(
     '--alarm-inputs',
@@ -459,10 +464,12 @@ COMFORT_INPUTS=int(option.alarm_inputs) if validate_port(option.alarm_inputs,8,M
 COMFORT_OUTPUTS=int(option.alarm_outputs) if validate_port(option.alarm_outputs,0,MAX_OUTPUTS) else 0
 COMFORT_RESPONSES=int(option.alarm_responses) if validate_port(option.alarm_responses,0,MAX_RESPONSES) else 0
 COMFORT_TIME=str(option.comfort_time)
+COMFORT_AUTO_TIMERS=str(option.auto_timers)             # If True then auto-create timer1-64 (COMFORT_TIMERS) entities and topics. If False, then no timer entities or topics are created.
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs) if validate_port(option.alarm_rio_inputs,0,120) else 0
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs) if validate_port(option.alarm_rio_outputs,0,120) else 0
 COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update) if int(option.comfort_battery_update) in [0,1]+list(range(33,40)) else 1
 COMFORT_TIMERS = 64                                     # Default number of timers supported by Comfort II. Max 64.
+COMFORT_TIMERRANGE = range(1,int(COMFORT_TIMERS)+1) 
 
 ALARMINPUTTOPIC = DOMAIN+"/input%d"                     #input1,input2,... input128 for every input. Physical Inputs (Default 8), Max 128
 if COMFORT_INPUTS < 8:
@@ -515,7 +522,7 @@ ALARMNUMBEROFCOUNTERS = 255                             # Hardcoded to 255
 ALARMCOUNTERINPUTRANGE = DOMAIN+"/counter%d"            # each counter represents a value EG. light level
 ALARMCOUNTERCOMMANDTOPIC = DOMAIN+"/counter%d/set"      # set the counter to a value for between 0 (off) to 255 (full on) or any signed 16-bit value.
 
-COMFORTTIMERSTOPIC = DOMAIN+"/timer%d"                  #timer1,timer2,...sensor64
+COMFORTTIMERSTOPIC = DOMAIN+"/timer%d"                  #timer1,timer2,...timer64
 
 logger.info('Completed importing the App configuration options')
 
@@ -1976,6 +1983,21 @@ class Comfort2(mqtt.Client):
                 self.publish(ALARMCONNECTEDTOPIC, 1,qos=1,retain=True)
                 time.sleep(0.1)
                 self.UpdateBatteryStatus()
+
+            for timer in COMFORT_TIMERRANGE:
+                _time = datetime.now().replace(microsecond=0).isoformat()
+                try:
+                    _name = timer_properties[str(timer)] if TIMERMAPFILE else "timer" + str(timer)
+                except KeyError as e:
+                    _name = "timer" + str(timer)
+                _name = str(_name)[:16]         # Protect against name overflow. Comfort only allows 16 characters for timer names.
+                MQTT_MSG=json.dumps({"Time": _time, 
+                                     "Name": _name,
+                                     "Value": 0,
+                                     "State": 0
+                                    })
+                self.publish(COMFORTTIMERSTOPIC % timer, MQTT_MSG,qos=2,retain=False)
+                time.sleep(0.01)    # 10mS delay between commands
 
     def UpdateBatteryStatus(self):
         global device_properties
