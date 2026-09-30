@@ -2521,28 +2521,19 @@ class Comfort2(mqtt.Client):
                 time.sleep(0.1)
 
     def create_entities(self):
-        global SAVEDTIME
-        global ADDON_VERSION
-        global ALPINE_VERSION
         
-        if ADDON_SLUG.strip() == "":
-                        MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
-                            "identifiers": ["comfort2mqtt_bridge"],
-                            "manufacturer": "Ingo de Jager",
-                            "sw_version": ADDON_VERSION,
-                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
-                            "model": "Comfort MQTT Bridge"
+        global SAVEDTIME
+        
+        MQTT_DEVICE = { "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
+                            "identifiers": ["comfort_device"],
+                            "manufacturer":"Cytech Technology Pte Ltd.",
+                            "hw_version":str(device_properties['ComfortHardwareModel']),
+                            "serial_number": device_properties['SerialNumber'],
+                            "sw_version":str(device_properties['Version']),
+                            "model": device_properties['ComfortHardwareModel'],
+                            "via_device": "comfort2mqtt_bridge"
                         }
-        else:
-                        MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
-                            "identifiers": ["comfort2mqtt_bridge"],
-                            "manufacturer": "Ingo de Jager",
-                            "sw_version": ADDON_VERSION,
-                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
-                            "configuration_url": "homeassistant://config/app/" + ADDON_SLUG + "/info",
-                            "model": "Comfort MQTT Bridge"
-                  }
-
+        
         # Insert BROKERCONNECTED check here to ensure MQTT is connected before proceeding
         if BROKERCONNECTED == True:
                         if AUTO_TIMERS.strip().lower() == 'true':
@@ -2561,6 +2552,7 @@ class Comfort2(mqtt.Client):
                                                      "device_class": "duration",
                                                      "state_class": "measurement",
                                                      "unit_of_measurement": "s",
+                                                     "precision": 0,
                                                      "icon":"mdi:clock-outline",
                                                      "qos": "2",
                                                      "device": MQTT_DEVICE
