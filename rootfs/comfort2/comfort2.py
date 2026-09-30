@@ -2549,15 +2549,15 @@ class Comfort2(mqtt.Client):
                             for timer_number in COMFORT_TIMERRANGE:
                                 discoverytopic = "homeassistant/sensor/comfort2mqtt/timer" + str(timer_number) + "/config"
                                 MQTT_MSG=json.dumps({"name": "Timer " + str(timer_number),
-                                                     "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3]+"_timer" + str(timer_number),
-                                                     "default_entity_id": "sensor."+DOMAIN+"_"+discoverytopic.split('/')[3]+"_timer" + str(timer_number),
+                                                     "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3] + str(timer_number),
+                                                     "default_entity_id": "sensor."+DOMAIN+"_"+discoverytopic.split('/')[3] + str(timer_number),
                                                      "availability_topic": ALARMAVAILABLETOPIC,
                                                      "payload_available": "1",
                                                      "payload_not_available": "0",
                                                      "state_topic": DOMAIN+"/timer" + str(timer_number),
                                                      "value_template": "{{ value_json.Value | int(0) }}",
                                                      "json_attributes_template": "{{ value_json | tojson }}",
-                                                     "json_attributes_topic": DOMAIN+"/timers/timer" + str(timer_number),
+                                                     "json_attributes_topic": DOMAIN+"/timer" + str(timer_number),
                                                      "device_class": "duration",
                                                      "state_class": "measurement",
                                                      "unit_of_measurement": "s",
