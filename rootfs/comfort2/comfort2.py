@@ -2520,6 +2520,60 @@ class Comfort2(mqtt.Client):
                 SAVEDTIME = datetime.now()
                 time.sleep(0.1)
 
+    def create_entities(self):
+        global SAVEDTIME
+        global ADDON_VERSION
+        global ALPINE_VERSION
+        
+        if ADDON_SLUG.strip() == "":
+                        MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
+                            "identifiers": ["comfort2mqtt_bridge"],
+                            "manufacturer": "Ingo de Jager",
+                            "sw_version": ADDON_VERSION,
+                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
+                            "model": "Comfort MQTT Bridge"
+                        }
+        else:
+                        MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
+                            "identifiers": ["comfort2mqtt_bridge"],
+                            "manufacturer": "Ingo de Jager",
+                            "sw_version": ADDON_VERSION,
+                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
+                            "configuration_url": "homeassistant://config/app/" + ADDON_SLUG + "/info",
+                            "model": "Comfort MQTT Bridge"
+                  }
+
+        # Insert BROKERCONNECTED check here to ensure MQTT is connected before proceeding
+        if BROKERCONNECTED == True:
+                        if AUTO_TIMERS.strip().lower() == 'true':
+                            for timer_number in COMFORT_TIMERRANGE:
+                                discoverytopic = "homeassistant/sensor/comfort2mqtt/timer" + str(timer_number) + "/config"
+                                MQTT_MSG=json.dumps({"name": "Timer " + str(timer_number),
+                                                     "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3]+"_timer" + str(timer_number),
+                                                     "default_entity_id": "sensor."+DOMAIN+"_"+discoverytopic.split('/')[3]+"_timer" + str(timer_number),
+                                                     "availability_topic": ALARMAVAILABLETOPIC,
+                                                     "payload_available": "1",
+                                                     "payload_not_available": "0",
+                                                     "state_topic": DOMAIN+"/timer" + str(timer_number),
+                                                     "value_template": "{{ value_json.Value | int(0) }}",
+                                                     "json_attributes_template": "{{ value_json | tojson }}",
+                                                     "json_attributes_topic": DOMAIN+"/timers/timer" + str(timer_number),
+                                                     "device_class": "duration",
+                                                     "state_class": "measurement",
+                                                     "unit_of_measurement": "s",
+                                                     "icon":"mdi:clock-outline",
+                                                     "qos": "2",
+                                                     "device": MQTT_DEVICE
+                                                    })
+                                self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+                                time.sleep(0.1)
+        else:   # Cleanup any existing timers if AUTO_TIMERS is set to False. This will overwrite any existing timers.
+                            for timer_number in COMFORT_TIMERRANGE:
+                                discoverytopic = "homeassistant/sensor/comfort2mqtt/timer" + str(timer_number) + "/config"
+                                self.publish(discoverytopic, None, qos=2, retain=True)
+                                time.sleep(0.1)
+
+
     def check_string(self, s):
 
         pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')
@@ -3087,56 +3141,6 @@ class Comfort2(mqtt.Client):
 
                     SAVEDTIME = datetime.now()      # Added 29/4/2025
 
-
-        
-                    if ADDON_SLUG.strip() == "":
-                        MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
-                            "identifiers": ["comfort2mqtt_bridge"],
-                            "manufacturer": "Ingo de Jager",
-                            "sw_version": ADDON_VERSION,
-                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
-                            "model": "Comfort MQTT Bridge"
-                        }
-                    else:
-                        MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
-                            "identifiers": ["comfort2mqtt_bridge"],
-                            "manufacturer": "Ingo de Jager",
-                            "sw_version": ADDON_VERSION,
-                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
-                            "configuration_url": "homeassistant://config/app/" + ADDON_SLUG + "/info",
-                            "model": "Comfort MQTT Bridge"
-                        }
-
-                    # Insert BROKERCONNECTED check here to ensure MQTT is connected before proceeding
-                    if BROKERCONNECTED == True:
-                        if AUTO_TIMERS.strip().lower() == 'true':
-                            for timer_number in COMFORT_TIMERRANGE:
-                                discoverytopic = "homeassistant/sensor/comfort2mqtt/timer" + str(timer_number) + "/config"
-                                MQTT_MSG=json.dumps({"name": "Timer " + str(timer_number),
-                                                     "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3]+"_timer" + str(timer_number),
-                                                     "default_entity_id": "sensor."+DOMAIN+"_"+discoverytopic.split('/')[3]+"_timer" + str(timer_number),
-                                                     "availability_topic": ALARMAVAILABLETOPIC,
-                                                     "payload_available": "1",
-                                                     "payload_not_available": "0",
-                                                     "state_topic": DOMAIN+"/timer" + str(timer_number),
-                                                     "value_template": "{{ value_json.Value | int(0) }}",
-                                                     "json_attributes_template": "{{ value_json | tojson }}",
-                                                     "json_attributes_topic": DOMAIN+"/timers/timer" + str(timer_number),
-                                                     "device_class": "duration",
-                                                     "state_class": "measurement",
-                                                     "unit_of_measurement": "s",
-                                                     "icon":"mdi:clock-outline",
-                                                     "qos": "2",
-                                                     "device": MQTT_DEVICE
-                                                    })
-                                self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-                                time.sleep(0.1)
-                        else:   # Cleanup any existing timers if AUTO_TIMERS is set to False. This will overwrite any existing timers.
-                            for timer_number in COMFORT_TIMERRANGE:
-                                discoverytopic = "homeassistant/sensor/comfort2mqtt/timer" + str(timer_number) + "/config"
-                                self.publish(discoverytopic, None, qos=2, retain=True)
-                                time.sleep(0.1)
-
                     for line in self.readlines():
 
                         pattern = re.compile(r'(\x03[a-zA-Z0-9!?]*)$')      # Extract 'legal' characters from line.
@@ -3180,7 +3184,8 @@ class Comfort2(mqtt.Client):
                                     self.publish(REFRESHTOPIC, "", qos=1,retain=True)               # Clear Refresh Key
                                     time.sleep(0.01)
 
-                                    self.setdatetime()      # Set Date/Time if Option is enabled
+                                    self.setdatetime()          # Set Date/Time if Option is enabled
+                                    self.create_entities()      # Create Home Assistant Entities if Option is enabled
 
                                     if FIRST_LOGIN == True:
                                         self.readcurrentstate()
