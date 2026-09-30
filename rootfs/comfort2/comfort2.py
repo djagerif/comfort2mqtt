@@ -2552,7 +2552,7 @@ class Comfort2(mqtt.Client):
                                                      "device_class": "duration",
                                                      "state_class": "measurement",
                                                      "unit_of_measurement": "s",
-                                                     "precision": 0,
+                                                     "suggested_display_precision": 0,
                                                      "icon":"mdi:clock-outline",
                                                      "qos": "2",
                                                      "device": MQTT_DEVICE
@@ -3253,7 +3253,8 @@ class Comfort2(mqtt.Client):
                                 self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
 
                             elif line[1:3] == "TR":     # Timer Reports 'TR' is not fully supported as Comfort stops the reports after a while.
-                                if AUTO_TIMERS.strip().lower() == 'true':       # Only process TR reports if Auto Timers is enabled. Otherwise ignore.
+                                result = self.validate_hex_in_list(line[3:5], "1-64")
+                                if result and AUTO_TIMERS.strip().lower() == 'true':       # Only process TR reports if Auto Timers is enabled. Otherwise ignore.
                                     ipMsgTR = ComfortTRReport(line[1:])
                                     _time = datetime.now().replace(microsecond=0).isoformat()
                                     _name = timer_properties[str(ipMsgTR.timer)] if TIMERMAPFILE else "timer" + str(ipMsgTR.timer)
