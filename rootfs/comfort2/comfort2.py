@@ -464,7 +464,12 @@ COMFORT_INPUTS=int(option.alarm_inputs) if validate_port(option.alarm_inputs,8,M
 COMFORT_OUTPUTS=int(option.alarm_outputs) if validate_port(option.alarm_outputs,0,MAX_OUTPUTS) else 0
 COMFORT_RESPONSES=int(option.alarm_responses) if validate_port(option.alarm_responses,0,MAX_RESPONSES) else 0
 COMFORT_TIME=str(option.comfort_time)
-AUTO_TIMERS=str(option.auto_timers)             # If True then auto-create timer1-64 (COMFORT_TIMERS) entities and topics. If False, then no timer entities or topics are created.
+AUTO_TIMERS=str(option.auto_timers)             # If True then auto-create timer1-64 (COMFORT_TIMERS) entities and topics. If False, then no timer entities or topics are created.``
+
+logger.debug('### AUTO_TIMERS = %s', str(option.auto_timers))
+logger.debug('### COMFORT_TIME= %s', str(option.comfort_time))
+
+
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs) if validate_port(option.alarm_rio_inputs,0,120) else 0
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs) if validate_port(option.alarm_rio_outputs,0,120) else 0
 COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update) if int(option.comfort_battery_update) in [0,1]+list(range(33,40)) else 1
