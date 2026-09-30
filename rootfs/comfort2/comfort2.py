@@ -2536,35 +2536,34 @@ class Comfort2(mqtt.Client):
         
         # Insert BROKERCONNECTED check here to ensure MQTT is connected before proceeding
         if BROKERCONNECTED == True:
-                        if AUTO_TIMERS.strip().lower() == 'true':
-                            for timer_number in COMFORT_TIMERRANGE:
-                                discoverytopic = "homeassistant/sensor/comfort2mqtt/timer" + str(timer_number) + "/config"
-                                MQTT_MSG=json.dumps({"name": "Timer " + str(timer_number),
-                                                     "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                                                     "default_entity_id": "sensor."+DOMAIN+"_"+discoverytopic.split('/')[3],
-                                                     "availability_topic": ALARMAVAILABLETOPIC,
-                                                     "payload_available": "1",
-                                                     "payload_not_available": "0",
-                                                     "state_topic": DOMAIN+"/timer" + str(timer_number),
-                                                     "value_template": "{{ value_json.Value | int(0) }}",
-                                                     "json_attributes_template": "{{ value_json | tojson }}",
-                                                     "json_attributes_topic": DOMAIN+"/timer" + str(timer_number),
-                                                     "device_class": "duration",
-                                                     "state_class": "measurement",
-                                                     "unit_of_measurement": "s",
-                                                     "suggested_display_precision": 0,
-                                                     "icon":"mdi:clock-outline",
-                                                     "qos": "2",
-                                                     "device": MQTT_DEVICE
-                                                    })
-                                self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
-                                time.sleep(0.1)
-        else:   # Cleanup any existing timers if AUTO_TIMERS is set to False. This will overwrite any existing timers.
-                            for timer_number in COMFORT_TIMERRANGE:
-                                discoverytopic = "homeassistant/sensor/comfort2mqtt/timer" + str(timer_number) + "/config"
-                                self.publish(discoverytopic, None, qos=2, retain=True)
-                                time.sleep(0.1)
-
+            if AUTO_TIMERS.strip().lower() == 'true':
+                for timer_number in COMFORT_TIMERRANGE:
+                    discoverytopic = "homeassistant/sensor/comfort2mqtt/timer" + str(timer_number) + "/config"
+                    MQTT_MSG=json.dumps({"name": "Timer " + str(timer_number),
+                                         "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
+                                         "default_entity_id": "sensor."+DOMAIN+"_"+discoverytopic.split('/')[3],
+                                         "availability_topic": ALARMAVAILABLETOPIC,
+                                         "payload_available": "1",
+                                         "payload_not_available": "0",
+                                         "state_topic": DOMAIN+"/timer" + str(timer_number),
+                                         "value_template": "{{ value_json.Value | int(0) }}",
+                                         "json_attributes_template": "{{ value_json | tojson }}",
+                                         "json_attributes_topic": DOMAIN+"/timer" + str(timer_number),
+                                         "device_class": "duration",
+                                         "state_class": "measurement",
+                                         "unit_of_measurement": "s",
+                                         "suggested_display_precision": 0,
+                                         "icon":"mdi:clock-outline",
+                                         "qos": "2",
+                                         "device": MQTT_DEVICE
+                                        })
+                    self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+                    time.sleep(0.1)
+            else:   # Cleanup any existing timers if AUTO_TIMERS is set to False. This will overwrite any existing timers.
+                for timer_number in COMFORT_TIMERRANGE:
+                    discoverytopic = "homeassistant/sensor/comfort2mqtt/timer" + str(timer_number) + "/config"
+                    self.publish(discoverytopic, None, qos=2, retain=True)
+                    time.sleep(0.1)
 
     def check_string(self, s):
 
