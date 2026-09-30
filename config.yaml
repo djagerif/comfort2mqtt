@@ -15,8 +15,6 @@ arch:
   - amd64
 services:
   - mqtt:need
-#map:
-#  - addon_config:ro
 map:
   - type: app_config
     read_only: true

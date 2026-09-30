@@ -464,7 +464,7 @@ COMFORT_INPUTS=int(option.alarm_inputs) if validate_port(option.alarm_inputs,8,M
 COMFORT_OUTPUTS=int(option.alarm_outputs) if validate_port(option.alarm_outputs,0,MAX_OUTPUTS) else 0
 COMFORT_RESPONSES=int(option.alarm_responses) if validate_port(option.alarm_responses,0,MAX_RESPONSES) else 0
 COMFORT_TIME=str(option.comfort_time)
-COMFORT_AUTO_TIMERS=str(option.auto_timers)             # If True then auto-create timer1-64 (COMFORT_TIMERS) entities and topics. If False, then no timer entities or topics are created.
+AUTO_TIMERS=str(option.auto_timers)             # If True then auto-create timer1-64 (COMFORT_TIMERS) entities and topics. If False, then no timer entities or topics are created.
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs) if validate_port(option.alarm_rio_inputs,0,120) else 0
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs) if validate_port(option.alarm_rio_outputs,0,120) else 0
 COMFORT_BATTERY_STATUS_ID=int(option.comfort_battery_update) if int(option.comfort_battery_update) in [0,1]+list(range(33,40)) else 1
@@ -548,6 +548,7 @@ logger.debug('MQTT_CLIENT_CERT = %s', MQTT_CLIENT_CERT)
 logger.debug('MQTT_CLIENT_KEY = %s', MQTT_CLIENT_KEY)    
 
 logger.debug('MQTT_LOG_LEVEL = %s', MQTT_LOG_LEVEL)
+logger.debug('AUTO_TIMERS = %s', AUTO_TIMERS)
 logger.debug('COMFORT_TIME= %s', COMFORT_TIME)
 
 # Map HA variables to internal variables.
@@ -1984,20 +1985,25 @@ class Comfort2(mqtt.Client):
                 time.sleep(0.1)
                 self.UpdateBatteryStatus()
 
-            for timer in COMFORT_TIMERRANGE:
-                _time = datetime.now().replace(microsecond=0).isoformat()
-                try:
-                    _name = timer_properties[str(timer)] if TIMERMAPFILE else "timer" + str(timer)
-                except KeyError as e:
-                    _name = "timer" + str(timer)
-                _name = str(_name)[:16]         # Protect against name overflow. Comfort only allows 16 characters for timer names.
-                MQTT_MSG=json.dumps({"Time": _time, 
-                                     "Name": _name,
-                                     "Value": 0,
-                                     "State": 0
-                                    })
-                self.publish(COMFORTTIMERSTOPIC % timer, MQTT_MSG,qos=2,retain=False)
-                time.sleep(0.01)    # 10mS delay between commands
+            if AUTO_TIMERS.strip().lower() == 'true':       #Create all timers on first login if AUTO_TIMERS is set to True. This will overwrite any existing timers.
+                for timer_number in COMFORT_TIMERRANGE:
+                    _time = datetime.now().replace(microsecond=0).isoformat()
+                    try:
+                        _name = timer_properties[str(timer_number)] if TIMERMAPFILE else "timer" + str(timer_number)
+                    except KeyError as e:
+                        _name = "timer" + str(timer_number)
+                    _name = str(_name)[:16]         # Protect against name overflow. Comfort only allows 16 characters for timer names.
+                    MQTT_MSG=json.dumps({"Time": _time, 
+                                         "Name": _name,
+                                         "Value": 0,
+                                         "State": 0
+                                        })
+                    self.publish(COMFORTTIMERSTOPIC % timer_number, MQTT_MSG,qos=2,retain=False)
+                    time.sleep(0.01)    # 10mS delay between commands
+            else:       #Cleanup all timers on first login if AUTO_TIMERS is set to False. This will overwrite any existing timers.
+                for timer_number in COMFORT_TIMERRANGE:
+                    self.publish(COMFORTTIMERSTOPIC % timer_number, None, qos=2, retain=True)
+                    time.sleep(0.1)
 
     def UpdateBatteryStatus(self):
         global device_properties
@@ -2036,9 +2042,6 @@ class Comfort2(mqtt.Client):
         global COMFORT_BATTERY_STATUS_ID
         global ADDON_SLUG
         global file_exists
-
-        #option = parser.parse_args()
-        #COMFORT_BATTERY_STATUS_ID=option.comfort_battery_update
         
         file_exists = _file
   
@@ -3033,6 +3036,11 @@ class Comfort2(mqtt.Client):
         global SupportedFirmware
 
         global ALARMSTATE
+        global AUTO_TIMERS
+
+        global ADDON_VERSION
+        global ALPINE_VERSION
+        global ADDON_SLUG
 
         signal.signal(signal.SIGTERM, self.exit_gracefully)
         if os.name != 'nt':
@@ -3077,6 +3085,60 @@ class Comfort2(mqtt.Client):
                     self.login()
 
                     SAVEDTIME = datetime.now()      # Added 29/4/2025
+
+
+        
+                    if ADDON_SLUG.strip() == "":
+                        MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
+                            "identifiers": ["comfort2mqtt_bridge"],
+                            "manufacturer": "Ingo de Jager",
+                            "sw_version": ADDON_VERSION,
+                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
+                            "model": "Comfort MQTT Bridge"
+                        }
+                    else:
+                        MQTT_DEVICE = { "name": "Comfort2MQTT Bridge",
+                            "identifiers": ["comfort2mqtt_bridge"],
+                            "manufacturer": "Ingo de Jager",
+                            "sw_version": ADDON_VERSION,
+                            "hw_version": "Alpine Linux " + ALPINE_VERSION,
+                            "configuration_url": "homeassistant://config/app/" + ADDON_SLUG + "/info",
+                            "model": "Comfort MQTT Bridge"
+                        }
+
+                    # Insert BROKERCONNECTED check here to ensure MQTT is connected before proceeding
+                    if BROKERCONNECTED == True:
+                        if AUTO_TIMERS.strip().lower() == 'true':
+                            for timer_number in COMFORT_TIMERRANGE:
+                                discoverytopic = "homeassistant/sensor/comfort2mqtt/timers/timer" + str(timer_number) + "/config"
+                                MQTT_MSG=json.dumps({"name": "Timer " + str(timer_number),
+                                                     "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3]+"_timer" + str(timer_number),
+                                                     "default_entity_id": "sensor."+DOMAIN+"_"+discoverytopic.split('/')[3]+"_timer" + str(timer_number),
+                                                     "availability_topic": ALARMAVAILABLETOPIC,
+                                                     "payload_available": "1",
+                                                     "payload_not_available": "0",
+                                                     "state_topic": DOMAIN+"/timers/timer" + str(timer_number),
+                                                     "value_template": "{{ value_json.Value | int(0) }}",
+                                                     "json_attributes_template": "{{ value_json | tojson }}",
+                                                     "json_attributes_topic": DOMAIN+"/timers/timer" + str(timer_number),
+                                                     "device_class": "duration",
+                                                     "state_class": "measurement",
+                                                     "unit_of_measurement": "s",
+                                                     "icon":"mdi:clock-outline",
+                                                     "qos": "2",
+                                                     "device": MQTT_DEVICE
+                                                    })
+
+      
+
+                                
+                                self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+                                time.sleep(0.1)
+                        else:   # Cleanup any existing timers if AUTO_TIMERS is set to False. This will overwrite any existing timers.
+                            for timer_number in COMFORT_TIMERRANGE:
+                                discoverytopic = "homeassistant/sensor/comfort2mqtt/timers/timer" + str(timer_number) + "/config"
+                                self.publish(discoverytopic, None, qos=2, retain=True)
+                                time.sleep(0.1)
 
                     for line in self.readlines():
 
@@ -3197,16 +3259,17 @@ class Comfort2(mqtt.Client):
                                 self.publish(ALARMSENSORTOPIC % ipMsgSR.counter, MQTT_MSG,qos=2,retain=False)    # 19/8/2024 Changed to False
 
                             elif line[1:3] == "TR":     # Timer Reports 'TR' is not fully supported as Comfort stops the reports after a while.
-                                ipMsgTR = ComfortTRReport(line[1:])
-                                _time = datetime.now().replace(microsecond=0).isoformat()
-                                _name = timer_properties[str(ipMsgTR.timer)] if TIMERMAPFILE else "timer" + str(ipMsgTR.timer)
-                                MQTT_MSG=json.dumps({"Time": _time, 
-                                                     "Name": _name, 
-                                                     "Value": ipMsgTR.value,
-                                                     "State": ipMsgTR.state
-                                                    })
-                                self.publish(COMFORTTIMERSTOPIC % ipMsgTR.timer, MQTT_MSG,qos=2,retain=False)
-                                time.sleep(0.01)
+                                if AUTO_TIMERS.strip().lower() == 'true':       # Only process TR reports if Auto Timers is enabled. Otherwise ignore.
+                                    ipMsgTR = ComfortTRReport(line[1:])
+                                    _time = datetime.now().replace(microsecond=0).isoformat()
+                                    _name = timer_properties[str(ipMsgTR.timer)] if TIMERMAPFILE else "timer" + str(ipMsgTR.timer)
+                                    MQTT_MSG=json.dumps({"Time": _time, 
+                                                         "Name": _name, 
+                                                         "Value": ipMsgTR.value,
+                                                         "State": ipMsgTR.state
+                                                        })
+                                    self.publish(COMFORTTIMERSTOPIC % ipMsgTR.timer, MQTT_MSG,qos=2,retain=False)
+                                    time.sleep(0.01)
                             
                             elif line[1:3] == "LR":
                                 luMsg = ComfortLUUserLoggedIn(line[1:])
