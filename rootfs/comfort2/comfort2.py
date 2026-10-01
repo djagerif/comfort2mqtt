@@ -88,7 +88,7 @@ ALARMCOMMANDTOPIC = DOMAIN+"/alarm/set"
 ALARMAVAILABLETOPIC = DOMAIN+"/alarm/online"
 ALARMLWTTOPIC = DOMAIN+"/alarm/LWT"
 ALARMMESSAGETOPIC = DOMAIN+"/alarm/message"
-ALARMTIMERTOPIC = DOMAIN+"/alarm/timer"
+ALARMTIMERTOPIC = DOMAIN+"/alarm/timer"                 # Entry/Exist Timer.
 ALARMDOORBELLTOPIC = DOMAIN+"/alarm/doorbell"
 
 MODULESTATUSTOPIC = DOMAIN+"/alarm/module_status"       # Future expansion for module status reporting.
@@ -1994,10 +1994,10 @@ class Comfort2(mqtt.Client):
                     except KeyError as e:
                         _name = "timer" + str(timer_number)
                     _name = str(_name)[:16]         # Protect against name overflow. Comfort only allows 16 characters for timer names.
-                    MQTT_MSG=json.dumps({"Time": _time, 
-                                         "Name": _name,
-                                         "Value": 0,
-                                         "State": 0
+                    MQTT_MSG=json.dumps({"time": _time, 
+                                         "name": _name,
+                                         "value": 0,
+                                         "state": 0
                                         })
                     self.publish(COMFORTTIMERSTOPIC % timer_number, MQTT_MSG,qos=2,retain=False)
                     time.sleep(0.01)    # 10mS delay between commands
@@ -2534,19 +2534,19 @@ class Comfort2(mqtt.Client):
                             "via_device": "comfort2mqtt_bridge"
                         }
         
-        # Insert BROKERCONNECTED check here to ensure MQTT is connected before proceeding
         if BROKERCONNECTED == True:
             if AUTO_TIMERS.strip().lower() == 'true':
                 for timer_number in COMFORT_TIMERRANGE:
                     discoverytopic = "homeassistant/sensor/comfort2mqtt/timer" + str(timer_number) + "/config"
-                    MQTT_MSG=json.dumps({"name": "Timer " + str(timer_number),
+                    _name = timer_properties[str(timer_number)] if TIMERMAPFILE else "timer" + str(timer_number)
+                    MQTT_MSG=json.dumps({"name": _name,             # "Timer " + str(timer_number),
                                          "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                                          "default_entity_id": "sensor."+DOMAIN+"_"+discoverytopic.split('/')[3],
                                          "availability_topic": ALARMAVAILABLETOPIC,
                                          "payload_available": "1",
                                          "payload_not_available": "0",
                                          "state_topic": DOMAIN+"/timer" + str(timer_number),
-                                         "value_template": "{{ value_json.Value | int(0) }}",
+                                         "value_template": "{{ value_json.value | int(0) }}",
                                          "json_attributes_template": "{{ value_json | tojson }}",
                                          "json_attributes_topic": DOMAIN+"/timer" + str(timer_number),
                                          "device_class": "duration",
@@ -2554,7 +2554,7 @@ class Comfort2(mqtt.Client):
                                          "unit_of_measurement": "s",
                                          "suggested_display_precision": 0,
                                          "icon":"mdi:clock-outline",
-                                         "qos": "2",
+                                         "qos": 2,
                                          "device": MQTT_DEVICE
                                         })
                     self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)      # Retain auto-generated timer entities.
@@ -3257,10 +3257,10 @@ class Comfort2(mqtt.Client):
                                     ipMsgTR = ComfortTRReport(line[1:])
                                     _time = datetime.now().replace(microsecond=0).isoformat()
                                     _name = timer_properties[str(ipMsgTR.timer)] if TIMERMAPFILE else "timer" + str(ipMsgTR.timer)
-                                    MQTT_MSG=json.dumps({"Time": _time, 
-                                                         "Name": _name, 
-                                                         "Value": ipMsgTR.value,
-                                                         "State": ipMsgTR.state
+                                    MQTT_MSG=json.dumps({"time": _time, 
+                                                         "name": _name, 
+                                                         "value": ipMsgTR.value,
+                                                         "state": ipMsgTR.state
                                                         })
                                     self.publish(COMFORTTIMERSTOPIC % ipMsgTR.timer, MQTT_MSG,qos=2,retain=False)
                                     time.sleep(0.01)
