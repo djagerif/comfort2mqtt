@@ -2557,7 +2557,7 @@ class Comfort2(mqtt.Client):
                                          "qos": "2",
                                          "device": MQTT_DEVICE
                                         })
-                    self.publish(discoverytopic, MQTT_MSG, qos=2, retain=False)
+                    self.publish(discoverytopic, MQTT_MSG, qos=2, retain=True)      # Retain auto-generated timer entities.
                     time.sleep(0.1)
             else:   # Cleanup any existing timers if AUTO_TIMERS is set to False. This will overwrite any existing timers.
                 for timer_number in COMFORT_TIMERRANGE:
