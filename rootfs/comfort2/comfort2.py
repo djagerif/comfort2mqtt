@@ -2521,10 +2521,12 @@ class Comfort2(mqtt.Client):
                 time.sleep(0.1)
 
     def create_entities(self):
-        
+
         global SAVEDTIME
-        
-        MQTT_DEVICE = { "name": models[int(device_properties['ComfortFileSystem'])] if int(device_properties['ComfortFileSystem']) in models else "Unknown",
+
+        test = device_properties['ComfortFileSystem']
+
+        MQTT_DEVICE = { "name": models[int(device_properties['ComfortFileSystem'])] if file_exists and int(device_properties['ComfortFileSystem']) in models else "Unknown",
                             "identifiers": ["comfort_device"],
                             "manufacturer":"Cytech Technology Pte Ltd.",
                             "hw_version":str(device_properties['ComfortHardwareModel']),
@@ -2538,7 +2540,7 @@ class Comfort2(mqtt.Client):
             if AUTO_TIMERS.strip().lower() == 'true':
                 for timer_number in COMFORT_TIMERRANGE:
                     discoverytopic = "homeassistant/sensor/comfort2mqtt/timer" + str(timer_number) + "/config"
-                    _name = timer_properties[str(timer_number)] if TIMERMAPFILE else "timer" + str(timer_number)
+                    _name = timer_properties[str(timer_number)] if TIMERMAPFILE else "Timer{:02d}".format(timer_number)
                     MQTT_MSG=json.dumps({"name": _name,             # "Timer " + str(timer_number),
                                          "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
                                          "default_entity_id": "sensor."+DOMAIN+"_"+discoverytopic.split('/')[3],
