@@ -18,6 +18,8 @@ services:
 map:
   - type: app_config
     read_only: true
+  - type: ssl
+    read_only: true
 options:
   mqtt_broker_address: core-mosquitto
   mqtt_user: null
