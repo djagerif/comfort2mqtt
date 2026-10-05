@@ -26,7 +26,7 @@ This App is used to bridge an IP connected Cytech Comfort II ULTRA Alarm system 
 
 This is a customised version of the original comfort2mqtt project by `koochyrat`. More information about the original source project is available [here][koochyrat].
 
-This implementation does minimal MQTT auto-discovery. Some `System` entities are created but all other objects need to be manually configured in Home Assistant as required except Timer entities which is selectable via the Optional setting.
+This implementation does minimal MQTT auto-discovery. Some `System` entities are created but all other objects need to be manually configured in Home Assistant as required. Optional `Timer` support, which is selectable from the configuration page, enables MQTT `Timer` Topics and Home Assistant `Timer` Entities to be automatically created. If unselected, then all Home Assistant `Timer` Entities and MQTT `Timer` Topics are removed.
 
 The following objects are supported:
 
@@ -38,7 +38,7 @@ The following objects are supported:
 * RIO Inputs [129-248]
 * RIO Outputs [129-248]
 * Responses [1-1024]
-* Timers [1-64]
+* Timers [64] (Optional)
 
 <div style="text-align:center"> <img src="https://github.com/djagerif/comfort2mqtt/assets/5621764/64abe350-6b37-4b79-8fea-12fa5e89353a" alt="Comfort II ULTRA Keypad"/> </div>
 

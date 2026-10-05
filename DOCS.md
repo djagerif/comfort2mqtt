@@ -97,10 +97,10 @@ comfort2mqtt/counter<0 to 254> have the following JSON attributes EG.
 
 comfort2mqtt/timer<1 to 64> have the following JSON attributes EG.
 {
-  "Time": "2024-06-12T17:16:54",
+  "Time": "2026-09-12T17:16:54",
   "Name": "Timer01",
+  "Value": 0,
   "State": 0
-  "Value": 0
 }
 *Note:  'State' 1 for Running, 0 for Off. State is set to 1 when Value is non-zero.
 
@@ -264,6 +264,9 @@ When the App is fully configured and running, there will be two new MQTT Devices
 
 ![image](https://github.com/user-attachments/assets/faeaa08b-c8f6-43db-a946-46ee9762b35b)
 
+#### Timer Support (Optional) 
+
+If you enabled the optional `Timer` object support then all 64 Timer MQTT topics and Home Assistant entities will be created. If the CCLX file has been loaded it will enrich the Timer Name field with the configured timer CCLX name. TR (Timer Report) command processing is also enable only when you have enabled Timer support.
 
 ## Home Assistant - Bypass Open Zones `#` button
 
