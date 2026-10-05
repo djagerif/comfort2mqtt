@@ -95,6 +95,15 @@ comfort2mqtt/counter<0 to 254> have the following JSON attributes EG.
 *Note:  'State' 1 for On, 0 for Off. State is set to 1 when Value is non-zero. Used for lighting 
         as this indicates On|Off status while Value could indicate brightness
 
+comfort2mqtt/timer<1 to 64> have the following JSON attributes EG.
+{
+  "Time": "2024-06-12T17:16:54",
+  "Name": "Timer01",
+  "State": 0
+  "Value": 0
+}
+*Note:  'State' 1 for Running, 0 for Off. State is set to 1 when Value is non-zero.
+
 ```
 
 The following MQTT topics are subscribed.
