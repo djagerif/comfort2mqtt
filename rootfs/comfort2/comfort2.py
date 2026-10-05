@@ -321,7 +321,7 @@ group.add_argument(
 group.add_argument(
     '--auto-timers',
     type=boolean_string, default='false',
-    help="Generate Timer Report entities and topics, 'True'|'False'. [default: 'False']")
+    help="Auto Generate Timer Report entities, 'True'|'False'. [default: 'False']")
 
 group = parser.add_argument_group('Comfort Alarm options')
 group.add_argument(
@@ -464,7 +464,7 @@ COMFORT_INPUTS=int(option.alarm_inputs) if validate_port(option.alarm_inputs,8,M
 COMFORT_OUTPUTS=int(option.alarm_outputs) if validate_port(option.alarm_outputs,0,MAX_OUTPUTS) else 0
 COMFORT_RESPONSES=int(option.alarm_responses) if validate_port(option.alarm_responses,0,MAX_RESPONSES) else 0
 COMFORT_TIME=str(option.comfort_time)
-AUTO_TIMERS=str(option.auto_timers)             # If True then auto-create timer1-64 (COMFORT_TIMERS) entities and topics. If False, then no timer entities or topics are created.``
+AUTO_TIMERS=str(option.auto_timers)             # If True then auto-create timer1-64 (COMFORT_TIMERS) entities. If False, timer entities must be manually created.``
 
 COMFORT_RIO_INPUTS=int(option.alarm_rio_inputs) if validate_port(option.alarm_rio_inputs,0,120) else 0
 COMFORT_RIO_OUTPUTS=int(option.alarm_rio_outputs) if validate_port(option.alarm_rio_outputs,0,120) else 0
@@ -1986,25 +1986,25 @@ class Comfort2(mqtt.Client):
                 time.sleep(0.1)
                 self.UpdateBatteryStatus()
 
-            if AUTO_TIMERS.strip().lower() == 'true':       #Create all timers on first login if AUTO_TIMERS is set to True. This will overwrite any existing timers.
-                for timer_number in COMFORT_TIMERRANGE:
-                    _time = datetime.now().replace(microsecond=0).isoformat()
-                    try:
-                        _name = timer_properties[str(timer_number)] if TIMERMAPFILE else "timer" + str(timer_number)
-                    except KeyError as e:
-                        _name = "timer" + str(timer_number)
-                    _name = str(_name)[:16]         # Protect against name overflow. Comfort only allows 16 characters for timer names.
-                    MQTT_MSG=json.dumps({"time": _time, 
-                                         "name": _name,
-                                         "value": 0,
-                                         "state": 0
-                                        })
-                    self.publish(COMFORTTIMERSTOPIC % timer_number, MQTT_MSG,qos=2,retain=False)
-                    time.sleep(0.01)    # 10mS delay between commands
-            else:       #Cleanup all timers on first login if AUTO_TIMERS is set to False. This will overwrite any existing timers.
-                for timer_number in COMFORT_TIMERRANGE:
-                    self.publish(COMFORTTIMERSTOPIC % timer_number, None, qos=2, retain=True)
-                    time.sleep(0.1)
+            #if AUTO_TIMERS.strip().lower() == 'true':       #Create all timers on first login if AUTO_TIMERS is set to True. This will overwrite any existing timers.
+            for timer_number in COMFORT_TIMERRANGE:
+                _time = datetime.now().replace(microsecond=0).isoformat()
+                try:
+                    _name = timer_properties[str(timer_number)] if TIMERMAPFILE else "timer" + str(timer_number)
+                except KeyError as e:
+                    _name = "timer" + str(timer_number)
+                _name = str(_name)[:16]         # Protect against name overflow. Comfort only allows 16 characters for timer names.
+                MQTT_MSG=json.dumps({"time": _time, 
+                                     "name": _name,
+                                     "value": 0,
+                                     "state": 0
+                                    })
+                self.publish(COMFORTTIMERSTOPIC % timer_number, MQTT_MSG,qos=2,retain=False)
+                time.sleep(0.01)    # 10mS delay between commands
+            #else:       #Cleanup all timers on first login if AUTO_TIMERS is set to False. This will overwrite any existing timers.
+            #    for timer_number in COMFORT_TIMERRANGE:
+            #        self.publish(COMFORTTIMERSTOPIC % timer_number, None, qos=2, retain=True)
+            #        time.sleep(0.1)
 
     def UpdateBatteryStatus(self):
         global device_properties
