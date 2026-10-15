@@ -21,10 +21,6 @@
 #
 # from xmlrpc import client
 
-import code
-import code
-from email.mime import text
-
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm
