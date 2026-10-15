@@ -43,7 +43,7 @@ import signal
 import ipaddress
 import socket
 import time
-import datetime
+#import datetime
 import threading
 import logging
 from logging.handlers import RotatingFileHandler
@@ -370,7 +370,7 @@ _missing = [name for name, value in (
     ('COMFORT_LOGIN_ID / --comfort-login-id', option.comfort_login_id)) if not value]
 if _missing:
     parser.error('missing required setting(s): ' + ', '.join(_missing))
-    
+
 #logging.basicConfig(
 #    format='%(asctime)s %(levelname)-8s %(message)s',
 #    level=option.log_verbosity,
@@ -1590,7 +1590,7 @@ class Comfort2(mqtt.Client):
 
         elif msg.topic.startswith(DOMAIN) and msg.topic.endswith("/bypass_open_zones"):
             # Check if Alarm is in Arming state else ignore the '#' key.
-            msgstr_cleaned = msgstr[0] if msgstr else '1'
+            #msgstr_cleaned = msgstr[0] if msgstr else '1'
             if ALARMSTATUS == "pending":
                 logger.info("Force Arming with Open Zones.")
                 self.comfortsock.sendall("\x03KD1A\r".encode())    #Send 'ENT' key code (KD1A) when arming with open zones. This is required for Comfort to arm with open zones.
