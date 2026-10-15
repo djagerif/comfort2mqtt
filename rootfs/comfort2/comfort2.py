@@ -1359,9 +1359,10 @@ class Comfort2(mqtt.Client):
         if isinstance(data, dict):
             action = data.get("action")
             code = data.get("code", "")
-            if not isinstance(action, str):
-                return None, ""
-            return action, (code if isinstance(code, str) else "")
+            # Only a 4 to 6 digit (ASCII 0-9) PIN is passed on; anything else becomes "".
+            if not (isinstance(code, str) and re.fullmatch(r"[0-9]{4,6}", code)):
+                code = ""
+            return action, code
         return None, ""                  # numbers, lists, null, etc.
 
     # The callback for when the client receives a CONNACK response from the server.
