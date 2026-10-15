@@ -266,7 +266,7 @@ When the App is fully configured and running, there will be two new MQTT Devices
 
 #### Timer Support (Optional) 
 
-If you enabled the optional `Timer` object support then all 64 Timer MQTT topics and Home Assistant entities will be created. If the CCLX file has been loaded it will enrich the Timer Name field with the configured timer CCLX name. TR (Timer Report) command processing is also enable only when you have enabled Timer support.
+If you enabled the optional `Timer` object support then all 64 MQTT Timer  topics and Home Assistant entities will be created. If the CCLX file has been loaded it will also enrich the Timer Name field with the configured timer CCLX name. TR (Timer Report) command processing is also enabled only when you have enabled Timer support.
 
 ## Home Assistant - Bypass Open Zones `#` button
 

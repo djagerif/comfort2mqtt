@@ -21,6 +21,10 @@
 #
 # from xmlrpc import client
 
+import code
+import code
+from email.mime import text
+
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -1327,6 +1331,30 @@ class Comfort2(mqtt.Client):
     if os.name != 'nt':
         signal.signal(signal.SIGTSTP, handler)
 
+    def parse_alarm_command(self, raw):
+        """Return (action, code) from an alarm/set payload.
+
+          Accepts JSON {"action": "...", "code": "1234"} or a legacy plain string
+          such as ARM_AWAY. Returns (None, "") for anything unusable.
+        """
+        try:
+            text = raw.decode("utf-8").strip()
+        except UnicodeDecodeError:
+            return None, ""
+        try:
+            data = json.loads(text)
+        except ValueError:          # JSONDecodeError is a subclass of ValueError
+            data = text             # not JSON: treat as a legacy plain-string command
+        if isinstance(data, str):
+            return data, ""
+        if isinstance(data, dict):
+            action = data.get("action")
+            code = data.get("code", "")
+            if not isinstance(action, str):
+                return None, ""
+            return action, (code if isinstance(code, str) else "")
+        return None, ""                  # numbers, lists, null, etc.
+
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc, properties):
 
@@ -1478,18 +1506,22 @@ class Comfort2(mqtt.Client):
         global SAVEDTIME
         global COMFORT_KEY
 
-        msgstr = msg.payload.decode()
+        #msgstr = msg.payload.decode()
+        msgstr = msg.payload.decode("utf-8", errors="replace")
 
         if msg.topic == ALARMCOMMANDTOPIC:
-            try:
-                payload = json.loads(msg.payload.decode())
-                msgstr = payload.get("action")
-                #code = payload.get("code", self.comfort_pincode)  # fallback to local pincode if not sent. NB! Local PIN code cannot disarm remotely.
-                code = payload.get("code",)
-            except (ValueError, json.JSONDecodeError):
-                # Not JSON - fall back to old plain-string behaviour
-                logger.debug("Invalid JSON received in ALARMCOMMANDTOPIC.")
-                #code = self.comfort_pincode  
+
+            msgstr, code = self.parse_alarm_command(msg.payload)
+            if msgstr is None:
+                logger.debug("Ignoring unusable payload on the alarm command topic.")
+                return
+
+#            try:
+#                payload = json.loads(msg.payload.decode())
+#                msgstr = payload.get("action")
+#                code = payload.get("code",)
+#            except (ValueError, json.JSONDecodeError):
+#                logger.debug("Invalid JSON received in ALARMCOMMANDTOPIC.")
 
             if self.connected:
                 if msgstr == "ARM_VACATION":
@@ -1527,7 +1559,7 @@ class Comfort2(mqtt.Client):
 #                    self.comfortsock.sendall(("\x03m!00"+code+"\r").encode()) #Local arm to 00 using PIN entered via Home Assistant keypad.
                 elif msgstr == "DISARM":
                     # Loop through each digit in 'code' and send corresponding KD0x commands.
-                    if len(code) < 4 or len(code) > 6 or not code.isdigit():
+                    if not (code.isascii() and code.isdigit() and 4 <= len(code) <= 6):
                         logger.debug("Invalid PIN Code received for DISARM command. Must be 4 to 6 digits.")
                     else:
                         for digit in code:
