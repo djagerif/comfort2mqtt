@@ -1343,8 +1343,9 @@ class Comfort2(mqtt.Client):
     def parse_alarm_command(self, raw):
         """Return (action, code) from an alarm/set payload.
 
-          Accepts JSON {"action": "...", "code": "1234"} or a legacy plain string
-          such as ARM_AWAY. Returns (None, "") for anything unusable.
+        Accepts JSON {"action": "...", "code": "1234"} or a legacy plain string
+        such as ARM_AWAY. The code must be absent, empty, or exactly 4 to 6 ASCII
+        digits. Anything else rejects the whole message and returns (None, "").
         """
         try:
             text = raw.decode("utf-8").strip()
@@ -1359,11 +1360,14 @@ class Comfort2(mqtt.Client):
         if isinstance(data, dict):
             action = data.get("action")
             code = data.get("code", "")
-            # Only a 4 to 6 digit (ASCII 0-9) PIN is passed on; anything else becomes "".
-            if not (isinstance(code, str) and re.fullmatch(r"[0-9]{4,6}", code)):
-                code = ""
+            if not isinstance(action, str):
+                return None, ""
+            if not isinstance(code, str):
+                return None, ""                         # null, numbers, lists, etc.
+            if code and not re.fullmatch(r"[0-9]{4,6}", code):
+                return None, ""                         # not a 4 to 6 digit PIN
             return action, code
-        return None, ""                  # numbers, lists, null, etc.
+        return None, ""                                 # numbers, lists, null, etc.
 
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc, properties):
