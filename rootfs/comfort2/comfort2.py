@@ -252,8 +252,9 @@ group.add_argument(
 
 group.add_argument(
     '--broker-password',
-    required=True,
-    help='MQTT Password to use for MQTT broker authentication.')
+    required=False,
+    #help='MQTT Password to use for MQTT broker authentication.')
+    help='MQTT Password (or set the MQTT_PASSWORD environment variable).')
 
 group.add_argument(
     '--broker-protocol',
@@ -301,8 +302,9 @@ group.add_argument(
 
 group.add_argument(
     '--comfort-login-id',
-    required=True,
-    help='Comfort system Login ID.')
+    required=False,
+    #help='Comfort system Login ID.')
+    help='Comfort system Login ID (or set the COMFORT_LOGIN_ID environment variable).')
 
 group.add_argument(
     '--comfort-cclx-file',
@@ -358,6 +360,17 @@ group.add_argument(
 
 option = parser.parse_args()
 
+# Secrets: a command-line argument wins, otherwise fall back to the environment.
+if not option.broker_password:
+    option.broker_password = os.environ.get('MQTT_PASSWORD')
+if not option.comfort_login_id:
+    option.comfort_login_id = os.environ.get('COMFORT_LOGIN_ID')
+_missing = [name for name, value in (
+    ('MQTT_PASSWORD / --broker-password', option.broker_password),
+    ('COMFORT_LOGIN_ID / --comfort-login-id', option.comfort_login_id)) if not value]
+if _missing:
+    parser.error('missing required setting(s): ' + ', '.join(_missing))
+    
 #logging.basicConfig(
 #    format='%(asctime)s %(levelname)-8s %(message)s',
 #    level=option.log_verbosity,

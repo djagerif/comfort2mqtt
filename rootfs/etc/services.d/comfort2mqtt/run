@@ -44,9 +44,13 @@ if [ "${MQTT_USER}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --broker-username ${MQTT_USER}"
 fi
 
-if [ "${MQTT_PASSWORD}" != "null" ]; then
-    COMFORT_ARGS="${COMFORT_ARGS} --broker-password ${MQTT_PASSWORD}"
-fi
+#if [ "${MQTT_PASSWORD}" != "null" ]; then
+#    COMFORT_ARGS="${COMFORT_ARGS} --broker-password ${MQTT_PASSWORD}"
+#fi
+
+# Pass secrets via the environment, not the command line.
+if [ "${MQTT_PASSWORD}" != "null" ]; then export MQTT_PASSWORD; fi
+if [ "${COMFORT_LOGIN_ID}" != "null" ]; then export COMFORT_LOGIN_ID; fi
 
 if [ "${MQTT_USE_TLS}" != "null" ]; then
       COMFORT_ARGS="${COMFORT_ARGS} --broker-encryption ${MQTT_USE_TLS}"
@@ -84,9 +88,9 @@ if [ "${COMFORT_PORT}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --comfort-port ${COMFORT_PORT}"
 fi
 
-if [ "${COMFORT_LOGIN_ID}" != "null" ]; then
-    COMFORT_ARGS="${COMFORT_ARGS} --comfort-login-id ${COMFORT_LOGIN_ID}"
-fi
+#if [ "${COMFORT_LOGIN_ID}" != "null" ]; then
+#    COMFORT_ARGS="${COMFORT_ARGS} --comfort-login-id ${COMFORT_LOGIN_ID}"
+#fi
 
 if [ "${COMFORT_INPUTS}" != "null" ]; then
     COMFORT_ARGS="${COMFORT_ARGS} --alarm-inputs ${COMFORT_INPUTS}"
