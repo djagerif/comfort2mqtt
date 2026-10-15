@@ -29,6 +29,8 @@ The Comfort Disarm PIN is not stored in the App, it does however appear in the M
  - Update Configuration option names to include `(required)` for options that must be set by the user.
  - Reset MQTT bypass_open_zones status on Disarm.
  - Update MQTT Device `configuration_url`.
+ - MQTT Password and Comfort Login ID PIN use environment variables for added security.
+ - Internal code cleanup and added security checks.
   
 ### Fixed
 
