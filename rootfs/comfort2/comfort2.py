@@ -2528,7 +2528,7 @@ class Comfort2(mqtt.Client):
         discoverytopic = "homeassistant/binary_sensor/comfort2mqtt/comfort_connection_state/config"
         MQTT_MSG=json.dumps({"name": "LAN Status",
                              "unique_id": DOMAIN+"_"+discoverytopic.split('/')[3],
-                             "default_entity_id": "sensor."+DOMAIN+"_"+discoverytopic.split('/')[3],
+                             "default_entity_id": "binary_sensor."+DOMAIN+"_"+discoverytopic.split('/')[3],
                              "state_topic": ALARMCONNECTEDTOPIC,
                              "device_class": "connectivity",
                              "entity_category": "diagnostic",
@@ -2570,7 +2570,7 @@ class Comfort2(mqtt.Client):
 
         global SAVEDTIME
 
-        test = device_properties['ComfortFileSystem']
+#        test = device_properties['ComfortFileSystem']
 
         MQTT_DEVICE = { "name": models[int(device_properties['ComfortFileSystem'])] if file_exists and int(device_properties['ComfortFileSystem']) in models else "Unknown",
                             "identifiers": ["comfort_device"],
@@ -3218,7 +3218,7 @@ class Comfort2(mqtt.Client):
 
                                     self.connected = True  
                                     #self.publish(ALARMCOMMANDTOPIC, "comm test", qos=1,retain=True)
-                                    self.publish(ALARMCOMMANDTOPIC, json.dumps({"action": "comm test", "code": "000000"}), qos=1, retain=True) #Updated to send JSON payload.
+                                    self.publish(ALARMCOMMANDTOPIC, json.dumps({"action": "comm test", "code": "000000"}), qos=1, retain=False) #Updated to send JSON payload. retain False 20/8/26
                                     time.sleep(0.01)
                                     self.publish(REFRESHTOPIC, "", qos=1,retain=True)               # Clear Refresh Key
                                     time.sleep(0.01)
@@ -3503,7 +3503,7 @@ class Comfort2(mqtt.Client):
 
                             elif line[1:3] == "AM":    # AM/AR for Non-Detector alarms
                                 amMsg = ComfortAMSystemAlarmReport(line[1:])
-                                logging.warning(amMsg.message)
+                                logging.warning(amMsg.message)                          # If message is Duress then hide log entry.
                                 #if amMsg.parameter <= int(COMFORT_INPUTS):
                                 self.publish(ALARMMESSAGETOPIC, amMsg.message, qos=1, retain=True)
                                 if amMsg.triggered:

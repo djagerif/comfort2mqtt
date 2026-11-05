@@ -10,7 +10,7 @@
  - Added `Remote AWAY Arm`, `Panic Alarm` and `Fire Alarm` buttons to auto-discovery.
  
 ### Breaking Changes
- - Comfort Login PIN can now be set to a user without Disarm rights (eg. User 02). The Disarm function can now use a different Comfort PIN (from a user with Disarm rights) entered via the Home Assistant keypad. This also enables usage of the Duress code if need be. You can remove the hard-coded PIN, from the configuration.yaml file as per below, and replace it with "REMOTE_CODE" and the updated command_template. Alternatively, use the newly created Alarm Control Panel created automatically from 1.7.0 onwards.
+ - Comfort Login PIN can now be set to a user without Disarm rights (eg. User 02). The Disarm function can now use a different Comfort PIN (from a user with Disarm rights) entered via the Home Assistant keypad. This also enables usage of the Duress code if need be. You can remove the hard-coded PIN, from the configuration.yaml file as per below, and replace it with "REMOTE_CODE" and the updated command_template. Alternatively, use the newly created Alarm Control Panel created automatically from release 1.7.0 onwards.
  
       ```
       #code: !secret alarm_pin
@@ -33,6 +33,7 @@ The Comfort Disarm PIN is not stored in the App, it does however appear in the M
  - Internal code cleanup and added security checks.
   
 ### Fixed
+ - binary sensor `connection_state` used incorrect sensor domain.
 
 
 ## [1.6.3] - 2026-07-21
